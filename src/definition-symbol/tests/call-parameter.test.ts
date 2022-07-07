@@ -1,0 +1,111 @@
+import ts, { findAncestor } from 'typescript';
+import {
+  dumpInferred,
+  findNodeInTree,
+  getPropertyValueType,
+  mockProgram,
+} from '../../../test/utils';
+import { dumpSymbol } from '../../symbols';
+import { defineType } from '../index';
+
+describe('infer call parameter type', () => {
+  it('should pull parameter type from explicit type', () => {
+    const program = mockProgram({
+      'test.ts': `
+        type ExplicitType = { foo: string };
+        type ExplicitFn = (foo: string, bar: ExplicitType) => void;
+        const x: ExplicitFn = function(foo, bar) {}
+        x(undefined, undefined);
+      `,
+    });
+    const checker = program.getTypeChecker();
+    const callStatement = findNodeInTree(
+      program.getSourceFile('test.ts')!,
+      ts.isCallExpression
+    )!;
+
+    const stringArgument = defineType(callStatement.arguments[0], checker)!;
+    expect(dumpInferred(stringArgument, checker)).toMatchInlineSnapshot(`
+      Object {
+        "symbol": Array [
+          Object {
+            "column": 27,
+            "fileName": "test.ts",
+            "kind": "Parameter",
+            "line": 3,
+            "name": "foo: string",
+            "path": ".ExplicitFn.[0]",
+          },
+        ],
+        "type": "string",
+      }
+    `);
+
+    // TODO: Into the ExplicitType?
+    const objectArgument = defineType(callStatement.arguments[1], checker)!;
+    expect(dumpInferred(objectArgument, checker)).toMatchInlineSnapshot(`
+      Object {
+        "symbol": Array [
+          Object {
+            "column": 40,
+            "fileName": "test.ts",
+            "kind": "Parameter",
+            "line": 3,
+            "name": "bar: ExplicitType",
+            "path": ".ExplicitFn.[1]",
+          },
+        ],
+        "type": "ExplicitType",
+      }
+    `);
+  });
+  it('should pull parameter type from parameter type', () => {
+    const program = mockProgram({
+      'test.ts': `
+        type ExplicitType = { foo: string };
+        function x(foo: string, bar: ExplicitType) {}
+        x(undefined, undefined);
+      `,
+    });
+    const checker = program.getTypeChecker();
+    const callStatement = findNodeInTree(
+      program.getSourceFile('test.ts')!,
+      ts.isCallExpression
+    )!;
+
+    const stringArgument = defineType(callStatement.arguments[0], checker)!;
+    expect(dumpInferred(stringArgument, checker)).toMatchInlineSnapshot(`
+      Object {
+        "symbol": Array [
+          Object {
+            "column": 19,
+            "fileName": "test.ts",
+            "kind": "Parameter",
+            "line": 3,
+            "name": "foo: string",
+            "path": ".x.[0]",
+          },
+        ],
+        "type": "string",
+      }
+    `);
+
+    // TODO: Should the symbol for this be the ExplicitType declaration?
+    const objectArgument = defineType(callStatement.arguments[1], checker)!;
+    expect(dumpInferred(objectArgument, checker)).toMatchInlineSnapshot(`
+      Object {
+        "symbol": Array [
+          Object {
+            "column": 32,
+            "fileName": "test.ts",
+            "kind": "Parameter",
+            "line": 3,
+            "name": "bar: ExplicitType",
+            "path": ".x.[1]",
+          },
+        ],
+        "type": "ExplicitType",
+      }
+    `);
+  });
+});

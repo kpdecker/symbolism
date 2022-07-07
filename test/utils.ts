@@ -1,7 +1,7 @@
 import invariant from 'tiny-invariant';
 import ts from 'typescript';
 import { dumpSymbol } from '../src/symbols';
-import { inferType } from '../src/type-inference/index';
+import { defineType } from '../src/definition-symbol/index';
 import { isIntrinsicType } from '../src/utils';
 
 export function mockProgram(sourceFiles: Record<string, string>) {
@@ -49,7 +49,7 @@ export function mockProgram(sourceFiles: Record<string, string>) {
 }
 
 export function dumpInferred(
-  inferred: ReturnType<typeof inferType>,
+  inferred: ReturnType<typeof defineType>,
   checker: ts.TypeChecker
 ) {
   return {
