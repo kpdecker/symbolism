@@ -1,6 +1,6 @@
 import ts from 'typescript';
 import { dumpInferred, findNodeInTree, mockProgram } from '../../../test/utils';
-import { defineType } from '../index';
+import { defineSymbol } from '../index';
 
 describe('infer return type', () => {
   it('should pull return type from explicit type', () => {
@@ -17,7 +17,7 @@ describe('infer return type', () => {
       program.getSourceFile('test.ts')!,
       ts.isReturnStatement
     );
-    const type = defineType(returnStatement!, checker)!;
+    const type = defineSymbol(returnStatement!, checker)!;
     expect(dumpInferred(type, checker)).toMatchInlineSnapshot(`
       Object {
         "symbol": Array [
@@ -47,7 +47,7 @@ describe('infer return type', () => {
       program.getSourceFile('test.ts')!,
       ts.isReturnStatement
     );
-    const type = defineType(returnStatement!, checker)!;
+    const type = defineSymbol(returnStatement!, checker)!;
     expect(dumpInferred(type, checker)).toMatchInlineSnapshot(`
       Object {
         "symbol": Array [

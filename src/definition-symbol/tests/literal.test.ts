@@ -7,7 +7,7 @@ import {
   mockProgram,
 } from '../../../test/utils';
 import { dumpNode, dumpSymbol } from '../../symbols';
-import { defineType } from '../index';
+import { defineSymbol } from '../index';
 
 describe('infer object literal types', () => {
   it('should pull object type from object type', () => {
@@ -24,7 +24,7 @@ describe('infer object literal types', () => {
       ts.isCallExpression
     )!;
 
-    const objectType = defineType(callStatement.arguments[1], checker)!;
+    const objectType = defineSymbol(callStatement.arguments[1], checker)!;
     expect(dumpInferred(objectType, checker)).toMatchInlineSnapshot(`
       Object {
         "symbol": Array [
@@ -58,7 +58,7 @@ describe('infer object literal types', () => {
 
     invariant(ts.isVariableDeclaration(varSymbol?.valueDeclaration!));
 
-    const objectType = defineType(
+    const objectType = defineSymbol(
       varSymbol?.valueDeclaration?.initializer!,
       checker
     )!;
@@ -97,7 +97,7 @@ describe('infer object literal types', () => {
     const arrayNode = varSymbol?.valueDeclaration?.initializer!;
     const objectNode = findNodeInTree(arrayNode, ts.isObjectLiteralExpression)!;
 
-    const arrayType = defineType(arrayNode, checker)!;
+    const arrayType = defineSymbol(arrayNode, checker)!;
     expect(dumpInferred(arrayType, checker)).toMatchInlineSnapshot(`
       Object {
         "symbol": Array [
@@ -114,7 +114,7 @@ describe('infer object literal types', () => {
       }
     `);
 
-    const objectType = defineType(objectNode, checker)!;
+    const objectType = defineSymbol(objectNode, checker)!;
     expect(dumpInferred(objectType, checker)).toMatchInlineSnapshot(`
       Object {
         "symbol": Array [
@@ -154,7 +154,7 @@ describe('infer object literal types', () => {
 
     const propertyNode = objectNode.properties[0];
 
-    const objectType = defineType(objectNode, checker)!;
+    const objectType = defineSymbol(objectNode, checker)!;
     expect(dumpInferred(objectType, checker)).toMatchInlineSnapshot(`
       Object {
         "symbol": Array [
@@ -171,7 +171,7 @@ describe('infer object literal types', () => {
       }
     `);
 
-    const propertyType = defineType(propertyNode, checker)!;
+    const propertyType = defineSymbol(propertyNode, checker)!;
     expect(dumpInferred(propertyType, checker)).toMatchInlineSnapshot(`
       Object {
         "symbol": Array [
@@ -211,7 +211,7 @@ describe('infer object literal types', () => {
     )!;
     const propertyNode = nestedObjectNode.properties[0];
 
-    const nestedObjectType = defineType(nestedObjectNode, checker)!;
+    const nestedObjectType = defineSymbol(nestedObjectNode, checker)!;
     expect(dumpInferred(nestedObjectType, checker)).toMatchInlineSnapshot(`
       Object {
         "symbol": Array [
@@ -228,7 +228,7 @@ describe('infer object literal types', () => {
       }
     `);
 
-    const propertyType = defineType(propertyNode, checker)!;
+    const propertyType = defineSymbol(propertyNode, checker)!;
     expect(dumpInferred(propertyType, checker)).toMatchInlineSnapshot(`
       Object {
         "symbol": Array [
@@ -261,7 +261,7 @@ describe('infer object literal types', () => {
         ts.isIdentifier(node) && node.getText() === 'y'
     );
 
-    const inferred = defineType(yNode!, checker);
+    const inferred = defineSymbol(yNode!, checker);
     expect(dumpInferred(inferred, checker)).toMatchInlineSnapshot(`
       Object {
         "symbol": Array [

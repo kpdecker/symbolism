@@ -25,7 +25,7 @@ const definitionOperations: DefinitionOperation[] = [
   definePassThrough,
 ];
 
-export function defineType(node: ts.Node, checker: ts.TypeChecker) {
+export function defineSymbol(node: ts.Node, checker: ts.TypeChecker) {
   console.log('defineType', ts.SyntaxKind[node.kind]); //, dumpNode(node, checker));
   for (const operation of definitionOperations) {
     const result = node && operation(node, checker);
@@ -41,7 +41,7 @@ export function defineType(node: ts.Node, checker: ts.TypeChecker) {
 function defineIdentifier(node: ts.Node, checker: ts.TypeChecker) {
   if (ts.isIdentifier(node)) {
     if (ts.isObjectLiteralExpression(node.parent)) {
-      const objectType = defineType(node.parent, checker);
+      const objectType = defineSymbol(node.parent, checker);
       if (!objectType || !objectType.type) {
         return;
       }
@@ -51,7 +51,7 @@ function defineIdentifier(node: ts.Node, checker: ts.TypeChecker) {
       });
     }
     if (ts.isArrayLiteralExpression(node.parent)) {
-      const arrayType = defineType(node.parent, checker);
+      const arrayType = defineSymbol(node.parent, checker);
       if (!arrayType || !arrayType.type) {
         return;
       }
@@ -74,7 +74,7 @@ function defineIdentifier(node: ts.Node, checker: ts.TypeChecker) {
       ts.isBinaryExpression(node.parent) ||
       ts.isConditionalExpression(node.parent)
     ) {
-      return defineType(node.parent, checker);
+      return defineSymbol(node.parent, checker);
     }
 
     // Use the identifier directly
@@ -149,7 +149,7 @@ function defineLiteral(node: ts.Node, checker: ts.TypeChecker) {
       return;
     }
 
-    const inferred = defineType(node.parent, checker);
+    const inferred = defineSymbol(node.parent, checker);
     if (!inferred) {
       return;
     }
@@ -160,7 +160,7 @@ function defineLiteral(node: ts.Node, checker: ts.TypeChecker) {
 
 function definePropertyAssignment(node: ts.Node, checker: ts.TypeChecker) {
   if (ts.isPropertyAssignment(node) || ts.isShorthandPropertyAssignment(node)) {
-    const objectType = defineType(node.parent, checker);
+    const objectType = defineSymbol(node.parent, checker);
     if (!objectType || !objectType.type) {
       return;
     }
@@ -182,7 +182,7 @@ function defineBindingElement(node: ts.Node, checker: ts.TypeChecker) {
     }
 
     const bindingPattern = node.parent;
-    const bindingPatternType = defineType(bindingPattern, checker);
+    const bindingPatternType = defineSymbol(bindingPattern, checker);
 
     const propertyName = ts.isArrayBindingPattern(bindingPattern)
       ? bindingPattern.elements.indexOf(node) + ''
@@ -203,7 +203,7 @@ function defineBindingElement(node: ts.Node, checker: ts.TypeChecker) {
   if (ts.isObjectBindingPattern(node) || ts.isArrayBindingPattern(node)) {
     if (ts.isVariableDeclaration(node.parent)) {
       const variableDeclaration = node.parent;
-      return defineType(variableDeclaration, checker);
+      return defineSymbol(variableDeclaration, checker);
     }
     throw new Error(
       'unhandled binding pattern: ' + SyntaxKind[node.parent.kind]
@@ -259,7 +259,7 @@ function definePassThrough(node: ts.Node, checker: ts.TypeChecker) {
     ts.isConditionalExpression(node) ||
     ts.isAsExpression(node)
   ) {
-    return defineType(node.parent, checker);
+    return defineSymbol(node.parent, checker);
   }
 }
 

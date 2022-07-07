@@ -6,7 +6,7 @@ import {
   mockProgram,
 } from '../../../test/utils';
 import { dumpSymbol } from '../../symbols';
-import { defineType } from '../index';
+import { defineSymbol } from '../index';
 
 describe('infer binding elements', () => {
   describe('object literal', () => {
@@ -26,7 +26,7 @@ describe('infer binding elements', () => {
         )
         .find((s) => s.getName() === 'y');
 
-      const type = defineType(varSymbol?.valueDeclaration!, checker);
+      const type = defineSymbol(varSymbol?.valueDeclaration!, checker);
       expect(dumpInferred(type, checker)).toMatchInlineSnapshot(`
               Object {
                 "symbol": Array [
@@ -59,7 +59,7 @@ describe('infer binding elements', () => {
         )
         .find((s) => s.getName() === 'y');
 
-      const type = defineType(varSymbol?.valueDeclaration!, checker);
+      const type = defineSymbol(varSymbol?.valueDeclaration!, checker);
       expect(dumpInferred(type, checker)).toMatchInlineSnapshot(`
         Object {
           "symbol": Array [
@@ -92,7 +92,7 @@ describe('infer binding elements', () => {
         )
         .find((s) => s.getName() === 'y');
 
-      const type = defineType(varSymbol?.valueDeclaration!, checker);
+      const type = defineSymbol(varSymbol?.valueDeclaration!, checker);
       expect(dumpInferred(type, checker)).toMatchInlineSnapshot(`
               Object {
                 "symbol": Array [
@@ -127,7 +127,7 @@ describe('infer binding elements', () => {
         )
         .find((s) => s.getName() === 'y');
 
-      const inferred = defineType(varSymbol?.valueDeclaration!, checker);
+      const inferred = defineSymbol(varSymbol?.valueDeclaration!, checker);
       expect(dumpInferred(inferred, checker)).toMatchInlineSnapshot(`
         Object {
           "symbol": Array [
@@ -162,7 +162,7 @@ describe('infer binding elements', () => {
         )
         .find((s) => s.getName() === 'y');
 
-      const inferred = defineType(varSymbol?.valueDeclaration!, checker);
+      const inferred = defineSymbol(varSymbol?.valueDeclaration!, checker);
       expect(dumpInferred(inferred, checker)).toMatchInlineSnapshot(`
               Object {
                 "symbol": Array [
@@ -195,7 +195,7 @@ describe('infer binding elements', () => {
         )
         .find((s) => s.getName() === 'y');
 
-      const inferred = defineType(varSymbol?.valueDeclaration!, checker);
+      const inferred = defineSymbol(varSymbol?.valueDeclaration!, checker);
       expect(dumpInferred(inferred, checker)).toMatchInlineSnapshot(`
               Object {
                 "symbol": Array [
@@ -228,7 +228,7 @@ describe('infer binding elements', () => {
         )
         .find((s) => s.getName() === 'y');
 
-      const type = defineType(varSymbol?.valueDeclaration!, checker);
+      const type = defineSymbol(varSymbol?.valueDeclaration!, checker);
       expect(dumpInferred(type, checker)).toMatchInlineSnapshot(`
               Object {
                 "symbol": Array [
@@ -263,7 +263,7 @@ describe('infer binding elements', () => {
         )
         .find((s) => s.getName() === 'y');
 
-      const inferred = defineType(varSymbol?.valueDeclaration!, checker);
+      const inferred = defineSymbol(varSymbol?.valueDeclaration!, checker);
       expect(dumpInferred(inferred, checker)).toMatchInlineSnapshot(`
         Object {
           "symbol": Array [

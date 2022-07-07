@@ -5,7 +5,7 @@ import {
   mockProgram,
 } from '../../../test/utils';
 import { dumpSymbol } from '../../symbols';
-import { defineType } from '../index';
+import { defineSymbol } from '../index';
 
 describe('infer variable declaration', () => {
   it('should pull variable declaration from explicit type', () => {
@@ -23,7 +23,7 @@ describe('infer variable declaration', () => {
       )
       .find((s) => s.getName() === 'x');
 
-    const type = defineType(varSymbol?.valueDeclaration!, checker);
+    const type = defineSymbol(varSymbol?.valueDeclaration!, checker);
     expect(dumpInferred(type, checker)).toMatchInlineSnapshot(`
       Object {
         "symbol": Array [
@@ -67,7 +67,7 @@ describe('infer variable declaration', () => {
       )
       .find((s) => s.getName() === 'x');
 
-    const type = defineType(varSymbol?.valueDeclaration!, checker);
+    const type = defineSymbol(varSymbol?.valueDeclaration!, checker);
     expect(dumpInferred(type, checker)).toMatchInlineSnapshot(`
       Object {
         "symbol": Array [

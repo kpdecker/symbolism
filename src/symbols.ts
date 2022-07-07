@@ -7,7 +7,7 @@ import { isIntrinsicType, namedPathToNode } from './utils';
 import { lineAndColumn } from './coverage';
 import { getSymbolFromLanguageServices } from './definition-symbol/language-services';
 import { getSymbolForJSXAttribute } from './definition-symbol/jsx';
-import { defineType } from './definition-symbol/index';
+import { defineSymbol } from './definition-symbol/index';
 
 type SymbolTable = Map<ts.Symbol, Set<ts.Node>>;
 
@@ -98,7 +98,7 @@ export function parseSymbolTable(
         }
 
         if (definitionSymbol === undefined) {
-          const inferredType = defineType(node, checker);
+          const inferredType = defineSymbol(node, checker);
           definitionSymbol = inferredType?.symbol;
         }
 

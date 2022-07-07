@@ -6,7 +6,7 @@ import {
   mockProgram,
 } from '../../../test/utils';
 import { dumpSymbol } from '../../symbols';
-import { defineType } from '../index';
+import { defineSymbol } from '../index';
 
 describe('infer call parameter type', () => {
   it('should pull parameter type from explicit type', () => {
@@ -24,7 +24,7 @@ describe('infer call parameter type', () => {
       ts.isCallExpression
     )!;
 
-    const stringArgument = defineType(callStatement.arguments[0], checker)!;
+    const stringArgument = defineSymbol(callStatement.arguments[0], checker)!;
     expect(dumpInferred(stringArgument, checker)).toMatchInlineSnapshot(`
       Object {
         "symbol": Array [
@@ -42,7 +42,7 @@ describe('infer call parameter type', () => {
     `);
 
     // TODO: Into the ExplicitType?
-    const objectArgument = defineType(callStatement.arguments[1], checker)!;
+    const objectArgument = defineSymbol(callStatement.arguments[1], checker)!;
     expect(dumpInferred(objectArgument, checker)).toMatchInlineSnapshot(`
       Object {
         "symbol": Array [
@@ -73,7 +73,7 @@ describe('infer call parameter type', () => {
       ts.isCallExpression
     )!;
 
-    const stringArgument = defineType(callStatement.arguments[0], checker)!;
+    const stringArgument = defineSymbol(callStatement.arguments[0], checker)!;
     expect(dumpInferred(stringArgument, checker)).toMatchInlineSnapshot(`
       Object {
         "symbol": Array [
@@ -91,7 +91,7 @@ describe('infer call parameter type', () => {
     `);
 
     // TODO: Should the symbol for this be the ExplicitType declaration?
-    const objectArgument = defineType(callStatement.arguments[1], checker)!;
+    const objectArgument = defineSymbol(callStatement.arguments[1], checker)!;
     expect(dumpInferred(objectArgument, checker)).toMatchInlineSnapshot(`
       Object {
         "symbol": Array [
