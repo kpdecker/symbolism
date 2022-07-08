@@ -97,6 +97,9 @@ export function namedPathToNode(
     ts.isCatchClause(node) ||
     ts.isAwaitExpression(node) ||
     ts.isObjectLiteralExpression(node) ||
+    ts.isTaggedTemplateExpression(node) ||
+    ts.isTemplateExpression(node) ||
+    ts.isTemplateSpan(node) ||
     //
     // Types
     ts.isFunctionTypeNode(node) ||

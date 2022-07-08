@@ -1,5 +1,31 @@
 import invariant from 'tiny-invariant';
 import ts, { findAncestor } from 'typescript';
+import { dumpNode, dumpSymbol } from '../symbols';
+import { defineSymbol } from './index';
+import { DefinitionSymbol, directTypeAndSymbol } from './utils';
+
+export function defineJSX(
+  node: ts.Node,
+  checker: ts.TypeChecker
+): DefinitionSymbol | undefined {
+  if (ts.isJsxElement(node)) {
+    return defineJSX(node.openingElement, checker);
+  }
+  if (ts.isJsxAttribute(node)) {
+    return getSymbolForJSXAttribute(node, checker);
+  }
+
+  if (ts.isJsxOpeningElement(node) || ts.isJsxSelfClosingElement(node)) {
+    return directTypeAndSymbol(node.tagName, checker);
+  }
+  if (ts.isJsxAttributes(node)) {
+    return defineJSX(node.parent, checker);
+  }
+
+  if (ts.isJsxSpreadAttribute(node)) {
+    return defineSymbol(node.expression, checker);
+  }
+}
 
 /**
  * Resolves the symbol for a JSX attribute, resolving all types and symbols.
@@ -34,7 +60,10 @@ function resolveObjectTypeProperty(
   // TODO: checker.getTypeOfSymbolAtLocation?
   if ((ts as any).isTransientSymbol(objectSymbol)) {
     const type: ts.Type = (objectSymbol as any).type;
-    return type.getProperty(name);
+    return {
+      symbol: type.getProperty(name),
+      type,
+    };
   }
   console.error('Unknown object symbol type', objectSymbol);
   throw new Error('Unknown object symbol type');

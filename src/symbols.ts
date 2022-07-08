@@ -102,16 +102,6 @@ export function parseSymbolTable(
           definitionSymbol = inferredType?.symbol;
         }
 
-        // JSX Attributes
-        if (definitionSymbol === undefined) {
-          if (ts.isJsxAttribute(symbolDeclaration)) {
-            definitionSymbol = getSymbolForJSXAttribute(
-              symbolDeclaration,
-              checker
-            );
-          }
-        }
-
         // If this is a function parameter then we are at our identity
         if (definitionSymbol === undefined) {
           if (ts.isParameter(symbolDeclaration)) {
@@ -191,7 +181,7 @@ export function dumpSymbolTable(symbols: SymbolTable, checker: ts.TypeChecker) {
 export function dumpSymbol(
   symbol: ts.Symbol | undefined,
   checker: ts.TypeChecker
-) {
+): ReturnType<typeof dumpNode>[] {
   if (!symbol) {
     return [];
   }
@@ -202,7 +192,16 @@ export function dumpSymbol(
     !declarations.length &&
     isIntrinsicType(checker.getDeclaredTypeOfSymbol(symbol))
   ) {
-    return [{ kind: 'keyword', name: symbol.getName() }];
+    return [
+      {
+        kind: 'keyword',
+        name: symbol.getName(),
+        fileName: 'intrinsic',
+        path: symbol.getName(),
+        line: 1,
+        column: 1,
+      },
+    ];
   }
 
   invariant(declarations.length, 'Missing declaration: ' + symbol.getName());

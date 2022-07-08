@@ -2,11 +2,9 @@ import invariant from 'tiny-invariant';
 import ts, { findAncestor, SyntaxKind } from 'typescript';
 import { dumpNode, dumpSymbol } from '../symbols';
 import { getPropertySymbol, isArraySymbol, isErrorType } from '../utils';
+import { defineJSX } from './jsx';
+import { DefinitionSymbol, directTypeAndSymbol, getArrayType } from './utils';
 
-type DefinitionSymbol = {
-  symbol: ts.Symbol | undefined;
-  type: ts.Type | undefined;
-};
 type DefinitionOperation = (
   node: ts.Node,
   checker: ts.TypeChecker
@@ -18,15 +16,17 @@ const definitionOperations: DefinitionOperation[] = [
   defineParameter,
   defineReturn,
   defineLiteral,
-  definePropertyAssignment,
+  defineProperties,
   defineCallReturn,
+  defineTaggedTemplate,
   defineBindingElement,
   defineBinaryExpression,
+  defineJSX,
   definePassThrough,
 ];
 
 export function defineSymbol(node: ts.Node, checker: ts.TypeChecker) {
-  console.log('defineType', ts.SyntaxKind[node.kind]); //, dumpNode(node, checker));
+  console.log('defineSymbol', ts.SyntaxKind[node.kind]); //, dumpNode(node, checker));
   for (const operation of definitionOperations) {
     const result = node && operation(node, checker);
     if (result) {
@@ -40,31 +40,17 @@ export function defineSymbol(node: ts.Node, checker: ts.TypeChecker) {
 
 function defineIdentifier(node: ts.Node, checker: ts.TypeChecker) {
   if (ts.isIdentifier(node)) {
-    if (ts.isObjectLiteralExpression(node.parent)) {
-      const objectType = defineSymbol(node.parent, checker);
-      if (!objectType || !objectType.type) {
-        return;
+    if (
+      ts.isObjectLiteralExpression(node.parent) ||
+      ts.isArrayLiteralExpression(node.parent)
+    ) {
+      const contextualType = checker.getContextualType(node);
+      if (contextualType) {
+        return {
+          type: contextualType,
+          symbol: contextualType.symbol,
+        };
       }
-
-      return getPropertySymbol(node, objectType.type, checker, node.getText(), {
-        stringIndex: true,
-      });
-    }
-    if (ts.isArrayLiteralExpression(node.parent)) {
-      const arrayType = defineSymbol(node.parent, checker);
-      if (!arrayType || !arrayType.type) {
-        return;
-      }
-
-      return getPropertySymbol(
-        node,
-        arrayType.type,
-        checker,
-        node.parent.elements.indexOf(node) + '',
-        {
-          numberIndex: true,
-        }
-      );
     }
 
     // Identifier pass through
@@ -72,7 +58,8 @@ function defineIdentifier(node: ts.Node, checker: ts.TypeChecker) {
       ts.isBindingElement(node.parent) ||
       ts.isPropertyAssignment(node.parent) ||
       ts.isBinaryExpression(node.parent) ||
-      ts.isConditionalExpression(node.parent)
+      ts.isConditionalExpression(node.parent) ||
+      ts.isJsxAttribute(node.parent)
     ) {
       return defineSymbol(node.parent, checker);
     }
@@ -82,12 +69,19 @@ function defineIdentifier(node: ts.Node, checker: ts.TypeChecker) {
     if (
       ts.isTypeOfExpression(node.parent) ||
       ts.isReturnStatement(node.parent) ||
-      ts.isVariableDeclaration(node.parent)
+      ts.isPropertyAccessExpression(node.parent) ||
+      ts.isVariableDeclaration(node.parent) ||
+      ts.isJsxSpreadAttribute(node.parent) ||
+      (ts.isArrowFunction(node.parent) && node.parent.body === node)
     ) {
       return directTypeAndSymbol(node, checker);
     }
 
-    if (ts.isCallExpression(node.parent)) {
+    if (
+      ts.isCallExpression(node.parent) ||
+      ts.isNewExpression(node.parent) ||
+      ts.isArrowFunction(node.parent)
+    ) {
       // Will be picked up by inferParameter
       return;
     }
@@ -125,6 +119,10 @@ function defineParameter(node: ts.Node, checker: ts.TypeChecker) {
       type: checker.getTypeOfSymbolAtLocation(parameterSymbol, node.parent),
     };
   }
+
+  if (ts.isParameter(node)) {
+    return directTypeAndSymbol(node, checker);
+  }
 }
 
 function defineReturn(node: ts.Node, checker: ts.TypeChecker) {
@@ -158,8 +156,12 @@ function defineLiteral(node: ts.Node, checker: ts.TypeChecker) {
   }
 }
 
-function definePropertyAssignment(node: ts.Node, checker: ts.TypeChecker) {
-  if (ts.isPropertyAssignment(node) || ts.isShorthandPropertyAssignment(node)) {
+function defineProperties(node: ts.Node, checker: ts.TypeChecker) {
+  if (
+    ts.isPropertyAssignment(node) ||
+    ts.isShorthandPropertyAssignment(node) ||
+    ts.isPropertyAccessExpression(node)
+  ) {
     const objectType = defineSymbol(node.parent, checker);
     if (!objectType || !objectType.type) {
       return;
@@ -201,7 +203,7 @@ function defineBindingElement(node: ts.Node, checker: ts.TypeChecker) {
   }
 
   if (ts.isObjectBindingPattern(node) || ts.isArrayBindingPattern(node)) {
-    if (ts.isVariableDeclaration(node.parent)) {
+    if (ts.isVariableDeclaration(node.parent) || ts.isParameter(node.parent)) {
       const variableDeclaration = node.parent;
       return defineSymbol(variableDeclaration, checker);
     }
@@ -213,6 +215,24 @@ function defineBindingElement(node: ts.Node, checker: ts.TypeChecker) {
 
 function defineCallReturn(node: ts.Node, checker: ts.TypeChecker) {
   if (ts.isCallExpression(node)) {
+    const signature = checker.getResolvedSignature(node);
+    if (signature) {
+      const returnType = signature.getReturnType();
+      if (returnType) {
+        return {
+          type: returnType,
+          symbol: returnType.symbol,
+        };
+      }
+    }
+  }
+  if (ts.isArrowFunction(node)) {
+    return directTypeAndSymbol(node, checker);
+  }
+}
+
+function defineTaggedTemplate(node: ts.Node, checker: ts.TypeChecker) {
+  if (ts.isTaggedTemplateExpression(node)) {
     const signature = checker.getResolvedSignature(node);
     if (signature) {
       const returnType = signature.getReturnType();
@@ -260,34 +280,5 @@ function definePassThrough(node: ts.Node, checker: ts.TypeChecker) {
     ts.isAsExpression(node)
   ) {
     return defineSymbol(node.parent, checker);
-  }
-}
-
-function directTypeAndSymbol(node: ts.Node, checker: ts.TypeChecker) {
-  const symbol = checker.getSymbolAtLocation(node);
-  let type: ts.Type;
-
-  if (symbol) {
-    type = checker.getTypeOfSymbolAtLocation(symbol, node);
-  } else {
-    type = checker.getTypeAtLocation(node);
-  }
-
-  return {
-    symbol: symbol ? symbol : type.symbol,
-    type,
-  };
-}
-
-function getArrayType(inferred: DefinitionSymbol) {
-  const { type, symbol } = inferred;
-
-  // If our parent is an array, we need to get the element type
-  if (type && symbol && isArraySymbol(symbol) && type.getNumberIndexType()) {
-    const numberIndexType = type.getNumberIndexType();
-    return {
-      symbol: numberIndexType?.symbol || symbol,
-      type: type.getNumberIndexType(),
-    };
   }
 }

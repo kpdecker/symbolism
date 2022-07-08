@@ -30,7 +30,7 @@ export function mockProgram(sourceFiles: Record<string, string>) {
       return fileName;
     },
     getCurrentDirectory() {
-      return '';
+      return process.cwd();
     },
     getDefaultLibFileName: ts.getDefaultLibFilePath,
     useCaseSensitiveFileNames() {
@@ -52,9 +52,15 @@ export function dumpInferred(
   inferred: ReturnType<typeof defineSymbol>,
   checker: ts.TypeChecker
 ) {
+  const symbol = dumpSymbol(inferred!.symbol, checker);
+  symbol.forEach((x) => {
+    x.fileName = x.fileName.includes('node_modules')
+      ? x.fileName.replace(/.*\/node_modules\//, '')
+      : x.fileName;
+  });
   return {
     type: checker.typeToString(inferred?.type!),
-    symbol: dumpSymbol(inferred!.symbol, checker),
+    symbol,
   };
 }
 
@@ -83,4 +89,20 @@ export function findNodeInTree<T extends ts.Node>(
   }
 
   return undefined;
+}
+
+export function findNodesInTree<T extends ts.Node>(
+  node: ts.Node,
+  matcher: (node: ts.Node) => node is T
+): T[] {
+  if (matcher(node)) {
+    return [node];
+  }
+
+  const ret = [];
+  for (const child of node.getChildren()) {
+    ret.push(...findNodesInTree(child, matcher));
+  }
+
+  return ret;
 }
