@@ -8,7 +8,7 @@ import { DefinitionSymbol, directTypeAndSymbol, getArrayType } from './utils';
 type DefinitionOperation = (
   node: ts.Node,
   checker: ts.TypeChecker
-) => DefinitionSymbol | undefined;
+) => DefinitionSymbol | undefined | null;
 
 const definitionOperations: DefinitionOperation[] = [
   defineIdentifier,
@@ -29,7 +29,7 @@ export function defineSymbol(node: ts.Node, checker: ts.TypeChecker) {
   console.log('defineSymbol', ts.SyntaxKind[node.kind]); //, dumpNode(node, checker));
   for (const operation of definitionOperations) {
     const result = node && operation(node, checker);
-    if (result) {
+    if (result !== undefined) {
       return result;
     }
   }
@@ -136,7 +136,7 @@ function defineReturn(node: ts.Node, checker: ts.TypeChecker) {
       return directTypeAndSymbol(node.expression, checker);
     }
 
-    // TODO: Handle no return value
+    return null;
   }
 }
 

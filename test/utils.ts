@@ -52,6 +52,9 @@ export function dumpInferred(
   inferred: ReturnType<typeof defineSymbol>,
   checker: ts.TypeChecker
 ) {
+  if (!inferred) {
+    return inferred;
+  }
   const symbol = dumpSymbol(inferred!.symbol, checker);
   symbol.forEach((x) => {
     x.fileName = x.fileName.includes('node_modules')

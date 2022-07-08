@@ -8,7 +8,7 @@ import { DefinitionSymbol, directTypeAndSymbol } from './utils';
 export function defineJSX(
   node: ts.Node,
   checker: ts.TypeChecker
-): DefinitionSymbol | undefined {
+): DefinitionSymbol | null | undefined {
   if (ts.isJsxElement(node)) {
     return defineJSX(node.openingElement, checker);
   }

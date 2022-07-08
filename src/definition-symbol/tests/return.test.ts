@@ -1,11 +1,11 @@
-import ts from 'typescript';
-import { dumpInferred, findNodeInTree, mockProgram } from '../../../test/utils';
-import { defineSymbol } from '../index';
+import ts from "typescript";
+import { dumpInferred, findNodeInTree, mockProgram } from "../../../test/utils";
+import { defineSymbol } from "../index";
 
-describe('infer return type', () => {
-  it('should pull return type from explicit type', () => {
+describe("infer return type", () => {
+  it("should pull return type from explicit type", () => {
     const program = mockProgram({
-      'test.ts': `
+      "test.ts": `
         type ExplicitType = { foo: string };
         function x(): ExplicitType {
           return { foo: undefined };
@@ -14,7 +14,7 @@ describe('infer return type', () => {
     });
     const checker = program.getTypeChecker();
     const returnStatement = findNodeInTree(
-      program.getSourceFile('test.ts')!,
+      program.getSourceFile("test.ts")!,
       ts.isReturnStatement
     );
     const type = defineSymbol(returnStatement!, checker)!;
@@ -34,9 +34,9 @@ describe('infer return type', () => {
       }
     `);
   });
-  it('should pull return type from inferred type', () => {
+  it("should pull return type from inferred type", () => {
     const program = mockProgram({
-      'test.ts': `
+      "test.ts": `
         function x() {
           return { foo: "foo" };
         }
@@ -44,7 +44,7 @@ describe('infer return type', () => {
     });
     const checker = program.getTypeChecker();
     const returnStatement = findNodeInTree(
-      program.getSourceFile('test.ts')!,
+      program.getSourceFile("test.ts")!,
       ts.isReturnStatement
     );
     const type = defineSymbol(returnStatement!, checker)!;
@@ -63,5 +63,21 @@ describe('infer return type', () => {
         "type": "{ foo: string; }",
       }
     `);
+  });
+  it("should pull return type from inferred type", () => {
+    const program = mockProgram({
+      "test.ts": `
+        function x() {
+          return;
+        }
+      `,
+    });
+    const checker = program.getTypeChecker();
+    const returnStatement = findNodeInTree(
+      program.getSourceFile("test.ts")!,
+      ts.isReturnStatement
+    );
+    const type = defineSymbol(returnStatement!, checker)!;
+    expect(dumpInferred(type, checker)).toMatchInlineSnapshot(`null`);
   });
 });
