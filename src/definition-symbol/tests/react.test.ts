@@ -174,7 +174,7 @@ describe("react", () => {
             "path": ".GenericTemplate.myProp",
           },
         ],
-        "type": "{ theme?: Theme; as?: ElementType<any>; } & { myProp: number; } & ClassAttributes<HTMLDivElement> & HTMLAttributes<HTMLDivElement>",
+        "type": "number",
       }
     `);
   });
