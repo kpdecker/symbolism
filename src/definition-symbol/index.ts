@@ -41,7 +41,7 @@ const nodeHandlers: Partial<Record<ts.SyntaxKind, DefinitionOperation>> = {
 
   // References
   [ts.SyntaxKind.Identifier]: defineIdentifier,
-  [ts.SyntaxKind.QualifiedName]: defineIdentifier, // JSX
+  [ts.SyntaxKind.QualifiedName]: defineIdentifier, // JSDoc
 
   // Expressions
   [ts.SyntaxKind.ArrayLiteralExpression]: contextualTypeAndSymbol,
@@ -76,7 +76,6 @@ const nodeHandlers: Partial<Record<ts.SyntaxKind, DefinitionOperation>> = {
   },
   // case ts.SyntaxKind.ConditionalExpression:
   // case ts.SyntaxKind.TemplateExpression:
-  // case ts.SyntaxKind.YieldExpression:
   // case ts.SyntaxKind.SpreadElement:
   // case ts.SyntaxKind.OmittedExpression:
   // case ts.SyntaxKind.ExpressionWithTypeArguments:
@@ -113,12 +112,12 @@ const nodeHandlers: Partial<Record<ts.SyntaxKind, DefinitionOperation>> = {
     invariantNode(node, ts.isThrowStatement);
     return defineSymbol(node.expression, checker);
   },
-  // [ts.SyntaxKind.ContinueStatement]: nopHandler,
-  // [ts.SyntaxKind.BreakStatement]: nopHandler,
-  // [ts.SyntaxKind.WithStatement]: nopHandler,
-  // [ts.SyntaxKind.TryStatement]: nopHandler,
+  [ts.SyntaxKind.ContinueStatement]: nopHandler,
+  [ts.SyntaxKind.BreakStatement]: nopHandler,
+  [ts.SyntaxKind.WithStatement]: nopHandler,
+  [ts.SyntaxKind.TryStatement]: nopHandler,
   // [ts.SyntaxKind.CatchClause]:
-  // [ts.SyntaxKind.DebuggerStatement]: nopHandler,
+  [ts.SyntaxKind.DebuggerStatement]: nopHandler,
 
   // [ts.SyntaxKind.SwitchStatement]: nopHandler,
   // case ts.SyntaxKind.CaseClause:

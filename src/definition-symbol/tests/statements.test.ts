@@ -51,4 +51,19 @@ describe("infer statements", () => {
       }
     `);
   });
+  it("should handle continue statements", () => {
+    expect(testStatement("continue")).toMatchInlineSnapshot(`null`);
+  });
+  it("should handle break statements", () => {
+    expect(testStatement("break")).toMatchInlineSnapshot(`null`);
+  });
+  it("should handle with statements", () => {
+    expect(testStatement("with (Date) {}")).toMatchInlineSnapshot(`null`);
+  });
+  it("should handle debugger statements", () => {
+    expect(testStatement("debugger")).toMatchInlineSnapshot(`null`);
+  });
+  it("should handle try statements", () => {
+    expect(testStatement("try {}")).toMatchInlineSnapshot(`null`);
+  });
 });

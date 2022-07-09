@@ -14,6 +14,8 @@ export const classOperators = nodeOperators({
     return directTypeAndSymbol(node.parent, checker);
   },
   [ts.SyntaxKind.SuperKeyword]: directTypeAndSymbol,
+  // [ts.SyntaxKind.ThisKeyword]: nopHandler,
+
   [ts.SyntaxKind.HeritageClause]: directTypeAndSymbol, // extends/implements
 
   [ts.SyntaxKind.PrivateIdentifier]: directTypeAndSymbol,

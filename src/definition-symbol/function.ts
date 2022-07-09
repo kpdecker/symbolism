@@ -7,9 +7,6 @@ import {
 } from './utils';
 
 export const functionOperators = nodeOperators({
-  // ts.SyntaxKind.Block:
-  [ts.SyntaxKind.ReturnStatement]: handleReturnStatement,
-
   [ts.SyntaxKind.CallExpression]: defineCallReturn,
   [ts.SyntaxKind.NewExpression]: defineCallReturn,
   // case ts.SyntaxKind.FunctionExpression:
@@ -24,6 +21,10 @@ export const functionOperators = nodeOperators({
     }
     return directTypeAndSymbol(node, checker);
   },
+
+  // ts.SyntaxKind.Block:
+  // case ts.SyntaxKind.YieldExpression:
+  [ts.SyntaxKind.ReturnStatement]: handleReturnStatement,
 });
 
 function defineCallReturn(node: ts.Node, checker: ts.TypeChecker) {
