@@ -1,6 +1,4 @@
-import invariant from 'tiny-invariant';
 import ts from 'typescript';
-import { dumpNode, dumpSymbol } from './symbols';
 
 export function isArraySymbol(symbol: ts.Symbol): boolean {
   // const arraySymbol = checker
@@ -134,7 +132,10 @@ export function namedPathToNode(
     ts.isInterfaceDeclaration(node) ||
     ts.isModuleDeclaration(node) ||
     ts.isEnumDeclaration(node) ||
-    ts.isEnumMember(node)
+    ts.isEnumMember(node) ||
+    ts.isClassDeclaration(node) ||
+    ts.isPropertyDeclaration(node) ||
+    ts.isMethodDeclaration(node)
   ) {
     name = node.name?.getText() || name;
   } else if (
@@ -152,7 +153,7 @@ export function namedPathToNode(
   } else if (ts.isPropertyAssignment(node)) {
     name = node.name.getText();
   } else if (ts.isParameter(node)) {
-    name = '[' + node.parent.parameters.indexOf(node) + ']';
+    name = node.name.getText();
   } else if (ts.isArrayLiteralExpression(node) || ts.isArrayTypeNode(node)) {
     name = '[]';
   } else if (ts.isIfStatement(node)) {

@@ -1,19 +1,18 @@
-import ts, { findAncestor, SyntaxKind } from 'typescript';
-import { dumpNode, dumpSymbol } from '../symbols';
+import ts from 'typescript';
+import { dumpNode } from '../symbols';
 import { getPropertySymbol, isArraySymbol, isErrorType } from '../utils';
+import { classOperators } from './class';
+import { functionOperators } from './function';
 import { jsDocHandlers } from './jsdoc';
 import { jsxSymbolHandlers } from './jsx';
 import {
   contextualTypeAndSymbol,
   DefinitionOperation,
-  DefinitionSymbol,
   directTypeAndSymbol,
   getArrayType,
   invariantNode,
   isNamedDeclaration,
 } from './utils';
-
-function logOnce(kind: string) {}
 
 function nopHandler() {
   return null;
@@ -116,7 +115,6 @@ const nodeHandlers: Partial<Record<ts.SyntaxKind, DefinitionOperation>> = {
   [ts.SyntaxKind.InstanceOfKeyword]: nopHandler,
   [ts.SyntaxKind.NewKeyword]: nopHandler,
   [ts.SyntaxKind.ReturnKeyword]: nopHandler,
-  [ts.SyntaxKind.SuperKeyword]: nopHandler,
   [ts.SyntaxKind.SwitchKeyword]: nopHandler,
   [ts.SyntaxKind.ThisKeyword]: nopHandler,
   [ts.SyntaxKind.ThrowKeyword]: nopHandler,
@@ -168,7 +166,6 @@ const nodeHandlers: Partial<Record<ts.SyntaxKind, DefinitionOperation>> = {
   [ts.SyntaxKind.FromKeyword]: nopHandler,
   [ts.SyntaxKind.GlobalKeyword]: nopHandler,
   [ts.SyntaxKind.BigIntKeyword]: nopHandler,
-  [ts.SyntaxKind.OverrideKeyword]: nopHandler,
   [ts.SyntaxKind.OfKeyword]: nopHandler,
 
   // Intrinsic Values
@@ -187,7 +184,6 @@ const nodeHandlers: Partial<Record<ts.SyntaxKind, DefinitionOperation>> = {
   // References
   [ts.SyntaxKind.Identifier]: defineIdentifier,
   [ts.SyntaxKind.QualifiedName]: defineIdentifier, // JSX
-  // [ts.SyntaxKind.PrivateIdentifier]: directTypeAndSymbol,
 
   // Expressions
   [ts.SyntaxKind.ArrayLiteralExpression]: contextualTypeAndSymbol,
@@ -199,17 +195,27 @@ const nodeHandlers: Partial<Record<ts.SyntaxKind, DefinitionOperation>> = {
   // case ts.SyntaxKind.ComputedPropertyName:
 
   // case ts.SyntaxKind.ElementAccessExpression:
-  [ts.SyntaxKind.CallExpression]: defineCallReturn,
-  [ts.SyntaxKind.NewExpression]: defineCallReturn,
   // case ts.SyntaxKind.TypeAssertionExpression:
   // case ts.SyntaxKind.ParenthesizedExpression:
-  // case ts.SyntaxKind.FunctionExpression:
-  [ts.SyntaxKind.ArrowFunction]: defineCallReturn,
   // case ts.SyntaxKind.DeleteExpression:
   // case ts.SyntaxKind.AwaitExpression:
   [ts.SyntaxKind.PrefixUnaryExpression]: directTypeAndSymbol,
   // case ts.SyntaxKind.PostfixUnaryExpression:
-  // case ts.SyntaxKind.BinaryExpression:
+  [ts.SyntaxKind.BinaryExpression](node, checker) {
+    invariantNode(node, ts.isBinaryExpression);
+    if (node.operatorToken.kind === ts.SyntaxKind.EqualsToken) {
+      const left = contextualTypeAndSymbol(node.left, checker);
+      const right = contextualTypeAndSymbol(node.right, checker);
+
+      // Select whoever has a type, giving LHS priority
+      return left.symbol?.declarations && left.symbol?.declarations.length > 0
+        ? left
+        : right;
+    }
+    throw new Error(
+      'Not implemented ' + ts.SyntaxKind[node.operatorToken.kind]
+    );
+  },
   // case ts.SyntaxKind.ConditionalExpression:
   // case ts.SyntaxKind.TemplateExpression:
   // case ts.SyntaxKind.YieldExpression:
@@ -244,7 +250,6 @@ const nodeHandlers: Partial<Record<ts.SyntaxKind, DefinitionOperation>> = {
   // case ts.SyntaxKind.ForStatement:
   // case ts.SyntaxKind.ForInStatement:
   // case ts.SyntaxKind.ForOfStatement:
-  [ts.SyntaxKind.ReturnStatement]: defineReturn,
   // case ts.SyntaxKind.LabeledStatement:
   [ts.SyntaxKind.ThrowStatement]: (node, checker) => {
     invariantNode(node, ts.isThrowStatement);
@@ -264,29 +269,15 @@ const nodeHandlers: Partial<Record<ts.SyntaxKind, DefinitionOperation>> = {
 
   // Declarations
   // case ts.SyntaxKind.Decorator:
-  // case ts.SyntaxKind.GetAccessor:
-  // case ts.SyntaxKind.SetAccessor:
   // case ts.SyntaxKind.CallSignature: Type?
 
   [ts.SyntaxKind.ObjectBindingPattern]: defineBindingElement,
   [ts.SyntaxKind.ArrayBindingPattern]: defineBindingElement,
   [ts.SyntaxKind.BindingElement]: defineBindingElement,
-  // case ts.SyntaxKind.Block:
 
   // case ts.SyntaxKind.VariableDeclarationList:
   //   return undefined;
   [ts.SyntaxKind.VariableDeclaration]: defineVariableDeclaration,
-
-  [ts.SyntaxKind.FunctionDeclaration]: directTypeAndSymbol,
-  [ts.SyntaxKind.Parameter]: directTypeAndSymbol,
-
-  [ts.SyntaxKind.ClassExpression]: directTypeAndSymbol,
-  [ts.SyntaxKind.ClassDeclaration]: directTypeAndSymbol,
-  // case ts.SyntaxKind.Constructor:
-  // case ts.SyntaxKind.MethodDeclaration:
-  // case ts.SyntaxKind.PropertyDeclaration:
-  // case ts.SyntaxKind.ClassStaticBlockDeclaration:
-  [ts.SyntaxKind.SemicolonClassElement]: nopHandler,
 
   // case ts.SyntaxKind.EnumDeclaration:
   // case ts.SyntaxKind.EnumMember:
@@ -322,8 +313,6 @@ const nodeHandlers: Partial<Record<ts.SyntaxKind, DefinitionOperation>> = {
   [ts.SyntaxKind.ModuleDeclaration]: directTypeAndSymbol,
   [ts.SyntaxKind.ModuleBlock]: directTypeAndSymbol,
   [ts.SyntaxKind.TypeOfExpression]: directTypeAndSymbol,
-  [ts.SyntaxKind.HeritageClause]: directTypeAndSymbol, // extends/implements
-  [ts.SyntaxKind.PropertySignature]: directTypeAndSymbol,
   [ts.SyntaxKind.MethodSignature]: directTypeAndSymbol,
   [ts.SyntaxKind.TypeParameter]: directTypeAndSymbol,
 
@@ -367,6 +356,8 @@ const nodeHandlers: Partial<Record<ts.SyntaxKind, DefinitionOperation>> = {
   [ts.SyntaxKind.MergeDeclarationMarker]: nopHandler,
   [ts.SyntaxKind.EndOfDeclarationMarker]: nopHandler,
 
+  ...functionOperators,
+  ...classOperators,
   ...jsDocHandlers,
   ...jsxSymbolHandlers,
 };
@@ -378,6 +369,7 @@ export function defineSymbol(node: ts.Node, checker: ts.TypeChecker) {
   if (nodeHandler) {
     return nodeHandler(node, checker);
   }
+
   console.warn('failed to infer type', dumpNode(node, checker));
   throw new Error('failed to infer type');
   // return checker.getTypeAtLocation(node);
@@ -400,10 +392,12 @@ function defineIdentifier(node: ts.Node, checker: ts.TypeChecker) {
       (isNamedDeclaration(node.parent) && node.parent.name === node) ||
       ts.isBindingElement(node.parent) ||
       ts.isPropertyAssignment(node.parent) ||
+      ts.isPropertyAccessExpression(node.parent) ||
       ts.isBinaryExpression(node.parent) ||
       ts.isConditionalExpression(node.parent) ||
       ts.isVariableDeclaration(node.parent) ||
-      ts.isJsxAttribute(node.parent)
+      ts.isJsxAttribute(node.parent) ||
+      ts.isClassExpression(node.parent)
     ) {
       return defineSymbol(node.parent, checker);
     }
@@ -413,7 +407,6 @@ function defineIdentifier(node: ts.Node, checker: ts.TypeChecker) {
     if (
       ts.isTypeOfExpression(node.parent) ||
       ts.isReturnStatement(node.parent) ||
-      ts.isPropertyAccessExpression(node.parent) ||
       ts.isJsxSpreadAttribute(node.parent) ||
       (ts.isArrowFunction(node.parent) && node.parent.body === node)
     ) {
@@ -430,7 +423,7 @@ function defineIdentifier(node: ts.Node, checker: ts.TypeChecker) {
 function defineVariableDeclaration(node: ts.Node, checker: ts.TypeChecker) {
   if (ts.isVariableDeclaration(node)) {
     return directTypeAndSymbol(
-      node.type || node.initializer || node.name,
+      node.name,
       checker
     );
   }
@@ -457,27 +450,8 @@ function handleIdentifierInCall(node: ts.Node, checker: ts.TypeChecker) {
   }
 }
 
-function defineReturn(node: ts.Node, checker: ts.TypeChecker) {
-  if (ts.isReturnStatement(node)) {
-    const parent = findAncestor(node, ts.isFunctionLike);
-    if (parent?.type) {
-      return directTypeAndSymbol(parent.type, checker);
-    }
-
-    if (node.expression) {
-      return directTypeAndSymbol(node.expression, checker);
-    }
-
-    return null;
-  }
-}
-
 function defineProperties(node: ts.Node, checker: ts.TypeChecker) {
-  if (
-    ts.isPropertyAssignment(node) ||
-    ts.isShorthandPropertyAssignment(node) ||
-    ts.isPropertyAccessExpression(node)
-  ) {
+  if (ts.isPropertyAssignment(node) || ts.isShorthandPropertyAssignment(node)) {
     const objectType = defineSymbol(node.parent, checker);
     if (!objectType || !objectType.type) {
       return;
@@ -487,6 +461,17 @@ function defineProperties(node: ts.Node, checker: ts.TypeChecker) {
     return getPropertySymbol(node, objectType.type, checker, propertyName, {
       stringIndex: true,
     });
+  }
+  if (ts.isPropertyAccessExpression(node)) {
+    const type = directTypeAndSymbol(node, checker);
+    const typeDeclaration = type.symbol?.declarations?.[0];
+
+    // Check to see if we can resolve the property into ancestors.
+    if (typeDeclaration && ts.isPropertyDeclaration(typeDeclaration)) {
+      return defineSymbol(typeDeclaration, checker);
+    }
+
+    return type;
   }
 }
 
@@ -520,30 +505,11 @@ function defineBindingElement(node: ts.Node, checker: ts.TypeChecker) {
 
   if (ts.isObjectBindingPattern(node) || ts.isArrayBindingPattern(node)) {
     if (ts.isVariableDeclaration(node.parent) || ts.isParameter(node.parent)) {
-      const variableDeclaration = node.parent;
-      return defineSymbol(variableDeclaration, checker);
+      return defineSymbol(node.parent, checker);
     }
     throw new Error(
       'unhandled binding pattern: ' + SyntaxKind[node.parent.kind]
     );
-  }
-}
-
-function defineCallReturn(node: ts.Node, checker: ts.TypeChecker) {
-  if (ts.isCallExpression(node) || ts.isNewExpression(node)) {
-    const signature = checker.getResolvedSignature(node);
-    if (signature) {
-      const returnType = signature.getReturnType();
-      if (returnType) {
-        return {
-          type: returnType,
-          symbol: returnType.symbol,
-        };
-      }
-    }
-  }
-  if (ts.isArrowFunction(node)) {
-    return directTypeAndSymbol(node, checker);
   }
 }
 
@@ -559,33 +525,6 @@ function defineTaggedTemplate(node: ts.Node, checker: ts.TypeChecker) {
         };
       }
     }
-  }
-}
-
-function defineBinaryExpression(node: ts.Node, checker: ts.TypeChecker) {
-  if (ts.isBinaryExpression(node)) {
-    // const leftType = inferType(node.left, checker);
-    // const rightType = inferType(node.right, checker);
-    // if (leftType && rightType) {
-    if (ts.isIdentifier(node.left)) {
-      const symbol = checker.getSymbolAtLocation(node.left);
-      if (symbol) {
-        return {
-          symbol,
-          type: checker.getTypeOfSymbolAtLocation(symbol, node),
-        };
-      }
-    }
-    if (ts.isIdentifier(node.right)) {
-      const symbol = checker.getSymbolAtLocation(node.right);
-      if (symbol) {
-        return {
-          symbol,
-          type: checker.getTypeOfSymbolAtLocation(symbol, node),
-        };
-      }
-    }
-    // TODO: WIP
   }
 }
 

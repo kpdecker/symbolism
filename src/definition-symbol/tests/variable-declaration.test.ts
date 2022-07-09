@@ -1,16 +1,16 @@
-import ts from 'typescript';
+import ts from "typescript";
 import {
   dumpInferred,
   getPropertyValueType,
   mockProgram,
-} from '../../../test/utils';
-import { dumpSymbol } from '../../symbols';
-import { defineSymbol } from '../index';
+} from "../../../test/utils";
+import { dumpSymbol } from "../../symbols";
+import { defineSymbol } from "../index";
 
-describe('infer variable declaration', () => {
-  it('should pull variable declaration from explicit type', () => {
+describe("infer variable declaration", () => {
+  it("should pull variable declaration from explicit type", () => {
     const program = mockProgram({
-      'test.ts': `
+      "test.ts": `
         type ExplicitType = { foo: string };
         const x: ExplicitType = { foo: undefined };
       `,
@@ -18,22 +18,22 @@ describe('infer variable declaration', () => {
     const checker = program.getTypeChecker();
     const varSymbol = checker
       .getSymbolsInScope(
-        program.getSourceFile('test.ts')!,
+        program.getSourceFile("test.ts")!,
         ts.SymbolFlags.Variable
       )
-      .find((s) => s.getName() === 'x');
+      .find((s) => s.getName() === "x");
 
     const type = defineSymbol(varSymbol?.valueDeclaration!, checker);
     expect(dumpInferred(type, checker)).toMatchInlineSnapshot(`
       Object {
         "symbol": Array [
           Object {
-            "column": 28,
+            "column": 14,
             "fileName": "test.ts",
-            "kind": "TypeLiteral",
-            "line": 2,
-            "name": "{ foo: string }",
-            "path": ".ExplicitType",
+            "kind": "VariableDeclaration",
+            "line": 3,
+            "name": "x: ExplicitType = { foo: undefined }",
+            "path": ".x",
           },
         ],
         "type": "ExplicitType",
@@ -53,30 +53,30 @@ describe('infer variable declaration', () => {
       ]
     `);
   });
-  it('should pull variable declaration from initializer', () => {
+  it("should pull variable declaration from initializer", () => {
     const program = mockProgram({
-      'test.ts': `
+      "test.ts": `
         const x = { foo: "foo" };
       `,
     });
     const checker = program.getTypeChecker();
     const varSymbol = checker
       .getSymbolsInScope(
-        program.getSourceFile('test.ts')!,
+        program.getSourceFile("test.ts")!,
         ts.SymbolFlags.Value
       )
-      .find((s) => s.getName() === 'x');
+      .find((s) => s.getName() === "x");
 
     const type = defineSymbol(varSymbol?.valueDeclaration!, checker);
     expect(dumpInferred(type, checker)).toMatchInlineSnapshot(`
       Object {
         "symbol": Array [
           Object {
-            "column": 18,
+            "column": 14,
             "fileName": "test.ts",
-            "kind": "ObjectLiteralExpression",
+            "kind": "VariableDeclaration",
             "line": 2,
-            "name": "{ foo: \\"foo\\" }",
+            "name": "x = { foo: \\"foo\\" }",
             "path": ".x",
           },
         ],
