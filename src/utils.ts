@@ -99,6 +99,7 @@ export function namedPathToNode(
     ts.isObjectLiteralExpression(node) ||
     ts.isTaggedTemplateExpression(node) ||
     ts.isTemplateExpression(node) ||
+    ts.isClassExpression(node) ||
     ts.isTemplateSpan(node) ||
     //
     // Types

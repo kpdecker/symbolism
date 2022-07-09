@@ -29,12 +29,12 @@ describe('infer object literal types', () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 32,
+            "column": 28,
             "fileName": "test.ts",
-            "kind": "Parameter",
-            "line": 3,
-            "name": "bar: ExplicitType",
-            "path": ".x.[1]",
+            "kind": "TypeLiteral",
+            "line": 2,
+            "name": "{ foo: string }",
+            "path": ".ExplicitType",
           },
         ],
         "type": "ExplicitType",

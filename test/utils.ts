@@ -4,6 +4,17 @@ import { dumpSymbol } from '../src/symbols';
 import { defineSymbol } from '../src/definition-symbol/index';
 import { isIntrinsicType } from '../src/utils';
 
+export function testStatement(source: string) {
+  const program = mockProgram({
+    'test.ts': source + ';',
+  });
+  const checker = program.getTypeChecker();
+  const sourceFile = program.getSourceFile('test.ts')!;
+  const node = sourceFile.statements[0];
+
+  return dumpInferred(defineSymbol(node, checker)!, checker);
+}
+
 export function mockProgram(sourceFiles: Record<string, string>) {
   const host: ts.CompilerHost = {
     fileExists(fileName) {
