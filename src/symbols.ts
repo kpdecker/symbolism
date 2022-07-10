@@ -7,6 +7,7 @@ import { lineAndColumn } from "./coverage";
 import { getSymbolFromLanguageServices } from "./definition-symbol/language-services";
 import { defineSymbol } from "./definition-symbol/index";
 import { namedPathToNode } from "./path/index";
+import { logInfo, logVerbose } from "./logger";
 
 type SymbolTable = Map<ts.Symbol, Set<ts.Node>>;
 
@@ -23,6 +24,7 @@ export function parseSymbolTable(
 
   const checker = program.getTypeChecker();
   sourceFiles.forEach((sourceFile) => {
+    logInfo(`Parsing symbols in ${sourceFile.fileName}`);
     if (config.exclude(sourceFile.fileName)) {
       return;
     }
@@ -67,8 +69,7 @@ export function parseSymbolTable(
 
         const symbol = checker.getSymbolAtLocation(node);
         if (!symbol) {
-          // TODO: Put behind verbose logging
-          // console.error('No Symbol:', dumpNode(node, checker));
+          logVerbose("No Symbol:", dumpNode(node, checker));
           return;
         }
 
@@ -160,14 +161,6 @@ export function dumpSymbolTable(symbols: SymbolTable, checker: ts.TypeChecker) {
 
   symbols.forEach((symbolMap, symbol) => {
     const source = dumpSymbol(symbol, checker)![0];
-
-    // Filter for debugging
-    if (
-      source.kind === "EnumDeclaration" ||
-      source.kind === "ClassDeclaration"
-    ) {
-      return;
-    }
 
     symbolMap.forEach((node) => {
       ret.set(source, ret.get(source) || []);
