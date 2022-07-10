@@ -1,5 +1,7 @@
 import ts from "typescript";
-import { dumpNode } from "../symbols";
+import { NodeError } from "../error";
+import { logDebug, logVerbose } from "../logger";
+import { dumpNode, dumpSymbol } from "../symbols";
 import { getPropertySymbol, isArraySymbol, isErrorType } from "../utils";
 import { classOperators } from "./class";
 import { functionOperators } from "./function";
@@ -268,11 +270,18 @@ const nodeHandlers: Record<ts.SyntaxKind, DefinitionOperation> = {
 };
 
 export function defineSymbol(node: ts.Node, checker: ts.TypeChecker) {
-  console.log("defineSymbol", ts.SyntaxKind[node.kind]); //, dumpNode(node, checker));
+  logDebug("defineSymbol", ts.SyntaxKind[node.kind]); //, dumpNode(node, checker));
 
-  const nodeHandler = nodeHandlers[node.kind];
-  if (nodeHandler) {
-    return nodeHandler(node, checker);
+  try {
+    const nodeHandler = nodeHandlers[node.kind];
+    if (nodeHandler) {
+      return nodeHandler(node, checker);
+    }
+  } catch (err) {
+    if ((err as NodeError).isNodeError) {
+      throw err;
+    }
+    throw new NodeError(`Error in defineSymbol`, node, checker, err as Error);
   }
 
   console.warn("failed to infer type", dumpNode(node, checker));
