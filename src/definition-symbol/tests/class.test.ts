@@ -692,4 +692,26 @@ describe("classes", () => {
       }
     `);
   });
+  it("should handle override", () => {
+    const overrideNodes = findNodesInTree(
+      sourceFile,
+      (node): node is ts.Node => node.kind === ts.SyntaxKind.ThisKeyword
+    );
+    expect(dumpInferred(defineSymbol(overrideNodes[0], checker), checker))
+      .toMatchInlineSnapshot(`
+      Object {
+        "symbol": Array [
+          Object {
+            "column": 4,
+            "fileName": "test.tsx",
+            "kind": "ClassDeclaration",
+            "line": 3,
+            "name": "class DeclaredClass implements Foo {",
+            "path": ".DeclaredClass",
+          },
+        ],
+        "type": "typeof DeclaredClass",
+      }
+    `);
+  });
 });
