@@ -1,17 +1,20 @@
-import ts, { findAncestor } from 'typescript';
+import ts, { findAncestor } from "typescript";
+import { defineSymbol } from "./index";
 import {
   contextualTypeAndSymbol,
   directTypeAndSymbol,
   invariantNode,
   nodeOperators,
-} from './utils';
+} from "./utils";
 
 export const functionOperators = nodeOperators({
   [ts.SyntaxKind.CallExpression]: defineCallReturn,
   [ts.SyntaxKind.NewExpression]: defineCallReturn,
-  // case ts.SyntaxKind.FunctionExpression:
   [ts.SyntaxKind.ArrowFunction]: defineCallReturn,
 
+  [ts.SyntaxKind.FunctionExpression](node, checker) {
+    return defineSymbol(node.parent, checker);
+  },
   [ts.SyntaxKind.FunctionDeclaration]: directTypeAndSymbol,
   [ts.SyntaxKind.Parameter](node, checker) {
     invariantNode(node, ts.isParameter);
@@ -23,7 +26,7 @@ export const functionOperators = nodeOperators({
   },
 
   [ts.SyntaxKind.Block]: () => undefined,
-  // case ts.SyntaxKind.YieldExpression:
+  [ts.SyntaxKind.YieldExpression]: directTypeAndSymbol,
   [ts.SyntaxKind.ReturnStatement]: handleReturnStatement,
 });
 

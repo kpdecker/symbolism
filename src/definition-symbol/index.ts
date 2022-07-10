@@ -20,7 +20,7 @@ function nopHandler() {
 }
 
 // TODO: Remove partial once fully spec
-const nodeHandlers: Partial<Record<ts.SyntaxKind, DefinitionOperation>> = {
+const nodeHandlers: Record<ts.SyntaxKind, DefinitionOperation> = {
   [ts.SyntaxKind.SourceFile]: directTypeAndSymbol,
 
   // Low level tokens
@@ -308,21 +308,7 @@ function defineIdentifier(node: ts.Node, checker: ts.TypeChecker) {
       return defineSymbol(node.parent, checker);
     }
 
-    // Use the identifier directly
-    // TODO: We want to remove this. Making an explicit list for now to identify missed cases
-    if (
-      ts.isTypeOfExpression(node.parent) ||
-      ts.isReturnStatement(node.parent) ||
-      ts.isJsxSpreadAttribute(node.parent) ||
-      (ts.isArrowFunction(node.parent) && node.parent.body === node)
-    ) {
-      return directTypeAndSymbol(node, checker);
-    }
-
     return directTypeAndSymbol(node, checker);
-
-    console.error('failed to infer identifier', dumpNode(node.parent, checker));
-    throw new Error('failed to infer identifier');
   }
 }
 
@@ -431,15 +417,5 @@ function defineTaggedTemplate(node: ts.Node, checker: ts.TypeChecker) {
         };
       }
     }
-  }
-}
-
-function definePassThrough(node: ts.Node, checker: ts.TypeChecker) {
-  if (
-    ts.isTypeOfExpression(node) ||
-    ts.isConditionalExpression(node) ||
-    ts.isAsExpression(node)
-  ) {
-    return defineSymbol(node.parent, checker);
   }
 }
