@@ -1,5 +1,5 @@
 import invariant from "tiny-invariant";
-import ts from "typescript";
+import ts, { findAncestor } from "typescript";
 import { getPropertySymbol } from "../utils";
 import { defineSymbol } from "./index";
 import {
@@ -14,7 +14,27 @@ export const classOperators = nodeOperators({
     return directTypeAndSymbol(node.parent, checker);
   },
   [ts.SyntaxKind.SuperKeyword]: directTypeAndSymbol,
-  [ts.SyntaxKind.ThisKeyword]: directTypeAndSymbol,
+  [ts.SyntaxKind.ThisKeyword](node, checker) {
+    // Internal API: Couldn't find any other way to resolve proper type
+    // consistently.
+    const thisType = (checker as any).tryGetThisTypeAt(node);
+    if (thisType) {
+      return {
+        symbol: thisType.symbol,
+        type: thisType,
+      };
+    }
+
+    const classNode = findAncestor(node, ts.isClassLike);
+
+    // Hit the container class directly if we are able to.
+    // The built in resolution can be hit or miss on what is returned.
+    if (classNode) {
+      return defineSymbol(classNode, checker);
+    }
+
+    return directTypeAndSymbol(node, checker);
+  },
 
   [ts.SyntaxKind.HeritageClause]: directTypeAndSymbol, // extends/implements
   [ts.SyntaxKind.ExpressionWithTypeArguments]: directTypeAndSymbol,

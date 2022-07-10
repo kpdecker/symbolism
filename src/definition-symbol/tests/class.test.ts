@@ -6,7 +6,7 @@ import {
   getPropertyValueType,
   mockProgram,
 } from "../../../test/utils";
-import { dumpSymbol } from "../../symbols";
+import { dumpNode, dumpSymbol } from "../../symbols";
 import { defineSymbol } from "../index";
 
 const program = mockProgram({
@@ -58,6 +58,10 @@ const program = mockProgram({
             this.propInit;
       }
     };
+
+    function thisType(this: DeclaredClass) {
+      return this.propParent;
+    }
 
     new Expression(1, 2);
     new DeclaredClass();
@@ -690,12 +694,14 @@ describe("classes", () => {
       }
     `);
   });
-  it("should handle override", () => {
-    const overrideNodes = findNodesInTree(
+  it("should handle this", () => {
+    const thisNodes = findNodesInTree(
       sourceFile,
       (node): node is ts.Node => node.kind === ts.SyntaxKind.ThisKeyword
     );
-    expect(dumpInferred(defineSymbol(overrideNodes[0], checker), checker))
+
+    // Access in declaration class
+    expect(dumpInferred(defineSymbol(thisNodes[0], checker), checker))
       .toMatchInlineSnapshot(`
       Object {
         "symbol": Array [
@@ -708,7 +714,77 @@ describe("classes", () => {
             "path": "DeclaredClass",
           },
         ],
-        "type": "typeof DeclaredClass",
+        "type": "this",
+      }
+    `);
+
+    // Access of parent in subclass
+    expect(dumpInferred(defineSymbol(thisNodes[2], checker), checker))
+      .toMatchInlineSnapshot(`
+      Object {
+        "symbol": Array [
+          Object {
+            "column": 23,
+            "fileName": "test.tsx",
+            "kind": "ClassExpression",
+            "line": 28,
+            "name": "class extends DeclaredClass {",
+            "path": "Expression",
+          },
+        ],
+        "type": "this",
+      }
+    `);
+
+    // Access of self in subclass
+    expect(dumpInferred(defineSymbol(thisNodes[3], checker), checker))
+      .toMatchInlineSnapshot(`
+      Object {
+        "symbol": Array [
+          Object {
+            "column": 23,
+            "fileName": "test.tsx",
+            "kind": "ClassExpression",
+            "line": 28,
+            "name": "class extends DeclaredClass {",
+            "path": "Expression",
+          },
+        ],
+        "type": "this",
+      }
+    `);
+
+    // Via this type
+    expect(dumpInferred(defineSymbol(thisNodes[8], checker), checker))
+      .toMatchInlineSnapshot(`
+      Object {
+        "symbol": Array [
+          Object {
+            "column": 4,
+            "fileName": "test.tsx",
+            "kind": "ClassDeclaration",
+            "line": 3,
+            "name": "class DeclaredClass implements Foo {",
+            "path": "DeclaredClass",
+          },
+        ],
+        "type": "DeclaredClass",
+      }
+    `);
+    expect(dumpInferred(defineSymbol(thisNodes[8].parent, checker), checker))
+      .toMatchInlineSnapshot(`
+      Object {
+        "symbol": Array [
+          Object {
+            "column": 6,
+            "fileName": "test.tsx",
+            "kind": "PropertyDeclaration",
+            "line": 5,
+            "name": "propParent: string;",
+            "path": "DeclaredClass.propParent",
+          },
+        ],
+        "type": "string",
       }
     `);
   });
