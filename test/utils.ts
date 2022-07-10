@@ -1,18 +1,29 @@
-import invariant from 'tiny-invariant';
-import ts from 'typescript';
-import { dumpSymbol } from '../src/symbols';
-import { defineSymbol } from '../src/definition-symbol/index';
-import { isIntrinsicType } from '../src/utils';
+import invariant from "tiny-invariant";
+import ts from "typescript";
+import { dumpSymbol } from "../src/symbols";
+import { defineSymbol } from "../src/definition-symbol/index";
+import { isIntrinsicType } from "../src/utils";
 
 export function testStatement(source: string) {
   const program = mockProgram({
-    'test.ts': source + ';',
+    "test.ts": source + ";",
   });
   const checker = program.getTypeChecker();
-  const sourceFile = program.getSourceFile('test.ts')!;
+  const sourceFile = program.getSourceFile("test.ts")!;
   const node = sourceFile.statements[0];
 
   return dumpInferred(defineSymbol(node, checker)!, checker);
+}
+
+export function testExpression(source: string) {
+  const program = mockProgram({
+    "test.ts": "var bar = " + source + ";",
+  });
+  const checker = program.getTypeChecker();
+  const sourceFile = program.getSourceFile("test.ts")!;
+  const node = findNodeInTree(sourceFile, ts.isVariableDeclaration);
+
+  return dumpInferred(defineSymbol(node?.initializer!, checker)!, checker);
 }
 
 export function mockProgram(sourceFiles: Record<string, string>) {
@@ -24,12 +35,12 @@ export function mockProgram(sourceFiles: Record<string, string>) {
       return sourceFiles[fileName] || ts.sys.readFile(fileName);
     },
     writeFile(fileName, text) {
-      throw new Error('NOT IMPLEMENTED');
+      throw new Error("NOT IMPLEMENTED");
     },
     getSourceFile(fileName) {
       invariant(
         host.fileExists(fileName),
-        'getSourceFile: file not found: ' + fileName
+        "getSourceFile: file not found: " + fileName
       );
       return ts.createSourceFile(
         fileName,
@@ -48,7 +59,7 @@ export function mockProgram(sourceFiles: Record<string, string>) {
       return true;
     },
     getNewLine() {
-      return '\n';
+      return "\n";
     },
   };
 
@@ -68,8 +79,8 @@ export function dumpInferred(
   }
   const symbol = dumpSymbol(inferred!.symbol, checker);
   symbol.forEach((x) => {
-    x.fileName = x.fileName.includes('node_modules')
-      ? x.fileName.replace(/.*\/node_modules\//, '')
+    x.fileName = x.fileName.includes("node_modules")
+      ? x.fileName.replace(/.*\/node_modules\//, "")
       : x.fileName;
   });
   return {
