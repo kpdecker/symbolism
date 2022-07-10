@@ -201,7 +201,11 @@ export function dumpSymbol(
   return declarations.map((node) => dumpNode(node, checker));
 }
 
-export function dumpNode(node: ts.Node, checker: ts.TypeChecker) {
+export function dumpNode(
+  node: ts.Node,
+  checker: ts.TypeChecker,
+  omitPath = false
+) {
   const sourceFile = node.getSourceFile();
   const fileName = sourceFile.fileName;
   const lineAndChar = sourceFile.getLineAndCharacterOfPosition(node.getStart());
@@ -209,7 +213,7 @@ export function dumpNode(node: ts.Node, checker: ts.TypeChecker) {
   const ret = {
     kind: ts.SyntaxKind[node.kind],
     name: "",
-    path: namedPathToNode(node, checker),
+    path: !omitPath ? namedPathToNode(node, checker) : "",
     fileName,
     ...lineAndColumn(lineAndChar),
   };
