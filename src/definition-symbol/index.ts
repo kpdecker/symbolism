@@ -139,7 +139,7 @@ const nodeHandlers: Partial<Record<ts.SyntaxKind, DefinitionOperation>> = {
   [ts.SyntaxKind.ForInStatement]: nopHandler,
   [ts.SyntaxKind.ForOfStatement]: nopHandler,
   [ts.SyntaxKind.LabeledStatement]: nopHandler,
-  [ts.SyntaxKind.ThrowStatement]: (node, checker) => {
+  [ts.SyntaxKind.ThrowStatement](node, checker) {
     invariantNode(node, ts.isThrowStatement);
     return defineSymbol(node.expression, checker);
   },
@@ -165,8 +165,24 @@ const nodeHandlers: Partial<Record<ts.SyntaxKind, DefinitionOperation>> = {
   [ts.SyntaxKind.VariableDeclaration]: defineVariableDeclaration,
   [ts.SyntaxKind.VariableDeclarationList]: directTypeAndSymbol,
 
-  // case ts.SyntaxKind.EnumDeclaration:
-  // case ts.SyntaxKind.EnumMember:
+  [ts.SyntaxKind.EnumDeclaration](node, checker) {
+    invariantNode(node, ts.isEnumDeclaration);
+    return directTypeAndSymbol(node.name, checker);
+  },
+  [ts.SyntaxKind.EnumMember](node, checker) {
+    invariantNode(node, ts.isEnumMember);
+    const parentDefinition = defineSymbol(node.parent, checker);
+    const type = parentDefinition?.type;
+    debugger;
+    if (!type) {
+      return directTypeAndSymbol(node.name, checker);
+    }
+
+    return getPropertySymbol(node, type, checker, node.name.getText());
+  },
+  [ts.SyntaxKind.SyntaxList](node, checker) {
+    return defineSymbol(node.parent, checker);
+  },
 
   // Type Declarations
   [ts.SyntaxKind.ConstructSignature]: directTypeAndSymbol,
@@ -235,7 +251,6 @@ const nodeHandlers: Partial<Record<ts.SyntaxKind, DefinitionOperation>> = {
   [ts.SyntaxKind.Bundle]: nopHandler,
   [ts.SyntaxKind.UnparsedSource]: nopHandler,
   [ts.SyntaxKind.InputFiles]: nopHandler,
-  [ts.SyntaxKind.SyntaxList]: nopHandler,
   [ts.SyntaxKind.NotEmittedStatement]: nopHandler,
   [ts.SyntaxKind.PartiallyEmittedExpression]: nopHandler,
   [ts.SyntaxKind.SyntheticExpression]: nopHandler,
@@ -283,6 +298,7 @@ function defineIdentifier(node: ts.Node, checker: ts.TypeChecker) {
       ts.isBindingElement(node.parent) ||
       ts.isPropertyAssignment(node.parent) ||
       ts.isPropertyAccessExpression(node.parent) ||
+      ts.isEnumMember(node.parent) ||
       ts.isBinaryExpression(node.parent) ||
       ts.isConditionalExpression(node.parent) ||
       ts.isVariableDeclaration(node.parent) ||
