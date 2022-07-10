@@ -22,7 +22,7 @@ export const functionOperators = nodeOperators({
     return directTypeAndSymbol(node, checker);
   },
 
-  // ts.SyntaxKind.Block:
+  [ts.SyntaxKind.Block]: () => undefined,
   // case ts.SyntaxKind.YieldExpression:
   [ts.SyntaxKind.ReturnStatement]: handleReturnStatement,
 });

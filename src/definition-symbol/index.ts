@@ -99,15 +99,15 @@ const nodeHandlers: Partial<Record<ts.SyntaxKind, DefinitionOperation>> = {
     invariantNode(node, ts.isExpressionStatement);
     return defineSymbol(node.expression, checker);
   },
-  [ts.SyntaxKind.EmptyStatement]: directTypeAndSymbol,
-  // case ts.SyntaxKind.VariableStatement:
-  [ts.SyntaxKind.IfStatement]: directTypeAndSymbol,
-  [ts.SyntaxKind.DoStatement]: directTypeAndSymbol,
-  [ts.SyntaxKind.WhileStatement]: directTypeAndSymbol,
-  // case ts.SyntaxKind.ForStatement:
-  // case ts.SyntaxKind.ForInStatement:
-  // case ts.SyntaxKind.ForOfStatement:
-  // case ts.SyntaxKind.LabeledStatement:
+  [ts.SyntaxKind.EmptyStatement]: nopHandler,
+  [ts.SyntaxKind.VariableStatement]: nopHandler,
+  [ts.SyntaxKind.IfStatement]: nopHandler,
+  [ts.SyntaxKind.DoStatement]: nopHandler,
+  [ts.SyntaxKind.WhileStatement]: nopHandler,
+  [ts.SyntaxKind.ForStatement]: nopHandler,
+  [ts.SyntaxKind.ForInStatement]: nopHandler,
+  [ts.SyntaxKind.ForOfStatement]: nopHandler,
+  [ts.SyntaxKind.LabeledStatement]: nopHandler,
   [ts.SyntaxKind.ThrowStatement]: (node, checker) => {
     invariantNode(node, ts.isThrowStatement);
     return defineSymbol(node.expression, checker);
@@ -116,13 +116,13 @@ const nodeHandlers: Partial<Record<ts.SyntaxKind, DefinitionOperation>> = {
   [ts.SyntaxKind.BreakStatement]: nopHandler,
   [ts.SyntaxKind.WithStatement]: nopHandler,
   [ts.SyntaxKind.TryStatement]: nopHandler,
-  // [ts.SyntaxKind.CatchClause]:
+  [ts.SyntaxKind.CatchClause]: nopHandler,
   [ts.SyntaxKind.DebuggerStatement]: nopHandler,
 
-  // [ts.SyntaxKind.SwitchStatement]: nopHandler,
-  // case ts.SyntaxKind.CaseClause:
-  // case ts.SyntaxKind.DefaultClause:
-  // case ts.SyntaxKind.CaseBlock:
+  [ts.SyntaxKind.SwitchStatement]: nopHandler,
+  [ts.SyntaxKind.CaseClause]: nopHandler,
+  [ts.SyntaxKind.DefaultClause]: nopHandler,
+  [ts.SyntaxKind.CaseBlock]: nopHandler,
 
   // Declarations
   // case ts.SyntaxKind.Decorator:
