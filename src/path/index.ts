@@ -1,4 +1,4 @@
-import ts from "typescript";
+import ts, { isMappedTypeNode, isTypeOfExpression } from "typescript";
 import {
   literalText,
   nameWithParent,
@@ -12,8 +12,14 @@ import { jsDocHandlers } from "./jsdoc";
 import { jsxPathHandlers } from "./jsx";
 import { tokenOperators } from "./tokens";
 import { invariantNode, isNamedDeclaration } from "../definition-symbol/utils";
+import { dumpNode } from "../symbols";
+import { NodeError } from "../error";
 
-const handlePropertyAccess: PathHandler = ({ node, getParentPath }) => {
+const handlePropertyAccess: PathHandler = ({
+  node,
+  checker,
+  getParentPath,
+}) => {
   invariantNode(
     node,
     (node): node is ts.PropertyAccessExpression | ts.ElementAccessExpression =>
@@ -35,8 +41,16 @@ const handlePropertyAccess: PathHandler = ({ node, getParentPath }) => {
         "." +
         node.argumentExpression.getText()
       );
+    } else if (ts.isParenthesizedExpression(node)) {
+      return resolvePropertyAccessDownward(node.expression);
+    } else if (ts.isAsExpression(node)) {
+      return resolvePropertyAccessDownward(node.expression);
+    } else {
+      // Unknown node type i.e.
+      //    (foo.push = foo).l
+      // Complicated expressions likely won't make sense for paths anyway.
+      return getParentPath() + ".unknownProp";
     }
-    throw new Error("Unexpected node type");
   }
 
   return getParentPath() + "." + resolvePropertyAccessDownward(node);
@@ -138,7 +152,7 @@ const nodePathHandlers: Record<ts.SyntaxKind, PathHandler> = {
   [ts.SyntaxKind.CaseBlock]: skipNode,
 
   // Declarations
-  [ts.SyntaxKind.Decorator]: nameWithParent,
+  [ts.SyntaxKind.Decorator]: skipNode,
 
   [ts.SyntaxKind.ObjectBindingPattern]: skipNode,
   [ts.SyntaxKind.ArrayBindingPattern]: skipNode,
@@ -152,56 +166,58 @@ const nodePathHandlers: Record<ts.SyntaxKind, PathHandler> = {
   [ts.SyntaxKind.SyntaxList]: skipNode,
 
   // Type Declarations
-  [ts.SyntaxKind.ConstructSignature]: nameWithParent,
-  [ts.SyntaxKind.IndexSignature]: nameWithParent,
-  [ts.SyntaxKind.TypePredicate]: nameWithParent,
-  [ts.SyntaxKind.TypeReference]: nameWithParent,
+  [ts.SyntaxKind.ConstructSignature]: ({ getParentPath }) =>
+    getParentPath() + "()",
+  [ts.SyntaxKind.IndexSignature]: ({ getParentPath }) =>
+    getParentPath() + ".index",
+  [ts.SyntaxKind.TypePredicate]: skipNode,
+  [ts.SyntaxKind.TypeReference]: skipNode,
   [ts.SyntaxKind.FunctionType]: nameWithParent,
   [ts.SyntaxKind.ConstructorType]: nameWithParent,
   [ts.SyntaxKind.TypeQuery]: skipNode,
   [ts.SyntaxKind.TypeLiteral]: skipNode,
   [ts.SyntaxKind.ArrayType]: skipNode,
-  [ts.SyntaxKind.TupleType]: nameWithParent,
-  [ts.SyntaxKind.OptionalType]: nameWithParent,
-  [ts.SyntaxKind.RestType]: nameWithParent,
-  [ts.SyntaxKind.UnionType]: nameWithParent,
-  [ts.SyntaxKind.IntersectionType]: nameWithParent,
-  [ts.SyntaxKind.ConditionalType]: nameWithParent,
+  [ts.SyntaxKind.TupleType]: skipNode,
+  [ts.SyntaxKind.OptionalType]: skipNode,
+  [ts.SyntaxKind.RestType]: skipNode,
+  [ts.SyntaxKind.UnionType]: skipNode,
+  [ts.SyntaxKind.IntersectionType]: skipNode,
+  [ts.SyntaxKind.ConditionalType]: skipNode,
   [ts.SyntaxKind.InferType]: nameWithParent,
   [ts.SyntaxKind.ParenthesizedType]: skipNode,
-  [ts.SyntaxKind.ThisType]: nameWithParent,
-  [ts.SyntaxKind.TypeOperator]: nameWithParent,
-  [ts.SyntaxKind.IndexedAccessType]: nameWithParent,
-  [ts.SyntaxKind.MappedType]: nameWithParent,
-  [ts.SyntaxKind.LiteralType]: literalText,
+  [ts.SyntaxKind.ThisType]: ({ getParentPath }) => getParentPath() + ".this",
+  [ts.SyntaxKind.TypeOperator]: skipNode,
+  [ts.SyntaxKind.IndexedAccessType]: skipNode,
+  [ts.SyntaxKind.MappedType]: skipNode,
+  [ts.SyntaxKind.LiteralType]: skipNode,
   [ts.SyntaxKind.NamedTupleMember]: nameWithParent,
-  [ts.SyntaxKind.TemplateLiteralType]: nameWithParent,
-  [ts.SyntaxKind.TemplateLiteralTypeSpan]: nameWithParent,
+  [ts.SyntaxKind.TemplateLiteralType]: skipNode,
+  [ts.SyntaxKind.TemplateLiteralTypeSpan]: skipNode,
   [ts.SyntaxKind.InterfaceDeclaration]: nameWithParent,
   [ts.SyntaxKind.TypeAliasDeclaration]: nameWithParent,
   [ts.SyntaxKind.ModuleDeclaration]: nameWithParent,
   [ts.SyntaxKind.ModuleBlock]: skipNode,
-  [ts.SyntaxKind.TypeOfExpression]: nameWithParent,
+  [ts.SyntaxKind.TypeOfExpression]: skipNode,
   [ts.SyntaxKind.CallSignature]: nameWithParent,
   [ts.SyntaxKind.MethodSignature]: nameWithParent,
   [ts.SyntaxKind.TypeParameter]: nameWithParent,
 
   // Import/Export
-  [ts.SyntaxKind.ImportType]: nameWithParent,
+  [ts.SyntaxKind.ImportType]: skipNode,
   [ts.SyntaxKind.NamespaceExportDeclaration]: nameWithParent,
   [ts.SyntaxKind.ImportEqualsDeclaration]: nameWithParent,
-  [ts.SyntaxKind.ImportDeclaration]: nameWithParent,
-  [ts.SyntaxKind.ImportClause]: nameWithParent,
+  [ts.SyntaxKind.ImportDeclaration]: skipNode,
+  [ts.SyntaxKind.ImportClause]: skipNode,
   [ts.SyntaxKind.NamespaceImport]: nameWithParent,
-  [ts.SyntaxKind.NamedImports]: nameWithParent,
+  [ts.SyntaxKind.NamedImports]: skipNode,
   [ts.SyntaxKind.ImportSpecifier]: nameWithParent,
-  [ts.SyntaxKind.ExportAssignment]: nameWithParent,
-  [ts.SyntaxKind.ExportDeclaration]: nameWithParent,
-  [ts.SyntaxKind.NamedExports]: nameWithParent,
+  [ts.SyntaxKind.ExportAssignment]: skipNode,
+  [ts.SyntaxKind.ExportDeclaration]: skipNode,
+  [ts.SyntaxKind.NamedExports]: skipNode,
   [ts.SyntaxKind.NamespaceExport]: nameWithParent,
   [ts.SyntaxKind.ExportSpecifier]: nameWithParent,
   [ts.SyntaxKind.ExternalModuleReference]: nameWithParent,
-  [ts.SyntaxKind.ImportTypeAssertionContainer]: nameWithParent,
+  [ts.SyntaxKind.ImportTypeAssertionContainer]: skipNode,
   [ts.SyntaxKind.AssertClause]: skipNode,
   [ts.SyntaxKind.AssertEntry]: skipNode,
   [ts.SyntaxKind.MetaProperty]: skipNode, // import.foo
@@ -254,12 +270,20 @@ export function namedPathToNode(
     node = symbolDeclaration;
   }
 
-  // console.log("path!", ts.SyntaxKind[node.kind]);
-  const ret = nodePathHandlers[node.kind]({
-    node,
-    checker,
-    getPath,
-    getParentPath,
-  });
-  return ret.replace(/^\./, "");
+  try {
+    return nodePathHandlers[node.kind]({
+      node,
+      checker,
+      getPath,
+      getParentPath,
+    }).replace(/^\./, "");
+  } catch (err) {
+    if ((err as NodeError).isNodeError) {
+      throw err;
+    }
+
+    console.error(err);
+    console.error(dumpNode(node, checker, true));
+    throw new NodeError("Error in path", node, checker, err as Error);
+  }
 }

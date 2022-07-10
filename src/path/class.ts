@@ -3,8 +3,9 @@ import { nameWithParent, nopPath, pathHandler, skipNode } from "./handlers";
 
 export const classOperators = pathHandler({
   [ts.SyntaxKind.OverrideKeyword]: skipNode,
-  [ts.SyntaxKind.SuperKeyword]: nameWithParent,
-  [ts.SyntaxKind.ThisKeyword]: nameWithParent,
+  [ts.SyntaxKind.SuperKeyword]: ({ getParentPath }) =>
+    getParentPath() + ".super",
+  [ts.SyntaxKind.ThisKeyword]: ({ getParentPath }) => getParentPath() + ".this",
 
   [ts.SyntaxKind.HeritageClause]: nopPath, // extends/implements
   [ts.SyntaxKind.ExpressionWithTypeArguments]: skipNode,
