@@ -1,5 +1,5 @@
-import ts from 'typescript';
-import { directTypeAndSymbol, nodeOperators } from './utils';
+import ts from "typescript";
+import { directTypeAndSymbol, nodeOperators } from "./utils";
 
 export const jsDocHandlers = nodeOperators({
   [ts.SyntaxKind.JSDocTypeExpression]: directTypeAndSymbol,

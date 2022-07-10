@@ -1,12 +1,12 @@
-import ts, { findAncestor } from 'typescript';
-import invariant from 'tiny-invariant';
-import { getTokenAtPosition } from 'tsutils';
+import ts, { findAncestor } from "typescript";
+import invariant from "tiny-invariant";
+import { getTokenAtPosition } from "tsutils";
 
-import { Config } from './config';
-import { isIntrinsicType, namedPathToNode } from './utils';
-import { lineAndColumn } from './coverage';
-import { getSymbolFromLanguageServices } from './definition-symbol/language-services';
-import { defineSymbol } from './definition-symbol/index';
+import { Config } from "./config";
+import { isIntrinsicType, namedPathToNode } from "./utils";
+import { lineAndColumn } from "./coverage";
+import { getSymbolFromLanguageServices } from "./definition-symbol/language-services";
+import { defineSymbol } from "./definition-symbol/index";
 
 type SymbolTable = Map<ts.Symbol, Set<ts.Node>>;
 
@@ -79,7 +79,7 @@ export function parseSymbolTable(
 
         const symbolDeclaration =
           symbol.valueDeclaration || symbol.declarations?.[0];
-        invariant(symbolDeclaration, 'No declaration for symbol');
+        invariant(symbolDeclaration, "No declaration for symbol");
 
         const type = checker.getTypeAtLocation(node);
 
@@ -163,8 +163,8 @@ export function dumpSymbolTable(symbols: SymbolTable, checker: ts.TypeChecker) {
 
     // Filter for debugging
     if (
-      source.kind === 'EnumDeclaration' ||
-      source.kind === 'ClassDeclaration'
+      source.kind === "EnumDeclaration" ||
+      source.kind === "ClassDeclaration"
     ) {
       return;
     }
@@ -193,9 +193,9 @@ export function dumpSymbol(
   ) {
     return [
       {
-        kind: 'keyword',
+        kind: "keyword",
         name: symbol.getName(),
-        fileName: 'intrinsic',
+        fileName: "intrinsic",
         path: symbol.getName(),
         line: 1,
         column: 1,
@@ -203,7 +203,7 @@ export function dumpSymbol(
     ];
   }
 
-  invariant(declarations.length, 'Missing declaration: ' + symbol.getName());
+  invariant(declarations.length, "Missing declaration: " + symbol.getName());
 
   return declarations.map((node) => dumpNode(node, checker));
 }
@@ -215,7 +215,7 @@ export function dumpNode(node: ts.Node, checker: ts.TypeChecker) {
 
   const ret = {
     kind: ts.SyntaxKind[node.kind],
-    name: '',
+    name: "",
     path: namedPathToNode(node, checker),
     fileName,
     ...lineAndColumn(lineAndChar),
@@ -239,7 +239,7 @@ export function dumpNode(node: ts.Node, checker: ts.TypeChecker) {
 
       name =
         declaration.name.getText() +
-        ' ' +
+        " " +
         (checker.getSymbolAtLocation(node.parent.parent.parent) &&
           checker.getFullyQualifiedName(
             checker.getSymbolAtLocation(node.parent.parent.parent)!

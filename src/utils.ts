@@ -1,4 +1,4 @@
-import ts from 'typescript';
+import ts from "typescript";
 
 export function isArraySymbol(symbol: ts.Symbol): boolean {
   // const arraySymbol = checker
@@ -7,11 +7,11 @@ export function isArraySymbol(symbol: ts.Symbol): boolean {
 
   // return type.symbol === arraySymbol;
 
-  return symbol.getName() === 'Array';
+  return symbol.getName() === "Array";
 }
 
 export function isErrorType(type: ts.Type | undefined): boolean {
-  return (type as any)?.intrinsicName === 'error';
+  return (type as any)?.intrinsicName === "error";
 }
 
 const intrinsicTypes =
@@ -72,12 +72,12 @@ export function namedPathToNode(
 ): string {
   //
   if (ts.isSourceFile(node)) {
-    return '';
+    return "";
   }
 
   // Stop iterating when we reach a reference
   if (ts.isCallExpression(node) || ts.isBinaryExpression(node)) {
-    return '';
+    return "";
   }
 
   if (
@@ -110,9 +110,9 @@ export function namedPathToNode(
     return namedPathToNode(node.parent, checker, filter, node);
   }
 
-  let parentPath = '';
+  let parentPath = "";
   if (filter(node.parent)) {
-    parentPath = namedPathToNode(node.parent, checker, filter, node) + '.';
+    parentPath = namedPathToNode(node.parent, checker, filter, node) + ".";
   }
 
   // Avoid duplicate identifiers
@@ -122,7 +122,7 @@ export function namedPathToNode(
     }
   }
 
-  let name = '';
+  let name = "";
   const symbol = checker.getSymbolAtLocation(node);
   if (symbol) {
     name = symbol.name;
@@ -155,16 +155,16 @@ export function namedPathToNode(
   } else if (ts.isParameter(node)) {
     name = node.name.getText();
   } else if (ts.isArrayLiteralExpression(node) || ts.isArrayTypeNode(node)) {
-    name = '[]';
+    name = "[]";
   } else if (ts.isIfStatement(node)) {
-    name = 'if';
+    name = "if";
   } else if (ts.isJsxElement(node)) {
-    name = '<' + node.openingElement.tagName.getText() + '>';
+    name = "<" + node.openingElement.tagName.getText() + ">";
   } else if (ts.isTypeParameterDeclaration(node)) {
-    name = '<' + node.name.getText() + '>';
+    name = "<" + node.name.getText() + ">";
   } else {
     // TODO: Better naming here
-    name = ts.SyntaxKind[node.kind] + '(' + name + ')';
+    name = ts.SyntaxKind[node.kind] + "(" + name + ")";
   }
   // name = ts.SyntaxKind[node.kind] + '(' + name + ')';
 

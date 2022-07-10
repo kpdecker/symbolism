@@ -1,6 +1,6 @@
-import invariant from 'tiny-invariant';
-import { getTokenAtPosition } from 'tsutils';
-import ts from 'typescript';
+import invariant from "tiny-invariant";
+import { getTokenAtPosition } from "tsutils";
+import ts from "typescript";
 
 export function getSymbolFromLanguageServices(
   node: ts.Node,

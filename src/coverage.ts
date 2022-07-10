@@ -1,5 +1,5 @@
-import { readFileSync } from 'fs';
-import { LineAndCharacter } from 'typescript';
+import { readFileSync } from "fs";
+import { LineAndCharacter } from "typescript";
 
 export type LineAndColumn = { line: number; column: number };
 
@@ -14,7 +14,7 @@ export function lineAndColumn(lineAndChar: LineAndCharacter) {
 }
 
 export function parseCoverage(coveragePath: string) {
-  const rawCoverageJson = JSON.parse(readFileSync(coveragePath, 'utf8'));
+  const rawCoverageJson = JSON.parse(readFileSync(coveragePath, "utf8"));
   const coverageJson: Record</** filePath */ string, StatementCoverage[]> = {};
 
   Object.entries<any>(rawCoverageJson).forEach(

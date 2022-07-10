@@ -1,11 +1,11 @@
-import ts from 'typescript';
-import { dumpNode } from '../symbols';
-import { getPropertySymbol, isArraySymbol, isErrorType } from '../utils';
-import { classOperators } from './class';
-import { functionOperators } from './function';
-import { jsDocHandlers } from './jsdoc';
-import { jsxSymbolHandlers } from './jsx';
-import { tokenOperators } from './tokens';
+import ts from "typescript";
+import { dumpNode } from "../symbols";
+import { getPropertySymbol, isArraySymbol, isErrorType } from "../utils";
+import { classOperators } from "./class";
+import { functionOperators } from "./function";
+import { jsDocHandlers } from "./jsdoc";
+import { jsxSymbolHandlers } from "./jsx";
+import { tokenOperators } from "./tokens";
 import {
   contextualTypeAndSymbol,
   DefinitionOperation,
@@ -13,7 +13,7 @@ import {
   getArrayType,
   invariantNode,
   isNamedDeclaration,
-} from './utils';
+} from "./utils";
 
 function nopHandler() {
   return null;
@@ -268,16 +268,15 @@ const nodeHandlers: Record<ts.SyntaxKind, DefinitionOperation> = {
 };
 
 export function defineSymbol(node: ts.Node, checker: ts.TypeChecker) {
-  console.log('defineSymbol', ts.SyntaxKind[node.kind]); //, dumpNode(node, checker));
+  console.log("defineSymbol", ts.SyntaxKind[node.kind]); //, dumpNode(node, checker));
 
   const nodeHandler = nodeHandlers[node.kind];
   if (nodeHandler) {
     return nodeHandler(node, checker);
   }
 
-  console.warn('failed to infer type', dumpNode(node, checker));
-  throw new Error('failed to infer type');
-  // return checker.getTypeAtLocation(node);
+  console.warn("failed to infer type", dumpNode(node, checker));
+  invariantNode(node);
 }
 
 function defineIdentifier(node: ts.Node, checker: ts.TypeChecker) {
@@ -380,7 +379,7 @@ function defineBindingElement(node: ts.Node, checker: ts.TypeChecker) {
     const bindingPatternType = defineSymbol(bindingPattern, checker);
 
     const propertyName = ts.isArrayBindingPattern(bindingPattern)
-      ? bindingPattern.elements.indexOf(node) + ''
+      ? bindingPattern.elements.indexOf(node) + ""
       : (node.propertyName || node.name).getText();
 
     return getPropertySymbol(
@@ -399,9 +398,8 @@ function defineBindingElement(node: ts.Node, checker: ts.TypeChecker) {
     if (ts.isVariableDeclaration(node.parent) || ts.isParameter(node.parent)) {
       return defineSymbol(node.parent, checker);
     }
-    throw new Error(
-      'unhandled binding pattern: ' + SyntaxKind[node.parent.kind]
-    );
+
+    invariantNode(node.parent);
   }
 }
 

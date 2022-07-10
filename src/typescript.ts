@@ -1,6 +1,6 @@
-import { existsSync, readFileSync } from 'fs';
-import ts from 'typescript';
-import { Config } from './config';
+import { existsSync, readFileSync } from "fs";
+import ts from "typescript";
+import { Config } from "./config";
 
 export function initTypescript(config: Config) {
   const configPath = ts.findConfigFile(
@@ -19,17 +19,17 @@ export function initTypescript(config: Config) {
       ...ts.sys,
       onUnRecoverableConfigFileDiagnostic(diagnostic) {
         console.error(diagnostic);
-        throw new Error('Config load failed');
+        throw new Error("Config load failed");
       },
     }
   );
   if (!configFile?.options) {
-    throw new Error('Failed to attach compilerOptions');
+    throw new Error("Failed to attach compilerOptions");
   }
 
   const servicesHost: ts.LanguageServiceHost = {
     getScriptFileNames: () => config.entryPoints,
-    getScriptVersion: (fileName) => '1',
+    getScriptVersion: (fileName) => "1",
     getScriptSnapshot: (fileName) => {
       if (!existsSync(fileName)) {
         return undefined;
@@ -38,7 +38,7 @@ export function initTypescript(config: Config) {
       try {
         return ts.ScriptSnapshot.fromString(readFileSync(fileName).toString());
       } catch (e: any) {
-        throw new Error('Failed to read file ' + fileName + ': ' + e.message);
+        throw new Error("Failed to read file " + fileName + ": " + e.message);
       }
     },
     getCurrentDirectory: () => process.cwd(),

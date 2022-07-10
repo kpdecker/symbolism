@@ -1,5 +1,5 @@
-import ts from 'typescript';
-import { nodeOperators } from './utils';
+import ts from "typescript";
+import { nodeOperators } from "./utils";
 
 export const tokenOperators = nodeOperators({
   [ts.SyntaxKind.EndOfFileToken]: nopHandler,

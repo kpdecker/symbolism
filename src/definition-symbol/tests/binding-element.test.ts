@@ -1,18 +1,18 @@
-import ts from 'typescript';
+import ts from "typescript";
 import {
   dumpInferred,
   findNodeInTree,
   getPropertyValueType,
   mockProgram,
-} from '../../../test/utils';
-import { dumpSymbol } from '../../symbols';
-import { defineSymbol } from '../index';
+} from "../../../test/utils";
+import { dumpSymbol } from "../../symbols";
+import { defineSymbol } from "../index";
 
-describe('infer binding elements', () => {
-  describe('object literal', () => {
-    it('should pull object binding from variable', () => {
+describe("infer binding elements", () => {
+  describe("object literal", () => {
+    it("should pull object binding from variable", () => {
       const program = mockProgram({
-        'test.ts': `
+        "test.ts": `
         type ExplicitType = { foo: string };
         const x: ExplicitType = { foo: undefined };
         const { foo: y } = x;
@@ -21,10 +21,10 @@ describe('infer binding elements', () => {
       const checker = program.getTypeChecker();
       const varSymbol = checker
         .getSymbolsInScope(
-          program.getSourceFile('test.ts')!,
+          program.getSourceFile("test.ts")!,
           ts.SymbolFlags.Variable
         )
-        .find((s) => s.getName() === 'y');
+        .find((s) => s.getName() === "y");
 
       const type = defineSymbol(varSymbol?.valueDeclaration!, checker);
       expect(dumpInferred(type, checker)).toMatchInlineSnapshot(`
@@ -43,9 +43,9 @@ describe('infer binding elements', () => {
               }
           `);
     });
-    it('should pull object rest binding from variable', () => {
+    it("should pull object rest binding from variable", () => {
       const program = mockProgram({
-        'test.ts': `
+        "test.ts": `
         type ExplicitType = { foo: string };
         const x: ExplicitType = { foo: undefined };
         const { foo, ...y } = x;
@@ -54,10 +54,10 @@ describe('infer binding elements', () => {
       const checker = program.getTypeChecker();
       const varSymbol = checker
         .getSymbolsInScope(
-          program.getSourceFile('test.ts')!,
+          program.getSourceFile("test.ts")!,
           ts.SymbolFlags.Variable
         )
-        .find((s) => s.getName() === 'y');
+        .find((s) => s.getName() === "y");
 
       const type = defineSymbol(varSymbol?.valueDeclaration!, checker);
       expect(dumpInferred(type, checker)).toMatchInlineSnapshot(`
@@ -76,9 +76,9 @@ describe('infer binding elements', () => {
         }
       `);
     });
-    it('should pull object binding from function calls', () => {
+    it("should pull object binding from function calls", () => {
       const program = mockProgram({
-        'test.ts': `
+        "test.ts": `
         type ExplicitType = { foo: string };
         const x = (): ExplicitType => ({ foo: undefined });
         const { foo: y } = x();
@@ -87,10 +87,10 @@ describe('infer binding elements', () => {
       const checker = program.getTypeChecker();
       const varSymbol = checker
         .getSymbolsInScope(
-          program.getSourceFile('test.ts')!,
+          program.getSourceFile("test.ts")!,
           ts.SymbolFlags.Variable
         )
-        .find((s) => s.getName() === 'y');
+        .find((s) => s.getName() === "y");
 
       const type = defineSymbol(varSymbol?.valueDeclaration!, checker);
       expect(dumpInferred(type, checker)).toMatchInlineSnapshot(`
@@ -110,9 +110,9 @@ describe('infer binding elements', () => {
           `);
     });
 
-    it('should pull original variable from assignment', () => {
+    it("should pull original variable from assignment", () => {
       const program = mockProgram({
-        'test.ts': `
+        "test.ts": `
         type ExplicitType = { foo: string };
         const x: ExplicitType = { foo: undefined };
         let y;
@@ -122,10 +122,10 @@ describe('infer binding elements', () => {
       const checker = program.getTypeChecker();
       const varSymbol = checker
         .getSymbolsInScope(
-          program.getSourceFile('test.ts')!,
+          program.getSourceFile("test.ts")!,
           ts.SymbolFlags.Variable
         )
-        .find((s) => s.getName() === 'y');
+        .find((s) => s.getName() === "y");
 
       const inferred = defineSymbol(varSymbol?.valueDeclaration!, checker);
       expect(dumpInferred(inferred, checker)).toMatchInlineSnapshot(`
@@ -145,10 +145,10 @@ describe('infer binding elements', () => {
       `);
     });
   });
-  describe('array literals', () => {
-    it('should pull array binding from variable', () => {
+  describe("array literals", () => {
+    it("should pull array binding from variable", () => {
       const program = mockProgram({
-        'test.ts': `
+        "test.ts": `
         type ExplicitType = ({ foo: string })[];
         const x: ExplicitType = [{ foo: undefined }];
         const [y] = x;
@@ -157,10 +157,10 @@ describe('infer binding elements', () => {
       const checker = program.getTypeChecker();
       const varSymbol = checker
         .getSymbolsInScope(
-          program.getSourceFile('test.ts')!,
+          program.getSourceFile("test.ts")!,
           ts.SymbolFlags.Variable
         )
-        .find((s) => s.getName() === 'y');
+        .find((s) => s.getName() === "y");
 
       const inferred = defineSymbol(varSymbol?.valueDeclaration!, checker);
       expect(dumpInferred(inferred, checker)).toMatchInlineSnapshot(`
@@ -179,9 +179,9 @@ describe('infer binding elements', () => {
               }
           `);
     });
-    it('should pull array rest binding from variable', () => {
+    it("should pull array rest binding from variable", () => {
       const program = mockProgram({
-        'test.ts': `
+        "test.ts": `
         type ExplicitType = ({ foo: string })[];
         const x: ExplicitType = [{ foo: undefined }];
         const [...y] = x;
@@ -190,10 +190,10 @@ describe('infer binding elements', () => {
       const checker = program.getTypeChecker();
       const varSymbol = checker
         .getSymbolsInScope(
-          program.getSourceFile('test.ts')!,
+          program.getSourceFile("test.ts")!,
           ts.SymbolFlags.Variable
         )
-        .find((s) => s.getName() === 'y');
+        .find((s) => s.getName() === "y");
 
       const inferred = defineSymbol(varSymbol?.valueDeclaration!, checker);
       expect(dumpInferred(inferred, checker)).toMatchInlineSnapshot(`
@@ -212,9 +212,9 @@ describe('infer binding elements', () => {
               }
           `);
     });
-    it('should pull array binding from function calls', () => {
+    it("should pull array binding from function calls", () => {
       const program = mockProgram({
-        'test.ts': `
+        "test.ts": `
         type ExplicitType = ({ foo: string })[];
         const x = (): ExplicitType => [{ foo: undefined }];
         const [y] = x();
@@ -223,10 +223,10 @@ describe('infer binding elements', () => {
       const checker = program.getTypeChecker();
       const varSymbol = checker
         .getSymbolsInScope(
-          program.getSourceFile('test.ts')!,
+          program.getSourceFile("test.ts")!,
           ts.SymbolFlags.Variable
         )
-        .find((s) => s.getName() === 'y');
+        .find((s) => s.getName() === "y");
 
       const type = defineSymbol(varSymbol?.valueDeclaration!, checker);
       expect(dumpInferred(type, checker)).toMatchInlineSnapshot(`
@@ -246,9 +246,9 @@ describe('infer binding elements', () => {
           `);
     });
 
-    it('should pull original variable from assignment', () => {
+    it("should pull original variable from assignment", () => {
       const program = mockProgram({
-        'test.ts': `
+        "test.ts": `
         type ExplicitType = ({ foo: string })[];
         const x: ExplicitType = [{ foo: undefined }];
         let y;
@@ -258,10 +258,10 @@ describe('infer binding elements', () => {
       const checker = program.getTypeChecker();
       const varSymbol = checker
         .getSymbolsInScope(
-          program.getSourceFile('test.ts')!,
+          program.getSourceFile("test.ts")!,
           ts.SymbolFlags.Variable
         )
-        .find((s) => s.getName() === 'y');
+        .find((s) => s.getName() === "y");
 
       const inferred = defineSymbol(varSymbol?.valueDeclaration!, checker);
       expect(dumpInferred(inferred, checker)).toMatchInlineSnapshot(`

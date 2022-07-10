@@ -1,8 +1,8 @@
-import { testStatement } from '../../../test/utils';
+import { testStatement } from "../../../test/utils";
 
-describe('infer intrinsic types', () => {
-  it('should pull undefined', () => {
-    expect(testStatement('undefined')).toMatchInlineSnapshot(`
+describe("infer intrinsic types", () => {
+  it("should pull undefined", () => {
+    expect(testStatement("undefined")).toMatchInlineSnapshot(`
       Object {
         "symbol": Array [
           Object {
@@ -18,43 +18,43 @@ describe('infer intrinsic types', () => {
       }
     `);
   });
-  it('should pull void', () => {
-    expect(testStatement('void')).toMatchInlineSnapshot(`
+  it("should pull void", () => {
+    expect(testStatement("void")).toMatchInlineSnapshot(`
       Object {
         "symbol": Array [],
         "type": "undefined",
       }
     `);
-    expect(testStatement('void 0')).toMatchInlineSnapshot(`
+    expect(testStatement("void 0")).toMatchInlineSnapshot(`
       Object {
         "symbol": Array [],
         "type": "undefined",
       }
     `);
   });
-  it('should pull null', () => {
-    expect(testStatement('null')).toMatchInlineSnapshot(`
+  it("should pull null", () => {
+    expect(testStatement("null")).toMatchInlineSnapshot(`
       Object {
         "symbol": Array [],
         "type": "null",
       }
     `);
   });
-  it('should pull booleans', () => {
-    expect(testStatement('true')).toMatchInlineSnapshot(`
+  it("should pull booleans", () => {
+    expect(testStatement("true")).toMatchInlineSnapshot(`
       Object {
         "symbol": Array [],
         "type": "true",
       }
     `);
-    expect(testStatement('false')).toMatchInlineSnapshot(`
+    expect(testStatement("false")).toMatchInlineSnapshot(`
       Object {
         "symbol": Array [],
         "type": "false",
       }
     `);
   });
-  it('should pull strings', () => {
+  it("should pull strings", () => {
     expect(testStatement('"string"')).toMatchInlineSnapshot(`
       Object {
         "symbol": Array [],
@@ -62,20 +62,20 @@ describe('infer intrinsic types', () => {
       }
     `);
   });
-  it('should pull numbers', () => {
-    expect(testStatement('1')).toMatchInlineSnapshot(`
+  it("should pull numbers", () => {
+    expect(testStatement("1")).toMatchInlineSnapshot(`
       Object {
         "symbol": Array [],
         "type": "1",
       }
     `);
-    expect(testStatement('1.1')).toMatchInlineSnapshot(`
+    expect(testStatement("1.1")).toMatchInlineSnapshot(`
       Object {
         "symbol": Array [],
         "type": "1.1",
       }
     `);
-    expect(testStatement('NaN')).toMatchInlineSnapshot(`
+    expect(testStatement("NaN")).toMatchInlineSnapshot(`
       Object {
         "symbol": Array [
           Object {
@@ -90,7 +90,7 @@ describe('infer intrinsic types', () => {
         "type": "number",
       }
     `);
-    expect(testStatement('Infinity')).toMatchInlineSnapshot(`
+    expect(testStatement("Infinity")).toMatchInlineSnapshot(`
       Object {
         "symbol": Array [
           Object {
@@ -105,19 +105,19 @@ describe('infer intrinsic types', () => {
         "type": "number",
       }
     `);
-    expect(testStatement('-Infinity')).toMatchInlineSnapshot(`
+    expect(testStatement("-Infinity")).toMatchInlineSnapshot(`
       Object {
         "symbol": Array [],
         "type": "number",
       }
     `);
   });
-  it.skip('should pull symbols', () => {
+  it.skip("should pull symbols", () => {
     // TODO: Is this what we want?
     expect(testStatement('Symbol("foo")')).toMatchInlineSnapshot();
   });
-  it('should pull regexp literal', () => {
-    expect(testStatement('/foo/')).toMatchInlineSnapshot(`
+  it("should pull regexp literal", () => {
+    expect(testStatement("/foo/")).toMatchInlineSnapshot(`
       Object {
         "symbol": Array [
           Object {
@@ -142,15 +142,15 @@ describe('infer intrinsic types', () => {
       }
     `);
   });
-  it('should pull template literal', () => {
-    expect(testStatement('`bar`')).toMatchInlineSnapshot(`
+  it("should pull template literal", () => {
+    expect(testStatement("`bar`")).toMatchInlineSnapshot(`
       Object {
         "symbol": Array [],
         "type": "\\"bar\\"",
       }
     `);
   });
-  it('should pull empty statement', () => {
-    expect(testStatement('')).toMatchInlineSnapshot(`null`);
+  it("should pull empty statement", () => {
+    expect(testStatement("")).toMatchInlineSnapshot(`null`);
   });
 });

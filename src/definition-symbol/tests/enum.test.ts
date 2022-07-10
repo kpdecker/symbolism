@@ -1,28 +1,28 @@
-import ts, { findAncestor } from 'typescript';
+import ts, { findAncestor } from "typescript";
 import {
   dumpInferred,
   findNodesInTree,
   getPropertyValueType,
   mockProgram,
-} from '../../../test/utils';
-import { dumpNode, dumpSymbol } from '../../symbols';
-import { defineSymbol } from '../index';
+} from "../../../test/utils";
+import { dumpNode, dumpSymbol } from "../../symbols";
+import { defineSymbol } from "../index";
 
-describe('infer enum', () => {
-  it('should pull enum declaration', () => {
+describe("infer enum", () => {
+  it("should pull enum declaration", () => {
     const program = mockProgram({
-      'test.ts': `
+      "test.ts": `
         enum MyEnum { foo };
         const x = MyEnum.foo;
         const y = MyEnum[MyEnum.foo];
       `,
     });
     const checker = program.getTypeChecker();
-    const sourceFile = program.getSourceFile('test.ts')!;
+    const sourceFile = program.getSourceFile("test.ts")!;
     const nodes = findNodesInTree(
       sourceFile,
       (node): node is ts.Identifier =>
-        ts.isIdentifier(node) && node.getText() === 'foo'
+        ts.isIdentifier(node) && node.getText() === "foo"
     );
 
     const declarationNode = findAncestor(nodes[0], ts.isEnumDeclaration)!;
@@ -96,10 +96,10 @@ describe('infer enum', () => {
 
     const varSymbol = checker
       .getSymbolsInScope(
-        program.getSourceFile('test.ts')!,
+        program.getSourceFile("test.ts")!,
         ts.SymbolFlags.Variable
       )
-      .filter((s) => ['x', 'y'].includes(s.getName()));
+      .filter((s) => ["x", "y"].includes(s.getName()));
 
     expect(
       dumpInferred(

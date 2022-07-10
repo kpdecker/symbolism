@@ -1,13 +1,13 @@
-import invariant from 'tiny-invariant';
-import ts from 'typescript';
-import { getPropertySymbol } from '../utils';
-import { defineSymbol } from './index';
+import invariant from "tiny-invariant";
+import ts from "typescript";
+import { getPropertySymbol } from "../utils";
+import { defineSymbol } from "./index";
 import {
   collectAllAncestorTypes,
   directTypeAndSymbol,
   invariantNode,
   nodeOperators,
-} from './utils';
+} from "./utils";
 
 export const classOperators = nodeOperators({
   [ts.SyntaxKind.OverrideKeyword](node, checker) {

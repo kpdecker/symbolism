@@ -63,8 +63,6 @@ const program = mockProgram({
     new DeclaredClass();
   `,
 });
-// TODO:
-// declare resident: Dog;
 const checker = program.getTypeChecker();
 const sourceFile = program.getSourceFile("test.tsx")!;
 

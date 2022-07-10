@@ -1,5 +1,5 @@
-import ts from 'typescript';
-import { isArraySymbol } from '../utils';
+import ts from "typescript";
+import { isArraySymbol } from "../utils";
 
 export type DefinitionSymbol = {
   symbol: ts.Symbol | undefined;
@@ -29,7 +29,7 @@ export function isExpression(node: ts.Node): node is ts.Expression {
   return (ts as any).isExpression(node) || ts.isJsxAttributes(node);
 }
 export function isNamedDeclaration(node: ts.Node): node is ts.NamedDeclaration {
-  return isDeclaration(node) && 'name' in node;
+  return isDeclaration(node) && "name" in node;
 }
 export function isDeclaration(node: ts.Node): node is ts.Declaration {
   return (ts as any).isDeclaration(node);

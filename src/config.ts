@@ -1,7 +1,7 @@
-import { readFileSync } from 'fs';
-import { glob } from 'glob';
-import minimatch from 'minimatch';
-import { SetRequired } from 'type-fest';
+import { readFileSync } from "fs";
+import { glob } from "glob";
+import minimatch from "minimatch";
+import { SetRequired } from "type-fest";
 
 export type ConfigFileSchema = {
   /**
@@ -36,15 +36,15 @@ export type ConfigFileSchema = {
   min?: number;
 };
 
-export type Config = Omit<ConfigFileSchema, 'min' | 'tokens' | 'exclude'> & {
+export type Config = Omit<ConfigFileSchema, "min" | "tokens" | "exclude"> & {
   // Object form is the only internal representation
-  tokens: SetRequired<Exclude<ConfigFileSchema['tokens'][0], string>, 'min'>[];
+  tokens: SetRequired<Exclude<ConfigFileSchema["tokens"][0], string>, "min">[];
   exclude: (fileName: string) => boolean;
 };
 
 export function parseConfig(configFilePath: string): Config {
   const config: Partial<ConfigFileSchema> = JSON.parse(
-    readFileSync(configFilePath, 'utf8')
+    readFileSync(configFilePath, "utf8")
   );
 
   const min = config.min ?? 1;
@@ -57,14 +57,14 @@ export function parseConfig(configFilePath: string): Config {
 
   return {
     baseDir: process.cwd(),
-    tsConfigPath: 'tsconfig.json',
+    tsConfigPath: "tsconfig.json",
     ...config,
 
-    entryPoints: (config.entryPoints || ['src/index.ts']).flatMap((pattern) =>
+    entryPoints: (config.entryPoints || ["src/index.ts"]).flatMap((pattern) =>
       glob.sync(pattern).filter((fileName) => !exclude(fileName))
     ),
     tokens: (config.tokens || []).map((token) =>
-      typeof token === 'string' ? { name: token, min } : { ...token, min }
+      typeof token === "string" ? { name: token, min } : { ...token, min }
     ),
     exclude,
   };

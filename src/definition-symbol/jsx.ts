@@ -1,13 +1,13 @@
-import invariant from 'tiny-invariant';
-import ts, { findAncestor, JsxOpeningLikeElement } from 'typescript';
-import { getPropertySymbol } from '../utils';
-import { defineSymbol } from './index';
+import invariant from "tiny-invariant";
+import ts, { findAncestor, JsxOpeningLikeElement } from "typescript";
+import { getPropertySymbol } from "../utils";
+import { defineSymbol } from "./index";
 import {
   contextualTypeAndSymbol,
   directTypeAndSymbol,
   invariantNode,
   nodeOperators,
-} from './utils';
+} from "./utils";
 
 export const jsxSymbolHandlers = nodeOperators({
   [ts.SyntaxKind.JsxElement](node, checker) {
