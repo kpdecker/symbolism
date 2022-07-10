@@ -1,18 +1,18 @@
-import invariant from 'tiny-invariant';
-import ts, { findAncestor } from 'typescript';
+import invariant from "tiny-invariant";
+import ts, { findAncestor } from "typescript";
 import {
   dumpInferred,
   findNodeInTree,
   getPropertyValueType,
   mockProgram,
-} from '../../../test/utils';
-import { dumpNode, dumpSymbol } from '../../symbols';
-import { defineSymbol } from '../index';
+} from "../../../test/utils";
+import { dumpNode, dumpSymbol } from "../../symbols";
+import { defineSymbol } from "../index";
 
-describe('infer object literal types', () => {
-  it('should pull object type from object type', () => {
+describe("infer object literal types", () => {
+  it("should pull object type from object type", () => {
     const program = mockProgram({
-      'test.ts': `
+      "test.ts": `
         type ExplicitType = { foo: string };
         function x(foo: string, bar: ExplicitType) {}
         x(undefined, { foo: undefined });
@@ -20,7 +20,7 @@ describe('infer object literal types', () => {
     });
     const checker = program.getTypeChecker();
     const callStatement = findNodeInTree(
-      program.getSourceFile('test.ts')!,
+      program.getSourceFile("test.ts")!,
       ts.isCallExpression
     )!;
 
@@ -41,9 +41,9 @@ describe('infer object literal types', () => {
       }
     `);
   });
-  it('should pull object type from variable type', () => {
+  it("should pull object type from variable type", () => {
     const program = mockProgram({
-      'test.ts': `
+      "test.ts": `
         type ExplicitType = { foo: string };
         const x: ExplicitType = { foo: undefined });
       `,
@@ -51,10 +51,10 @@ describe('infer object literal types', () => {
     const checker = program.getTypeChecker();
     const varSymbol = checker
       .getSymbolsInScope(
-        program.getSourceFile('test.ts')!,
+        program.getSourceFile("test.ts")!,
         ts.SymbolFlags.Value
       )
-      .find((s) => s.getName() === 'x');
+      .find((s) => s.getName() === "x");
 
     invariant(ts.isVariableDeclaration(varSymbol?.valueDeclaration!));
 
@@ -78,9 +78,9 @@ describe('infer object literal types', () => {
       }
     `);
   });
-  it('should pull object type from array type', () => {
+  it("should pull object type from array type", () => {
     const program = mockProgram({
-      'test.ts': `
+      "test.ts": `
         type ExplicitType = { foo: string }[];
         const x: ExplicitType = [{ foo: undefined })];
       `,
@@ -88,10 +88,10 @@ describe('infer object literal types', () => {
     const checker = program.getTypeChecker();
     const varSymbol = checker
       .getSymbolsInScope(
-        program.getSourceFile('test.ts')!,
+        program.getSourceFile("test.ts")!,
         ts.SymbolFlags.Value
       )
-      .find((s) => s.getName() === 'x');
+      .find((s) => s.getName() === "x");
 
     invariant(ts.isVariableDeclaration(varSymbol?.valueDeclaration!));
     const arrayNode = varSymbol?.valueDeclaration?.initializer!;
@@ -132,9 +132,9 @@ describe('infer object literal types', () => {
     `);
   });
 
-  it('should pull array type from object type', () => {
+  it("should pull array type from object type", () => {
     const program = mockProgram({
-      'test.ts': `
+      "test.ts": `
         type ExplicitType = { foo: {bar: string}[] };
         const x: ExplicitType = { foo: undefined };
       `,
@@ -143,10 +143,10 @@ describe('infer object literal types', () => {
 
     const varSymbol = checker
       .getSymbolsInScope(
-        program.getSourceFile('test.ts')!,
+        program.getSourceFile("test.ts")!,
         ts.SymbolFlags.Value
       )
-      .find((s) => s.getName() === 'x');
+      .find((s) => s.getName() === "x");
     invariant(ts.isVariableDeclaration(varSymbol?.valueDeclaration!));
 
     const objectNode = varSymbol?.valueDeclaration?.initializer!;
@@ -188,9 +188,9 @@ describe('infer object literal types', () => {
       }
     `);
   });
-  it('should pull array type from deep object type', () => {
+  it("should pull array type from deep object type", () => {
     const program = mockProgram({
-      'test.ts': `
+      "test.ts": `
         type ExplicitType = { foo: {bar: string[]} };
         const x: ExplicitType = { foo: { bar: undefined } };
       `,
@@ -198,10 +198,10 @@ describe('infer object literal types', () => {
     const checker = program.getTypeChecker();
     const varSymbol = checker
       .getSymbolsInScope(
-        program.getSourceFile('test.ts')!,
+        program.getSourceFile("test.ts")!,
         ts.SymbolFlags.Value
       )
-      .find((s) => s.getName() === 'x');
+      .find((s) => s.getName() === "x");
 
     invariant(ts.isVariableDeclaration(varSymbol?.valueDeclaration!));
     const objectNode = varSymbol?.valueDeclaration?.initializer!;
@@ -246,9 +246,9 @@ describe('infer object literal types', () => {
     `);
   });
 
-  it('should pull array binding from function arguments', () => {
+  it("should pull array binding from function arguments", () => {
     const program = mockProgram({
-      'test.ts': `
+      "test.ts": `
         type ExplicitType = ({ foo: string })[];
         const x = (foo: ExplicitType): ExplicitType => [{ foo: undefined }];
         x([y]);
@@ -256,9 +256,9 @@ describe('infer object literal types', () => {
     });
     const checker = program.getTypeChecker();
     const yNode = findNodeInTree(
-      program.getSourceFile('test.ts')!,
+      program.getSourceFile("test.ts")!,
       (node): node is ts.Identifier =>
-        ts.isIdentifier(node) && node.getText() === 'y'
+        ts.isIdentifier(node) && node.getText() === "y"
     );
 
     const inferred = defineSymbol(yNode!, checker);
@@ -279,7 +279,37 @@ describe('infer object literal types', () => {
     `);
   });
 
+  it("should resolve computed property names", () => {
+    const program = mockProgram({
+      "test.ts": `
+        const x: number[] = [ 1, ...console ];
+      `,
+    });
+    const checker = program.getTypeChecker();
+    const node = findNodeInTree(
+      program.getSourceFile("test.ts")!,
+      ts.isSpreadElement
+    );
+
+    const inferred = defineSymbol(node!, checker);
+    expect(dumpInferred(inferred, checker)).toMatchInlineSnapshot(`
+      Object {
+        "symbol": Array [
+          Object {
+            "column": 12,
+            "fileName": "typescript/lib/lib.dom.d.ts",
+            "kind": "VariableDeclaration",
+            "line": 17177,
+            "name": "console: Console",
+            "path": ".console",
+          },
+        ],
+        "type": "Console",
+      }
+    `);
+  });
+
   // TODO: Nested arrays
   // TODO: Nested objects
-  // TODO: Rest parameters
+  // TODO: Tuples
 });

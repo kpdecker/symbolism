@@ -45,13 +45,16 @@ const nodeHandlers: Partial<Record<ts.SyntaxKind, DefinitionOperation>> = {
 
   // Expressions
   [ts.SyntaxKind.ArrayLiteralExpression]: contextualTypeAndSymbol,
-  // case ts.SyntaxKind.SpreadElement:
+  [ts.SyntaxKind.SpreadElement](node, checker) {
+    invariantNode(node, ts.isSpreadElement);
+    return defineSymbol(node.expression, checker);
+  },
   [ts.SyntaxKind.ObjectLiteralExpression]: contextualTypeAndSymbol,
   [ts.SyntaxKind.PropertyAccessExpression]: defineProperties,
   [ts.SyntaxKind.PropertyAssignment]: defineProperties,
   [ts.SyntaxKind.ShorthandPropertyAssignment]: defineProperties,
   [ts.SyntaxKind.SpreadAssignment]: defineProperties,
-  // case ts.SyntaxKind.ComputedPropertyName:
+  [ts.SyntaxKind.ComputedPropertyName]: directTypeAndSymbol,
 
   [ts.SyntaxKind.ElementAccessExpression]: defineProperties,
   [ts.SyntaxKind.ParenthesizedExpression](node, checker) {
@@ -154,7 +157,6 @@ const nodeHandlers: Partial<Record<ts.SyntaxKind, DefinitionOperation>> = {
 
   // Declarations
   [ts.SyntaxKind.Decorator]: directTypeAndSymbol,
-  // case ts.SyntaxKind.CallSignature: Type?
 
   [ts.SyntaxKind.ObjectBindingPattern]: defineBindingElement,
   [ts.SyntaxKind.ArrayBindingPattern]: defineBindingElement,
@@ -197,6 +199,7 @@ const nodeHandlers: Partial<Record<ts.SyntaxKind, DefinitionOperation>> = {
   [ts.SyntaxKind.ModuleDeclaration]: directTypeAndSymbol,
   [ts.SyntaxKind.ModuleBlock]: directTypeAndSymbol,
   [ts.SyntaxKind.TypeOfExpression]: directTypeAndSymbol,
+  [ts.SyntaxKind.CallSignature]: directTypeAndSymbol,
   [ts.SyntaxKind.MethodSignature]: directTypeAndSymbol,
   [ts.SyntaxKind.TypeParameter]: directTypeAndSymbol,
 
@@ -237,6 +240,7 @@ const nodeHandlers: Partial<Record<ts.SyntaxKind, DefinitionOperation>> = {
   [ts.SyntaxKind.PartiallyEmittedExpression]: nopHandler,
   [ts.SyntaxKind.SyntheticExpression]: nopHandler,
   [ts.SyntaxKind.SyntheticReferenceExpression]: nopHandler,
+  [ts.SyntaxKind.Count]: nopHandler,
 
   // Misc
   [ts.SyntaxKind.MergeDeclarationMarker]: nopHandler,
