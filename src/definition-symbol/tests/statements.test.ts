@@ -24,7 +24,7 @@ describe("infer statements", () => {
             "line": 1027,
             "name": "interface Error {
       ",
-            "path": ".Error",
+            "path": "Error",
           },
           Object {
             "column": 12,
@@ -32,7 +32,7 @@ describe("infer statements", () => {
             "kind": "VariableDeclaration",
             "line": 1039,
             "name": "Error: ErrorConstructor",
-            "path": ".Error",
+            "path": "Error",
           },
         ],
         "type": "Error",

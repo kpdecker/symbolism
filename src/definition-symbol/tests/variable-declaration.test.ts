@@ -33,7 +33,7 @@ describe("infer variable declaration", () => {
             "kind": "VariableDeclaration",
             "line": 3,
             "name": "x: ExplicitType = { foo: undefined }",
-            "path": ".x",
+            "path": "x",
           },
         ],
         "type": "ExplicitType",
@@ -48,7 +48,7 @@ describe("infer variable declaration", () => {
           "kind": "VariableDeclaration",
           "line": 3,
           "name": "x: ExplicitType = { foo: undefined }",
-          "path": ".x",
+          "path": "x",
         },
       ]
     `);
@@ -77,7 +77,7 @@ describe("infer variable declaration", () => {
             "kind": "VariableDeclaration",
             "line": 2,
             "name": "x = { foo: \\"foo\\" }",
-            "path": ".x",
+            "path": "x",
           },
         ],
         "type": "{ foo: string; }",

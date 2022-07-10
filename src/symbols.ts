@@ -1,12 +1,12 @@
 import ts, { findAncestor } from "typescript";
 import invariant from "tiny-invariant";
-import { getTokenAtPosition } from "tsutils";
 
 import { Config } from "./config";
-import { isIntrinsicType, namedPathToNode } from "./utils";
+import { isIntrinsicType } from "./utils";
 import { lineAndColumn } from "./coverage";
 import { getSymbolFromLanguageServices } from "./definition-symbol/language-services";
 import { defineSymbol } from "./definition-symbol/index";
+import { namedPathToNode } from "./path/index";
 
 type SymbolTable = Map<ts.Symbol, Set<ts.Node>>;
 

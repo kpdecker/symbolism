@@ -28,20 +28,20 @@ describe("infer binding elements", () => {
 
       const type = defineSymbol(varSymbol?.valueDeclaration!, checker);
       expect(dumpInferred(type, checker)).toMatchInlineSnapshot(`
-              Object {
-                "symbol": Array [
-                  Object {
-                    "column": 30,
-                    "fileName": "test.ts",
-                    "kind": "PropertySignature",
-                    "line": 2,
-                    "name": "foo: string",
-                    "path": ".ExplicitType.foo",
-                  },
-                ],
-                "type": "string",
-              }
-          `);
+        Object {
+          "symbol": Array [
+            Object {
+              "column": 30,
+              "fileName": "test.ts",
+              "kind": "PropertySignature",
+              "line": 2,
+              "name": "foo: string",
+              "path": "ExplicitType.foo",
+            },
+          ],
+          "type": "string",
+        }
+      `);
     });
     it("should pull object rest binding from variable", () => {
       const program = mockProgram({
@@ -69,7 +69,7 @@ describe("infer binding elements", () => {
               "kind": "BindingElement",
               "line": 4,
               "name": "...y",
-              "path": ".{ foo, ...y }.BindingElement()",
+              "path": "{ foo, ...y }",
             },
           ],
           "type": "{}",
@@ -94,20 +94,20 @@ describe("infer binding elements", () => {
 
       const type = defineSymbol(varSymbol?.valueDeclaration!, checker);
       expect(dumpInferred(type, checker)).toMatchInlineSnapshot(`
-              Object {
-                "symbol": Array [
-                  Object {
-                    "column": 30,
-                    "fileName": "test.ts",
-                    "kind": "PropertySignature",
-                    "line": 2,
-                    "name": "foo: string",
-                    "path": ".ExplicitType.foo",
-                  },
-                ],
-                "type": "string",
-              }
-          `);
+        Object {
+          "symbol": Array [
+            Object {
+              "column": 30,
+              "fileName": "test.ts",
+              "kind": "PropertySignature",
+              "line": 2,
+              "name": "foo: string",
+              "path": "ExplicitType.foo",
+            },
+          ],
+          "type": "string",
+        }
+      `);
     });
 
     it("should pull original variable from assignment", () => {
@@ -137,7 +137,7 @@ describe("infer binding elements", () => {
               "kind": "VariableDeclaration",
               "line": 4,
               "name": "y",
-              "path": ".y",
+              "path": "y",
             },
           ],
           "type": "any",
@@ -164,20 +164,20 @@ describe("infer binding elements", () => {
 
       const inferred = defineSymbol(varSymbol?.valueDeclaration!, checker);
       expect(dumpInferred(inferred, checker)).toMatchInlineSnapshot(`
-              Object {
-                "symbol": Array [
-                  Object {
-                    "column": 29,
-                    "fileName": "test.ts",
-                    "kind": "TypeLiteral",
-                    "line": 2,
-                    "name": "{ foo: string }",
-                    "path": ".ExplicitType.[]",
-                  },
-                ],
-                "type": "{ foo: string; }",
-              }
-          `);
+        Object {
+          "symbol": Array [
+            Object {
+              "column": 29,
+              "fileName": "test.ts",
+              "kind": "TypeLiteral",
+              "line": 2,
+              "name": "{ foo: string }",
+              "path": "ExplicitType",
+            },
+          ],
+          "type": "{ foo: string; }",
+        }
+      `);
     });
     it("should pull array rest binding from variable", () => {
       const program = mockProgram({
@@ -197,20 +197,20 @@ describe("infer binding elements", () => {
 
       const inferred = defineSymbol(varSymbol?.valueDeclaration!, checker);
       expect(dumpInferred(inferred, checker)).toMatchInlineSnapshot(`
-              Object {
-                "symbol": Array [
-                  Object {
-                    "column": 29,
-                    "fileName": "test.ts",
-                    "kind": "TypeLiteral",
-                    "line": 2,
-                    "name": "{ foo: string }",
-                    "path": ".ExplicitType.[]",
-                  },
-                ],
-                "type": "{ foo: string; }",
-              }
-          `);
+        Object {
+          "symbol": Array [
+            Object {
+              "column": 29,
+              "fileName": "test.ts",
+              "kind": "TypeLiteral",
+              "line": 2,
+              "name": "{ foo: string }",
+              "path": "ExplicitType",
+            },
+          ],
+          "type": "{ foo: string; }",
+        }
+      `);
     });
     it("should pull array binding from function calls", () => {
       const program = mockProgram({
@@ -230,20 +230,20 @@ describe("infer binding elements", () => {
 
       const type = defineSymbol(varSymbol?.valueDeclaration!, checker);
       expect(dumpInferred(type, checker)).toMatchInlineSnapshot(`
-              Object {
-                "symbol": Array [
-                  Object {
-                    "column": 29,
-                    "fileName": "test.ts",
-                    "kind": "TypeLiteral",
-                    "line": 2,
-                    "name": "{ foo: string }",
-                    "path": ".ExplicitType.[]",
-                  },
-                ],
-                "type": "{ foo: string; }",
-              }
-          `);
+        Object {
+          "symbol": Array [
+            Object {
+              "column": 29,
+              "fileName": "test.ts",
+              "kind": "TypeLiteral",
+              "line": 2,
+              "name": "{ foo: string }",
+              "path": "ExplicitType",
+            },
+          ],
+          "type": "{ foo: string; }",
+        }
+      `);
     });
 
     it("should pull original variable from assignment", () => {
@@ -273,7 +273,7 @@ describe("infer binding elements", () => {
               "kind": "VariableDeclaration",
               "line": 4,
               "name": "y",
-              "path": ".y",
+              "path": "y",
             },
           ],
           "type": "any",
