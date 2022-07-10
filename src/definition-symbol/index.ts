@@ -45,6 +45,7 @@ const nodeHandlers: Partial<Record<ts.SyntaxKind, DefinitionOperation>> = {
 
   // Expressions
   [ts.SyntaxKind.ArrayLiteralExpression]: contextualTypeAndSymbol,
+  // case ts.SyntaxKind.SpreadElement:
   [ts.SyntaxKind.ObjectLiteralExpression]: contextualTypeAndSymbol,
   [ts.SyntaxKind.PropertyAccessExpression]: defineProperties,
   [ts.SyntaxKind.PropertyAssignment]: defineProperties,
@@ -52,38 +53,65 @@ const nodeHandlers: Partial<Record<ts.SyntaxKind, DefinitionOperation>> = {
   [ts.SyntaxKind.SpreadAssignment]: defineProperties,
   // case ts.SyntaxKind.ComputedPropertyName:
 
-  // case ts.SyntaxKind.ElementAccessExpression:
-  // case ts.SyntaxKind.TypeAssertionExpression:
-  // case ts.SyntaxKind.ParenthesizedExpression:
-  // case ts.SyntaxKind.DeleteExpression:
-  // case ts.SyntaxKind.AwaitExpression:
+  [ts.SyntaxKind.ElementAccessExpression]: defineProperties,
+  [ts.SyntaxKind.ParenthesizedExpression](node, checker) {
+    invariantNode(node, ts.isParenthesizedExpression);
+    return defineSymbol(node.expression, checker);
+  },
+  [ts.SyntaxKind.DeleteExpression]: directTypeAndSymbol,
+  [ts.SyntaxKind.AwaitExpression]: directTypeAndSymbol,
   [ts.SyntaxKind.PrefixUnaryExpression]: directTypeAndSymbol,
-  // case ts.SyntaxKind.PostfixUnaryExpression:
+  [ts.SyntaxKind.PostfixUnaryExpression]: directTypeAndSymbol,
   [ts.SyntaxKind.BinaryExpression](node, checker) {
     invariantNode(node, ts.isBinaryExpression);
-    if (node.operatorToken.kind === ts.SyntaxKind.EqualsToken) {
-      const left = contextualTypeAndSymbol(node.left, checker);
-      const right = contextualTypeAndSymbol(node.right, checker);
 
-      // Select whoever has a type, giving LHS priority
-      return left.symbol?.declarations && left.symbol?.declarations.length > 0
-        ? left
-        : right;
+    switch (node.operatorToken.kind) {
+      case ts.SyntaxKind.PlusEqualsToken:
+      case ts.SyntaxKind.MinusEqualsToken:
+      case ts.SyntaxKind.AsteriskAsteriskEqualsToken:
+      case ts.SyntaxKind.AsteriskEqualsToken:
+      case ts.SyntaxKind.SlashEqualsToken:
+      case ts.SyntaxKind.PercentEqualsToken:
+      case ts.SyntaxKind.AmpersandEqualsToken:
+      case ts.SyntaxKind.BarEqualsToken:
+      case ts.SyntaxKind.CaretEqualsToken:
+      //
+      case ts.SyntaxKind.LessThanLessThanEqualsToken:
+      case ts.SyntaxKind.GreaterThanGreaterThanGreaterThanEqualsToken:
+      case ts.SyntaxKind.GreaterThanGreaterThanEqualsToken:
+      case ts.SyntaxKind.BarBarEqualsToken:
+      case ts.SyntaxKind.AmpersandAmpersandEqualsToken:
+      case ts.SyntaxKind.QuestionQuestionEqualsToken:
+      case ts.SyntaxKind.EqualsToken:
+      case ts.SyntaxKind.AmpersandAmpersandEqualsToken:
+      case ts.SyntaxKind.BarBarEqualsToken:
+      case ts.SyntaxKind.QuestionQuestionEqualsToken:
+      case ts.SyntaxKind.EqualsToken:
+      case ts.SyntaxKind.PlusEqualsToken:
+      case ts.SyntaxKind.MinusEqualsToken: {
+        const left = contextualTypeAndSymbol(node.left, checker);
+        const right = contextualTypeAndSymbol(node.right, checker);
+
+        // Select whoever has a type, giving LHS priority
+        return left.symbol?.declarations && left.symbol?.declarations.length > 0
+          ? left
+          : right;
+      }
+
+      default:
+        return directTypeAndSymbol(node, checker);
     }
-    throw new Error(
-      'Not implemented ' + ts.SyntaxKind[node.operatorToken.kind]
-    );
   },
-  // case ts.SyntaxKind.ConditionalExpression:
-  // case ts.SyntaxKind.TemplateExpression:
-  // case ts.SyntaxKind.SpreadElement:
-  // case ts.SyntaxKind.OmittedExpression:
-  // case ts.SyntaxKind.ExpressionWithTypeArguments:
-  // case ts.SyntaxKind.AsExpression:
-  // case ts.SyntaxKind.NonNullExpression:
-  // case ts.SyntaxKind.MetaProperty:
-  // case ts.SyntaxKind.SyntheticExpression:
-  // case ts.SyntaxKind.CommaListExpression:
+  [ts.SyntaxKind.ConditionalExpression]: directTypeAndSymbol,
+  [ts.SyntaxKind.TemplateExpression]: directTypeAndSymbol,
+  [ts.SyntaxKind.OmittedExpression]: nopHandler,
+  [ts.SyntaxKind.AsExpression]: directTypeAndSymbol,
+  [ts.SyntaxKind.TypeAssertionExpression]: directTypeAndSymbol,
+  [ts.SyntaxKind.NonNullExpression](node, checker) {
+    invariantNode(node, ts.isNonNullExpression);
+    return defineSymbol(node.expression, checker);
+  },
+  [ts.SyntaxKind.CommaListExpression]: directTypeAndSymbol,
 
   [ts.SyntaxKind.TaggedTemplateExpression]: defineTaggedTemplate,
   [ts.SyntaxKind.TemplateHead]: directTypeAndSymbol,
@@ -125,16 +153,15 @@ const nodeHandlers: Partial<Record<ts.SyntaxKind, DefinitionOperation>> = {
   [ts.SyntaxKind.CaseBlock]: nopHandler,
 
   // Declarations
-  // case ts.SyntaxKind.Decorator:
+  [ts.SyntaxKind.Decorator]: directTypeAndSymbol,
   // case ts.SyntaxKind.CallSignature: Type?
 
   [ts.SyntaxKind.ObjectBindingPattern]: defineBindingElement,
   [ts.SyntaxKind.ArrayBindingPattern]: defineBindingElement,
   [ts.SyntaxKind.BindingElement]: defineBindingElement,
 
-  // case ts.SyntaxKind.VariableDeclarationList:
-  //   return undefined;
   [ts.SyntaxKind.VariableDeclaration]: defineVariableDeclaration,
+  [ts.SyntaxKind.VariableDeclarationList]: directTypeAndSymbol,
 
   // case ts.SyntaxKind.EnumDeclaration:
   // case ts.SyntaxKind.EnumMember:
@@ -191,6 +218,7 @@ const nodeHandlers: Partial<Record<ts.SyntaxKind, DefinitionOperation>> = {
   [ts.SyntaxKind.ImportTypeAssertionContainer]: directTypeAndSymbol,
   [ts.SyntaxKind.AssertClause]: directTypeAndSymbol,
   [ts.SyntaxKind.AssertEntry]: directTypeAndSymbol,
+  [ts.SyntaxKind.MetaProperty]: directTypeAndSymbol, // import.foo
 
   // Error Constructs
   [ts.SyntaxKind.MissingDeclaration]: nopHandler,
@@ -207,6 +235,7 @@ const nodeHandlers: Partial<Record<ts.SyntaxKind, DefinitionOperation>> = {
   [ts.SyntaxKind.SyntaxList]: nopHandler,
   [ts.SyntaxKind.NotEmittedStatement]: nopHandler,
   [ts.SyntaxKind.PartiallyEmittedExpression]: nopHandler,
+  [ts.SyntaxKind.SyntheticExpression]: nopHandler,
   [ts.SyntaxKind.SyntheticReferenceExpression]: nopHandler,
 
   // Misc
@@ -316,7 +345,10 @@ function defineProperties(node: ts.Node, checker: ts.TypeChecker) {
       stringIndex: true,
     });
   }
-  if (ts.isPropertyAccessExpression(node)) {
+  if (
+    ts.isPropertyAccessExpression(node) ||
+    ts.isElementAccessExpression(node)
+  ) {
     const type = directTypeAndSymbol(node, checker);
     const typeDeclaration = type.symbol?.declarations?.[0];
 

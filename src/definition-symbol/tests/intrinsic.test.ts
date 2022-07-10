@@ -151,11 +151,6 @@ describe('infer intrinsic types', () => {
     `);
   });
   it('should pull empty statement', () => {
-    expect(testStatement('')).toMatchInlineSnapshot(`
-      Object {
-        "symbol": Array [],
-        "type": "any",
-      }
-    `);
+    expect(testStatement('')).toMatchInlineSnapshot(`null`);
   });
 });

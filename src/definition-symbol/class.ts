@@ -17,6 +17,7 @@ export const classOperators = nodeOperators({
   // [ts.SyntaxKind.ThisKeyword]: nopHandler,
 
   [ts.SyntaxKind.HeritageClause]: directTypeAndSymbol, // extends/implements
+  [ts.SyntaxKind.ExpressionWithTypeArguments]: directTypeAndSymbol,
 
   [ts.SyntaxKind.PrivateIdentifier]: directTypeAndSymbol,
 
