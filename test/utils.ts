@@ -67,6 +67,7 @@ export function mockProgram(sourceFiles: Record<string, string>) {
     rootNames: Object.keys(sourceFiles),
     options: {
       target: ts.ScriptTarget.ES2017,
+      moduleResolution: ts.ModuleResolutionKind.NodeJs,
     },
     host,
   });

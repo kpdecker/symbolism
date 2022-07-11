@@ -137,6 +137,24 @@ describe("infer intrinsic types", () => {
             "name": "RegExp: RegExpConstructor",
             "path": "RegExp",
           },
+          Object {
+            "column": 0,
+            "fileName": "typescript/lib/lib.es2015.core.d.ts",
+            "kind": "InterfaceDeclaration",
+            "line": 367,
+            "name": "interface RegExp {
+      ",
+            "path": "RegExp",
+          },
+          Object {
+            "column": 0,
+            "fileName": "typescript/lib/lib.es2015.symbol.wellknown.d.ts",
+            "kind": "InterfaceDeclaration",
+            "line": 181,
+            "name": "interface RegExp {
+      ",
+            "path": "RegExp",
+          },
         ],
         "type": "RegExp",
       }

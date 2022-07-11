@@ -198,7 +198,7 @@ describe("infer expressions", () => {
     expect(testExpression("console ? Error : Promise")).toMatchInlineSnapshot(`
       Object {
         "symbol": Array [],
-        "type": "any",
+        "type": "ErrorConstructor | PromiseConstructor",
       }
     `);
   });
