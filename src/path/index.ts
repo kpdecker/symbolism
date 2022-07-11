@@ -198,7 +198,7 @@ const nodePathHandlers: Record<ts.SyntaxKind, PathHandler> = {
   [ts.SyntaxKind.ModuleDeclaration]: nameWithParent,
   [ts.SyntaxKind.ModuleBlock]: skipNode,
   [ts.SyntaxKind.TypeOfExpression]: skipNode,
-  [ts.SyntaxKind.CallSignature]: nameWithParent,
+  [ts.SyntaxKind.CallSignature]: skipNode,
   [ts.SyntaxKind.MethodSignature]: nameWithParent,
   [ts.SyntaxKind.TypeParameter]: nameWithParent,
 
