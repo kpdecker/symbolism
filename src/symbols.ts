@@ -67,6 +67,11 @@ export function parseSymbolTable(
           return;
         }
 
+        // Filter out known tokens that do not have explicit symbols
+        if (node.getText() === "undefined" || node.getText() === "arguments") {
+          return;
+        }
+
         const symbol = checker.getSymbolAtLocation(node);
         if (!symbol) {
           logVerbose("No Symbol:", dumpNode(node, checker));
