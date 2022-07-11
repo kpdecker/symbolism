@@ -300,6 +300,13 @@ function defineIdentifier(node: ts.Node, checker: ts.TypeChecker) {
       return contextualTypeAndSymbol(node, checker);
     }
 
+    // Don't emit anything when we are the property assignment name
+    if (ts.isPropertyAssignment(node.parent)) {
+      if (node.parent.name === node) {
+        return null;
+      }
+    }
+
     // Identifier pass through
     if (
       (isNamedDeclaration(node.parent) && node.parent.name === node) ||
