@@ -15,6 +15,10 @@ export class NodeError extends Error {
         ts.SyntaxKind[node.kind]
       }`
     );
-    (this as any).cause = cause;
+
+    if (cause) {
+      (this as any).cause = cause;
+      this.stack += `\n\n Caused By:\n${cause?.stack}`;
+    }
   }
 }

@@ -281,8 +281,6 @@ export function namedPathToNode(
     if ((err as NodeError).isNodeError) {
       throw err;
     }
-
-    console.error(err);
     console.error(dumpNode(node, checker, true));
     throw new NodeError("Error in path", node, checker, err as Error);
   }
