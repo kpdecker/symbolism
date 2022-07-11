@@ -158,6 +158,47 @@ export function parseSymbolTable(
   return symbols;
 }
 
+/**
+ * Helper method to dump a symbol table into summary data. This is intended
+ * for debugging purposes.
+ */
+export function extractSymbolSummary(
+  symbols: SymbolTable,
+  checker: ts.TypeChecker
+) {
+  const pathMap: Map<string, ts.Symbol> = new Map();
+  const declarationPaths: string[] = [];
+  const allPaths: string[] = [];
+
+  symbols.forEach((symbolMap, symbol) => {
+    const declarationPath = namedPathToNode(
+      getSymbolDeclaration(symbol)!,
+      checker
+    );
+    if (declarationPath) {
+      declarationPaths.push(declarationPath);
+      pathMap.set(declarationPath, symbol);
+    }
+    symbolMap.forEach((referenceNode) => {
+      const referencePath = namedPathToNode(referenceNode, checker);
+      if (!allPaths.includes(referencePath)) {
+        allPaths.push(referencePath);
+      }
+    });
+  });
+
+  declarationPaths.sort();
+  allPaths.sort();
+  return allPaths.map((path) => {
+    const symbol = pathMap.get(path);
+    const references = symbols.get(symbol!);
+    return {
+      path,
+      size: references?.size || 0,
+    };
+  });
+}
+
 export function dumpSymbolTable(symbols: SymbolTable, checker: ts.TypeChecker) {
   const ret: Map<
     ReturnType<typeof dumpSymbol>[0],
@@ -172,6 +213,7 @@ export function dumpSymbolTable(symbols: SymbolTable, checker: ts.TypeChecker) {
       ret.get(source)!.push(dumpNode(node, checker));
     });
   });
+
   return ret;
 }
 

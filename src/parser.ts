@@ -7,12 +7,7 @@ import {
   getSymbolForModuleLike,
 } from "./utils";
 import { initTypescript } from "./typescript";
-import {
-  dumpNode,
-  dumpSymbolTable,
-  extractDefinitions,
-  parseSymbolTable,
-} from "./symbols";
+import { dumpNode, dumpSymbolTable, parseSymbolTable } from "./symbols";
 import { lineAndColumn, LineAndColumn } from "./coverage";
 import { namedPathToNode, pathMatchesTokenFilter } from "./path/index";
 
