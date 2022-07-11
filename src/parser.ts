@@ -23,4 +23,24 @@ export function findCoverageLocations(config: Config) {
   }
 
   const symbols = parseSymbolTable(program, services, config);
+  // console.log(dumpSymbolTable(symbols));
+
+  const coverageRequired: ReturnType<typeof findReferences> = [];
+
+  const fileCoverageLocations: Record<string, TokenSourceLocation[]> = {};
+  coverageRequired.forEach((coverageRequired) => {
+    fileCoverageLocations[coverageRequired.fileName] =
+      fileCoverageLocations[coverageRequired.fileName] || [];
+    fileCoverageLocations[coverageRequired.fileName].push(coverageRequired);
+  });
+
+  const symbolCoverageLocations: Record<string, TokenSourceLocation[]> = {};
+  coverageRequired.forEach((coverageRequired) => {
+    symbolCoverageLocations[coverageRequired.token] =
+      symbolCoverageLocations[coverageRequired.token] || [];
+    symbolCoverageLocations[coverageRequired.token].push(coverageRequired);
+  });
+
+  return { fileCoverageLocations, symbolCoverageLocations };
+}
 }
