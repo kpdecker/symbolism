@@ -176,7 +176,6 @@ describe("classes", () => {
   it("should resolve implements", () => {
     const nodes = lookupNamedToken("Foo");
 
-    // TODO: Type resolution
     expect(dumpInferred(defineSymbol(nodes[1], checker), checker))
       .toMatchInlineSnapshot(`
       Object {
@@ -190,7 +189,7 @@ describe("classes", () => {
             "path": "Foo",
           },
         ],
-        "type": "any",
+        "type": "Foo",
       }
     `);
   });

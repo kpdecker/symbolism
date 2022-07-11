@@ -213,7 +213,10 @@ const nodeHandlers: Record<ts.SyntaxKind, DefinitionOperation> = {
   [ts.SyntaxKind.TemplateLiteralType]: directTypeAndSymbol,
   [ts.SyntaxKind.TemplateLiteralTypeSpan]: directTypeAndSymbol,
   [ts.SyntaxKind.InterfaceDeclaration]: directTypeAndSymbol,
-  [ts.SyntaxKind.TypeAliasDeclaration]: directTypeAndSymbol,
+  [ts.SyntaxKind.TypeAliasDeclaration](node, checker) {
+    invariantNode(node, ts.isTypeAliasDeclaration);
+    return directTypeAndSymbol(node.name, checker);
+  },
   [ts.SyntaxKind.ModuleDeclaration]: directTypeAndSymbol,
   [ts.SyntaxKind.ModuleBlock]: directTypeAndSymbol,
   [ts.SyntaxKind.TypeOfExpression]: directTypeAndSymbol,

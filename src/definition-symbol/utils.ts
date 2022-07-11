@@ -1,5 +1,5 @@
 import ts from "typescript";
-import { isArraySymbol } from "../utils";
+import { isArraySymbol, isErrorType } from "../utils";
 
 export type DefinitionSymbol = {
   symbol: ts.Symbol | undefined;
@@ -70,6 +70,13 @@ export function directTypeAndSymbol(
     type = checker.getTypeAtLocation(node);
   }
 
+  if (isErrorType(type)) {
+    // If we errored while attempting to resolve the type from the node
+    // (have seen this happen with symbols pointing to InterfaceDeclarations),
+    // we can try to resolve the type from the symbol.
+    type = checker.getTypeAtLocation(node);
+  }
+
   return {
     symbol: symbol ? symbol : type.symbol,
     type,
@@ -95,6 +102,11 @@ export function collectAllAncestorTypes(
   node: ts.Node,
   checker: ts.TypeChecker
 ): ts.Type[] {
+  // { foo() {} }
+  if (ts.isObjectLiteralExpression(node)) {
+    return [];
+  }
+
   invariantNode(node, isInheritingDeclaration);
   if (!node.heritageClauses) {
     return [];
