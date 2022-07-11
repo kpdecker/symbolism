@@ -38,10 +38,10 @@ export function mockProgram(sourceFiles: Record<string, string>) {
       throw new Error("NOT IMPLEMENTED");
     },
     getSourceFile(fileName) {
-      invariant(
-        host.fileExists(fileName),
-        "getSourceFile: file not found: " + fileName
-      );
+      if (!host.fileExists(fileName)) {
+        return undefined;
+      }
+
       return ts.createSourceFile(
         fileName,
         host.readFile(fileName)!,
