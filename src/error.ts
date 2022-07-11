@@ -18,7 +18,6 @@ export class NodeError extends Error {
 
     if (cause) {
       (this as any).cause = cause;
-      this.stack += `\n\n Caused By:\n${cause?.stack}`;
     }
   }
 }
