@@ -377,7 +377,11 @@ function defineProperties(node: ts.Node, checker: ts.TypeChecker) {
     const typeDeclaration = type.symbol?.declarations?.[0];
 
     // Check to see if we can resolve the property into ancestors.
-    if (typeDeclaration && ts.isPropertyDeclaration(typeDeclaration)) {
+    if (
+      typeDeclaration &&
+      (ts.isMethodDeclaration(typeDeclaration) ||
+        ts.isPropertyDeclaration(typeDeclaration))
+    ) {
       return defineSymbol(typeDeclaration, checker);
     }
 
