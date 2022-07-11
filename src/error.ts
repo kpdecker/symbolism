@@ -13,7 +13,7 @@ export class NodeError extends Error {
     super(
       `${message} for ${node.getSourceFile().fileName} ${
         ts.SyntaxKind[node.kind]
-      }`
+      }: ${node.getText().split("\n")[0]}`
     );
 
     if (cause) {
