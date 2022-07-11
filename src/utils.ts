@@ -33,6 +33,12 @@ export function isIntrinsicType(type: ts.Type) {
   return (type.flags & intrinsicTypes) !== 0;
 }
 
+export function getSymbolDeclaration(
+  symbol: ts.Symbol | undefined
+): ts.Declaration | undefined {
+  return symbol?.valueDeclaration || symbol?.declarations?.[0];
+}
+
 export function getPropertySymbol(
   node: ts.Node,
   type: ts.Type,
