@@ -65,7 +65,9 @@ export function mockProgram(sourceFiles: Record<string, string>) {
 
   return ts.createProgram({
     rootNames: Object.keys(sourceFiles),
-    options: {},
+    options: {
+      target: ts.ScriptTarget.ES2017,
+    },
     host,
   });
 }
