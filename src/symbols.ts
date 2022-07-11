@@ -97,11 +97,6 @@ export function parseSymbolTable(
         // If the type checker resolved a direct type, use that
         definitionSymbol = type?.getSymbol();
 
-        // Use language services definition lookup when it works
-        if (definitionSymbol === undefined) {
-          definitionSymbol = getSymbolFromLanguageServices(node, services);
-        }
-
         if (definitionSymbol === undefined) {
           const inferredType = defineSymbol(node, checker);
           definitionSymbol = inferredType?.symbol;

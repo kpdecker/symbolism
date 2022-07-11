@@ -31,7 +31,7 @@ export function findCoverageLocations(config: Config) {
 
   const checker = program.getTypeChecker();
 
-  const symbols = parseSymbolTable(program, services, config);
+  const symbols = parseSymbolTable(program, config);
   // console.log(dumpSymbolTable(symbols));
 
   const coverageRequired: TokenSourceLocation[] = [];
