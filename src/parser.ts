@@ -1,18 +1,30 @@
 import * as ts from "typescript";
 import { existsSync, readFileSync } from "fs";
 import { Config } from "./config";
-import { getNodeAtPosition, getSymbolForModuleLike } from "./utils";
+import {
+  getNodeAtPosition,
+  getSymbolDeclaration,
+  getSymbolForModuleLike,
+} from "./utils";
 import { initTypescript } from "./typescript";
-import { dumpSymbolTable, parseSymbolTable } from "./symbols";
+import {
+  dumpNode,
+  dumpSymbolTable,
+  extractDefinitions,
+  parseSymbolTable,
+} from "./symbols";
 import { lineAndColumn, LineAndColumn } from "./coverage";
+import { namedPathToNode, pathMatchesTokenFilter } from "./path/index";
 
 type TokenSourceLocation = {
   kind: ts.SyntaxKind;
+  definitionPath: string;
   token: string;
 
   fileName: string;
   start: number;
   length: number;
+  text: string;
 } & LineAndColumn;
 
 export function findCoverageLocations(config: Config) {
@@ -22,10 +34,40 @@ export function findCoverageLocations(config: Config) {
     throw new Error("Failed to create program");
   }
 
+  const checker = program.getTypeChecker();
+
   const symbols = parseSymbolTable(program, services, config);
   // console.log(dumpSymbolTable(symbols));
 
-  const coverageRequired: ReturnType<typeof findReferences> = [];
+  const coverageRequired: TokenSourceLocation[] = [];
+
+  symbols.forEach((referencingNodes, symbol) => {
+    const symbolPath = namedPathToNode(getSymbolDeclaration(symbol)!, checker);
+    if (
+      config.tokens.some(({ name }) => pathMatchesTokenFilter(symbolPath, name))
+    ) {
+      referencingNodes.forEach((referencingNode) => {
+        const sourceFile = referencingNode.getSourceFile();
+        const node = dumpNode(referencingNode, checker);
+        const lineAndChar = sourceFile?.getLineAndCharacterOfPosition(
+          referencingNode.pos
+        );
+
+        coverageRequired.push({
+          kind: referencingNode.parent.kind,
+          definitionPath: symbolPath,
+          token: node.path,
+          fileName: node.fileName,
+          start: referencingNode.pos,
+          length: referencingNode.end - referencingNode.pos,
+
+          text: node.name,
+
+          ...lineAndColumn(lineAndChar),
+        });
+      });
+    }
+  });
 
   const fileCoverageLocations: Record<string, TokenSourceLocation[]> = {};
   coverageRequired.forEach((coverageRequired) => {
@@ -42,5 +84,4 @@ export function findCoverageLocations(config: Config) {
   });
 
   return { fileCoverageLocations, symbolCoverageLocations };
-}
 }

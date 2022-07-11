@@ -1,6 +1,7 @@
 import { readFileSync } from "fs";
 import { glob } from "glob";
 import minimatch from "minimatch";
+import { relative } from "path";
 import { SetRequired } from "type-fest";
 
 export type ConfigFileSchema = {
@@ -51,7 +52,9 @@ export function parseConfig(configFilePath: string): Config {
 
   function exclude(fileName: string) {
     return (
-      config.exclude?.some((pattern) => minimatch(fileName, pattern)) ?? false
+      config.exclude?.some((pattern) =>
+        minimatch(relative(process.cwd(), fileName), pattern)
+      ) ?? false
     );
   }
 

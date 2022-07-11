@@ -69,7 +69,7 @@ Object.keys(coveragePercentage).forEach((keyName) => {
       .sort((a, b) => a.fileName.localeCompare(b.fileName) || a.line - b.line)
       .map((location) => {
         log(
-          `    ${ts.SyntaxKind[location.kind]}: ${chalk.blue(
+          `    ${location.text}: ${chalk.blue(
             "./" + relative(process.cwd(), location.fileName)
           )}:${chalk.yellow(location.line)}:${chalk.yellow(location.column)}`
         );
