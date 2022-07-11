@@ -2,7 +2,7 @@ import invariant from "tiny-invariant";
 import ts from "typescript";
 import { dumpSymbol } from "../src/symbols";
 import { defineSymbol } from "../src/definition-symbol/index";
-import { isIntrinsicType } from "../src/utils";
+import { getSymbolDeclaration, isIntrinsicType } from "../src/utils";
 
 export function testStatement(source: string) {
   const program = mockProgram({
@@ -98,7 +98,10 @@ export function getPropertyValueType(
   checker: ts.TypeChecker
 ) {
   const property = objectType.getProperty(propertyName);
-  return checker.getTypeAtLocation(property?.valueDeclaration!);
+  if (!property) {
+    return undefined;
+  }
+  return checker.getTypeAtLocation(getSymbolDeclaration(property)!);
 }
 
 export function findNodeInTree<T extends ts.Node>(
