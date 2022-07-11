@@ -285,3 +285,13 @@ export function namedPathToNode(
     throw new NodeError("Error in path", node, checker, err as Error);
   }
 }
+
+export function pathMatchesTokenFilter(path: string, tokenFilter: string) {
+  // Simple identity case
+  if (path === tokenFilter) {
+    return true;
+  }
+
+  // Partial matching
+  return path.endsWith("." + tokenFilter);
+}
