@@ -79,16 +79,13 @@ export function parseSymbolTable(
           return;
         }
 
-        if (isIntrinsicType(checker.getDeclaredTypeOfSymbol(symbol))) {
-          // No source declarations for intrinsic types
+        const type = checker.getTypeAtLocation(node);
+        if (isIntrinsicType(type)) {
+          logVerbose("Intensic Symbol:", dumpNode(node, checker));
           return;
         }
 
-        const symbolDeclaration =
-          symbol.valueDeclaration || symbol.declarations?.[0];
-        invariant(symbolDeclaration, "No declaration for symbol");
-
-        const type = checker.getTypeAtLocation(node);
+        const symbolDeclaration = getSymbolDeclaration(symbol);
 
         /**
          * The symbol that will serve as our primary key for reference tracking.
@@ -104,7 +101,7 @@ export function parseSymbolTable(
         }
 
         // If this is a function parameter then we are at our identity
-        if (definitionSymbol === undefined) {
+        if (definitionSymbol === undefined && symbolDeclaration) {
           if (ts.isParameter(symbolDeclaration)) {
             const parameter = symbolDeclaration;
             if (
@@ -117,7 +114,7 @@ export function parseSymbolTable(
         }
 
         // Variable declarations are also identity
-        if (definitionSymbol === undefined) {
+        if (definitionSymbol === undefined && symbolDeclaration) {
           if (
             ts.isVariableDeclaration(symbolDeclaration) ||
             ts.isPropertySignature(symbolDeclaration) ||
@@ -127,11 +124,9 @@ export function parseSymbolTable(
           }
         }
 
-        // Explicitly missing
-        if (definitionSymbol === null) {
+        if (!definitionSymbol) {
           return;
         }
-        invariant(definitionSymbol);
 
         // Don't omit the declaration case
         const definitionNode = getSymbolDeclaration(definitionSymbol);
@@ -139,6 +134,7 @@ export function parseSymbolTable(
           return;
         }
         invariant(definitionNode);
+
         if (
           definitionNode.getSourceFile() === sourceFile &&
           definitionNode.pos === node.pos
