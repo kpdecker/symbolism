@@ -1,3 +1,7 @@
+export function logWarn(...message: unknown[]) {
+  console.warn(...message);
+}
+
 export function logInfo(...message: unknown[]) {
   // console.log(...message);
 }
