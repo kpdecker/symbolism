@@ -83,4 +83,78 @@ describe("infer functions", () => {
       }
     `);
   });
+  it("should resolve destructured parameters", () => {
+    const program = mockProgram({
+      "test.ts": `
+        type ExplicitType = { foo: string };
+        const bar: (obj: ExplicitType) => void = function({
+          foo
+        }) {
+          console.log(foo);
+        }
+      `,
+    });
+    const checker = program.getTypeChecker();
+    const sourceFile = program.getSourceFile("test.ts")!;
+
+    const nodes = findNodesInTree(
+      sourceFile,
+      (node): node is ts.Identifier =>
+        ts.isIdentifier(node) && node.getText() === "foo"
+    );
+
+    // Declaration
+    expect(dumpInferred(defineSymbol(nodes[0], checker), checker))
+      .toMatchInlineSnapshot(`
+      Object {
+        "symbol": Array [
+          Object {
+            "column": 30,
+            "fileName": "test.ts",
+            "kind": "PropertySignature",
+            "line": 2,
+            "name": "foo: string",
+            "path": "ExplicitType.foo",
+          },
+        ],
+        "type": "string",
+      }
+    `);
+
+    // Destructure
+    expect(dumpInferred(defineSymbol(nodes[1], checker), checker))
+      .toMatchInlineSnapshot(`
+      Object {
+        "symbol": Array [
+          Object {
+            "column": 30,
+            "fileName": "test.ts",
+            "kind": "PropertySignature",
+            "line": 2,
+            "name": "foo: string",
+            "path": "ExplicitType.foo",
+          },
+        ],
+        "type": "string",
+      }
+    `);
+
+    // Use
+    expect(dumpInferred(defineSymbol(nodes[2], checker), checker))
+      .toMatchInlineSnapshot(`
+        Object {
+          "symbol": Array [
+            Object {
+              "column": 30,
+              "fileName": "test.ts",
+              "kind": "PropertySignature",
+              "line": 2,
+              "name": "foo: string",
+              "path": "ExplicitType.foo",
+            },
+          ],
+          "type": "string",
+        }
+    `);
+  });
 });

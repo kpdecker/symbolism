@@ -133,7 +133,10 @@ export function parseSymbolTable(
         invariant(definitionSymbol);
 
         // Don't omit the declaration case
-        const definitionNode = definitionSymbol.declarations?.[0];
+        const definitionNode = getSymbolDeclaration(definitionSymbol);
+        if (!definitionNode) {
+          return;
+        }
         invariant(definitionNode);
         if (
           definitionNode.getSourceFile() === sourceFile &&

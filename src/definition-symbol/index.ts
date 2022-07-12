@@ -12,6 +12,7 @@ import {
   contextualTypeAndSymbol,
   DefinitionOperation,
   directTypeAndSymbol,
+  followSymbol,
   getArrayType,
   invariantNode,
   isNamedDeclaration,
@@ -300,7 +301,11 @@ function defineIdentifier(node: ts.Node, checker: ts.TypeChecker) {
       ts.isNewExpression(node.parent) ||
       ts.isArrowFunction(node.parent)
     ) {
-      return contextualTypeAndSymbol(node, checker);
+      const contextSymbol = contextualTypeAndSymbol(node, checker);
+      const contextType = contextSymbol.type;
+      if (contextType && !(contextType?.getFlags() & ts.TypeFlags.Any)) {
+        return contextSymbol;
+      }
     }
 
     // Don't emit anything when we are the property assignment name
@@ -326,7 +331,7 @@ function defineIdentifier(node: ts.Node, checker: ts.TypeChecker) {
       return defineSymbol(node.parent, checker);
     }
 
-    return directTypeAndSymbol(node, checker);
+    return followSymbol(directTypeAndSymbol(node, checker), checker);
   }
 }
 

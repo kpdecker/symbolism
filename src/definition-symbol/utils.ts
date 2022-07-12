@@ -1,5 +1,7 @@
 import ts from "typescript";
-import { isArraySymbol, isErrorType } from "../utils";
+import { dumpNode, dumpSymbol } from "../symbols";
+import { defineSymbol } from "./index";
+import { getSymbolDeclaration, isArraySymbol, isErrorType } from "../utils";
 
 export type DefinitionSymbol = {
   symbol: ts.Symbol | undefined;
@@ -96,6 +98,23 @@ export function getArrayType(inferred: DefinitionSymbol) {
   }
 
   return inferred;
+}
+
+export function followSymbol(
+  definition: DefinitionSymbol,
+  checker: ts.TypeChecker
+) {
+  const { symbol } = definition;
+  if (!symbol) {
+    return definition;
+  }
+
+  const typeDeclaration = getSymbolDeclaration(symbol);
+  if (typeDeclaration) {
+    return defineSymbol(typeDeclaration, checker);
+  }
+
+  return definition;
 }
 
 export function collectAllAncestorTypes(
