@@ -24,10 +24,11 @@ export function parseSymbolTable(
 
   const checker = program.getTypeChecker();
   sourceFiles.forEach((sourceFile) => {
-    logInfo(`Parsing symbols in ${sourceFile.fileName}`);
     if (config.exclude(sourceFile.fileName)) {
       return;
     }
+
+    logInfo(`Parsing symbols in ${sourceFile.fileName}`);
 
     ts.forEachChild(sourceFile, function visitNode(node) {
       // Filter nodes that we already know everything about
