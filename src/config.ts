@@ -51,10 +51,12 @@ export function parseConfig(configFilePath: string): Config {
   const min = config.min ?? 1;
 
   function exclude(fileName: string) {
+    const relativePath = relative(process.cwd(), fileName)
+      // Normalize node module paths if loaded outside of the project.
+      .replace(/.*\/node_modules\//, "node_modules/");
     return (
-      config.exclude?.some((pattern) =>
-        minimatch(relative(process.cwd(), fileName), pattern)
-      ) ?? false
+      config.exclude?.some((pattern) => minimatch(relativePath, pattern)) ??
+      false
     );
   }
 
