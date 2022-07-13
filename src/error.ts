@@ -18,6 +18,16 @@ export class NodeError extends Error {
 
     if (cause) {
       (this as any).cause = cause;
+
+      if (isRunningInJest()) {
+        // Jest will not show the cause in the stack trace.
+        this.stack = this.stack + "\n\nCaused by: " + cause.stack;
+      }
     }
   }
+}
+
+// https://stackoverflow.com/a/52231746/238459
+function isRunningInJest() {
+  return process.env.JEST_WORKER_ID !== undefined;
 }
