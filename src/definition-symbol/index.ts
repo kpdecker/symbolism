@@ -345,27 +345,6 @@ function defineVariableDeclaration(node: ts.Node, checker: ts.TypeChecker) {
   return directTypeAndSymbol(node.name, checker);
 }
 
-function handleIdentifierInCall(node: ts.Node, checker: ts.TypeChecker) {
-  if (
-    (ts.isIdentifier(node) ||
-      ts.isObjectLiteralExpression(node) ||
-      ts.isArrayLiteralExpression(node)) &&
-    (ts.isCallExpression(node.parent) || ts.isNewExpression(node.parent))
-  ) {
-    const parameterIndex = node.parent.arguments?.indexOf(node) ?? -1;
-    if (parameterIndex < 0) {
-      return;
-    }
-
-    const signature = checker.getResolvedSignature(node.parent);
-    const parameterSymbol = signature!.parameters[parameterIndex];
-    return {
-      symbol: parameterSymbol,
-      type: checker.getTypeOfSymbolAtLocation(parameterSymbol, node.parent),
-    };
-  }
-}
-
 function defineProperties(node: ts.Node, checker: ts.TypeChecker) {
   if (ts.isPropertyAssignment(node) || ts.isShorthandPropertyAssignment(node)) {
     const objectType = defineSymbol(node.parent, checker);
