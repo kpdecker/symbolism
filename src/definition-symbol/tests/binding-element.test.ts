@@ -69,7 +69,7 @@ describe("infer binding elements", () => {
               "kind": "BindingElement",
               "line": 4,
               "name": "...y",
-              "path": "{ foo, ...y }",
+              "path": "y",
             },
           ],
           "type": "{}",

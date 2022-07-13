@@ -28,3 +28,16 @@ export const nameWithParent: PathHandler = ({ node, getParentPath }) => {
     getParentPath() + "." + (node as ts.VariableDeclaration).name.getText()
   );
 };
+
+export const simpleNameWithParent: PathHandler = ({ node, getParentPath }) => {
+  invariant(
+    "name" in node,
+    "node must have a name: " + ts.SyntaxKind[node.kind]
+  );
+  const { name } = node as ts.VariableDeclaration;
+  if (ts.isIdentifier(name)) {
+    return getParentPath() + "." + name.text;
+  } else {
+    return getParentPath();
+  }
+};

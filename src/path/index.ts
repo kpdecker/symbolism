@@ -4,6 +4,7 @@ import {
   nameWithParent,
   nopPath,
   PathHandler,
+  simpleNameWithParent,
   skipNode,
 } from "./handlers";
 import { classOperators } from "./class";
@@ -80,7 +81,6 @@ const nodePathHandlers: Record<ts.SyntaxKind, PathHandler> = {
     const { node, getParentPath } = context;
     if (
       (isNamedDeclaration(node.parent) && node.parent.name === node) ||
-      ts.isBindingElement(node.parent) ||
       ts.isPropertyAssignment(node.parent) ||
       ts.isPropertyAccessExpression(node.parent) ||
       ts.isEnumMember(node.parent) ||
@@ -156,9 +156,9 @@ const nodePathHandlers: Record<ts.SyntaxKind, PathHandler> = {
 
   [ts.SyntaxKind.ObjectBindingPattern]: skipNode,
   [ts.SyntaxKind.ArrayBindingPattern]: skipNode,
-  [ts.SyntaxKind.BindingElement]: skipNode,
+  [ts.SyntaxKind.BindingElement]: nameWithParent,
 
-  [ts.SyntaxKind.VariableDeclaration]: nameWithParent,
+  [ts.SyntaxKind.VariableDeclaration]: simpleNameWithParent,
   [ts.SyntaxKind.VariableDeclarationList]: skipNode,
 
   [ts.SyntaxKind.EnumDeclaration]: nameWithParent,

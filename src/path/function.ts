@@ -1,7 +1,12 @@
 import invariant from "tiny-invariant";
 import ts, { findAncestor } from "typescript";
 import { invariantNode, isNamedDeclaration } from "../definition-symbol/utils";
-import { nameWithParent, pathHandler, skipNode } from "./handlers";
+import {
+  nameWithParent,
+  pathHandler,
+  simpleNameWithParent,
+  skipNode,
+} from "./handlers";
 
 export const functionOperators = pathHandler({
   [ts.SyntaxKind.CallExpression]: skipNode,
@@ -16,7 +21,7 @@ export const functionOperators = pathHandler({
 
   [ts.SyntaxKind.FunctionExpression]: skipNode,
   [ts.SyntaxKind.FunctionDeclaration]: nameWithParent,
-  [ts.SyntaxKind.Parameter]: nameWithParent,
+  [ts.SyntaxKind.Parameter]: simpleNameWithParent,
 
   [ts.SyntaxKind.Block]: skipNode,
   [ts.SyntaxKind.YieldExpression]: skipNode,

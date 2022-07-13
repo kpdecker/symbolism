@@ -74,7 +74,7 @@ describe("well known", () => {
         "kind": "Identifier",
         "line": 13,
         "name": "then",
-        "path": "{ then }",
+        "path": "then",
       }
     `);
     expect(dumpInferred(definition, checker)).toMatchInlineSnapshot(`
