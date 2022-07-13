@@ -27,8 +27,17 @@ describe("infer call parameter type", () => {
     const stringArgument = defineSymbol(callStatement.arguments[0], checker)!;
     expect(dumpInferred(stringArgument, checker)).toMatchInlineSnapshot(`
       Object {
-        "symbol": Array [],
-        "type": "string",
+        "symbol": Array [
+          Object {
+            "column": 1,
+            "fileName": "intrinsic",
+            "kind": "keyword",
+            "line": 1,
+            "name": "undefined",
+            "path": "undefined",
+          },
+        ],
+        "type": "undefined",
       }
     `);
 
@@ -66,8 +75,17 @@ describe("infer call parameter type", () => {
     const stringArgument = defineSymbol(callStatement.arguments[0], checker)!;
     expect(dumpInferred(stringArgument, checker)).toMatchInlineSnapshot(`
       Object {
-        "symbol": Array [],
-        "type": "string",
+        "symbol": Array [
+          Object {
+            "column": 1,
+            "fileName": "intrinsic",
+            "kind": "keyword",
+            "line": 1,
+            "name": "undefined",
+            "path": "undefined",
+          },
+        ],
+        "type": "undefined",
       }
     `);
 

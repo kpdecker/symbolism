@@ -112,7 +112,7 @@ describe("classes", () => {
             "path": "DeclaredClass",
           },
         ],
-        "type": "typeof DeclaredClass",
+        "type": "DeclaredClass",
       }
     `);
 
@@ -130,7 +130,7 @@ describe("classes", () => {
             "path": "DeclaredClass",
           },
         ],
-        "type": "typeof DeclaredClass",
+        "type": "DeclaredClass",
       }
     `);
   });

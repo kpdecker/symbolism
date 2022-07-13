@@ -302,9 +302,14 @@ function defineIdentifier(node: ts.Node, checker: ts.TypeChecker) {
       ts.isArrowFunction(node.parent)
     ) {
       const contextSymbol = contextualTypeAndSymbol(node, checker);
-      const contextType = contextSymbol.type;
-      if (contextType && !(contextType?.getFlags() & ts.TypeFlags.Any)) {
-        return contextSymbol;
+      const contextType = contextSymbol?.type;
+      if (
+        contextType &&
+        !(contextType?.getFlags() & ts.TypeFlags.Any) &&
+        // Failover to what has a symbol since that can be tracked
+        contextType.symbol
+      ) {
+        return followSymbol(contextSymbol, checker);
       }
     }
 
@@ -336,9 +341,8 @@ function defineIdentifier(node: ts.Node, checker: ts.TypeChecker) {
 }
 
 function defineVariableDeclaration(node: ts.Node, checker: ts.TypeChecker) {
-  if (ts.isVariableDeclaration(node)) {
-    return directTypeAndSymbol(node.name, checker);
-  }
+  invariantNode(node, ts.isVariableDeclaration);
+  return directTypeAndSymbol(node.name, checker);
 }
 
 function handleIdentifierInCall(node: ts.Node, checker: ts.TypeChecker) {
@@ -410,6 +414,19 @@ function defineBindingElement(node: ts.Node, checker: ts.TypeChecker) {
       ? bindingPattern.elements.indexOf(node) + ""
       : (node.propertyName || node.name).getText();
 
+    // This supports tuple types. Unclear on others
+    if (bindingPatternType?.type && isTypeReference(bindingPatternType.type)) {
+      const typeRefType = bindingPatternType.type;
+      const typeArguments = checker.getTypeArguments(typeRefType);
+      const typeArgument = typeArguments[+propertyName] || typeArguments[0];
+      if (typeArgument && !(typeArgument.getFlags() & ts.TypeFlags.Any)) {
+        return {
+          type: typeArgument,
+          symbol: typeArgument.symbol,
+        };
+      }
+    }
+
     return getPropertySymbol(
       node,
       bindingPatternType?.type!,
@@ -423,7 +440,11 @@ function defineBindingElement(node: ts.Node, checker: ts.TypeChecker) {
   }
 
   if (ts.isObjectBindingPattern(node) || ts.isArrayBindingPattern(node)) {
-    if (ts.isVariableDeclaration(node.parent) || ts.isParameter(node.parent)) {
+    if (
+      ts.isVariableDeclaration(node.parent) ||
+      ts.isParameter(node.parent) ||
+      ts.isBindingElement(node.parent)
+    ) {
       return defineSymbol(node.parent, checker);
     }
 
