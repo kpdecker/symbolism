@@ -1,8 +1,8 @@
-import invariant from "tiny-invariant";
 import ts from "typescript";
 import { dumpSymbol } from "../src/symbols";
 import { defineSymbol } from "../src/definition-symbol/index";
-import { getSymbolDeclaration, isIntrinsicType } from "../src/utils";
+import { getSymbolDeclaration } from "../src/utils";
+import path from "path";
 
 export function testStatement(source: string) {
   const program = mockProgram({
@@ -55,6 +55,44 @@ export function mockProgram(sourceFiles: Record<string, string>) {
       return process.cwd();
     },
     getDefaultLibFileName: ts.getDefaultLibFilePath,
+    resolveModuleNames(
+      moduleNames,
+      containingFile,
+      reusedNames,
+      redirectedReference,
+      options,
+      containingSourceFile?
+    ) {
+      return moduleNames.map(
+        (moduleName): ts.ResolvedModuleFull | undefined => {
+          const mockPaths = [
+            moduleName + ".ts",
+            moduleName + ".tsx",
+            moduleName,
+          ];
+          for (const mockPath of mockPaths) {
+            const mockedModule = sourceFiles[mockPath];
+            if (mockedModule) {
+              return {
+                resolvedFileName: mockPath,
+                extension: path.extname(mockPath) as ts.Extension,
+              };
+            }
+          }
+
+          const resolved = ts.resolveModuleName(
+            moduleName,
+            containingFile,
+            options,
+            host
+          );
+          if (resolved.resolvedModule) {
+            return resolved.resolvedModule;
+          }
+          return undefined;
+        }
+      );
+    },
     useCaseSensitiveFileNames() {
       return true;
     },

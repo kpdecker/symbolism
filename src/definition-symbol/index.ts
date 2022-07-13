@@ -5,6 +5,7 @@ import { dumpNode, dumpSymbol } from "../symbols";
 import { getPropertySymbol, isArraySymbol, isErrorType } from "../utils";
 import { classOperators } from "./class";
 import { functionOperators } from "./function";
+import { importOperators } from "./import";
 import { jsDocHandlers } from "./jsdoc";
 import { jsxSymbolHandlers } from "./jsx";
 import { tokenOperators } from "./tokens";
@@ -225,26 +226,6 @@ const nodeHandlers: Record<ts.SyntaxKind, DefinitionOperation> = {
   [ts.SyntaxKind.MethodSignature]: directTypeAndSymbol,
   [ts.SyntaxKind.TypeParameter]: directTypeAndSymbol,
 
-  // Import/Export
-  [ts.SyntaxKind.ImportType]: directTypeAndSymbol,
-  [ts.SyntaxKind.NamespaceExportDeclaration]: directTypeAndSymbol,
-  [ts.SyntaxKind.ImportEqualsDeclaration]: directTypeAndSymbol,
-  [ts.SyntaxKind.ImportDeclaration]: directTypeAndSymbol,
-  [ts.SyntaxKind.ImportClause]: directTypeAndSymbol,
-  [ts.SyntaxKind.NamespaceImport]: directTypeAndSymbol,
-  [ts.SyntaxKind.NamedImports]: directTypeAndSymbol,
-  [ts.SyntaxKind.ImportSpecifier]: directTypeAndSymbol,
-  [ts.SyntaxKind.ExportAssignment]: directTypeAndSymbol,
-  [ts.SyntaxKind.ExportDeclaration]: directTypeAndSymbol,
-  [ts.SyntaxKind.NamedExports]: directTypeAndSymbol,
-  [ts.SyntaxKind.NamespaceExport]: directTypeAndSymbol,
-  [ts.SyntaxKind.ExportSpecifier]: directTypeAndSymbol,
-  [ts.SyntaxKind.ExternalModuleReference]: directTypeAndSymbol,
-  [ts.SyntaxKind.ImportTypeAssertionContainer]: directTypeAndSymbol,
-  [ts.SyntaxKind.AssertClause]: directTypeAndSymbol,
-  [ts.SyntaxKind.AssertEntry]: directTypeAndSymbol,
-  [ts.SyntaxKind.MetaProperty]: directTypeAndSymbol, // import.foo
-
   // Error Constructs
   [ts.SyntaxKind.MissingDeclaration]: nopHandler,
   [ts.SyntaxKind.UnparsedPrologue]: nopHandler,
@@ -267,6 +248,7 @@ const nodeHandlers: Record<ts.SyntaxKind, DefinitionOperation> = {
   [ts.SyntaxKind.MergeDeclarationMarker]: nopHandler,
   [ts.SyntaxKind.EndOfDeclarationMarker]: nopHandler,
 
+  ...importOperators,
   ...functionOperators,
   ...classOperators,
   ...jsDocHandlers,
