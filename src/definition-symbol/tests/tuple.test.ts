@@ -40,7 +40,7 @@ function lookupNamedToken(node: ts.Node, name: string) {
 }
 
 describe("infer tuple types", () => {
-  it.only("should destructure tuple type", () => {
+  it("should destructure tuple type", () => {
     const destructureANodes = lookupNamedToken(sourceFile, "destructureA");
     const destructureBNodes = lookupNamedToken(sourceFile, "destructureB");
     const destructureCNodes = lookupNamedToken(sourceFile, "destructureC");
@@ -59,7 +59,16 @@ describe("infer tuple types", () => {
     expect(dumpInferred(defineSymbol(destructureANodes[1], checker), checker))
       .toMatchInlineSnapshot(`
       Object {
-        "symbol": Array [],
+        "symbol": Array [
+          Object {
+            "column": 6,
+            "fileName": "test.tsx",
+            "kind": "BindingElement",
+            "line": 12,
+            "name": "destructureA",
+            "path": "destructureA",
+          },
+        ],
         "type": "string",
       }
     `);
@@ -140,7 +149,16 @@ describe("infer tuple types", () => {
     expect(dumpInferred(defineSymbol(paramANodes[1], checker), checker))
       .toMatchInlineSnapshot(`
       Object {
-        "symbol": Array [],
+        "symbol": Array [
+          Object {
+            "column": 26,
+            "fileName": "test.tsx",
+            "kind": "BindingElement",
+            "line": 7,
+            "name": "paramA",
+            "path": "destructure.paramA",
+          },
+        ],
         "type": "string",
       }
     `);
@@ -211,8 +229,62 @@ describe("infer tuple types", () => {
     expect(dumpInferred(defineSymbol(stateyNodes[0], checker), checker))
       .toMatchInlineSnapshot(`
       Object {
-        "symbol": Array [],
-        "type": "number",
+        "symbol": Array [
+          Object {
+            "column": 0,
+            "fileName": "typescript/lib/lib.es5.d.ts",
+            "kind": "InterfaceDeclaration",
+            "line": 1275,
+            "name": "interface Array<T> {
+      ",
+            "path": "Array",
+          },
+          Object {
+            "column": 12,
+            "fileName": "typescript/lib/lib.es5.d.ts",
+            "kind": "VariableDeclaration",
+            "line": 1470,
+            "name": "Array: ArrayConstructor",
+            "path": "Array",
+          },
+          Object {
+            "column": 0,
+            "fileName": "typescript/lib/lib.es2015.core.d.ts",
+            "kind": "InterfaceDeclaration",
+            "line": 21,
+            "name": "interface Array<T> {
+      ",
+            "path": "Array",
+          },
+          Object {
+            "column": 0,
+            "fileName": "typescript/lib/lib.es2015.iterable.d.ts",
+            "kind": "InterfaceDeclaration",
+            "line": 58,
+            "name": "interface Array<T> {
+      ",
+            "path": "Array",
+          },
+          Object {
+            "column": 0,
+            "fileName": "typescript/lib/lib.es2015.symbol.wellknown.d.ts",
+            "kind": "InterfaceDeclaration",
+            "line": 94,
+            "name": "interface Array<T> {
+      ",
+            "path": "Array",
+          },
+          Object {
+            "column": 0,
+            "fileName": "typescript/lib/lib.es2016.array.include.d.ts",
+            "kind": "InterfaceDeclaration",
+            "line": 21,
+            "name": "interface Array<T> {
+      ",
+            "path": "Array",
+          },
+        ],
+        "type": "(string | ExplicitType)[]",
       }
     `);
     expect(dumpInferred(defineSymbol(setStateyNodes[0], checker), checker))

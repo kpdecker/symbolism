@@ -406,7 +406,7 @@ function defineBindingElement(node: ts.Node, checker: ts.TypeChecker) {
       ts.isParameter(node.parent) ||
       ts.isBindingElement(node.parent)
     ) {
-      return defineSymbol(node.parent, checker);
+      return followSymbol(defineSymbol(node.parent, checker), checker);
     }
 
     invariantNode(node.parent);

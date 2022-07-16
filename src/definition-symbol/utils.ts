@@ -1,7 +1,12 @@
 import ts from "typescript";
-import { dumpNode, dumpSymbol } from "../symbols";
 import { defineSymbol } from "./index";
-import { getSymbolDeclaration, isArraySymbol, isErrorType } from "../utils";
+import {
+  getSymbolDeclaration,
+  getSymbolTarget,
+  isArraySymbol,
+  isErrorType,
+} from "../utils";
+import invariant from "tiny-invariant";
 
 export type DefinitionSymbol = {
   symbol: ts.Symbol | undefined;
@@ -109,9 +114,33 @@ export function followSymbol(
     return definition;
   }
 
+  const symbolTarget = getSymbolTarget(symbol, checker);
+  if (symbolTarget !== symbol) {
+    const targetDeclaration = getSymbolDeclaration(symbol);
+    invariant(
+      targetDeclaration,
+      "Expected to find a declaration for the symbol"
+    );
+    return {
+      symbol: symbolTarget,
+      type: definition.type,
+    };
+  }
+
   const typeDeclaration = getSymbolDeclaration(symbol);
   if (typeDeclaration) {
-    return defineSymbol(typeDeclaration, checker);
+    const followedDefinition = defineSymbol(typeDeclaration, checker);
+
+    if (
+      // Check that we have a fully resolved definition
+      followedDefinition?.symbol &&
+      followedDefinition.type
+    ) {
+      return {
+        symbol: followedDefinition.symbol,
+        type: definition.type,
+      };
+    }
   }
 
   return definition;

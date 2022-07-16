@@ -139,3 +139,32 @@ export function getSymbolForModuleLike(
     return globalSymbols[0];
   }
 }
+
+// Via https://github.com/microsoft/TypeScript/blob/5d65c4dc26334ec7518d2472a9b3b69dac9ff2b5/src/services/utilities.ts#L2479-L2498
+export function getSymbolTarget(
+  symbol: ts.Symbol,
+  checker: ts.TypeChecker
+): ts.Symbol {
+  let next: ts.Symbol & { target?: ts.Symbol } = symbol;
+  while (isAliasSymbol(next) || (isTransientSymbol(next) && next.target)) {
+    if (isTransientSymbol(next) && next.target) {
+      next = next.target;
+    } else {
+      next = skipAlias(next, checker);
+    }
+  }
+  return next;
+}
+
+function isTransientSymbol(symbol: ts.Symbol) {
+  return (symbol.flags & ts.SymbolFlags.Transient) !== 0;
+}
+
+function isAliasSymbol(symbol: ts.Symbol): boolean {
+  return (symbol.flags & ts.SymbolFlags.Alias) !== 0;
+}
+function skipAlias(symbol: ts.Symbol, checker: ts.TypeChecker) {
+  return symbol.flags & ts.SymbolFlags.Alias
+    ? checker.getAliasedSymbol(symbol)
+    : symbol;
+}
