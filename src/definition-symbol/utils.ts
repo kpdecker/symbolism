@@ -101,11 +101,11 @@ export function getArrayType(inferred: DefinitionSymbol) {
 }
 
 export function followSymbol(
-  definition: DefinitionSymbol,
+  definition: DefinitionSymbol | undefined | null,
   checker: ts.TypeChecker
 ) {
-  const { symbol } = definition;
-  if (!symbol) {
+  const { symbol } = definition || {};
+  if (!symbol || !definition) {
     return definition;
   }
 
