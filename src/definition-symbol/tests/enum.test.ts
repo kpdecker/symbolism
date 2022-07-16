@@ -1,8 +1,7 @@
 import ts, { findAncestor } from "typescript";
 import {
   dumpInferred,
-  findNodesInTree,
-  getPropertyValueType,
+  findIdentifiers,
   mockProgram,
 } from "../../../test/utils";
 import { defineSymbol } from "../index";
@@ -18,11 +17,7 @@ describe("infer enum", () => {
     });
     const checker = program.getTypeChecker();
     const sourceFile = program.getSourceFile("test.ts")!;
-    const nodes = findNodesInTree(
-      sourceFile,
-      (node): node is ts.Identifier =>
-        ts.isIdentifier(node) && node.getText() === "foo"
-    );
+    const nodes = findIdentifiers(sourceFile, "foo");
 
     const declarationNode = findAncestor(nodes[0], ts.isEnumDeclaration)!;
     const enumDeclaration = defineSymbol(declarationNode, checker);

@@ -1,10 +1,6 @@
-import invariant from "tiny-invariant";
-import ts, { findAncestor } from "typescript";
 import {
   dumpInferred,
-  findNodeInTree,
-  findNodesInTree,
-  getPropertyValueType,
+  findIdentifiers,
   mockProgram,
 } from "../../../test/utils";
 import { defineSymbol } from "../index";
@@ -33,18 +29,12 @@ const program = mockProgram({
 const checker = program.getTypeChecker();
 const sourceFile = program.getSourceFile("test.tsx")!;
 
-function lookupNamedToken(node: ts.Node, name: string) {
-  return findNodesInTree(sourceFile, (node): node is ts.Identifier => {
-    return ts.isIdentifier(node) && node.text === name;
-  });
-}
-
 describe("infer tuple types", () => {
   it("should destructure tuple type", () => {
-    const destructureANodes = lookupNamedToken(sourceFile, "destructureA");
-    const destructureBNodes = lookupNamedToken(sourceFile, "destructureB");
-    const destructureCNodes = lookupNamedToken(sourceFile, "destructureC");
-    const nestedDestructureNodes = lookupNamedToken(
+    const destructureANodes = findIdentifiers(sourceFile, "destructureA");
+    const destructureBNodes = findIdentifiers(sourceFile, "destructureB");
+    const destructureCNodes = findIdentifiers(sourceFile, "destructureC");
+    const nestedDestructureNodes = findIdentifiers(
       sourceFile,
       "nestedDestructure"
     );
@@ -134,10 +124,10 @@ describe("infer tuple types", () => {
   });
 
   it("should destructure tuple in params", () => {
-    const paramANodes = lookupNamedToken(sourceFile, "paramA");
-    const paramBNodes = lookupNamedToken(sourceFile, "paramB");
-    const paramCNodes = lookupNamedToken(sourceFile, "paramC");
-    const paramDNodes = lookupNamedToken(sourceFile, "paramD");
+    const paramANodes = findIdentifiers(sourceFile, "paramA");
+    const paramBNodes = findIdentifiers(sourceFile, "paramB");
+    const paramCNodes = findIdentifiers(sourceFile, "paramC");
+    const paramDNodes = findIdentifiers(sourceFile, "paramD");
 
     expect(dumpInferred(defineSymbol(paramANodes[0], checker), checker))
       .toMatchInlineSnapshot(`
@@ -223,8 +213,8 @@ describe("infer tuple types", () => {
   });
 
   it("should handle hooks", () => {
-    const stateyNodes = lookupNamedToken(sourceFile, "statey");
-    const setStateyNodes = lookupNamedToken(sourceFile, "setStatey");
+    const stateyNodes = findIdentifiers(sourceFile, "statey");
+    const setStateyNodes = findIdentifiers(sourceFile, "setStatey");
 
     expect(dumpInferred(defineSymbol(stateyNodes[0], checker), checker))
       .toMatchInlineSnapshot(`

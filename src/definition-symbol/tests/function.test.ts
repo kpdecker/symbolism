@@ -1,9 +1,8 @@
-import ts, { findAncestor } from "typescript";
+import ts from "typescript";
 import {
   dumpInferred,
+  findIdentifiers,
   findNodeInTree,
-  findNodesInTree,
-  getPropertyValueType,
   mockProgram,
 } from "../../../test/utils";
 import { defineSymbol } from "../index";
@@ -37,11 +36,7 @@ describe("infer functions", () => {
       }
     `);
 
-    const nodes = findNodesInTree(
-      sourceFile,
-      (node): node is ts.Identifier =>
-        ts.isIdentifier(node) && node.getText() === "foo"
-    );
+    const nodes = findIdentifiers(sourceFile, "foo");
 
     const reference = defineSymbol(nodes[0], checker);
     expect(dumpInferred(reference, checker)).toMatchInlineSnapshot(`
@@ -96,11 +91,7 @@ describe("infer functions", () => {
     const checker = program.getTypeChecker();
     const sourceFile = program.getSourceFile("test.ts")!;
 
-    const nodes = findNodesInTree(
-      sourceFile,
-      (node): node is ts.Identifier =>
-        ts.isIdentifier(node) && node.getText() === "foo"
-    );
+    const nodes = findIdentifiers(sourceFile, "foo");
 
     // Declaration
     expect(dumpInferred(defineSymbol(nodes[0], checker), checker))

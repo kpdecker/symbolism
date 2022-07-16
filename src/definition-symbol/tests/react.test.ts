@@ -1,9 +1,8 @@
 import ts from "typescript";
 import {
   dumpInferred,
+  findIdentifiers,
   findNodeInTree,
-  findNodesInTree,
-  getPropertyValueType,
   mockProgram,
 } from "../../../test/utils";
 import { defineSymbol } from "../index";
@@ -52,15 +51,9 @@ const program = mockProgram({
 const checker = program.getTypeChecker();
 const sourceFile = program.getSourceFile("test.tsx")!;
 
-function lookupNamedToken(node: ts.Node, name: string) {
-  return findNodesInTree(sourceFile, (node): node is ts.Identifier => {
-    return ts.isIdentifier(node) && node.text === name;
-  });
-}
-
 describe("react", () => {
   it("should resolve imported types", () => {
-    const styledNodes = lookupNamedToken(sourceFile, "styled");
+    const styledNodes = findIdentifiers(sourceFile, "styled");
     const styledDefinition = defineSymbol(styledNodes[1], checker);
     expect(dumpInferred(styledDefinition, checker)).toMatchInlineSnapshot(`
       Object {
@@ -79,7 +72,7 @@ describe("react", () => {
     `);
   });
   it("should resolve template literals", () => {
-    const simpleTemplateNodes = lookupNamedToken(sourceFile, "SimpleTemplate");
+    const simpleTemplateNodes = findIdentifiers(sourceFile, "SimpleTemplate");
     const simpleTemplateDefinition = defineSymbol(
       simpleTemplateNodes[1],
       checker
@@ -102,10 +95,7 @@ describe("react", () => {
     `);
   });
   it("should resolve tagged template literals", () => {
-    const genericTemplateNodes = lookupNamedToken(
-      sourceFile,
-      "GenericTemplate"
-    );
+    const genericTemplateNodes = findIdentifiers(sourceFile, "GenericTemplate");
     const genericTemplateDefinition = defineSymbol(
       genericTemplateNodes[1],
       checker
@@ -128,7 +118,7 @@ describe("react", () => {
     `);
   });
   it("should resolve jsx attributes in styled template", () => {
-    const propertyNodes = lookupNamedToken(sourceFile, "myProp");
+    const propertyNodes = findIdentifiers(sourceFile, "myProp");
     const arrowDefinition = defineSymbol(propertyNodes[2].parent, checker);
     expect(dumpInferred(arrowDefinition, checker)).toMatchInlineSnapshot(`
       Object {
@@ -163,7 +153,7 @@ describe("react", () => {
     `);
   });
   it("should resolve jsx attributes", () => {
-    const propertyNodes = lookupNamedToken(sourceFile, "myProp");
+    const propertyNodes = findIdentifiers(sourceFile, "myProp");
     const propertyDefinition = defineSymbol(propertyNodes[3], checker);
     expect(dumpInferred(propertyDefinition, checker)).toMatchInlineSnapshot(`
       Object {
@@ -182,7 +172,7 @@ describe("react", () => {
     `);
   });
   it("should handle jsx expressions", () => {
-    const fooNodes = lookupNamedToken(sourceFile, "foo");
+    const fooNodes = findIdentifiers(sourceFile, "foo");
     const fooDefinition = defineSymbol(fooNodes[1], checker);
     expect(dumpInferred(fooDefinition, checker)).toMatchInlineSnapshot(`
       Object {
@@ -217,7 +207,7 @@ describe("react", () => {
     `);
   });
   it("should resolve jsx spread operators", () => {
-    const styledNodes = lookupNamedToken(sourceFile, "bat");
+    const styledNodes = findIdentifiers(sourceFile, "bat");
     const componentNode = styledNodes[1].parent;
     const styledDefinition = defineSymbol(componentNode, checker);
     expect(dumpInferred(styledDefinition, checker)).toMatchInlineSnapshot(`
@@ -237,7 +227,7 @@ describe("react", () => {
     `);
   });
   it("should resolve jsx return", () => {
-    const myComponentNodes = lookupNamedToken(sourceFile, "MyComponent");
+    const myComponentNodes = findIdentifiers(sourceFile, "MyComponent");
     const myComponentDefinition = defineSymbol(myComponentNodes[0], checker);
     expect(dumpInferred(myComponentDefinition, checker)).toMatchInlineSnapshot(`
       Object {
@@ -256,7 +246,7 @@ describe("react", () => {
     `);
   });
   it("should resolve jsx element property access", () => {
-    const styledNodes = lookupNamedToken(sourceFile, "Bar");
+    const styledNodes = findIdentifiers(sourceFile, "Bar");
     const componentNode = styledNodes[1].parent;
     const styledDefinition = defineSymbol(componentNode, checker);
     expect(dumpInferred(styledDefinition, checker)).toMatchInlineSnapshot(`
@@ -276,7 +266,7 @@ describe("react", () => {
     `);
   });
   it("should resolve jsx intrinsic element", () => {
-    const styledNodes = lookupNamedToken(sourceFile, "div");
+    const styledNodes = findIdentifiers(sourceFile, "div");
     const componentNode = styledNodes[2].parent;
     const styledDefinition = defineSymbol(componentNode, checker);
     const dump = dumpInferred(styledDefinition, checker);
@@ -316,7 +306,7 @@ describe("react", () => {
   });
 
   it("should resolve property parameters", () => {
-    const childrenNodes = lookupNamedToken(sourceFile, "children");
+    const childrenNodes = findIdentifiers(sourceFile, "children");
 
     // Declaration
     expect(dumpInferred(defineSymbol(childrenNodes[1], checker), checker))

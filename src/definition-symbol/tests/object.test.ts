@@ -1,9 +1,6 @@
-import ts from "typescript";
 import {
   dumpInferred,
-  findNodeInTree,
-  findNodesInTree,
-  getPropertyValueType,
+  findIdentifiers,
   mockProgram,
 } from "../../../test/utils";
 import { defineSymbol } from "../index";
@@ -33,9 +30,7 @@ const checker = program.getTypeChecker();
 const sourceFile = program.getSourceFile("test.tsx")!;
 
 function lookupNamedToken(name: string) {
-  return findNodesInTree(sourceFile, (node): node is ts.Identifier => {
-    return ts.isIdentifier(node) && node.text === name;
-  });
+  return findIdentifiers(sourceFile, name);
 }
 
 describe("objects", () => {

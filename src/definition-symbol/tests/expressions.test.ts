@@ -1,8 +1,8 @@
 import ts from "typescript";
 import {
   dumpInferred,
+  findIdentifiers,
   findNodeInTree,
-  findNodesInTree,
   mockProgram,
   testExpression,
   testStatement,
@@ -32,12 +32,7 @@ describe("infer expressions", () => {
     const checker = program.getTypeChecker();
     const sourceFile = program.getSourceFile("test.ts")!;
 
-    const fooNodes = findNodesInTree(
-      sourceFile,
-      (node): node is ts.Identifier => {
-        return ts.isIdentifier(node) && node.text === "foo";
-      }
-    );
+    const fooNodes = findIdentifiers(sourceFile, "foo");
 
     expect(dumpInferred(defineSymbol(fooNodes[1], checker), checker))
       .toMatchInlineSnapshot(`
@@ -56,12 +51,7 @@ describe("infer expressions", () => {
       }
     `);
 
-    const barNodes = findNodesInTree(
-      sourceFile,
-      (node): node is ts.Identifier => {
-        return ts.isIdentifier(node) && node.text === "bar";
-      }
-    );
+    const barNodes = findIdentifiers(sourceFile, "bar");
     expect(dumpInferred(defineSymbol(barNodes[0], checker), checker))
       .toMatchInlineSnapshot(`
       Object {

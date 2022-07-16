@@ -1,6 +1,7 @@
 import ts from "typescript";
 import {
   dumpInferred,
+  findIdentifiers,
   findNodeInTree,
   findNodesInTree,
   getPropertyValueType,
@@ -22,9 +23,7 @@ const checker = program.getTypeChecker();
 const sourceFile = program.getSourceFile("test.tsx")!;
 
 function lookupNamedToken(name: string) {
-  return findNodesInTree(sourceFile, (node): node is ts.Identifier => {
-    return ts.isIdentifier(node) && node.text === name;
-  });
+  return findIdentifiers(sourceFile, name);
 }
 
 describe("types", () => {

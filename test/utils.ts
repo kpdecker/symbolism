@@ -199,3 +199,9 @@ export function findNodesInTree<T extends ts.Node>(
 
   return ret;
 }
+
+export function findIdentifiers(node: ts.Node, name: string) {
+  return findNodesInTree(node, (node): node is ts.Identifier => {
+    return ts.isIdentifier(node) && node.text === name;
+  });
+}

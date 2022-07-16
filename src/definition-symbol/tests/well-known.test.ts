@@ -1,9 +1,6 @@
-import ts from "typescript";
 import {
   dumpInferred,
-  findNodeInTree,
-  findNodesInTree,
-  getPropertyValueType,
+  findIdentifiers,
   mockProgram,
 } from "../../../test/utils";
 import { dumpNode } from "../../symbols";
@@ -28,15 +25,9 @@ const program = mockProgram({
 const checker = program.getTypeChecker();
 const sourceFile = program.getSourceFile("test.tsx")!;
 
-function lookupNamedToken(node: ts.Node, name: string) {
-  return findNodesInTree(node, (node): node is ts.Identifier => {
-    return ts.isIdentifier(node) && node.getText() === name;
-  });
-}
-
 describe("well known", () => {
   it("should handle Promise.then", () => {
-    const nodes = lookupNamedToken(sourceFile, "then");
+    const nodes = findIdentifiers(sourceFile, "then");
     const definition = defineSymbol(nodes[0], checker);
     expect(dumpNode(nodes[0], checker)).toMatchInlineSnapshot(`
       Object {
@@ -65,7 +56,7 @@ describe("well known", () => {
     `);
   });
   it("should handle destructuring", () => {
-    const nodes = lookupNamedToken(sourceFile, "then");
+    const nodes = findIdentifiers(sourceFile, "then");
     const definition = defineSymbol(nodes[1], checker);
     expect(dumpNode(nodes[1], checker)).toMatchInlineSnapshot(`
       Object {
@@ -95,7 +86,7 @@ describe("well known", () => {
   });
 
   it("should handle JSON.parse", () => {
-    const nodes = lookupNamedToken(sourceFile, "parse");
+    const nodes = findIdentifiers(sourceFile, "parse");
 
     expect(dumpNode(nodes[0], checker)).toMatchInlineSnapshot(`
       Object {
