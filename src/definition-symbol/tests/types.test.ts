@@ -162,7 +162,7 @@ describe("types", () => {
       }
     `);
   });
-  it.only("should handle type literal", () => {
+  it("should handle type literal", () => {
     const nodes = findNodesInTree(sourceFile, ts.isTypeLiteralNode);
 
     expect(dumpInferred(defineSymbol(nodes[0], checker), checker))
