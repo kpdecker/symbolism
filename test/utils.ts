@@ -119,15 +119,39 @@ export function dumpInferred(
     return inferred;
   }
   const symbol = dumpSymbol(inferred!.symbol, checker);
-  symbol.forEach((x) => {
-    x.fileName = x.fileName.includes("node_modules")
-      ? x.fileName.replace(/.*\/node_modules\//, "")
-      : x.fileName;
+  const declarations = symbol.declaration.map((x) => {
+    return {
+      ...x,
+      fileName: x.fileName.includes("node_modules")
+        ? x.fileName.replace(/.*\/node_modules\//, "")
+        : x.fileName,
+    };
   });
   return {
     type: checker.typeToString(inferred?.type!),
-    symbol,
+    symbol: declarations,
   };
+}
+
+export function dumpFlags(
+  flags: number | undefined,
+  allFlags: Record<number, string>
+) {
+  const ret: string[] = [];
+  Object.keys(allFlags).forEach((key) => {
+    const number = parseInt(key, 10);
+    if (!isNaN(number)) {
+      if (flags! & number) {
+        if (
+          !allFlags[number]?.endsWith("Excludes") &&
+          allFlags[number] !== "All"
+        ) {
+          ret.push(allFlags[number]);
+        }
+      }
+    }
+  });
+  return ret;
 }
 
 export function getPropertyValueType(

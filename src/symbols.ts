@@ -2,12 +2,13 @@ import ts, { findAncestor } from "typescript";
 import invariant from "tiny-invariant";
 
 import { Config } from "./config";
-import { isIntrinsicType } from "./utils";
+import { getSymbolDeclaration, isIntrinsicType } from "./utils";
 import { lineAndColumn } from "./coverage";
 import { getSymbolFromLanguageServices } from "./definition-symbol/language-services";
 import { defineSymbol } from "./definition-symbol/index";
 import { namedPathToNode } from "./path/index";
 import { logInfo, logVerbose } from "./logger";
+import { dumpFlags } from "../test/utils";
 
 type SymbolTable = Map<ts.Symbol, Set<ts.Node>>;
 
@@ -196,12 +197,12 @@ export function extractSymbolSummary(
 
 export function dumpSymbolTable(symbols: SymbolTable, checker: ts.TypeChecker) {
   const ret: Map<
-    ReturnType<typeof dumpSymbol>[0],
-    ReturnType<typeof dumpSymbol>
+    ReturnType<typeof dumpSymbol>["declaration"][0],
+    ReturnType<typeof dumpSymbol>["declaration"]
   > = new Map();
 
   symbols.forEach((symbolMap, symbol) => {
-    const source = dumpSymbol(symbol, checker)![0];
+    const source = dumpSymbol(symbol, checker)?.declaration[0];
 
     symbolMap.forEach((node) => {
       ret.set(source, ret.get(source) || []);
@@ -215,32 +216,37 @@ export function dumpSymbolTable(symbols: SymbolTable, checker: ts.TypeChecker) {
 export function dumpSymbol(
   symbol: ts.Symbol | undefined,
   checker: ts.TypeChecker
-): ReturnType<typeof dumpNode>[] {
-  if (!symbol) {
-    return [];
-  }
-
-  const declarations = symbol.declarations || [];
+) {
+  const declarations = symbol?.declarations || [];
+  const declarationDump: ReturnType<typeof dumpNode>[] = declarations.map(
+    (node) => dumpNode(node, checker)
+  );
 
   if (
+    symbol &&
     !declarations.length &&
     isIntrinsicType(checker.getDeclaredTypeOfSymbol(symbol))
   ) {
-    return [
-      {
-        kind: "keyword",
-        name: symbol.getName(),
-        fileName: "intrinsic",
-        path: symbol.getName(),
-        line: 1,
-        column: 1,
-      },
-    ];
+    declarationDump.push({
+      kind: "keyword",
+      name: symbol.getName(),
+      fileName: "intrinsic",
+      path: symbol.getName(),
+      line: 1,
+      column: 1,
+    });
   }
 
-  invariant(declarations.length, "Missing declaration: " + symbol.getName());
+  invariant(
+    !symbol || declarationDump.length,
+    "Missing declaration: " + symbol?.getName()
+  );
 
-  return declarations.map((node) => dumpNode(node, checker));
+  return {
+    id: (symbol as any)?.id,
+    flags: dumpFlags(symbol?.getFlags(), ts.SymbolFlags),
+    declaration: declarationDump,
+  };
 }
 
 export function dumpNode(

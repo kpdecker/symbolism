@@ -40,7 +40,7 @@ describe("infer variable declaration", () => {
       }
     `);
 
-    expect(dumpSymbol(varSymbol!, checker)).toMatchInlineSnapshot(`
+    expect(dumpSymbol(varSymbol!, checker).declaration).toMatchInlineSnapshot(`
       Array [
         Object {
           "column": 14,

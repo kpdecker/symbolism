@@ -6,7 +6,6 @@ import {
   getPropertyValueType,
   mockProgram,
 } from "../../../test/utils";
-import { dumpSymbol } from "../../symbols";
 import { defineSymbol } from "../index";
 
 const program = mockProgram({

@@ -2,7 +2,7 @@ import ts from "typescript";
 import { NodeError } from "../error";
 import { logDebug, logVerbose } from "../logger";
 import { dumpNode, dumpSymbol } from "../symbols";
-import { getPropertySymbol, isArraySymbol, isErrorType } from "../utils";
+import { getPropertySymbol, isTypeReference } from "../utils";
 import { classOperators } from "./class";
 import { functionOperators } from "./function";
 import { importOperators } from "./import";

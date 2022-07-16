@@ -6,7 +6,6 @@ import {
   getPropertyValueType,
   mockProgram,
 } from "../../../test/utils";
-import { dumpNode, dumpSymbol } from "../../symbols";
 import { defineSymbol } from "../index";
 
 describe("infer object literal types", () => {
