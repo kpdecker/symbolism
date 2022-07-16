@@ -16,6 +16,7 @@ import {
   followSymbol,
   getArrayType,
   invariantNode,
+  isAssignmentExpression,
   isNamedDeclaration,
 } from "./utils";
 
@@ -71,43 +72,17 @@ const nodeHandlers: Record<ts.SyntaxKind, DefinitionOperation> = {
   [ts.SyntaxKind.BinaryExpression](node, checker) {
     invariantNode(node, ts.isBinaryExpression);
 
-    switch (node.operatorToken.kind) {
-      case ts.SyntaxKind.PlusEqualsToken:
-      case ts.SyntaxKind.MinusEqualsToken:
-      case ts.SyntaxKind.AsteriskAsteriskEqualsToken:
-      case ts.SyntaxKind.AsteriskEqualsToken:
-      case ts.SyntaxKind.SlashEqualsToken:
-      case ts.SyntaxKind.PercentEqualsToken:
-      case ts.SyntaxKind.AmpersandEqualsToken:
-      case ts.SyntaxKind.BarEqualsToken:
-      case ts.SyntaxKind.CaretEqualsToken:
-      //
-      case ts.SyntaxKind.LessThanLessThanEqualsToken:
-      case ts.SyntaxKind.GreaterThanGreaterThanGreaterThanEqualsToken:
-      case ts.SyntaxKind.GreaterThanGreaterThanEqualsToken:
-      case ts.SyntaxKind.BarBarEqualsToken:
-      case ts.SyntaxKind.AmpersandAmpersandEqualsToken:
-      case ts.SyntaxKind.QuestionQuestionEqualsToken:
-      case ts.SyntaxKind.EqualsToken:
-      case ts.SyntaxKind.AmpersandAmpersandEqualsToken:
-      case ts.SyntaxKind.BarBarEqualsToken:
-      case ts.SyntaxKind.QuestionQuestionEqualsToken:
-      case ts.SyntaxKind.EqualsToken:
-      case ts.SyntaxKind.PlusEqualsToken:
-      case ts.SyntaxKind.MinusEqualsToken: {
-        const left = contextualTypeAndSymbol(node.left, checker);
-        const right = contextualTypeAndSymbol(node.right, checker);
+    if (isAssignmentExpression(node)) {
+      const left = contextualTypeAndSymbol(node.left, checker);
+      const right = contextualTypeAndSymbol(node.right, checker);
 
-        // Select whoever has a type, giving LHS priority
-        return left?.symbol?.declarations &&
-          left?.symbol?.declarations.length > 0
-          ? left
-          : right;
-      }
-
-      default:
-        return directTypeAndSymbol(node, checker);
+      // Select whoever has a type, giving LHS priority
+      return left?.symbol?.declarations && left?.symbol?.declarations.length > 0
+        ? left
+        : right;
     }
+
+    return directTypeAndSymbol(node, checker);
   },
   [ts.SyntaxKind.ConditionalExpression]: directTypeAndSymbol,
   [ts.SyntaxKind.TemplateExpression]: directTypeAndSymbol,
@@ -309,7 +284,7 @@ function defineIdentifier(node: ts.Node, checker: ts.TypeChecker) {
       ts.isPropertyAssignment(node.parent) ||
       ts.isPropertyAccessExpression(node.parent) ||
       ts.isEnumMember(node.parent) ||
-      ts.isBinaryExpression(node.parent) ||
+      isAssignmentExpression(node.parent) ||
       ts.isConditionalExpression(node.parent) ||
       ts.isVariableDeclaration(node.parent) ||
       ts.isJsxAttribute(node.parent) ||

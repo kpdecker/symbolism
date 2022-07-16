@@ -47,6 +47,47 @@ export function isInheritingDeclaration(
   return ts.isClassLike(node) || ts.isInterfaceDeclaration(node);
 }
 
+export function isAssignmentExpression(
+  node: ts.Node
+): node is ts.AssignmentExpression<ts.AssignmentOperatorToken> {
+  if (!ts.isBinaryExpression(node)) {
+    return false;
+  }
+
+  const operator: ts.AssignmentOperator = node.operatorToken
+    .kind as ts.AssignmentOperator;
+  switch (operator) {
+    case ts.SyntaxKind.PlusEqualsToken:
+    case ts.SyntaxKind.MinusEqualsToken:
+    case ts.SyntaxKind.AsteriskAsteriskEqualsToken:
+    case ts.SyntaxKind.AsteriskEqualsToken:
+    case ts.SyntaxKind.SlashEqualsToken:
+    case ts.SyntaxKind.PercentEqualsToken:
+    case ts.SyntaxKind.AmpersandEqualsToken:
+    case ts.SyntaxKind.BarEqualsToken:
+    case ts.SyntaxKind.CaretEqualsToken:
+    //
+    case ts.SyntaxKind.LessThanLessThanEqualsToken:
+    case ts.SyntaxKind.GreaterThanGreaterThanGreaterThanEqualsToken:
+    case ts.SyntaxKind.GreaterThanGreaterThanEqualsToken:
+    case ts.SyntaxKind.BarBarEqualsToken:
+    case ts.SyntaxKind.AmpersandAmpersandEqualsToken:
+    case ts.SyntaxKind.QuestionQuestionEqualsToken:
+    case ts.SyntaxKind.EqualsToken:
+    case ts.SyntaxKind.AmpersandAmpersandEqualsToken:
+    case ts.SyntaxKind.BarBarEqualsToken:
+    case ts.SyntaxKind.QuestionQuestionEqualsToken:
+    case ts.SyntaxKind.EqualsToken:
+    case ts.SyntaxKind.PlusEqualsToken:
+    case ts.SyntaxKind.MinusEqualsToken:
+      return true;
+
+    default:
+      const defaultAssertion: never = operator;
+      return false;
+  }
+}
+
 // Infers definition from where the symbol is defined vs. explicit types.
 // I.e. for jsx attributes, it resolves the props for the parent element.
 export function contextualTypeAndSymbol(

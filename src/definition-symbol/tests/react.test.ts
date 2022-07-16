@@ -10,7 +10,7 @@ import { defineSymbol } from "../index";
 
 const program = mockProgram({
   "test.tsx": `
-    import React from 'react';
+    import React, { ReactNode } from 'react';
     import styled from '@emotion/styled';
 
     const SimpleTemplate = styled.div\`
@@ -42,6 +42,10 @@ const program = mockProgram({
           <bat.Bar myProp={2} />
         </soup>
       );
+    }
+
+    export function WithInlineProps({ children }: { children: ReactNode; }) {
+      return <>{bat && children}</>;
     }
   `,
 });
@@ -307,6 +311,64 @@ describe("react", () => {
       Object {
         "symbol": Array [],
         "type": "any",
+      }
+    `);
+  });
+
+  it("should resolve property parameters", () => {
+    const childrenNodes = lookupNamedToken(sourceFile, "children");
+
+    // Declaration
+    expect(dumpInferred(defineSymbol(childrenNodes[1], checker), checker))
+      .toMatchInlineSnapshot(`
+      Object {
+        "symbol": Array [
+          Object {
+            "column": 52,
+            "fileName": "test.tsx",
+            "kind": "PropertySignature",
+            "line": 36,
+            "name": "children: ReactNode;",
+            "path": "WithInlineProps.children",
+          },
+        ],
+        "type": "ReactNode",
+      }
+    `);
+
+    // Destructure
+    expect(dumpInferred(defineSymbol(childrenNodes[0], checker), checker))
+      .toMatchInlineSnapshot(`
+      Object {
+        "symbol": Array [
+          Object {
+            "column": 52,
+            "fileName": "test.tsx",
+            "kind": "PropertySignature",
+            "line": 36,
+            "name": "children: ReactNode;",
+            "path": "WithInlineProps.children",
+          },
+        ],
+        "type": "ReactNode",
+      }
+    `);
+
+    // Use
+    expect(dumpInferred(defineSymbol(childrenNodes[2], checker), checker))
+      .toMatchInlineSnapshot(`
+      Object {
+        "symbol": Array [
+          Object {
+            "column": 52,
+            "fileName": "test.tsx",
+            "kind": "PropertySignature",
+            "line": 36,
+            "name": "children: ReactNode;",
+            "path": "WithInlineProps.children",
+          },
+        ],
+        "type": "ReactNode",
       }
     `);
   });
