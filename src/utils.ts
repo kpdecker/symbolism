@@ -1,12 +1,6 @@
 import ts from "typescript";
 
 export function isArraySymbol(symbol: ts.Symbol): boolean {
-  // const arraySymbol = checker
-  //   .getSymbolsInScope(node, ts.SymbolFlags.Type)
-  //   .find((s) => s.name === 'Array');
-
-  // return type.symbol === arraySymbol;
-
   return symbol.getName() === "Array";
 }
 
