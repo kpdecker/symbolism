@@ -185,10 +185,107 @@ describe("infer expressions", () => {
   });
 
   it("should handle conditional expression", () => {
-    expect(testExpression("console ? Error : Promise")).toMatchInlineSnapshot(`
+    const program = mockProgram({
+      "test.ts": "var bar = console ? Error : Promise;",
+    });
+    const checker = program.getTypeChecker();
+    const sourceFile = program.getSourceFile("test.ts")!;
+    const node = findNodeInTree(sourceFile, ts.isVariableDeclaration);
+
+    expect(dumpInferred(defineSymbol(node?.initializer!, checker)!, checker))
+      .toMatchInlineSnapshot(`
       Object {
         "symbol": Array [],
         "type": "ErrorConstructor | PromiseConstructor",
+      }
+    `);
+
+    const consoleNodes = findIdentifiers(sourceFile, "console");
+    expect(dumpInferred(defineSymbol(consoleNodes[0], checker)!, checker))
+      .toMatchInlineSnapshot(`
+      Object {
+        "symbol": Array [
+          Object {
+            "column": 12,
+            "fileName": "typescript/lib/lib.dom.d.ts",
+            "kind": "VariableDeclaration",
+            "line": 17177,
+            "name": "console: Console",
+            "path": "console",
+          },
+        ],
+        "type": "Console",
+      }
+    `);
+
+    const errorNodes = findIdentifiers(sourceFile, "Error");
+    expect(dumpInferred(defineSymbol(errorNodes[0], checker)!, checker))
+      .toMatchInlineSnapshot(`
+      Object {
+        "symbol": Array [
+          Object {
+            "column": 0,
+            "fileName": "typescript/lib/lib.es5.d.ts",
+            "kind": "InterfaceDeclaration",
+            "line": 1027,
+            "name": "interface Error {
+      ",
+            "path": "Error",
+          },
+          Object {
+            "column": 12,
+            "fileName": "typescript/lib/lib.es5.d.ts",
+            "kind": "VariableDeclaration",
+            "line": 1039,
+            "name": "Error: ErrorConstructor",
+            "path": "Error",
+          },
+        ],
+        "type": "ErrorConstructor",
+      }
+    `);
+
+    const promiseNodes = findIdentifiers(sourceFile, "Promise");
+    expect(dumpInferred(defineSymbol(promiseNodes[0], checker)!, checker))
+      .toMatchInlineSnapshot(`
+      Object {
+        "symbol": Array [
+          Object {
+            "column": 0,
+            "fileName": "typescript/lib/lib.es5.d.ts",
+            "kind": "InterfaceDeclaration",
+            "line": 1501,
+            "name": "interface Promise<T> {
+      ",
+            "path": "Promise",
+          },
+          Object {
+            "column": 0,
+            "fileName": "typescript/lib/lib.es2015.iterable.d.ts",
+            "kind": "InterfaceDeclaration",
+            "line": 218,
+            "name": "interface Promise<T> { }",
+            "path": "Promise",
+          },
+          Object {
+            "column": 12,
+            "fileName": "typescript/lib/lib.es2015.promise.d.ts",
+            "kind": "VariableDeclaration",
+            "line": 78,
+            "name": "Promise: PromiseConstructor",
+            "path": "Promise",
+          },
+          Object {
+            "column": 0,
+            "fileName": "typescript/lib/lib.es2015.symbol.wellknown.d.ts",
+            "kind": "InterfaceDeclaration",
+            "line": 173,
+            "name": "interface Promise<T> {
+      ",
+            "path": "Promise",
+          },
+        ],
+        "type": "PromiseConstructor",
       }
     `);
   });

@@ -285,7 +285,6 @@ function defineIdentifier(node: ts.Node, checker: ts.TypeChecker) {
       ts.isPropertyAccessExpression(node.parent) ||
       ts.isEnumMember(node.parent) ||
       isAssignmentExpression(node.parent) ||
-      ts.isConditionalExpression(node.parent) ||
       ts.isVariableDeclaration(node.parent) ||
       ts.isJsxAttribute(node.parent) ||
       ts.isClassExpression(node.parent)
