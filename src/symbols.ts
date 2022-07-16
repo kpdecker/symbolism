@@ -4,7 +4,6 @@ import invariant from "tiny-invariant";
 import { Config } from "./config";
 import { getSymbolDeclaration, isIntrinsicType } from "./utils";
 import { lineAndColumn } from "./coverage";
-import { getSymbolFromLanguageServices } from "./definition-symbol/language-services";
 import { defineSymbol } from "./definition-symbol/index";
 import { namedPathToNode } from "./path/index";
 import { logInfo, logVerbose } from "./logger";
@@ -12,11 +11,7 @@ import { dumpFlags } from "../test/utils";
 
 type SymbolTable = Map<ts.Symbol, Set<ts.Node>>;
 
-export function parseSymbolTable(
-  program: ts.Program,
-  services: ts.LanguageService,
-  config: Config
-) {
+export function parseSymbolTable(program: ts.Program, config: Config) {
   const sourceFiles = program
     .getSourceFiles()
     .filter(({ fileName }) => !config.exclude(fileName));
