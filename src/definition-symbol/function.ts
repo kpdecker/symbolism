@@ -1,11 +1,6 @@
 import ts, { findAncestor } from "typescript";
 import { defineSymbol } from "./index";
-import {
-  contextualTypeAndSymbol,
-  directTypeAndSymbol,
-  invariantNode,
-  nodeOperators,
-} from "./utils";
+import { directTypeAndSymbol, invariantNode, nodeOperators } from "./utils";
 
 export const functionOperators = nodeOperators({
   [ts.SyntaxKind.CallExpression]: defineCallReturn,

@@ -1,13 +1,8 @@
 import * as ts from "typescript";
-import { existsSync, readFileSync } from "fs";
 import { Config } from "./config";
-import {
-  getNodeAtPosition,
-  getSymbolDeclaration,
-  getSymbolForModuleLike,
-} from "./utils";
+import { getSymbolDeclaration } from "./utils";
 import { initTypescript } from "./typescript";
-import { dumpNode, dumpSymbolTable, parseSymbolTable } from "./symbols";
+import { dumpNode, extractSymbolSummary, parseSymbolTable } from "./symbols";
 import { lineAndColumn, LineAndColumn } from "./coverage";
 import { namedPathToNode, pathMatchesTokenFilter } from "./path/index";
 

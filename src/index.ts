@@ -6,7 +6,6 @@ import { parseConfig } from "./config";
 import { isLocationCovered, parseCoverage } from "./coverage";
 import { findCoverageLocations } from "./parser";
 import { relative } from "path";
-import ts from "typescript";
 
 program.option("-c, --config <path>", "config file path", "./.token-cov.json");
 program.argument("<coverage json path>", "Coverage json file");

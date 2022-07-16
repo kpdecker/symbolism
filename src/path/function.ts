@@ -1,5 +1,4 @@
-import invariant from "tiny-invariant";
-import ts, { findAncestor } from "typescript";
+import ts from "typescript";
 import { invariantNode, isNamedDeclaration } from "../definition-symbol/utils";
 import {
   nameWithParent,

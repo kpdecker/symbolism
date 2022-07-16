@@ -1,7 +1,7 @@
 import ts from "typescript";
 import { NodeError } from "../error";
-import { logDebug, logVerbose } from "../logger";
-import { dumpNode, dumpSymbol } from "../symbols";
+import { logDebug } from "../logger";
+import { dumpNode } from "../symbols";
 import { getPropertySymbol, isTypeReference } from "../utils";
 import { classOperators } from "./class";
 import { functionOperators } from "./function";
@@ -23,7 +23,6 @@ function nopHandler() {
   return null;
 }
 
-// TODO: Remove partial once fully spec
 const nodeHandlers: Record<ts.SyntaxKind, DefinitionOperation> = {
   [ts.SyntaxKind.SourceFile]: directTypeAndSymbol,
 
@@ -100,7 +99,8 @@ const nodeHandlers: Record<ts.SyntaxKind, DefinitionOperation> = {
         const right = contextualTypeAndSymbol(node.right, checker);
 
         // Select whoever has a type, giving LHS priority
-        return left.symbol?.declarations && left.symbol?.declarations.length > 0
+        return left?.symbol?.declarations &&
+          left?.symbol?.declarations.length > 0
           ? left
           : right;
       }

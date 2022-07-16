@@ -1,5 +1,5 @@
 import ts from "typescript";
-import { literalText, nopPath, pathHandler } from "./handlers";
+import { nopPath, pathHandler } from "./handlers";
 
 export const jsDocHandlers = pathHandler({
   [ts.SyntaxKind.JSDocTypeExpression]: nopPath,

@@ -1,4 +1,4 @@
-import ts, { isMappedTypeNode, isTypeOfExpression } from "typescript";
+import ts from "typescript";
 import {
   literalText,
   nameWithParent,

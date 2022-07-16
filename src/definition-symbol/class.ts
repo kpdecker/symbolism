@@ -1,4 +1,3 @@
-import invariant from "tiny-invariant";
 import ts, { findAncestor } from "typescript";
 import { getPropertySymbol } from "../utils";
 import { defineSymbol } from "./index";
