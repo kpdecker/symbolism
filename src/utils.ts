@@ -32,8 +32,11 @@ const intrinsicTypes =
 export function isIntrinsicType(type: ts.Type) {
   return (type.flags & intrinsicTypes) !== 0;
 }
-export function isTypeReference(type: ts.Type): type is ts.TypeReference {
+export function isTypeReference(
+  type: ts.Type | undefined
+): type is ts.TypeReference {
   return !!(
+    type &&
     type.flags & ts.TypeFlags.Object &&
     (type as ts.ObjectType).objectFlags & ts.ObjectFlags.Reference
   );
