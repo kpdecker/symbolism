@@ -6,7 +6,7 @@ import { getSymbolDeclaration, isIntrinsicType } from "./utils";
 import { lineAndColumn } from "./coverage";
 import { defineSymbol } from "./definition-symbol/index";
 import { namedPathToNode } from "./path/index";
-import { logInfo, logVerbose } from "./logger";
+import { logInfo, LogLevel, logVerbose, logWarn, setLogLevel } from "./logger";
 import { dumpFlags } from "../test/utils";
 
 type SymbolTable = Map<ts.Symbol, Set<ts.Node>>;
@@ -127,6 +127,14 @@ export function parseSymbolTable(program: ts.Program, config: Config) {
         // Don't omit the declaration case
         const definitionNode = getSymbolDeclaration(definitionSymbol);
         if (!definitionNode) {
+          if (!(definitionSymbol.flags & ts.SymbolFlags.Transient)) {
+            logWarn(
+              "Definition symbol lacking declaration",
+              dumpNode(node, checker),
+              dumpSymbol(definitionSymbol, checker)
+            );
+          }
+
           return;
         }
         invariant(definitionNode);
