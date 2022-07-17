@@ -91,13 +91,13 @@ export function parseSymbolTable(program: ts.Program, config: Config) {
         // If the type checker resolved a direct type, use that
         definitionSymbol = type?.getSymbol();
 
-        if (definitionSymbol === undefined) {
+        if (!getSymbolDeclaration(definitionSymbol)) {
           const inferredType = defineSymbol(node, checker);
           definitionSymbol = inferredType?.symbol;
         }
 
         // If this is a function parameter then we are at our identity
-        if (definitionSymbol === undefined && symbolDeclaration) {
+        if (!getSymbolDeclaration(definitionSymbol) && symbolDeclaration) {
           if (ts.isParameter(symbolDeclaration)) {
             const parameter = symbolDeclaration;
             if (
@@ -110,7 +110,7 @@ export function parseSymbolTable(program: ts.Program, config: Config) {
         }
 
         // Variable declarations are also identity
-        if (definitionSymbol === undefined && symbolDeclaration) {
+        if (!getSymbolDeclaration(definitionSymbol) && symbolDeclaration) {
           if (
             ts.isVariableDeclaration(symbolDeclaration) ||
             ts.isPropertySignature(symbolDeclaration) ||
