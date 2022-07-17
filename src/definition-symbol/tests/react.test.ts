@@ -44,7 +44,11 @@ const program = mockProgram({
     }
 
     export function WithInlineProps({ children }: { children: ReactNode; }) {
-      return <>{bat && children}</>;
+      return <>{bat && children}<WithAnyProp anyProp /></>;
+    }
+
+    export function WithAnyProps({ anyProp }) {
+      return <>{anyProp}</>;
     }
   `,
 });
@@ -362,5 +366,52 @@ describe("react", () => {
       }
     `);
   });
+
+  it("should handle implicit any props", () => {
+    const ignorePropNodes = findIdentifiers(sourceFile, "anyProp");
+
+    // Attribute
+    // Note that could not find a way to lookup the destructured property
+    expect(
+      dumpInferred(defineSymbol(ignorePropNodes[0], checker), checker)
+    ).toMatchInlineSnapshot(`undefined`);
+
+    // Definition
+    expect(dumpInferred(defineSymbol(ignorePropNodes[1], checker), checker))
+      .toMatchInlineSnapshot(`
+      Object {
+        "symbol": Array [
+          Object {
+            "column": 35,
+            "fileName": "test.tsx",
+            "kind": "BindingElement",
+            "line": 40,
+            "name": "anyProp",
+            "path": "WithAnyProps.anyProp",
+          },
+        ],
+        "type": "any",
+      }
+    `);
+
+    // Use
+    expect(dumpInferred(defineSymbol(ignorePropNodes[2], checker), checker))
+      .toMatchInlineSnapshot(`
+      Object {
+        "symbol": Array [
+          Object {
+            "column": 35,
+            "fileName": "test.tsx",
+            "kind": "BindingElement",
+            "line": 40,
+            "name": "anyProp",
+            "path": "WithAnyProps.anyProp",
+          },
+        ],
+        "type": "any",
+      }
+    `);
+  });
+
   // TODO: Object literal inference in attributes
 });

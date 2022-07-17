@@ -362,7 +362,7 @@ function defineBindingElement(node: ts.Node, checker: ts.TypeChecker) {
       }
     }
 
-    return getPropertySymbol(
+    const propertyDefinition = getPropertySymbol(
       node,
       bindingPatternType?.type!,
       checker,
@@ -372,6 +372,15 @@ function defineBindingElement(node: ts.Node, checker: ts.TypeChecker) {
         numberIndex: ts.isArrayBindingPattern(bindingPattern),
       }
     );
+
+    // The type resolved to an intrinsic type. This is likely
+    // a declaration without further typing. Attempt to resolve
+    // via the name identifier.
+    if (!propertyDefinition?.symbol?.declarations?.length) {
+      return directTypeAndSymbol(node.name, checker);
+    }
+
+    return propertyDefinition;
   }
 
   if (ts.isObjectBindingPattern(node) || ts.isArrayBindingPattern(node)) {
