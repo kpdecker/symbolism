@@ -19,6 +19,12 @@ const program = mockProgram({
     functionValue;
     Source.stringValue;
     Source.functionValue;
+
+    test({
+      foo: stringValue
+    });
+
+    function test(properties: any = {}) {}
   `,
 });
 const checker = program.getTypeChecker();
@@ -50,6 +56,24 @@ describe("imports", () => {
       }
     `);
     expect(dumpInferred(defineSymbol(stringValueNodes[1], checker), checker))
+      .toMatchInlineSnapshot(`
+      Object {
+        "symbol": Array [
+          Object {
+            "column": 17,
+            "fileName": "source.ts",
+            "kind": "VariableDeclaration",
+            "line": 2,
+            "name": "stringValue = \\"foo\\"",
+            "path": "stringValue",
+          },
+        ],
+        "type": "\\"foo\\"",
+      }
+    `);
+
+    // In object literal
+    expect(dumpInferred(defineSymbol(stringValueNodes[2], checker), checker))
       .toMatchInlineSnapshot(`
       Object {
         "symbol": Array [

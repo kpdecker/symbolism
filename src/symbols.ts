@@ -114,13 +114,20 @@ export function parseSymbolTable(program: ts.Program, config: Config) {
           if (
             ts.isVariableDeclaration(symbolDeclaration) ||
             ts.isPropertySignature(symbolDeclaration) ||
-            ts.isPropertyAssignment(symbolDeclaration)
+            ts.isPropertyAssignment(symbolDeclaration) ||
+            ts.isBindingElement(symbolDeclaration)
           ) {
             definitionSymbol = symbol;
           }
         }
 
         if (!definitionSymbol) {
+          logWarn(
+            `No definition symbol found`,
+            dumpNode(node, checker),
+            symbolDeclaration && dumpNode(symbolDeclaration, checker),
+            definitionSymbol
+          );
           return;
         }
 
@@ -226,21 +233,25 @@ export function dumpSymbol(
   );
 
   if (symbol && !declarations.length) {
-    if (symbol.flags & ts.SymbolFlags.Transient) {
+    const name = symbol.getName();
+    if (
+      symbol.flags & ts.SymbolFlags.Transient &&
+      !["undefined", "arguments"].includes(name)
+    ) {
       declarationDump.push({
         kind: "transient",
-        name: symbol.getName(),
+        name: name,
         fileName: "transient",
-        path: symbol.getName(),
+        path: name,
         line: 1,
         column: 1,
       });
     } else if (isIntrinsicType(checker.getDeclaredTypeOfSymbol(symbol))) {
       declarationDump.push({
         kind: "keyword",
-        name: symbol.getName(),
+        name: name,
         fileName: "intrinsic",
-        path: symbol.getName(),
+        path: name,
         line: 1,
         column: 1,
       });

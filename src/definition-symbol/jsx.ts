@@ -46,12 +46,6 @@ export const jsxSymbolHandlers = nodeOperators({
 
     const name = node.name.getText();
 
-    // isIgnoredJsxProperty
-    // https://github.com/microsoft/TypeScript/blob/5d65c4dc26334ec7518d2472a9b3b69dac9ff2b5/src/compiler/checker.ts#L18323-L18325
-    if (name.includes("-")) {
-      return undefined;
-    }
-
     const propertyDefinition = getPropertySymbol(
       node,
       properties.type!,
@@ -76,6 +70,12 @@ export const jsxSymbolHandlers = nodeOperators({
         bindingElement.propertyName || bindingElement.name,
         checker
       );
+    }
+
+    // isIgnoredJsxProperty
+    // https://github.com/microsoft/TypeScript/blob/5d65c4dc26334ec7518d2472a9b3b69dac9ff2b5/src/compiler/checker.ts#L18323-L18325
+    if (name.includes("-")) {
+      return null;
     }
 
     return propertyDefinition;

@@ -140,15 +140,14 @@ export function dumpFlags(
   const ret: string[] = [];
   Object.keys(allFlags).forEach((key) => {
     const number = parseInt(key, 10);
-    if (!isNaN(number)) {
-      if (flags! & number) {
-        if (
-          !allFlags[number]?.endsWith("Excludes") &&
-          allFlags[number] !== "All"
-        ) {
-          ret.push(allFlags[number]);
-        }
-      }
+    if (
+      // Flag is set
+      number &&
+      (flags! & number) === number &&
+      // And it's not a combined flag
+      !(~flags! & number)
+    ) {
+      ret.push(allFlags[number]);
     }
   });
   return ret;

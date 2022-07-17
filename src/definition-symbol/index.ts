@@ -286,7 +286,6 @@ function defineIdentifier(node: ts.Node, checker: ts.TypeChecker) {
     if (
       (isNamedDeclaration(node.parent) && node.parent.name === node) ||
       ts.isBindingElement(node.parent) ||
-      ts.isPropertyAssignment(node.parent) ||
       ts.isPropertyAccessExpression(node.parent) ||
       ts.isEnumMember(node.parent) ||
       isAssignmentExpression(node.parent) ||
@@ -294,7 +293,10 @@ function defineIdentifier(node: ts.Node, checker: ts.TypeChecker) {
       ts.isJsxAttribute(node.parent) ||
       ts.isClassExpression(node.parent)
     ) {
-      return defineSymbol(node.parent, checker);
+      const parentDefinition = defineSymbol(node.parent, checker);
+      if (parentDefinition) {
+        return parentDefinition;
+      }
     }
 
     return followSymbol(directTypeAndSymbol(node, checker), checker);
@@ -314,9 +316,32 @@ function defineProperties(node: ts.Node, checker: ts.TypeChecker) {
     }
     const propertyName = node.name.getText();
 
-    return getPropertySymbol(node, objectType.type, checker, propertyName, {
-      stringIndex: true,
-    });
+    const propertyDefinition = getPropertySymbol(
+      node,
+      objectType.type,
+      checker,
+      propertyName,
+      {
+        stringIndex: true,
+      }
+    );
+
+    if (!propertyDefinition && ts.isShorthandPropertyAssignment(node)) {
+      const shorthandSymbol = checker.getShorthandAssignmentValueSymbol(node);
+      if (shorthandSymbol) {
+        return followSymbol(
+          {
+            symbol: shorthandSymbol,
+            type: checker.getTypeOfSymbolAtLocation(shorthandSymbol, node),
+          },
+          checker
+        );
+      }
+
+      return directTypeAndSymbol(node.name, checker);
+    }
+
+    return propertyDefinition;
   }
   if (
     ts.isPropertyAccessExpression(node) ||

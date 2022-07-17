@@ -85,6 +85,7 @@ describe("infer functions", () => {
           foo
         }) {
           console.log(foo);
+          console.log({ foo });
         }
       `,
     });
@@ -131,6 +132,24 @@ describe("infer functions", () => {
 
     // Use
     expect(dumpInferred(defineSymbol(nodes[2], checker), checker))
+      .toMatchInlineSnapshot(`
+        Object {
+          "symbol": Array [
+            Object {
+              "column": 30,
+              "fileName": "test.ts",
+              "kind": "PropertySignature",
+              "line": 2,
+              "name": "foo: string",
+              "path": "ExplicitType.foo",
+            },
+          ],
+          "type": "string",
+        }
+    `);
+
+    // Shorthand property
+    expect(dumpInferred(defineSymbol(nodes[3], checker), checker))
       .toMatchInlineSnapshot(`
         Object {
           "symbol": Array [

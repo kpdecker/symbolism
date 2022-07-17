@@ -372,9 +372,22 @@ describe("react", () => {
 
   it("should ignore dash props", () => {
     const ignorePropNodes = findIdentifiers(sourceFile, "ignore-prop");
-    expect(
-      dumpInferred(defineSymbol(ignorePropNodes[0], checker), checker)
-    ).toMatchInlineSnapshot(`undefined`);
+    expect(dumpInferred(defineSymbol(ignorePropNodes[0], checker), checker))
+      .toMatchInlineSnapshot(`
+      Object {
+        "symbol": Array [
+          Object {
+            "column": 47,
+            "fileName": "test.tsx",
+            "kind": "JsxAttribute",
+            "line": 30,
+            "name": "ignore-prop",
+            "path": "GenericTemplate.ignore-prop",
+          },
+        ],
+        "type": "true",
+      }
+    `);
   });
 
   it("should handle implicit any props", () => {

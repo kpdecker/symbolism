@@ -2,8 +2,8 @@ import invariant from "tiny-invariant";
 import ts, { findAncestor } from "typescript";
 import {
   dumpInferred,
+  findIdentifiers,
   findNodeInTree,
-  getPropertyValueType,
   mockProgram,
 } from "../../../test/utils";
 import { defineSymbol } from "../index";
@@ -308,7 +308,35 @@ describe("infer object literal types", () => {
     `);
   });
 
+  it("should resolve computed property names", () => {
+    const program = mockProgram({
+      "test.ts": `
+        const x: [number] | [number, number ];
+        x.length;
+      `,
+    });
+    const checker = program.getTypeChecker();
+    const sourceFile = program.getSourceFile("test.ts")!;
+    const nodes = findIdentifiers(sourceFile, "length");
+
+    expect(dumpInferred(defineSymbol(nodes[0], checker), checker))
+      .toMatchInlineSnapshot(`
+      Object {
+        "symbol": Array [
+          Object {
+            "column": 1,
+            "fileName": "transient",
+            "kind": "transient",
+            "line": 1,
+            "name": "length",
+            "path": "length",
+          },
+        ],
+        "type": "1 | 2",
+      }
+    `);
+  });
+
   // TODO: Nested arrays
   // TODO: Nested objects
-  // TODO: Tuples
 });
