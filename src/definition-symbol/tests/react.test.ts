@@ -37,14 +37,17 @@ const program = mockProgram({
         <soup>
           <SimpleTemplate />
           {foo}
-          <GenericTemplate myProp={1} {...bat} />
+          <GenericTemplate myProp={1} {...bat} ignore-prop />
           <bat.Bar myProp={2} />
         </soup>
       );
     }
 
     export function WithInlineProps({ children }: { children: ReactNode; }) {
-      return <>{bat && children}<WithAnyProp anyProp /></>;
+      return <>
+        {bat && children}
+        <WithAnyProps anyProp />
+      </>;
     }
 
     export function WithAnyProps({ anyProp }) {
@@ -367,14 +370,33 @@ describe("react", () => {
     `);
   });
 
+  it("should ignore dash props", () => {
+    const ignorePropNodes = findIdentifiers(sourceFile, "ignore-prop");
+    expect(
+      dumpInferred(defineSymbol(ignorePropNodes[0], checker), checker)
+    ).toMatchInlineSnapshot(`undefined`);
+  });
+
   it("should handle implicit any props", () => {
     const ignorePropNodes = findIdentifiers(sourceFile, "anyProp");
 
     // Attribute
-    // Note that could not find a way to lookup the destructured property
-    expect(
-      dumpInferred(defineSymbol(ignorePropNodes[0], checker), checker)
-    ).toMatchInlineSnapshot(`undefined`);
+    expect(dumpInferred(defineSymbol(ignorePropNodes[0], checker), checker))
+      .toMatchInlineSnapshot(`
+      Object {
+        "symbol": Array [
+          Object {
+            "column": 35,
+            "fileName": "test.tsx",
+            "kind": "BindingElement",
+            "line": 43,
+            "name": "anyProp",
+            "path": "WithAnyProps.anyProp",
+          },
+        ],
+        "type": "any",
+      }
+    `);
 
     // Definition
     expect(dumpInferred(defineSymbol(ignorePropNodes[1], checker), checker))
@@ -385,7 +407,7 @@ describe("react", () => {
             "column": 35,
             "fileName": "test.tsx",
             "kind": "BindingElement",
-            "line": 40,
+            "line": 43,
             "name": "anyProp",
             "path": "WithAnyProps.anyProp",
           },
@@ -403,7 +425,7 @@ describe("react", () => {
             "column": 35,
             "fileName": "test.tsx",
             "kind": "BindingElement",
-            "line": 40,
+            "line": 43,
             "name": "anyProp",
             "path": "WithAnyProps.anyProp",
           },
