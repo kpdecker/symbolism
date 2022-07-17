@@ -225,19 +225,26 @@ export function dumpSymbol(
     (node) => dumpNode(node, checker)
   );
 
-  if (
-    symbol &&
-    !declarations.length &&
-    isIntrinsicType(checker.getDeclaredTypeOfSymbol(symbol))
-  ) {
-    declarationDump.push({
-      kind: "keyword",
-      name: symbol.getName(),
-      fileName: "intrinsic",
-      path: symbol.getName(),
-      line: 1,
-      column: 1,
-    });
+  if (symbol && !declarations.length) {
+    if (symbol.flags & ts.SymbolFlags.Transient) {
+      declarationDump.push({
+        kind: "transient",
+        name: symbol.getName(),
+        fileName: "transient",
+        path: symbol.getName(),
+        line: 1,
+        column: 1,
+      });
+    } else if (isIntrinsicType(checker.getDeclaredTypeOfSymbol(symbol))) {
+      declarationDump.push({
+        kind: "keyword",
+        name: symbol.getName(),
+        fileName: "intrinsic",
+        path: symbol.getName(),
+        line: 1,
+        column: 1,
+      });
+    }
   }
 
   invariant(
