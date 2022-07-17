@@ -17,6 +17,10 @@ const program = mockProgram({
     type IntersectionAlias = Foo & { bar: string };
 
     type Complicated = Extend | IntersectionAlias;
+
+    function setExtras(extras?: {}) {
+      return extras;
+    }
   `,
 });
 const checker = program.getTypeChecker();
@@ -178,6 +182,46 @@ describe("types", () => {
           },
         ],
         "type": "{ bar: string; }",
+      }
+    `);
+  });
+
+  it("should lookup object type literal", () => {
+    const nodes = lookupNamedToken("extras");
+
+    // Identity
+    expect(dumpInferred(defineSymbol(nodes[0].parent, checker), checker))
+      .toMatchInlineSnapshot(`
+      Object {
+        "symbol": Array [
+          Object {
+            "column": 23,
+            "fileName": "test.tsx",
+            "kind": "Parameter",
+            "line": 9,
+            "name": "extras?: {}",
+            "path": "setExtras.extras",
+          },
+        ],
+        "type": "{}",
+      }
+    `);
+
+    // Extends
+    expect(dumpInferred(defineSymbol(nodes[1], checker), checker))
+      .toMatchInlineSnapshot(`
+      Object {
+        "symbol": Array [
+          Object {
+            "column": 23,
+            "fileName": "test.tsx",
+            "kind": "Parameter",
+            "line": 9,
+            "name": "extras?: {}",
+            "path": "setExtras.extras",
+          },
+        ],
+        "type": "{}",
       }
     `);
   });

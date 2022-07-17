@@ -1,4 +1,5 @@
 import ts, { findAncestor } from "typescript";
+import { getSymbolDeclaration } from "../utils";
 import { defineSymbol } from "./index";
 import { directTypeAndSymbol, invariantNode, nodeOperators } from "./utils";
 
@@ -14,10 +15,15 @@ export const functionOperators = nodeOperators({
   [ts.SyntaxKind.Parameter](node, checker) {
     invariantNode(node, ts.isParameter);
 
-    if (ts.isParameterPropertyDeclaration(node, node.parent)) {
+    const parameterDefinition = directTypeAndSymbol(node, checker);
+
+    // If we don't have a type, then resolve as our own definition
+    // ex: constructor(public readonly name: string)
+    if (!getSymbolDeclaration(parameterDefinition.symbol)) {
       return directTypeAndSymbol(node.name, checker);
     }
-    return directTypeAndSymbol(node, checker);
+
+    return parameterDefinition;
   },
 
   [ts.SyntaxKind.Block]: () => undefined,
