@@ -231,7 +231,12 @@ const nodeHandlers: Record<ts.SyntaxKind, DefinitionOperation> = {
 };
 
 export function defineSymbol(node: ts.Node, checker: ts.TypeChecker) {
-  logDebug("defineSymbol", ts.SyntaxKind[node.kind]); //, dumpNode(node, checker));
+  logDebug(
+    "defineSymbol",
+    ts.SyntaxKind[node.kind],
+    ts.isIdentifier(node) ? node.getText() : ""
+    //, dumpNode(node, checker)
+  );
 
   try {
     const nodeHandler = nodeHandlers[node.kind];
