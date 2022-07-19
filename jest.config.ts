@@ -1,7 +1,7 @@
 export default {
-  preset: 'ts-jest',
+  preset: "ts-jest",
 
-  cacheDirectory: 'node_modules/.cache/jest',
+  cacheDirectory: "node_modules/.cache/jest",
 
   // Automatically clear mock calls, instances, contexts and results before every test
   clearMocks: true,
@@ -9,8 +9,8 @@ export default {
   // Indicates whether the coverage information should be collected while executing the test
   collectCoverage: true,
   // collectCoverageFrom: undefined,
-  coverageDirectory: 'coverage',
-  coverageProvider: 'v8',
+  coverageDirectory: "coverage",
+  coverageProvider: "v8",
 
   // An array of regexp pattern strings used to skip coverage collection
   // coveragePathIgnorePatterns: [
@@ -44,7 +44,7 @@ export default {
   // globals: {},
 
   // The maximum amount of workers used to run your tests. Can be specified as % or a number. E.g. maxWorkers: 10% will use 10% of your CPU amount + 1 as the maximum worker number. maxWorkers: 2 will use a maximum of 2 workers.
-  // maxWorkers: "50%",
+  maxWorkers: "50%",
 
   // An array of directory names to be searched recursively up from the requiring module's location
   // moduleDirectories: [
