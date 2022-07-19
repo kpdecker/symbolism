@@ -13,12 +13,12 @@ import {
   contextualTypeAndSymbol,
   DefinitionOperation,
   directTypeAndSymbol,
-  followSymbol,
   getArrayType,
   invariantNode,
   isAssignmentExpression,
   isNamedDeclaration,
 } from "./utils";
+import { followSymbol } from "./follow-symbol";
 
 function nopHandler() {
   return null;
