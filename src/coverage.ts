@@ -16,8 +16,8 @@ export function lineAndColumn(lineAndChar: LineAndCharacter) {
   return { line: lineAndChar.line + 1, column: lineAndChar.character };
 }
 
-export function parseCoverage(coveragePath: string) {
-  const rawCoverageJson = JSON.parse(readFileSync(coveragePath, "utf8"));
+export function parseExecutedCoverage(jsonPath: string) {
+  const rawCoverageJson = JSON.parse(readFileSync(jsonPath, "utf8"));
   const coverageJson: ExecutedCoverage = {};
 
   Object.entries<any>(rawCoverageJson).forEach(

@@ -2,7 +2,7 @@
 import { program } from "commander";
 
 import { parseConfig } from "./config";
-import { evaluateCoverage, parseCoverage } from "./coverage";
+import { evaluateCoverage, parseExecutedCoverage } from "./coverage";
 import { findCoverageLocations } from "./parser";
 import { printResults } from "./reporter";
 
@@ -13,7 +13,7 @@ program.parse();
 const opts = program.opts();
 
 const config = parseConfig(opts.config);
-const coverageJson = parseCoverage(config.coverageJsonPath);
+const coverageJson = parseExecutedCoverage(config.coverageJsonPath);
 
 const { requiredBySymbol } = findCoverageLocations(config);
 
