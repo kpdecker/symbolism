@@ -4,7 +4,7 @@ import { Config } from "./config";
 
 export function initTypescript(config: Config) {
   const configPath = ts.findConfigFile(
-    process.cwd(),
+    config.baseDir,
     ts.sys.fileExists,
     config.tsConfigPath
   );
@@ -41,7 +41,7 @@ export function initTypescript(config: Config) {
         throw new Error("Failed to read file " + fileName + ": " + e.message);
       }
     },
-    getCurrentDirectory: () => process.cwd(),
+    getCurrentDirectory: () => config.baseDir || process.cwd(),
     getCompilationSettings: () => configFile.options,
     getDefaultLibFileName: (options) => ts.getDefaultLibFilePath(options),
     fileExists: ts.sys.fileExists,

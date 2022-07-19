@@ -1,12 +1,14 @@
 import { readFileSync } from "fs";
 import { glob } from "glob";
 import minimatch from "minimatch";
-import { relative } from "path";
+import { dirname, relative, resolve } from "path";
 import { SetRequired } from "type-fest";
 
 export type ConfigFileSchema = {
   /**
-   * @default current working directory
+   * Paths are relative to this config file.
+   *
+   * @default current working directory.
    */
   baseDir: string;
 
@@ -14,6 +16,15 @@ export type ConfigFileSchema = {
    * @default 'tsconfig.json'
    */
   tsConfigPath: string;
+
+  /**
+   * Path to the istanbul json report output file.
+   *
+   * Note that this path is relative to the baseDir.
+   *
+   * @default './coverage/coverage-final.json'
+   */
+  coverageJsonPath: string;
 
   /**
    * List of glob match patterns defining the entry points for the project.
@@ -48,10 +59,15 @@ export function parseConfig(configFilePath: string): Config {
     readFileSync(configFilePath, "utf8")
   );
 
+  const baseDir = resolve(
+    config.baseDir || process.cwd(),
+    dirname(configFilePath)
+  );
+
   const min = config.min ?? 1;
 
   function exclude(fileName: string) {
-    const relativePath = relative(process.cwd(), fileName)
+    const relativePath = relative(baseDir, fileName)
       // Normalize node module paths if loaded outside of the project.
       .replace(/.*\/node_modules\//, "node_modules/");
     return (
@@ -60,13 +76,26 @@ export function parseConfig(configFilePath: string): Config {
     );
   }
 
-  return {
+  const initialConfig = {
     baseDir: process.cwd(),
     tsConfigPath: "tsconfig.json",
+    coverageJsonPath: "./coverage/coverage-final.json",
+    entryPoints: ["src/index.ts"],
     ...config,
+  } as ConfigFileSchema;
 
-    entryPoints: (config.entryPoints || ["src/index.ts"]).flatMap((pattern) =>
-      glob.sync(pattern).filter((fileName) => !exclude(fileName))
+  return {
+    ...initialConfig,
+    baseDir,
+    tsConfigPath: resolve(baseDir, initialConfig.tsConfigPath),
+    coverageJsonPath: resolve(baseDir, initialConfig.coverageJsonPath),
+
+    entryPoints: config.entryPoints!.flatMap((pattern) =>
+      glob
+        .sync(pattern, {
+          cwd: baseDir,
+        })
+        .filter((fileName) => !exclude(fileName))
     ),
     tokens: (config.tokens || []).map((token) =>
       typeof token === "string" ? { name: token, min } : { ...token, min }
