@@ -1,5 +1,6 @@
 import { readFileSync } from "fs";
 import { LineAndCharacter } from "typescript";
+import { CoverageRequiredListing } from "./parser";
 
 export type LineAndColumn = { line: number; column: number };
 
@@ -9,13 +10,15 @@ type StatementCoverage = {
   count: number;
 };
 
+type ExecutedCoverage = Record</** filePath */ string, StatementCoverage[]>;
+
 export function lineAndColumn(lineAndChar: LineAndCharacter) {
   return { line: lineAndChar.line + 1, column: lineAndChar.character };
 }
 
 export function parseCoverage(coveragePath: string) {
   const rawCoverageJson = JSON.parse(readFileSync(coveragePath, "utf8"));
-  const coverageJson: Record</** filePath */ string, StatementCoverage[]> = {};
+  const coverageJson: ExecutedCoverage = {};
 
   Object.entries<any>(rawCoverageJson).forEach(
     ([filePath, { statementMap, s: statementCoverage }]) => {
@@ -30,6 +33,44 @@ export function parseCoverage(coveragePath: string) {
   );
 
   return coverageJson;
+}
+
+export function evaluateCoverage(
+  coverageLocations: CoverageRequiredListing,
+  executedCoverage: ExecutedCoverage
+) {
+  const uncoveredLocations = Object.entries(coverageLocations).reduce(
+    (acc, [keyName, locations]) => {
+      const uncoveredLocations = locations.filter(
+        (location) =>
+          !isLocationCovered(executedCoverage, location.fileName, location)
+      );
+      if (uncoveredLocations.length) {
+        acc[keyName] = uncoveredLocations;
+      }
+      return acc;
+    },
+    {} as typeof coverageLocations
+  );
+
+  const coveragePercentage = Object.entries(coverageLocations).reduce(
+    (acc, [keyName, locations]) => {
+      const coverageNeeded = locations.length;
+      const coverageMissing = uncoveredLocations[keyName]?.length ?? 0;
+      acc[keyName] = {
+        covered: coverageNeeded - coverageMissing,
+        total: coverageNeeded,
+        locations: uncoveredLocations[keyName],
+      };
+      return acc;
+    },
+    {} as Record<
+      string,
+      { covered: number; total: number; locations: typeof coverageLocations[0] }
+    >
+  );
+
+  return { coveragePercentage, uncoveredLocations };
 }
 
 export function isLocationCovered(

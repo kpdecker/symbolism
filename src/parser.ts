@@ -6,7 +6,7 @@ import { dumpNode, extractSymbolSummary, parseSymbolTable } from "./symbols";
 import { lineAndColumn, LineAndColumn } from "./coverage";
 import { namedPathToNode, pathMatchesTokenFilter } from "./path/index";
 
-type TokenSourceLocation = {
+export type TokenSourceLocation = {
   kind: ts.SyntaxKind;
   definitionPath: string;
   token: string;
@@ -16,6 +16,8 @@ type TokenSourceLocation = {
   length: number;
   text: string;
 } & LineAndColumn;
+
+export type CoverageRequiredListing = Record<string, TokenSourceLocation[]>;
 
 export function findCoverageLocations(config: Config) {
   const services = initTypescript(config);
@@ -59,19 +61,19 @@ export function findCoverageLocations(config: Config) {
     }
   });
 
-  const fileCoverageLocations: Record<string, TokenSourceLocation[]> = {};
+  const requiredByFile: CoverageRequiredListing = {};
   coverageRequired.forEach((coverageRequired) => {
-    fileCoverageLocations[coverageRequired.fileName] =
-      fileCoverageLocations[coverageRequired.fileName] || [];
-    fileCoverageLocations[coverageRequired.fileName].push(coverageRequired);
+    requiredByFile[coverageRequired.fileName] =
+      requiredByFile[coverageRequired.fileName] || [];
+    requiredByFile[coverageRequired.fileName].push(coverageRequired);
   });
 
-  const symbolCoverageLocations: Record<string, TokenSourceLocation[]> = {};
+  const requiredBySymbol: CoverageRequiredListing = {};
   coverageRequired.forEach((coverageRequired) => {
-    symbolCoverageLocations[coverageRequired.token] =
-      symbolCoverageLocations[coverageRequired.token] || [];
-    symbolCoverageLocations[coverageRequired.token].push(coverageRequired);
+    requiredBySymbol[coverageRequired.token] =
+      requiredBySymbol[coverageRequired.token] || [];
+    requiredBySymbol[coverageRequired.token].push(coverageRequired);
   });
 
-  return { fileCoverageLocations, symbolCoverageLocations };
+  return { requiredByFile, requiredBySymbol };
 }
