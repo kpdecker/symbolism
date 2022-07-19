@@ -22,7 +22,7 @@ describe("infer return type", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 28,
+            "column": 29,
             "fileName": "test.ts",
             "kind": "TypeLiteral",
             "line": 2,
@@ -52,7 +52,7 @@ describe("infer return type", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 17,
+            "column": 18,
             "fileName": "test.ts",
             "kind": "ObjectLiteralExpression",
             "line": 3,

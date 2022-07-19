@@ -24,7 +24,7 @@ describe("infer functions", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 14,
+            "column": 15,
             "fileName": "test.ts",
             "kind": "VariableDeclaration",
             "line": 2,
@@ -43,7 +43,7 @@ describe("infer functions", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 14,
+            "column": 15,
             "fileName": "test.ts",
             "kind": "VariableDeclaration",
             "line": 2,
@@ -100,7 +100,7 @@ describe("infer functions", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 30,
+            "column": 31,
             "fileName": "test.ts",
             "kind": "PropertySignature",
             "line": 2,
@@ -118,7 +118,7 @@ describe("infer functions", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 30,
+            "column": 31,
             "fileName": "test.ts",
             "kind": "PropertySignature",
             "line": 2,
@@ -133,37 +133,37 @@ describe("infer functions", () => {
     // Use
     expect(dumpInferred(defineSymbol(nodes[2], checker), checker))
       .toMatchInlineSnapshot(`
-        Object {
-          "symbol": Array [
-            Object {
-              "column": 30,
-              "fileName": "test.ts",
-              "kind": "PropertySignature",
-              "line": 2,
-              "name": "foo: string",
-              "path": "ExplicitType.foo",
-            },
-          ],
-          "type": "string",
-        }
+      Object {
+        "symbol": Array [
+          Object {
+            "column": 31,
+            "fileName": "test.ts",
+            "kind": "PropertySignature",
+            "line": 2,
+            "name": "foo: string",
+            "path": "ExplicitType.foo",
+          },
+        ],
+        "type": "string",
+      }
     `);
 
     // Shorthand property
     expect(dumpInferred(defineSymbol(nodes[3], checker), checker))
       .toMatchInlineSnapshot(`
-        Object {
-          "symbol": Array [
-            Object {
-              "column": 30,
-              "fileName": "test.ts",
-              "kind": "PropertySignature",
-              "line": 2,
-              "name": "foo: string",
-              "path": "ExplicitType.foo",
-            },
-          ],
-          "type": "string",
-        }
+      Object {
+        "symbol": Array [
+          Object {
+            "column": 31,
+            "fileName": "test.ts",
+            "kind": "PropertySignature",
+            "line": 2,
+            "name": "foo: string",
+            "path": "ExplicitType.foo",
+          },
+        ],
+        "type": "string",
+      }
     `);
   });
 });

@@ -30,7 +30,7 @@ describe("infer binding elements", () => {
         Object {
           "symbol": Array [
             Object {
-              "column": 30,
+              "column": 31,
               "fileName": "test.ts",
               "kind": "PropertySignature",
               "line": 2,
@@ -63,7 +63,7 @@ describe("infer binding elements", () => {
         Object {
           "symbol": Array [
             Object {
-              "column": 21,
+              "column": 22,
               "fileName": "test.ts",
               "kind": "BindingElement",
               "line": 4,
@@ -96,7 +96,7 @@ describe("infer binding elements", () => {
         Object {
           "symbol": Array [
             Object {
-              "column": 30,
+              "column": 31,
               "fileName": "test.ts",
               "kind": "PropertySignature",
               "line": 2,
@@ -131,7 +131,7 @@ describe("infer binding elements", () => {
         Object {
           "symbol": Array [
             Object {
-              "column": 12,
+              "column": 13,
               "fileName": "test.ts",
               "kind": "VariableDeclaration",
               "line": 4,
@@ -166,7 +166,7 @@ describe("infer binding elements", () => {
         Object {
           "symbol": Array [
             Object {
-              "column": 29,
+              "column": 30,
               "fileName": "test.ts",
               "kind": "TypeLiteral",
               "line": 2,
@@ -199,7 +199,7 @@ describe("infer binding elements", () => {
         Object {
           "symbol": Array [
             Object {
-              "column": 29,
+              "column": 30,
               "fileName": "test.ts",
               "kind": "TypeLiteral",
               "line": 2,
@@ -232,7 +232,7 @@ describe("infer binding elements", () => {
         Object {
           "symbol": Array [
             Object {
-              "column": 29,
+              "column": 30,
               "fileName": "test.ts",
               "kind": "TypeLiteral",
               "line": 2,
@@ -267,7 +267,7 @@ describe("infer binding elements", () => {
         Object {
           "symbol": Array [
             Object {
-              "column": 12,
+              "column": 13,
               "fileName": "test.ts",
               "kind": "VariableDeclaration",
               "line": 4,

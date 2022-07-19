@@ -13,7 +13,8 @@ type StatementCoverage = {
 type ExecutedCoverage = Record</** filePath */ string, StatementCoverage[]>;
 
 export function lineAndColumn(lineAndChar: LineAndCharacter) {
-  return { line: lineAndChar.line + 1, column: lineAndChar.character };
+  // Return 1 index for both
+  return { line: lineAndChar.line + 1, column: lineAndChar.character + 1 };
 }
 
 export function parseExecutedCoverage(jsonPath: string) {

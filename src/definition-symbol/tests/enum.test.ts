@@ -25,7 +25,7 @@ describe("infer enum", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 8,
+            "column": 9,
             "fileName": "test.ts",
             "kind": "EnumDeclaration",
             "line": 2,
@@ -42,7 +42,7 @@ describe("infer enum", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 22,
+            "column": 23,
             "fileName": "test.ts",
             "kind": "EnumMember",
             "line": 2,
@@ -59,7 +59,7 @@ describe("infer enum", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 22,
+            "column": 23,
             "fileName": "test.ts",
             "kind": "EnumMember",
             "line": 2,
@@ -76,7 +76,7 @@ describe("infer enum", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 22,
+            "column": 23,
             "fileName": "test.ts",
             "kind": "EnumMember",
             "line": 2,
@@ -104,7 +104,7 @@ describe("infer enum", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 14,
+            "column": 15,
             "fileName": "test.ts",
             "kind": "VariableDeclaration",
             "line": 3,
@@ -124,7 +124,7 @@ describe("infer enum", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 14,
+            "column": 15,
             "fileName": "test.ts",
             "kind": "VariableDeclaration",
             "line": 4,

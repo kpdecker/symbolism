@@ -51,7 +51,7 @@ describe("infer tuple types", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 6,
+            "column": 7,
             "fileName": "test.tsx",
             "kind": "BindingElement",
             "line": 12,
@@ -68,7 +68,7 @@ describe("infer tuple types", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 24,
+            "column": 25,
             "fileName": "test.tsx",
             "kind": "TypeLiteral",
             "line": 4,
@@ -84,7 +84,7 @@ describe("infer tuple types", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 24,
+            "column": 25,
             "fileName": "test.tsx",
             "kind": "TypeLiteral",
             "line": 4,
@@ -110,7 +110,7 @@ describe("infer tuple types", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 50,
+            "column": 51,
             "fileName": "test.tsx",
             "kind": "PropertySignature",
             "line": 5,
@@ -141,7 +141,7 @@ describe("infer tuple types", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 26,
+            "column": 27,
             "fileName": "test.tsx",
             "kind": "BindingElement",
             "line": 7,
@@ -158,7 +158,7 @@ describe("infer tuple types", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 24,
+            "column": 25,
             "fileName": "test.tsx",
             "kind": "TypeLiteral",
             "line": 4,
@@ -174,7 +174,7 @@ describe("infer tuple types", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 24,
+            "column": 25,
             "fileName": "test.tsx",
             "kind": "TypeLiteral",
             "line": 4,
@@ -199,7 +199,7 @@ describe("infer tuple types", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 50,
+            "column": 51,
             "fileName": "test.tsx",
             "kind": "PropertySignature",
             "line": 5,
@@ -221,7 +221,7 @@ describe("infer tuple types", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 0,
+            "column": 1,
             "fileName": "typescript/lib/lib.es5.d.ts",
             "kind": "InterfaceDeclaration",
             "line": 1275,
@@ -230,7 +230,7 @@ describe("infer tuple types", () => {
             "path": "Array",
           },
           Object {
-            "column": 12,
+            "column": 13,
             "fileName": "typescript/lib/lib.es5.d.ts",
             "kind": "VariableDeclaration",
             "line": 1470,
@@ -238,7 +238,7 @@ describe("infer tuple types", () => {
             "path": "Array",
           },
           Object {
-            "column": 0,
+            "column": 1,
             "fileName": "typescript/lib/lib.es2015.core.d.ts",
             "kind": "InterfaceDeclaration",
             "line": 21,
@@ -247,7 +247,7 @@ describe("infer tuple types", () => {
             "path": "Array",
           },
           Object {
-            "column": 0,
+            "column": 1,
             "fileName": "typescript/lib/lib.es2015.iterable.d.ts",
             "kind": "InterfaceDeclaration",
             "line": 58,
@@ -256,7 +256,7 @@ describe("infer tuple types", () => {
             "path": "Array",
           },
           Object {
-            "column": 0,
+            "column": 1,
             "fileName": "typescript/lib/lib.es2015.symbol.wellknown.d.ts",
             "kind": "InterfaceDeclaration",
             "line": 94,
@@ -265,7 +265,7 @@ describe("infer tuple types", () => {
             "path": "Array",
           },
           Object {
-            "column": 0,
+            "column": 1,
             "fileName": "typescript/lib/lib.es2016.array.include.d.ts",
             "kind": "InterfaceDeclaration",
             "line": 21,
@@ -282,7 +282,7 @@ describe("infer tuple types", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 23,
+            "column": 24,
             "fileName": "@types/react/index.d.ts",
             "kind": "FunctionType",
             "line": 859,

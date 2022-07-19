@@ -66,7 +66,7 @@ describe("react", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 12,
+            "column": 13,
             "fileName": "@types/react/index.d.ts",
             "kind": "PropertySignature",
             "line": 3171,
@@ -89,7 +89,7 @@ describe("react", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 10,
+            "column": 11,
             "fileName": "test.tsx",
             "kind": "VariableDeclaration",
             "line": 5,
@@ -112,7 +112,7 @@ describe("react", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 10,
+            "column": 11,
             "fileName": "test.tsx",
             "kind": "VariableDeclaration",
             "line": 9,
@@ -131,7 +131,7 @@ describe("react", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 8,
+            "column": 9,
             "fileName": "test.tsx",
             "kind": "ArrowFunction",
             "line": 11,
@@ -147,7 +147,7 @@ describe("react", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 41,
+            "column": 42,
             "fileName": "test.tsx",
             "kind": "PropertySignature",
             "line": 9,
@@ -166,7 +166,7 @@ describe("react", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 41,
+            "column": 42,
             "fileName": "test.tsx",
             "kind": "PropertySignature",
             "line": 9,
@@ -185,7 +185,7 @@ describe("react", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 10,
+            "column": 11,
             "fileName": "test.tsx",
             "kind": "VariableDeclaration",
             "line": 15,
@@ -201,7 +201,7 @@ describe("react", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 10,
+            "column": 11,
             "fileName": "test.tsx",
             "kind": "VariableDeclaration",
             "line": 15,
@@ -221,7 +221,7 @@ describe("react", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 10,
+            "column": 11,
             "fileName": "test.tsx",
             "kind": "VariableDeclaration",
             "line": 23,
@@ -240,7 +240,7 @@ describe("react", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 4,
+            "column": 5,
             "fileName": "test.tsx",
             "kind": "FunctionDeclaration",
             "line": 25,
@@ -260,7 +260,7 @@ describe("react", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 18,
+            "column": 19,
             "fileName": "test.tsx",
             "kind": "ShorthandPropertyAssignment",
             "line": 23,
@@ -281,7 +281,7 @@ describe("react", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 12,
+            "column": 13,
             "fileName": "@types/react/index.d.ts",
             "kind": "PropertySignature",
             "line": 3171,
@@ -321,7 +321,7 @@ describe("react", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 52,
+            "column": 53,
             "fileName": "test.tsx",
             "kind": "PropertySignature",
             "line": 36,
@@ -339,7 +339,7 @@ describe("react", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 52,
+            "column": 53,
             "fileName": "test.tsx",
             "kind": "PropertySignature",
             "line": 36,
@@ -357,7 +357,7 @@ describe("react", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 52,
+            "column": 53,
             "fileName": "test.tsx",
             "kind": "PropertySignature",
             "line": 36,
@@ -377,7 +377,7 @@ describe("react", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 47,
+            "column": 48,
             "fileName": "test.tsx",
             "kind": "JsxAttribute",
             "line": 30,
@@ -399,7 +399,7 @@ describe("react", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 35,
+            "column": 36,
             "fileName": "test.tsx",
             "kind": "BindingElement",
             "line": 43,
@@ -417,7 +417,7 @@ describe("react", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 35,
+            "column": 36,
             "fileName": "test.tsx",
             "kind": "BindingElement",
             "line": 43,
@@ -435,7 +435,7 @@ describe("react", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 35,
+            "column": 36,
             "fileName": "test.tsx",
             "kind": "BindingElement",
             "line": 43,

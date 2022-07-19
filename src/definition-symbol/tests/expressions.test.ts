@@ -39,7 +39,7 @@ describe("infer expressions", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 8,
+            "column": 9,
             "fileName": "test.ts",
             "kind": "FunctionDeclaration",
             "line": 3,
@@ -57,7 +57,7 @@ describe("infer expressions", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 12,
+            "column": 13,
             "fileName": "test.ts",
             "kind": "VariableDeclaration",
             "line": 7,
@@ -75,7 +75,7 @@ describe("infer expressions", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 20,
+            "column": 21,
             "fileName": "test.ts",
             "kind": "TypeLiteral",
             "line": 2,
@@ -100,7 +100,7 @@ describe("infer expressions", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 0,
+            "column": 1,
             "fileName": "typescript/lib/lib.dom.d.ts",
             "kind": "InterfaceDeclaration",
             "line": 17154,
@@ -115,20 +115,20 @@ describe("infer expressions", () => {
 
   it("should handle logical binary expressions", () => {
     expect(testExpression("(Error && console)")).toMatchInlineSnapshot(`
+      Object {
+        "symbol": Array [
           Object {
-            "symbol": Array [
-              Object {
-                "column": 0,
-                "fileName": "typescript/lib/lib.dom.d.ts",
-                "kind": "InterfaceDeclaration",
-                "line": 17154,
-                "name": "interface Console {",
-                "path": "Console",
-              },
-            ],
-            "type": "Console",
-          }
-      `);
+            "column": 1,
+            "fileName": "typescript/lib/lib.dom.d.ts",
+            "kind": "InterfaceDeclaration",
+            "line": 17154,
+            "name": "interface Console {",
+            "path": "Console",
+          },
+        ],
+        "type": "Console",
+      }
+    `);
   });
 
   it("should handle logical binary expressions", () => {
@@ -154,7 +154,7 @@ describe("infer expressions", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 12,
+            "column": 13,
             "fileName": "typescript/lib/lib.dom.d.ts",
             "kind": "VariableDeclaration",
             "line": 17177,
@@ -171,7 +171,7 @@ describe("infer expressions", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 4,
+            "column": 5,
             "fileName": "typescript/lib/lib.dom.d.ts",
             "kind": "MethodSignature",
             "line": 17167,
@@ -206,7 +206,7 @@ describe("infer expressions", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 12,
+            "column": 13,
             "fileName": "typescript/lib/lib.dom.d.ts",
             "kind": "VariableDeclaration",
             "line": 17177,
@@ -224,7 +224,7 @@ describe("infer expressions", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 0,
+            "column": 1,
             "fileName": "typescript/lib/lib.es5.d.ts",
             "kind": "InterfaceDeclaration",
             "line": 1027,
@@ -233,7 +233,7 @@ describe("infer expressions", () => {
             "path": "Error",
           },
           Object {
-            "column": 12,
+            "column": 13,
             "fileName": "typescript/lib/lib.es5.d.ts",
             "kind": "VariableDeclaration",
             "line": 1039,
@@ -251,7 +251,7 @@ describe("infer expressions", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 0,
+            "column": 1,
             "fileName": "typescript/lib/lib.es5.d.ts",
             "kind": "InterfaceDeclaration",
             "line": 1501,
@@ -260,7 +260,7 @@ describe("infer expressions", () => {
             "path": "Promise",
           },
           Object {
-            "column": 0,
+            "column": 1,
             "fileName": "typescript/lib/lib.es2015.iterable.d.ts",
             "kind": "InterfaceDeclaration",
             "line": 218,
@@ -268,7 +268,7 @@ describe("infer expressions", () => {
             "path": "Promise",
           },
           Object {
-            "column": 12,
+            "column": 13,
             "fileName": "typescript/lib/lib.es2015.promise.d.ts",
             "kind": "VariableDeclaration",
             "line": 78,
@@ -276,7 +276,7 @@ describe("infer expressions", () => {
             "path": "Promise",
           },
           Object {
-            "column": 0,
+            "column": 1,
             "fileName": "typescript/lib/lib.es2015.symbol.wellknown.d.ts",
             "kind": "InterfaceDeclaration",
             "line": 173,

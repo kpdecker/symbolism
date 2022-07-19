@@ -44,7 +44,7 @@ describe("imports", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 17,
+            "column": 18,
             "fileName": "source.ts",
             "kind": "VariableDeclaration",
             "line": 2,
@@ -60,7 +60,7 @@ describe("imports", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 17,
+            "column": 18,
             "fileName": "source.ts",
             "kind": "VariableDeclaration",
             "line": 2,
@@ -78,7 +78,7 @@ describe("imports", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 17,
+            "column": 18,
             "fileName": "source.ts",
             "kind": "VariableDeclaration",
             "line": 2,
@@ -95,7 +95,7 @@ describe("imports", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 4,
+            "column": 5,
             "fileName": "source.ts",
             "kind": "FunctionDeclaration",
             "line": 3,
@@ -111,7 +111,7 @@ describe("imports", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 4,
+            "column": 5,
             "fileName": "source.ts",
             "kind": "FunctionDeclaration",
             "line": 3,
@@ -132,7 +132,7 @@ describe("imports", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 17,
+            "column": 18,
             "fileName": "source.ts",
             "kind": "VariableDeclaration",
             "line": 2,
@@ -149,7 +149,7 @@ describe("imports", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 4,
+            "column": 5,
             "fileName": "source.ts",
             "kind": "FunctionDeclaration",
             "line": 3,

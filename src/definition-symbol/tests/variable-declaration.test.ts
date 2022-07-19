@@ -28,7 +28,7 @@ describe("infer variable declaration", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 14,
+            "column": 15,
             "fileName": "test.ts",
             "kind": "VariableDeclaration",
             "line": 3,
@@ -43,7 +43,7 @@ describe("infer variable declaration", () => {
     expect(dumpSymbol(varSymbol!, checker).declaration).toMatchInlineSnapshot(`
       Array [
         Object {
-          "column": 14,
+          "column": 15,
           "fileName": "test.ts",
           "kind": "VariableDeclaration",
           "line": 3,
@@ -72,7 +72,7 @@ describe("infer variable declaration", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 14,
+            "column": 15,
             "fileName": "test.ts",
             "kind": "VariableDeclaration",
             "line": 2,

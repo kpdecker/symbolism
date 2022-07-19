@@ -40,7 +40,7 @@ describe("types", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 4,
+            "column": 5,
             "fileName": "test.tsx",
             "kind": "InterfaceDeclaration",
             "line": 2,
@@ -58,7 +58,7 @@ describe("types", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 4,
+            "column": 5,
             "fileName": "test.tsx",
             "kind": "InterfaceDeclaration",
             "line": 2,
@@ -76,7 +76,7 @@ describe("types", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 4,
+            "column": 5,
             "fileName": "test.tsx",
             "kind": "InterfaceDeclaration",
             "line": 2,
@@ -97,7 +97,7 @@ describe("types", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 4,
+            "column": 5,
             "fileName": "test.tsx",
             "kind": "InterfaceDeclaration",
             "line": 3,
@@ -115,7 +115,7 @@ describe("types", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 4,
+            "column": 5,
             "fileName": "test.tsx",
             "kind": "InterfaceDeclaration",
             "line": 3,
@@ -136,7 +136,7 @@ describe("types", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 4,
+            "column": 5,
             "fileName": "test.tsx",
             "kind": "TypeAliasDeclaration",
             "line": 5,
@@ -153,7 +153,7 @@ describe("types", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 4,
+            "column": 5,
             "fileName": "test.tsx",
             "kind": "TypeAliasDeclaration",
             "line": 5,
@@ -173,7 +173,7 @@ describe("types", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 35,
+            "column": 36,
             "fileName": "test.tsx",
             "kind": "TypeLiteral",
             "line": 5,
@@ -195,7 +195,7 @@ describe("types", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 23,
+            "column": 24,
             "fileName": "test.tsx",
             "kind": "Parameter",
             "line": 9,
@@ -213,7 +213,7 @@ describe("types", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 23,
+            "column": 24,
             "fileName": "test.tsx",
             "kind": "Parameter",
             "line": 9,

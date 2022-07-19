@@ -18,7 +18,7 @@ describe("infer statements", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 0,
+            "column": 1,
             "fileName": "typescript/lib/lib.es5.d.ts",
             "kind": "InterfaceDeclaration",
             "line": 1027,
@@ -27,7 +27,7 @@ describe("infer statements", () => {
             "path": "Error",
           },
           Object {
-            "column": 12,
+            "column": 13,
             "fileName": "typescript/lib/lib.es5.d.ts",
             "kind": "VariableDeclaration",
             "line": 1039,

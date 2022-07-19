@@ -85,7 +85,7 @@ describe("classes", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 4,
+            "column": 5,
             "fileName": "test.tsx",
             "kind": "ClassDeclaration",
             "line": 3,
@@ -103,7 +103,7 @@ describe("classes", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 4,
+            "column": 5,
             "fileName": "test.tsx",
             "kind": "ClassDeclaration",
             "line": 3,
@@ -121,7 +121,7 @@ describe("classes", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 4,
+            "column": 5,
             "fileName": "test.tsx",
             "kind": "ClassDeclaration",
             "line": 3,
@@ -142,7 +142,7 @@ describe("classes", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 10,
+            "column": 11,
             "fileName": "test.tsx",
             "kind": "VariableDeclaration",
             "line": 28,
@@ -160,7 +160,7 @@ describe("classes", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 10,
+            "column": 11,
             "fileName": "test.tsx",
             "kind": "VariableDeclaration",
             "line": 28,
@@ -180,7 +180,7 @@ describe("classes", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 4,
+            "column": 5,
             "fileName": "test.tsx",
             "kind": "InterfaceDeclaration",
             "line": 2,
@@ -202,7 +202,7 @@ describe("classes", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 20,
+            "column": 21,
             "fileName": "test.tsx",
             "kind": "PropertySignature",
             "line": 2,
@@ -220,7 +220,7 @@ describe("classes", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 20,
+            "column": 21,
             "fileName": "test.tsx",
             "kind": "PropertySignature",
             "line": 2,
@@ -238,7 +238,7 @@ describe("classes", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 20,
+            "column": 21,
             "fileName": "test.tsx",
             "kind": "PropertySignature",
             "line": 2,
@@ -256,7 +256,7 @@ describe("classes", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 20,
+            "column": 21,
             "fileName": "test.tsx",
             "kind": "PropertySignature",
             "line": 2,
@@ -277,7 +277,7 @@ describe("classes", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 6,
+            "column": 7,
             "fileName": "test.tsx",
             "kind": "GetAccessor",
             "line": 12,
@@ -285,7 +285,7 @@ describe("classes", () => {
             "path": "DeclaredClass.length",
           },
           Object {
-            "column": 6,
+            "column": 7,
             "fileName": "test.tsx",
             "kind": "SetAccessor",
             "line": 15,
@@ -303,7 +303,7 @@ describe("classes", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 6,
+            "column": 7,
             "fileName": "test.tsx",
             "kind": "GetAccessor",
             "line": 12,
@@ -311,7 +311,7 @@ describe("classes", () => {
             "path": "DeclaredClass.length",
           },
           Object {
-            "column": 6,
+            "column": 7,
             "fileName": "test.tsx",
             "kind": "SetAccessor",
             "line": 15,
@@ -329,7 +329,7 @@ describe("classes", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 6,
+            "column": 7,
             "fileName": "test.tsx",
             "kind": "GetAccessor",
             "line": 12,
@@ -337,7 +337,7 @@ describe("classes", () => {
             "path": "DeclaredClass.length",
           },
           Object {
-            "column": 6,
+            "column": 7,
             "fileName": "test.tsx",
             "kind": "SetAccessor",
             "line": 15,
@@ -355,7 +355,7 @@ describe("classes", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 6,
+            "column": 7,
             "fileName": "test.tsx",
             "kind": "GetAccessor",
             "line": 12,
@@ -363,7 +363,7 @@ describe("classes", () => {
             "path": "DeclaredClass.length",
           },
           Object {
-            "column": 6,
+            "column": 7,
             "fileName": "test.tsx",
             "kind": "SetAccessor",
             "line": 15,
@@ -385,7 +385,7 @@ describe("classes", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 23,
+            "column": 24,
             "fileName": "test.tsx",
             "kind": "ClassExpression",
             "line": 28,
@@ -407,7 +407,7 @@ describe("classes", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 4,
+            "column": 5,
             "fileName": "test.tsx",
             "kind": "ClassDeclaration",
             "line": 3,
@@ -423,7 +423,7 @@ describe("classes", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 4,
+            "column": 5,
             "fileName": "test.tsx",
             "kind": "ClassDeclaration",
             "line": 3,
@@ -445,7 +445,7 @@ describe("classes", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 6,
+            "column": 7,
             "fileName": "test.tsx",
             "kind": "MethodDeclaration",
             "line": 7,
@@ -463,7 +463,7 @@ describe("classes", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 6,
+            "column": 7,
             "fileName": "test.tsx",
             "kind": "MethodDeclaration",
             "line": 7,
@@ -479,7 +479,7 @@ describe("classes", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 6,
+            "column": 7,
             "fileName": "test.tsx",
             "kind": "MethodDeclaration",
             "line": 7,
@@ -501,7 +501,7 @@ describe("classes", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 8,
+            "column": 9,
             "fileName": "test.tsx",
             "kind": "Parameter",
             "line": 33,
@@ -519,7 +519,7 @@ describe("classes", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 8,
+            "column": 9,
             "fileName": "test.tsx",
             "kind": "Parameter",
             "line": 33,
@@ -541,7 +541,7 @@ describe("classes", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 6,
+            "column": 7,
             "fileName": "test.tsx",
             "kind": "PropertyDeclaration",
             "line": 5,
@@ -559,7 +559,7 @@ describe("classes", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 6,
+            "column": 7,
             "fileName": "test.tsx",
             "kind": "PropertyDeclaration",
             "line": 5,
@@ -580,7 +580,7 @@ describe("classes", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 6,
+            "column": 7,
             "fileName": "test.tsx",
             "kind": "PropertyDeclaration",
             "line": 29,
@@ -598,7 +598,7 @@ describe("classes", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 6,
+            "column": 7,
             "fileName": "test.tsx",
             "kind": "PropertyDeclaration",
             "line": 29,
@@ -620,7 +620,7 @@ describe("classes", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 6,
+            "column": 7,
             "fileName": "test.tsx",
             "kind": "PropertyDeclaration",
             "line": 11,
@@ -638,7 +638,7 @@ describe("classes", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 6,
+            "column": 7,
             "fileName": "test.tsx",
             "kind": "PropertyDeclaration",
             "line": 11,
@@ -656,7 +656,7 @@ describe("classes", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 6,
+            "column": 7,
             "fileName": "test.tsx",
             "kind": "PropertyDeclaration",
             "line": 11,
@@ -680,7 +680,7 @@ describe("classes", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 6,
+            "column": 7,
             "fileName": "test.tsx",
             "kind": "MethodDeclaration",
             "line": 39,
@@ -704,7 +704,7 @@ describe("classes", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 4,
+            "column": 5,
             "fileName": "test.tsx",
             "kind": "ClassDeclaration",
             "line": 3,
@@ -722,7 +722,7 @@ describe("classes", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 23,
+            "column": 24,
             "fileName": "test.tsx",
             "kind": "ClassExpression",
             "line": 28,
@@ -740,7 +740,7 @@ describe("classes", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 23,
+            "column": 24,
             "fileName": "test.tsx",
             "kind": "ClassExpression",
             "line": 28,
@@ -758,7 +758,7 @@ describe("classes", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 4,
+            "column": 5,
             "fileName": "test.tsx",
             "kind": "ClassDeclaration",
             "line": 3,
@@ -774,7 +774,7 @@ describe("classes", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 6,
+            "column": 7,
             "fileName": "test.tsx",
             "kind": "PropertyDeclaration",
             "line": 5,

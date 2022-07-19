@@ -31,7 +31,7 @@ describe("well known", () => {
     const definition = defineSymbol(nodes[0], checker);
     expect(dumpNode(nodes[0], checker)).toMatchInlineSnapshot(`
       Object {
-        "column": 7,
+        "column": 8,
         "fileName": "test.tsx",
         "kind": "Identifier",
         "line": 4,
@@ -43,7 +43,7 @@ describe("well known", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 4,
+            "column": 5,
             "fileName": "typescript/lib/lib.es5.d.ts",
             "kind": "MethodSignature",
             "line": 1508,
@@ -60,7 +60,7 @@ describe("well known", () => {
     const definition = defineSymbol(nodes[1], checker);
     expect(dumpNode(nodes[1], checker)).toMatchInlineSnapshot(`
       Object {
-        "column": 12,
+        "column": 13,
         "fileName": "test.tsx",
         "kind": "Identifier",
         "line": 13,
@@ -72,7 +72,7 @@ describe("well known", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 4,
+            "column": 5,
             "fileName": "typescript/lib/lib.es5.d.ts",
             "kind": "MethodSignature",
             "line": 1508,
@@ -90,7 +90,7 @@ describe("well known", () => {
 
     expect(dumpNode(nodes[0], checker)).toMatchInlineSnapshot(`
       Object {
-        "column": 9,
+        "column": 10,
         "fileName": "test.tsx",
         "kind": "Identifier",
         "line": 8,
@@ -103,7 +103,7 @@ describe("well known", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 4,
+            "column": 5,
             "fileName": "typescript/lib/lib.es5.d.ts",
             "kind": "MethodSignature",
             "line": 1114,
@@ -117,7 +117,7 @@ describe("well known", () => {
 
     expect(dumpNode(nodes[1], checker)).toMatchInlineSnapshot(`
       Object {
-        "column": 14,
+        "column": 15,
         "fileName": "test.tsx",
         "kind": "Identifier",
         "line": 11,
@@ -130,7 +130,7 @@ describe("well known", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 4,
+            "column": 5,
             "fileName": "typescript/lib/lib.es5.d.ts",
             "kind": "MethodSignature",
             "line": 1114,

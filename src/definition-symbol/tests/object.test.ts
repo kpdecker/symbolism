@@ -43,7 +43,7 @@ describe("objects", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 6,
+            "column": 7,
             "fileName": "test.tsx",
             "kind": "MethodDeclaration",
             "line": 3,
@@ -61,7 +61,7 @@ describe("objects", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 6,
+            "column": 7,
             "fileName": "test.tsx",
             "kind": "MethodDeclaration",
             "line": 3,
@@ -82,7 +82,7 @@ describe("objects", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 6,
+            "column": 7,
             "fileName": "test.tsx",
             "kind": "GetAccessor",
             "line": 5,
@@ -90,7 +90,7 @@ describe("objects", () => {
             "path": "untypedObject.getter",
           },
           Object {
-            "column": 6,
+            "column": 7,
             "fileName": "test.tsx",
             "kind": "SetAccessor",
             "line": 6,
@@ -108,7 +108,7 @@ describe("objects", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 6,
+            "column": 7,
             "fileName": "test.tsx",
             "kind": "GetAccessor",
             "line": 5,
@@ -116,7 +116,7 @@ describe("objects", () => {
             "path": "untypedObject.getter",
           },
           Object {
-            "column": 6,
+            "column": 7,
             "fileName": "test.tsx",
             "kind": "SetAccessor",
             "line": 6,
@@ -134,7 +134,7 @@ describe("objects", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 6,
+            "column": 7,
             "fileName": "test.tsx",
             "kind": "GetAccessor",
             "line": 5,
@@ -142,7 +142,7 @@ describe("objects", () => {
             "path": "untypedObject.getter",
           },
           Object {
-            "column": 6,
+            "column": 7,
             "fileName": "test.tsx",
             "kind": "SetAccessor",
             "line": 6,
@@ -160,7 +160,7 @@ describe("objects", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 6,
+            "column": 7,
             "fileName": "test.tsx",
             "kind": "GetAccessor",
             "line": 5,
@@ -168,7 +168,7 @@ describe("objects", () => {
             "path": "untypedObject.getter",
           },
           Object {
-            "column": 6,
+            "column": 7,
             "fileName": "test.tsx",
             "kind": "SetAccessor",
             "line": 6,

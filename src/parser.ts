@@ -29,7 +29,6 @@ export function findCoverageLocations(config: Config) {
   const checker = program.getTypeChecker();
 
   const symbols = parseSymbolTable(program, config);
-  // console.log(dumpSymbolTable(symbols));
 
   const coverageRequired: TokenSourceLocation[] = [];
 
@@ -42,7 +41,7 @@ export function findCoverageLocations(config: Config) {
         const sourceFile = referencingNode.getSourceFile();
         const node = dumpNode(referencingNode, checker);
         const lineAndChar = sourceFile?.getLineAndCharacterOfPosition(
-          referencingNode.pos
+          referencingNode.getStart()
         );
 
         coverageRequired.push({

@@ -79,7 +79,7 @@ describe("infer intrinsic types", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 12,
+            "column": 13,
             "fileName": "typescript/lib/lib.es5.d.ts",
             "kind": "VariableDeclaration",
             "line": 25,
@@ -94,7 +94,7 @@ describe("infer intrinsic types", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 12,
+            "column": 13,
             "fileName": "typescript/lib/lib.es5.d.ts",
             "kind": "VariableDeclaration",
             "line": 26,
@@ -121,7 +121,7 @@ describe("infer intrinsic types", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 0,
+            "column": 1,
             "fileName": "typescript/lib/lib.es5.d.ts",
             "kind": "InterfaceDeclaration",
             "line": 945,
@@ -130,7 +130,7 @@ describe("infer intrinsic types", () => {
             "path": "RegExp",
           },
           Object {
-            "column": 12,
+            "column": 13,
             "fileName": "typescript/lib/lib.es5.d.ts",
             "kind": "VariableDeclaration",
             "line": 1025,
@@ -138,7 +138,7 @@ describe("infer intrinsic types", () => {
             "path": "RegExp",
           },
           Object {
-            "column": 0,
+            "column": 1,
             "fileName": "typescript/lib/lib.es2015.core.d.ts",
             "kind": "InterfaceDeclaration",
             "line": 367,
@@ -147,7 +147,7 @@ describe("infer intrinsic types", () => {
             "path": "RegExp",
           },
           Object {
-            "column": 0,
+            "column": 1,
             "fileName": "typescript/lib/lib.es2015.symbol.wellknown.d.ts",
             "kind": "InterfaceDeclaration",
             "line": 181,

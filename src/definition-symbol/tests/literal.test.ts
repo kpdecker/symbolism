@@ -28,7 +28,7 @@ describe("infer object literal types", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 28,
+            "column": 29,
             "fileName": "test.ts",
             "kind": "TypeLiteral",
             "line": 2,
@@ -65,7 +65,7 @@ describe("infer object literal types", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 28,
+            "column": 29,
             "fileName": "test.ts",
             "kind": "TypeLiteral",
             "line": 2,
@@ -101,7 +101,7 @@ describe("infer object literal types", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 28,
+            "column": 29,
             "fileName": "test.ts",
             "kind": "TypeLiteral",
             "line": 2,
@@ -118,7 +118,7 @@ describe("infer object literal types", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 28,
+            "column": 29,
             "fileName": "test.ts",
             "kind": "TypeLiteral",
             "line": 2,
@@ -158,7 +158,7 @@ describe("infer object literal types", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 28,
+            "column": 29,
             "fileName": "test.ts",
             "kind": "TypeLiteral",
             "line": 2,
@@ -175,7 +175,7 @@ describe("infer object literal types", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 30,
+            "column": 31,
             "fileName": "test.ts",
             "kind": "PropertySignature",
             "line": 2,
@@ -215,7 +215,7 @@ describe("infer object literal types", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 28,
+            "column": 29,
             "fileName": "test.ts",
             "kind": "TypeLiteral",
             "line": 2,
@@ -232,7 +232,7 @@ describe("infer object literal types", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 30,
+            "column": 31,
             "fileName": "test.ts",
             "kind": "PropertySignature",
             "line": 2,
@@ -265,7 +265,7 @@ describe("infer object literal types", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 29,
+            "column": 30,
             "fileName": "test.ts",
             "kind": "TypeLiteral",
             "line": 2,
@@ -295,7 +295,7 @@ describe("infer object literal types", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 12,
+            "column": 13,
             "fileName": "typescript/lib/lib.dom.d.ts",
             "kind": "VariableDeclaration",
             "line": 17177,
