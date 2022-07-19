@@ -36,6 +36,8 @@ export type ConfigFileSchema = {
   /**
    * List of glob match patterns defining the files to be excluded from the coverage report.
    * Files in this list will be excluded from both symbol lookup and coverage reporting.
+   *
+   * @default [] ['**\/node_modules/**']
    */
   exclude?: string[];
 
@@ -71,8 +73,9 @@ export function parseConfig(configFilePath: string): Config {
       // Normalize node module paths if loaded outside of the project.
       .replace(/.*\/node_modules\//, "node_modules/");
     return (
-      config.exclude?.some((pattern) => minimatch(relativePath, pattern)) ??
-      false
+      initialConfig.exclude?.some((pattern) =>
+        minimatch(relativePath, pattern)
+      ) ?? false
     );
   }
 
@@ -81,6 +84,7 @@ export function parseConfig(configFilePath: string): Config {
     tsConfigPath: "tsconfig.json",
     coverageJsonPath: "./coverage/coverage-final.json",
     entryPoints: ["src/index.ts"],
+    exclude: ["**/node_modules/**"],
     ...config,
   } as ConfigFileSchema;
 
@@ -90,7 +94,7 @@ export function parseConfig(configFilePath: string): Config {
     tsConfigPath: resolve(baseDir, initialConfig.tsConfigPath),
     coverageJsonPath: resolve(baseDir, initialConfig.coverageJsonPath),
 
-    entryPoints: config.entryPoints!.flatMap((pattern) =>
+    entryPoints: initialConfig.entryPoints!.flatMap((pattern) =>
       glob
         .sync(pattern, {
           cwd: baseDir,
