@@ -4,7 +4,7 @@ import { getSymbolDeclaration } from "./utils";
 import { initTypescript } from "./typescript";
 import { dumpNode, extractSymbolSummary, parseSymbolTable } from "./symbols";
 import { lineAndColumn, LineAndColumn } from "./coverage";
-import { namedPathToNode, pathMatchesTokenFilter } from "./path/index";
+import { getNodePath, pathMatchesTokenFilter } from "./path/index";
 
 export type TokenSourceLocation = {
   kind: ts.SyntaxKind;
@@ -33,7 +33,7 @@ export function findCoverageLocations(config: Config) {
   const coverageRequired: TokenSourceLocation[] = [];
 
   symbols.forEach((referencingNodes, symbol) => {
-    const symbolPath = namedPathToNode(getSymbolDeclaration(symbol)!, checker);
+    const symbolPath = getNodePath(getSymbolDeclaration(symbol)!, checker);
     if (
       config.tokens.some(({ name }) => pathMatchesTokenFilter(symbolPath, name))
     ) {

@@ -250,14 +250,14 @@ const nodePathHandlers: Record<ts.SyntaxKind, PathHandler> = {
   ...jsxPathHandlers,
 };
 
-export function namedPathToNode(
+export function getNodePath(
   node: ts.Node,
   checker: ts.TypeChecker,
   filter: (node: ts.Node) => boolean = (node) => !!node,
   child?: ts.Node
 ): string {
   function getPath(child: ts.Node) {
-    return namedPathToNode(child, checker, filter).replace(/^\./, "");
+    return getNodePath(child, checker, filter).replace(/^\./, "");
   }
   function getParentPath() {
     return getPath(node.parent);

@@ -1,5 +1,5 @@
 import { parseConfig } from "../config";
-import { namedPathToNode } from "../path/index";
+import { getNodePath } from "../path/index";
 import { dumpSymbolTable, parseSymbolTable } from "../symbols";
 import { initTypescript } from "../typescript";
 
@@ -19,7 +19,7 @@ describe("symbol table", () => {
     });
 
     expect(
-      namedPathToNode(artifact![0].declarations![0], checker)
+      getNodePath(artifact![0].declarations![0], checker)
     ).toMatchInlineSnapshot(`"parseSymbolTable"`);
 
     const dump = Array.from(dumpSymbolTable(symbolTable, checker));

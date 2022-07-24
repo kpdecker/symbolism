@@ -5,7 +5,7 @@ import { Config } from "./config";
 import { getSymbolDeclaration, isIntrinsicType } from "./utils";
 import { lineAndColumn } from "./coverage";
 import { defineSymbol } from "./definition-symbol/index";
-import { namedPathToNode } from "./path/index";
+import { getNodePath } from "./path/index";
 import { logInfo, LogLevel, logVerbose, logWarn, setLogLevel } from "./logger";
 import { dumpFlags } from "../test/utils";
 
@@ -177,16 +177,13 @@ export function extractSymbolSummary(
   const allPaths: string[] = [];
 
   symbols.forEach((symbolMap, symbol) => {
-    const declarationPath = namedPathToNode(
-      getSymbolDeclaration(symbol)!,
-      checker
-    );
+    const declarationPath = getNodePath(getSymbolDeclaration(symbol)!, checker);
     if (declarationPath) {
       declarationPaths.push(declarationPath);
       pathMap.set(declarationPath, symbol);
     }
     symbolMap.forEach((referenceNode) => {
-      const referencePath = namedPathToNode(referenceNode, checker);
+      const referencePath = getNodePath(referenceNode, checker);
       if (!allPaths.includes(referencePath)) {
         allPaths.push(referencePath);
       }
@@ -293,7 +290,7 @@ export function dumpNode(
   const ret = {
     kind: ts.SyntaxKind[node.kind],
     name: "",
-    path: !omitPath ? namedPathToNode(node, checker) : "",
+    path: !omitPath ? getNodePath(node, checker) : "",
     fileName,
     ...lineAndColumn(lineAndChar),
   };
