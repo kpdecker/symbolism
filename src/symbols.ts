@@ -271,10 +271,21 @@ export function dumpSymbol(
 }
 
 export function dumpNode(
-  node: ts.Node,
+  node: ts.Node | undefined,
   checker: ts.TypeChecker,
   omitPath = false
 ) {
+  if (!node) {
+    return {
+      kind: "Undefined",
+      name: "undefined",
+      fileName: "undefined",
+      path: "undefined",
+      line: 1,
+      column: 1,
+    };
+  }
+
   const sourceFile = node.getSourceFile();
   const fileName = sourceFile.fileName;
   const lineAndChar = sourceFile.getLineAndCharacterOfPosition(node.getStart());
