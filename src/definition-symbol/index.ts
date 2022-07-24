@@ -326,7 +326,7 @@ function defineProperties(node: ts.Node, checker: ts.TypeChecker) {
       }
     );
 
-    if (!propertyDefinition && ts.isShorthandPropertyAssignment(node)) {
+    if (!propertyDefinition?.symbol && ts.isShorthandPropertyAssignment(node)) {
       const shorthandSymbol = checker.getShorthandAssignmentValueSymbol(node);
       if (shorthandSymbol) {
         return followSymbol(
