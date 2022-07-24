@@ -6,10 +6,10 @@ import { getSymbolDeclaration, isIntrinsicType } from "./utils";
 import { lineAndColumn } from "./coverage";
 import { defineSymbol } from "./definition-symbol/index";
 import { getNodePath } from "./path/index";
-import { logInfo, LogLevel, logVerbose, logWarn, setLogLevel } from "./logger";
+import { logDebug, logInfo, logVerbose, logWarn } from "./logger";
 import { dumpFlags } from "../test/utils";
 
-type SymbolTable = Map<ts.Symbol, Set<ts.Node>>;
+export type SymbolTable = Map<ts.Symbol, Set<ts.Node>>;
 
 export function parseSymbolTable(program: ts.Program, config: Config) {
   const sourceFiles = program
@@ -68,7 +68,18 @@ export function parseSymbolTable(program: ts.Program, config: Config) {
         if (node.getText() === "undefined" || node.getText() === "arguments") {
           return;
         }
+        /**
+         * The symbol that will serve as our primary key for reference tracking.
+         */
+        let definitionSymbol: ts.Symbol | null | undefined;
 
+        let handlerUsed = "";
+        function pickSymbol(handler: string, symbol: ts.Symbol | undefined) {
+          if (symbol) {
+            definitionSymbol = symbol;
+            handlerUsed = handler;
+          }
+        }
         const symbol = checker.getSymbolAtLocation(node);
         if (!symbol) {
           logVerbose("No Symbol:", dumpNode(node, checker));
@@ -77,47 +88,39 @@ export function parseSymbolTable(program: ts.Program, config: Config) {
 
         const type = checker.getTypeAtLocation(node);
         if (isIntrinsicType(type)) {
-          logVerbose("Intensic Symbol:", dumpNode(node, checker));
+          logVerbose("Intrinsic Symbol:", dumpNode(node, checker));
           return;
         }
 
         const symbolDeclaration = getSymbolDeclaration(symbol);
 
-        /**
-         * The symbol that will serve as our primary key for reference tracking.
-         */
-        let definitionSymbol: ts.Symbol | null | undefined;
-
         // If the type checker resolved a direct type, use that
-        definitionSymbol = type?.getSymbol();
+        pickSymbol("type-symbol", type?.getSymbol());
 
         if (!getSymbolDeclaration(definitionSymbol)) {
-          const inferredType = defineSymbol(node, checker);
-          definitionSymbol = inferredType?.symbol;
+          const defineType = defineSymbol(node, checker);
+          pickSymbol("define-symbol", defineType?.symbol);
         }
 
-        // If this is a function parameter then we are at our identity
         if (!getSymbolDeclaration(definitionSymbol) && symbolDeclaration) {
+          // If this is a function parameter then we are at our identity
           if (ts.isParameter(symbolDeclaration)) {
             const parameter = symbolDeclaration;
             if (
               ts.isFunctionDeclaration(parameter.parent) ||
               ts.isArrowFunction(parameter.parent)
             ) {
-              definitionSymbol = symbol;
+              pickSymbol("parameter", symbol);
             }
-          }
-        }
 
-        // Variable declarations are also identity
-        if (!getSymbolDeclaration(definitionSymbol) && symbolDeclaration) {
-          if (
+            // Variable declarations are also identity
+          } else if (
             ts.isVariableDeclaration(symbolDeclaration) ||
             ts.isPropertySignature(symbolDeclaration) ||
             ts.isPropertyAssignment(symbolDeclaration) ||
             ts.isBindingElement(symbolDeclaration)
           ) {
-            definitionSymbol = symbol;
+            pickSymbol("identifier", symbol);
           }
         }
 
@@ -146,12 +149,15 @@ export function parseSymbolTable(program: ts.Program, config: Config) {
         }
         invariant(definitionNode);
 
+        // Don't return self declarations
         if (
           definitionNode.getSourceFile() === sourceFile &&
           definitionNode.pos === node.pos
         ) {
           return;
         }
+
+        logDebug("Symbol:", handlerUsed, dumpNode(node, checker));
 
         const symbolMap = symbols.get(definitionSymbol) || new Set();
         symbols.set(definitionSymbol, symbolMap);
