@@ -25,8 +25,14 @@ export function parseExecutedCoverage(jsonPath: string) {
     ([filePath, { statementMap, s: statementCoverage }]) => {
       coverageJson[filePath] = Object.entries<any>(statementMap).map(
         ([id, { start, end }]) => ({
-          start,
-          end,
+          start: {
+            line: start.line,
+            column: start.column || 0, // null column = whole line
+          },
+          end: {
+            line: end.line,
+            column: end.column || Infinity,
+          },
           count: statementCoverage[id],
         })
       );
