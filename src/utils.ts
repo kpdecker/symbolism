@@ -1,4 +1,5 @@
 import ts from "typescript";
+import { logDebug } from "./logger";
 
 export function isArraySymbol(symbol: ts.Symbol): boolean {
   return symbol.getName() === "Array";
@@ -75,6 +76,11 @@ export function getPropertySymbol(
     (stringIndex && type.getStringIndexType()?.symbol) ||
     (numberIndex && type.getNumberIndexType()?.symbol) ||
     undefined;
+
+  if (!symbol) {
+    logDebug(`No symbol found for ${name} on ${checker.typeToString(type)}`);
+    return undefined;
+  }
 
   let propertyType: ts.Type | undefined = undefined;
   if (symbol) {

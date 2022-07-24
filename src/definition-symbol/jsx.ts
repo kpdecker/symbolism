@@ -1,5 +1,7 @@
 import invariant from "tiny-invariant";
 import ts, { JsxOpeningLikeElement } from "typescript";
+import { logDebug } from "../logger";
+import { dumpNode } from "../symbols";
 import { getPropertySymbol } from "../utils";
 import { defineSymbol } from "./index";
 import {
@@ -41,6 +43,7 @@ export const jsxSymbolHandlers = nodeOperators({
     invariantNode(node, ts.isJsxAttribute);
     const properties = defineSymbol(node.parent, checker);
     if (!properties) {
+      logDebug(`No properties for ${dumpNode(node.parent, checker)}`);
       return directTypeAndSymbol(node, checker);
     }
 
