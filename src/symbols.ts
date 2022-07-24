@@ -8,6 +8,7 @@ import { defineSymbol } from "./definition-symbol/index";
 import { getNodePath } from "./path/index";
 import { logDebug, logInfo, logVerbose, logWarn } from "./logger";
 import { dumpFlags } from "../test/utils";
+import { NodeError } from "./error";
 
 export type SymbolTable = Map<ts.Symbol, Set<ts.Node>>;
 
@@ -80,88 +81,97 @@ export function parseSymbolTable(program: ts.Program, config: Config) {
             handlerUsed = handler;
           }
         }
-        const symbol = checker.getSymbolAtLocation(node);
-        if (!symbol) {
-          logVerbose("No Symbol:", dumpNode(node, checker));
-          return;
-        }
 
-        const type = checker.getTypeAtLocation(node);
-        if (isIntrinsicType(type)) {
-          logVerbose("Intrinsic Symbol:", dumpNode(node, checker));
-          return;
-        }
+        try {
+          const symbol = checker.getSymbolAtLocation(node);
+          if (!symbol) {
+            logVerbose("No Symbol:", dumpNode(node, checker));
+            return;
+          }
 
-        const symbolDeclaration = getSymbolDeclaration(symbol);
+          const type = checker.getTypeAtLocation(node);
+          if (isIntrinsicType(type)) {
+            logVerbose("Intrinsic Symbol:", dumpNode(node, checker));
+            return;
+          }
 
-        // If the type checker resolved a direct type, use that
-        pickSymbol("type-symbol", type?.getSymbol());
+          const symbolDeclaration = getSymbolDeclaration(symbol);
 
-        if (!getSymbolDeclaration(definitionSymbol)) {
-          const defineType = defineSymbol(node, checker);
-          pickSymbol("define-symbol", defineType?.symbol);
-        }
+          // If the type checker resolved a direct type, use that
+          pickSymbol("type-symbol", type?.getSymbol());
 
-        if (!getSymbolDeclaration(definitionSymbol) && symbolDeclaration) {
-          // If this is a function parameter then we are at our identity
-          if (ts.isParameter(symbolDeclaration)) {
-            const parameter = symbolDeclaration;
-            if (
-              ts.isFunctionDeclaration(parameter.parent) ||
-              ts.isArrowFunction(parameter.parent)
+          if (!getSymbolDeclaration(definitionSymbol)) {
+            const defineType = defineSymbol(node, checker);
+            pickSymbol("define-symbol", defineType?.symbol);
+          }
+
+          if (!getSymbolDeclaration(definitionSymbol) && symbolDeclaration) {
+            // If this is a function parameter then we are at our identity
+            if (ts.isParameter(symbolDeclaration)) {
+              const parameter = symbolDeclaration;
+              if (
+                ts.isFunctionDeclaration(parameter.parent) ||
+                ts.isArrowFunction(parameter.parent)
+              ) {
+                pickSymbol("parameter", symbol);
+              }
+
+              // Variable declarations are also identity
+            } else if (
+              ts.isVariableDeclaration(symbolDeclaration) ||
+              ts.isPropertySignature(symbolDeclaration) ||
+              ts.isPropertyAssignment(symbolDeclaration) ||
+              ts.isBindingElement(symbolDeclaration)
             ) {
-              pickSymbol("parameter", symbol);
+              pickSymbol("identifier", symbol);
+            }
+          }
+
+          if (!definitionSymbol) {
+            logWarn(
+              `No definition symbol found`,
+              dumpNode(node, checker),
+              symbolDeclaration && dumpNode(symbolDeclaration, checker),
+              definitionSymbol
+            );
+            return;
+          }
+
+          // Don't omit the declaration case
+          const definitionNode = getSymbolDeclaration(definitionSymbol);
+          if (!definitionNode) {
+            if (!(definitionSymbol.flags & ts.SymbolFlags.Transient)) {
+              logWarn(
+                "Definition symbol lacking declaration",
+                dumpNode(node, checker),
+                dumpSymbol(definitionSymbol, checker)
+              );
             }
 
-            // Variable declarations are also identity
-          } else if (
-            ts.isVariableDeclaration(symbolDeclaration) ||
-            ts.isPropertySignature(symbolDeclaration) ||
-            ts.isPropertyAssignment(symbolDeclaration) ||
-            ts.isBindingElement(symbolDeclaration)
+            return;
+          }
+          invariant(definitionNode);
+
+          // Don't return self declarations
+          if (
+            definitionNode.getSourceFile() === sourceFile &&
+            definitionNode.pos === node.pos
           ) {
-            pickSymbol("identifier", symbol);
-          }
-        }
-
-        if (!definitionSymbol) {
-          logWarn(
-            `No definition symbol found`,
-            dumpNode(node, checker),
-            symbolDeclaration && dumpNode(symbolDeclaration, checker),
-            definitionSymbol
-          );
-          return;
-        }
-
-        // Don't omit the declaration case
-        const definitionNode = getSymbolDeclaration(definitionSymbol);
-        if (!definitionNode) {
-          if (!(definitionSymbol.flags & ts.SymbolFlags.Transient)) {
-            logWarn(
-              "Definition symbol lacking declaration",
-              dumpNode(node, checker),
-              dumpSymbol(definitionSymbol, checker)
-            );
+            return;
           }
 
-          return;
+          logDebug("Symbol:", handlerUsed, dumpNode(node, checker));
+
+          // TODO: Allow for multiple definitions (i.e. root type and variable declaration)?
+          const symbolMap = symbols.get(definitionSymbol) || new Set();
+          symbols.set(definitionSymbol, symbolMap);
+          symbolMap.add(node);
+        } catch (e) {
+          if ((e as NodeError).isNodeError) {
+            throw e;
+          }
+          throw new NodeError(`Failed parsing`, node, checker, e as Error);
         }
-        invariant(definitionNode);
-
-        // Don't return self declarations
-        if (
-          definitionNode.getSourceFile() === sourceFile &&
-          definitionNode.pos === node.pos
-        ) {
-          return;
-        }
-
-        logDebug("Symbol:", handlerUsed, dumpNode(node, checker));
-
-        const symbolMap = symbols.get(definitionSymbol) || new Set();
-        symbols.set(definitionSymbol, symbolMap);
-        symbolMap.add(node);
       }
       ts.forEachChild(node, visitNode);
     });
