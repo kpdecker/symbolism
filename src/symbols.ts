@@ -188,15 +188,18 @@ export function extractSymbolSummary(
   symbols: SymbolTable,
   checker: ts.TypeChecker
 ) {
-  const pathMap: Map<string, ts.Symbol> = new Map();
+  const pathMap: Record<string, ts.Symbol[]> = {};
   const declarationPaths: string[] = [];
   const allPaths: string[] = [];
 
   symbols.forEach((symbolMap, symbol) => {
     const declarationPath = getNodePath(getSymbolDeclaration(symbol)!, checker);
     if (declarationPath) {
-      declarationPaths.push(declarationPath);
-      pathMap.set(declarationPath, symbol);
+      if (!declarationPaths.includes(declarationPath)) {
+        declarationPaths.push(declarationPath);
+      }
+      pathMap[declarationPath] ??= [];
+      pathMap[declarationPath].push(symbol);
     }
     symbolMap.forEach((referenceNode) => {
       const referencePath = getNodePath(referenceNode, checker);
@@ -208,12 +211,15 @@ export function extractSymbolSummary(
 
   declarationPaths.sort();
   allPaths.sort();
-  return allPaths.map((path) => {
-    const symbol = pathMap.get(path);
-    const references = symbols.get(symbol!);
+
+  return declarationPaths.map((path) => {
+    const pathSymbols = pathMap[path];
     return {
       path,
-      size: references?.size || 0,
+      size: pathSymbols.reduce(
+        (prev, symbol) => prev + (symbols.get(symbol!)?.size || 0),
+        0
+      ),
     };
   });
 }
@@ -324,9 +330,6 @@ export function dumpNode(
       ts.isVariableDeclaration(node)
     ) as ts.VariableDeclaration;
     if (declaration) {
-      const variableType = checker.getTypeAtLocation(declaration);
-      // console.log(variableType.getProperties());
-
       name =
         declaration.name.getText() +
         " " +
