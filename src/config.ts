@@ -2,6 +2,7 @@ import { readFileSync } from "fs";
 import { glob } from "glob";
 import minimatch from "minimatch";
 import { dirname, relative, resolve } from "path";
+import invariant from "tiny-invariant";
 import { SetRequired } from "type-fest";
 
 export type ConfigFileSchema = {
@@ -55,6 +56,15 @@ export type Config = Omit<ConfigFileSchema, "min" | "tokens" | "exclude"> & {
   tokens: SetRequired<Exclude<ConfigFileSchema["tokens"][0], string>, "min">[];
   exclude: (fileName: string) => boolean;
 };
+
+let cliConfig: Config | undefined;
+export function loadCliConfig(configPath: string) {
+  cliConfig = parseConfig(configPath);
+}
+export function getCliConfig() {
+  invariant(cliConfig, "CLI config not loaded");
+  return cliConfig;
+}
 
 export function parseConfig(configFilePath: string): Config {
   const config: Partial<ConfigFileSchema> = JSON.parse(

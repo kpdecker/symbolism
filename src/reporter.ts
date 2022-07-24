@@ -5,6 +5,9 @@ import { relative } from "path";
 export function printResults(
   coveragePercentage: ReturnType<typeof evaluateCoverage>["coveragePercentage"]
 ) {
+  let hasMissing = false;
+
+  // const log = ((...args: any[]) => {});
   const log = console.error;
   Object.keys(coveragePercentage).forEach((keyName) => {
     const { covered, total, locations } = coveragePercentage[keyName];
@@ -15,6 +18,8 @@ export function printResults(
       ).toFixed(2)}% covered (${covered}/${total})`
     );
     if (locations) {
+      hasMissing = true;
+
       log(`  Missing:`);
 
       locations
@@ -29,4 +34,6 @@ export function printResults(
     }
     log();
   });
+
+  return hasMissing;
 }

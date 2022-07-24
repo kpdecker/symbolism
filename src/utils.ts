@@ -55,7 +55,7 @@ export function isTupleTypeReference(
 }
 
 export function getSymbolDeclaration(
-  symbol: ts.Symbol | undefined
+  symbol: ts.Symbol | null | undefined
 ): ts.Declaration | undefined {
   return symbol?.valueDeclaration || symbol?.declarations?.[0];
 }
