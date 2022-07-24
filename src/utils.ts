@@ -26,6 +26,7 @@ const intrinsicTypes =
 export function isIntrinsicType(type: ts.Type) {
   return (type.flags & intrinsicTypes) !== 0;
 }
+
 export function isTypeReference(
   type: ts.Type | undefined
 ): type is ts.TypeReference {
@@ -33,6 +34,23 @@ export function isTypeReference(
     type &&
     type.flags & ts.TypeFlags.Object &&
     (type as ts.ObjectType).objectFlags & ts.ObjectFlags.Reference
+  );
+}
+
+export function isTupleType(type: ts.Type): type is ts.TupleType {
+  return !!(
+    type &&
+    type.flags & ts.TypeFlags.Object &&
+    (type as ts.ObjectType).objectFlags & ts.ObjectFlags.Tuple
+  );
+}
+
+export function isTupleTypeReference(
+  type: ts.Type | undefined
+): type is ts.TupleTypeReference {
+  return (
+    isTypeReference(type) &&
+    !!((type.target as ts.ObjectType).objectFlags & ts.ObjectFlags.Tuple)
   );
 }
 
