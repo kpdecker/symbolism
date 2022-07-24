@@ -27,6 +27,6 @@ describe("symbol table", () => {
       ([declaration]) => declaration.name === "parseSymbolTable"
     )!;
 
-    expect(dumpArtifact[1].length).toBeGreaterThan(1);
+    expect(dumpArtifact.length).toBeGreaterThan(1);
   });
 });
