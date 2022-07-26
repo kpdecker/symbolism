@@ -28,11 +28,11 @@ export function findCoverageLocations(config: Config) {
 
   const checker = program.getTypeChecker();
 
-  const symbols = parseSymbolTable(program, config);
+  const allReferences = parseSymbolTable(program, config);
 
   const coverageRequired: TokenSourceLocation[] = [];
 
-  symbols.forEach((referencingNodes, symbol) => {
+  allReferences.forEach((referencingNodes, symbol) => {
     const symbolPath = getNodePath(getSymbolDeclaration(symbol)!, checker);
     if (
       config.tokens.some(({ name }) => pathMatchesTokenFilter(symbolPath, name))
