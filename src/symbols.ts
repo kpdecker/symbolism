@@ -75,12 +75,12 @@ export function parseSymbolTable(program: ts.Program, config: Config) {
         let definitionSymbol: ts.Symbol | null | undefined;
 
         let handlerUsed = "";
-        function pickSymbol(handler: string, symbol: ts.Symbol | undefined) {
+        const pickSymbol = (handler: string, symbol: ts.Symbol | undefined) => {
           if (symbol) {
             definitionSymbol = symbol;
             handlerUsed = handler;
           }
-        }
+        };
 
         try {
           const symbol = checker.getSymbolAtLocation(node);
