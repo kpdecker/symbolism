@@ -2,6 +2,7 @@
 import { program } from "commander";
 import { initAssert } from "./actions/assert";
 import { initDumpFiles } from "./actions/dump-files";
+import { initDumpSymbols } from "./actions/dump-symbols";
 
 import { loadCliConfig } from "./config";
 
@@ -14,5 +15,6 @@ program.hook("preAction", (command) => {
 
 initAssert(program);
 initDumpFiles(program);
+initDumpSymbols(program);
 
 program.parse();
