@@ -6,8 +6,8 @@
   "scripts": {
     "format": "prettier -w src",
     "test": "jest",
-    "assert": "node packages/symbolism-assert/dist/symbolism-assert.cjs.js",
-    "postinstall": "preconstruct dev"
+    "postinstall": "preconstruct dev",
+    "build": "preconstruct build"
   },
   "devDependencies": {
     "@babel/core": "^7.18.9",
