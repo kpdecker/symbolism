@@ -5,6 +5,10 @@
   "main": "dist/symbolism-type-eval.cjs.js",
   "author": "Kevin Decker <kpdecker@gmail.com>",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kpdecker/symbolism.git"
+  },
   "dependencies": {
     "@symbolism/ts-debug": "^0.0.0",
     "@symbolism/ts-utils": "^0.0.0",

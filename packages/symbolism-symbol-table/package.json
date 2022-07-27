@@ -4,6 +4,10 @@
   "description": "Symbolism project symbol table",
   "author": "Kevin Decker <kpdecker@gmail.com>",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kpdecker/symbolism.git"
+  },
   "main": "dist/symbolism-symbol-table.cjs.js",
   "dependencies": {
     "@symbolism/definitions": "^0.0.1",

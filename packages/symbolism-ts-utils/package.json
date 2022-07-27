@@ -4,6 +4,10 @@
   "description": "Symbolism typescript utilities",
   "author": "Kevin Decker <kpdecker@gmail.com>",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kpdecker/symbolism.git"
+  },
   "main": "dist/symbolism-ts-utils.cjs.js",
   "dependencies": {
     "@symbolism/utils": "^0.0.1",

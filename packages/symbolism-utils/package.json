@@ -5,6 +5,10 @@
   "main": "dist/symbolism-utils.cjs.js",
   "author": "Kevin Decker <kpdecker@gmail.com>",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kpdecker/symbolism.git"
+  },
   "dependencies": {
     "commander": "^9.3.0",
     "glob": "^8.0.3",
