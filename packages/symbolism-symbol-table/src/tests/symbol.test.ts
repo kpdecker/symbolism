@@ -4,7 +4,7 @@ import { dumpSymbolTable, parseSymbolTable } from "../index";
 
 describe("symbol table", () => {
   it("should parse this project", () => {
-    const config = parseConfig("./.token-cov.json");
+    const config = parseConfig("./.symbolism.json");
     const services = initTypescript(config);
     const program = services.getProgram()!;
     const checker = program.getTypeChecker();

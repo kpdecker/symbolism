@@ -7,11 +7,11 @@ import {
   printResults,
 } from "@symbolism/coverage";
 
-export function initAssert(program: Command) {
-  program.command("assert").action(assert);
+export function initCoverage(program: Command) {
+  program.command("coverage").action(assertCoverage);
 }
 
-export function assert() {
+function assertCoverage() {
   const config = getCliConfig();
   const executedCoverage = parseExecutedCoverage(config.coverageJsonPath);
 

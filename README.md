@@ -1,13 +1,15 @@
-# token-cov
+# symbolism
 
-Code coverage assertions by token name.
+Typescript symbol inspection/assertion tools.
 
-Allows for code coverage assertions to be made for specific function calls, etc. Ensure that your critical functionality is covered by the assertions without arbitrary line counts.
+- Code coverage assertions by symbol name.
+
+  Allows for code coverage assertions to be made for specific function calls, etc. Ensure that your critical functionality is covered by the assertions without arbitrary line counts.
 
 ## Usage
 
 ```shell
-$ token-cov -c ./.token-cov.json ./coverage/coverage-final.json
+$ symbolism --help
 ```
 
 ## Config
