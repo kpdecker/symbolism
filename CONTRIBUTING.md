@@ -6,11 +6,11 @@ WIP
 
 Releases are managed using [changeset](https://github.com/changesets/changesets) to manage versioning and publishing.
 
-`yarn changeset`
+`yarn changeset` : Run what changes that warrant notes in the changelog are made.
 
-`yarn version`
+`yarn version` : Run prior to publish
 
-`yarn publish`
+`yarn release` : Run to publish
 
 ## Useful resources
 

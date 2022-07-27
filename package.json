@@ -10,7 +10,7 @@
     "build": "preconstruct build",
     "changeset": "changesets",
     "version": "changesets version",
-    "publish": "yarn build && changesets publish"
+    "release": "yarn build && changesets publish"
   },
   "devDependencies": {
     "@babel/core": "^7.18.9",
