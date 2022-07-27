@@ -1,12 +1,12 @@
 {
   "name": "@symbolism/ts-utils",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "Symbolism typescript utilities",
   "author": "Kevin Decker <kpdecker@gmail.com>",
   "license": "MIT",
   "main": "dist/symbolism-ts-utils.cjs.js",
   "dependencies": {
-    "@symbolism/utils": "^0.0.0",
+    "@symbolism/utils": "^0.0.1",
     "tiny-invariant": "^1.2.0"
   },
   "peerDependencies": {

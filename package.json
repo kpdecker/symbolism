@@ -7,12 +7,16 @@
     "format": "prettier -w src",
     "test": "jest",
     "postinstall": "preconstruct dev",
-    "build": "preconstruct build"
+    "build": "preconstruct build",
+    "changeset": "changesets",
+    "version": "changesets version",
+    "publish": "yarn build && changesets publish"
   },
   "devDependencies": {
     "@babel/core": "^7.18.9",
     "@babel/preset-env": "^7.18.9",
     "@babel/preset-typescript": "^7.18.6",
+    "@changesets/cli": "^2.24.1",
     "@emotion/styled": "^11.9.3",
     "@preconstruct/cli": "^2.2.1",
     "@types/glob": "^7.2.0",
