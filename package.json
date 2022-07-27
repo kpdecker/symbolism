@@ -1,40 +1,37 @@
 {
-  "name": "token-cov",
+  "private": true,
+  "name": "symbolism",
   "version": "0.0.0",
   "description": "Coverage assertions for specific code tokens.",
-  "main": "index.js",
   "scripts": {
     "format": "prettier -w src",
-    "test": "jest"
-  },
-  "keywords": [
-    "code",
-    "coverage",
-    "token",
-    "name",
-    "function"
-  ],
-  "author": "Kevin Decker <kpdecker@gmail.com>",
-  "license": "MIT",
-  "dependencies": {
-    "chalk": "4",
-    "commander": "^9.3.0",
-    "tiny-invariant": "^1.2.0",
-    "tsutils": "^3.21.0"
+    "test": "jest",
+    "assert": "node packages/symbolism-assert/dist/symbolism-assert.cjs.js",
+    "postinstall": "preconstruct dev"
   },
   "devDependencies": {
+    "@babel/core": "^7.18.9",
+    "@babel/preset-env": "^7.18.9",
+    "@babel/preset-typescript": "^7.18.6",
     "@emotion/styled": "^11.9.3",
+    "@preconstruct/cli": "^2.2.1",
     "@types/glob": "^7.2.0",
     "@types/jest": "^28.1.4",
     "@types/node": "^18.0.0",
     "@types/react": "^18.0.15",
-    "glob": "^8.0.3",
     "jest": "^28.1.2",
-    "minimatch": "^5.1.0",
     "prettier": "^2.7.1",
     "ts-jest": "^28.0.5",
     "ts-node": "^10.8.2",
     "type-fest": "^2.16.0",
     "typescript": "^4.7.4"
+  },
+  "workspaces": [
+    "packages/*"
+  ],
+  "preconstruct": {
+    "packages": [
+      "packages/*"
+    ]
   }
 }

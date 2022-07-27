@@ -1,0 +1,33 @@
+{
+  "name": "@symbolism/cli",
+  "version": "0.0.0",
+  "description": "Coverage assertions for specific code tokens.",
+  "main": "dist/symbolism-cli.cjs.js",
+  "bin": {
+    "symbolism": "bin/symbolism.js"
+  },
+  "keywords": [
+    "code",
+    "coverage",
+    "token",
+    "name",
+    "function"
+  ],
+  "author": "Kevin Decker <kpdecker@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "@symbolism/coverage": "^0.0.0",
+    "@symbolism/paths": "^0.0.0",
+    "@symbolism/symbol-table": "^0.0.0",
+    "@symbolism/ts-debug": "^0.0.0",
+    "@symbolism/ts-utils": "^0.0.0",
+    "@symbolism/type-eval": "^0.0.0",
+    "@symbolism/utils": "^0.0.0",
+    "chalk": "4",
+    "commander": "^9.4.0",
+    "tiny-invariant": "^1.2.0"
+  },
+  "peerDependencies": {
+    "typescript": "^4.7.4"
+  }
+}

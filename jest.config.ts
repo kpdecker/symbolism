@@ -63,8 +63,17 @@ export default {
   //   "node"
   // ],
 
-  // A map from regular expressions to module names or to arrays of module names that allow to stub out resources with a single module
-  // moduleNameMapper: {},
+  // Map our internal packages in typescript space to ensure we are most recent versions. Using
+  // the node_modules-based lookup can result in old versions of the code being tested.
+  moduleNameMapper: {
+    "^@symbolism/coverage": "<rootDir>/packages/symbolism-coverage/src",
+    "^@symbolism/definitions": "<rootDir>/packages/symbolism-definitions/src",
+    "^@symbolism/paths": "<rootDir>/packages/symbolism-paths/src",
+    "^@symbolism/symbol-table": "<rootDir>/packages/symbolism-symbol-table/src",
+    "^@symbolism/ts-utils": "<rootDir>/packages/symbolism-ts-utils/src",
+    "^@symbolism/type-eval": "<rootDir>/packages/symbolism-type-eval/src",
+    "^@symbolism/utils": "<rootDir>/packages/symbolism-utils/src",
+  },
 
   // An array of regexp pattern strings, matched against all module paths before considered 'visible' to the module loader
   // modulePathIgnorePatterns: [],

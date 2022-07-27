@@ -1,0 +1,20 @@
+{
+  "name": "@symbolism/coverage",
+  "version": "0.0.0",
+  "description": "Coverage assertions for specific code tokens.",
+  "main": "dist/symbolism-coverage.cjs.js",
+  "author": "Kevin Decker <kpdecker@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "@symbolism/utils": "^0.0.0",
+    "@symbolism/ts-debug": "^0.0.0",
+    "@symbolism/ts-utils": "^0.0.0",
+    "@symbolism/paths": "^0.0.0",
+    "@symbolism/symbol-table": "^0.0.0",
+    "chalk": "4",
+    "tiny-invariant": "^1.2.0"
+  },
+  "peerDependencies": {
+    "typescript": "^4.7.4"
+  }
+}

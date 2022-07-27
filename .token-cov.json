@@ -1,3 +1,4 @@
 {
+  "entryPoints": ["packages/*/src/index.ts"],
   "tokens": ["ts"]
 }
