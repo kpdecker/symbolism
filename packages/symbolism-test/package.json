@@ -1,0 +1,18 @@
+{
+  "name": "@symbolism/test",
+  "version": "0.0.1",
+  "description": "Symbolism utilities",
+  "main": "dist/symbolism-test.cjs.js",
+  "author": "Kevin Decker <kpdecker@gmail.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kpdecker/symbolism.git"
+  },
+  "dependencies": {
+    "tiny-invariant": "^1.2.0"
+  },
+  "peerDependencies": {
+    "typescript": "^4.7.4"
+  }
+}
