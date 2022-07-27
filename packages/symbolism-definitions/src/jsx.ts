@@ -8,7 +8,8 @@ import {
   getPropertySymbol,
   nodeOperators,
 } from "./utils";
-import { dumpNode, invariantNode } from "@symbolism/ts-utils";
+import { invariantNode } from "@symbolism/ts-utils";
+import { dumpNode } from "@symbolism/ts-debug";
 
 export const jsxSymbolHandlers = nodeOperators({
   [ts.SyntaxKind.JsxElement](node, checker) {

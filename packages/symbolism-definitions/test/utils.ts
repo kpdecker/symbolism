@@ -1,7 +1,8 @@
 import ts from "typescript";
 import path from "path";
-import { dumpSymbol, findNodeInTree } from "@symbolism/ts-utils";
+import { findNodeInTree } from "@symbolism/ts-utils";
 import { defineSymbol } from "../src/index";
+import { dumpSymbol } from "@symbolism/ts-debug";
 
 export function testStatement(source: string) {
   const program = mockProgram({

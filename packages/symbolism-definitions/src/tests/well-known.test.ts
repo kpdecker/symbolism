@@ -1,4 +1,5 @@
-import { dumpNode, findIdentifiers } from "@symbolism/ts-utils";
+import { dumpNode } from "@symbolism/ts-debug";
+import { findIdentifiers } from "@symbolism/ts-utils";
 import { dumpInferred, mockProgram } from "../../test/utils";
 import { defineSymbol } from "../index";
 
