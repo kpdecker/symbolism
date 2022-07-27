@@ -8,9 +8,9 @@
     "test": "jest",
     "postinstall": "preconstruct dev",
     "build": "preconstruct build",
-    "changeset": "changesets",
-    "version": "changesets version",
-    "release": "yarn build && changesets publish"
+    "changeset": "changeset",
+    "version-packages": "changeset version",
+    "release": "yarn build && changeset publish"
   },
   "devDependencies": {
     "@babel/core": "^7.18.9",
