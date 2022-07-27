@@ -8,14 +8,12 @@ export default {
 
   // Indicates whether the coverage information should be collected while executing the test
   collectCoverage: true,
-  // collectCoverageFrom: undefined,
+  collectCoverageFrom: ["packages/*/src/**/*.{ts,tsx}"],
   coverageDirectory: "coverage",
   coverageProvider: "v8",
 
   // An array of regexp pattern strings used to skip coverage collection
-  // coveragePathIgnorePatterns: [
-  //   "/node_modules/"
-  // ],
+  coveragePathIgnorePatterns: ["/node_modules/", "/test/", "/dist/"],
 
   // A list of reporter names that Jest uses when writing coverage reports
   // coverageReporters: [
@@ -71,6 +69,7 @@ export default {
     "^@symbolism/paths": "<rootDir>/packages/symbolism-paths/src",
     "^@symbolism/symbol-table": "<rootDir>/packages/symbolism-symbol-table/src",
     "^@symbolism/ts-utils": "<rootDir>/packages/symbolism-ts-utils/src",
+    "^@symbolism/ts-debug": "<rootDir>/packages/symbolism-ts-debug/src",
     "^@symbolism/type-eval": "<rootDir>/packages/symbolism-type-eval/src",
     "^@symbolism/utils": "<rootDir>/packages/symbolism-utils/src",
   },
@@ -126,7 +125,7 @@ export default {
   // snapshotSerializers: [],
 
   // The test environment that will be used for testing
-  // testEnvironment: "jest-environment-node",
+  testEnvironment: "jest-environment-node",
 
   // Options that will be passed to the testEnvironment
   // testEnvironmentOptions: {},

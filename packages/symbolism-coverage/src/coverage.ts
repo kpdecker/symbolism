@@ -29,7 +29,7 @@ export function parseExecutedCoverage(jsonPath: string) {
         .flatMap(({ locations }, id) => {
           return locations.map((location: any, locationIndex: number) => ({
             ...parseCoverageLocation(location),
-            count: branchCoverage[id][locationIndex],
+            count: branchCoverage[id][locationIndex] || 0,
           }));
         })
         .sort(reverseLocationPriority);
@@ -38,7 +38,7 @@ export function parseExecutedCoverage(jsonPath: string) {
         statements: Object.entries<any>(statementMap)
           .map(([id, { start, end }]) => ({
             ...parseCoverageLocation({ start, end }),
-            count: statementCoverage[id],
+            count: statementCoverage[id] || 0,
           }))
           .sort(reverseLocationPriority),
         branches: branchDeclarations,
