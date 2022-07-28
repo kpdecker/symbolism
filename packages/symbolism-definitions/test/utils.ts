@@ -4,6 +4,8 @@ import { defineSymbol } from "../src/index";
 import { dumpSymbol } from "@symbolism/ts-debug";
 import { mockProgram } from "@symbolism/test";
 
+export { mockProgram } from "@symbolism/test";
+
 export function testStatement(source: string) {
   const program = mockProgram({
     "test.ts": source + ";",
