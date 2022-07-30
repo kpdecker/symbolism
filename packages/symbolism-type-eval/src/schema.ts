@@ -2,42 +2,66 @@ import invariant from "tiny-invariant";
 import ts from "typescript";
 import {
   getSymbolDeclaration,
-  isTupleType,
   isTupleTypeReference,
-  isTypeReference,
 } from "@symbolism/ts-utils";
 import { dumpFlags, dumpSymbol } from "@symbolism/ts-debug";
 
 interface SchemaNode {
   kind:
     | "literal"
-    | "string"
-    | "number"
-    | "any"
-    | "never"
+    | "primitive"
     | "object"
     | "array"
     | "tuple"
     | "union"
     | "intersection"
+    | "template-literal"
+    | "function"
     | "error";
   flags?: string[];
   extra?: any;
 }
 
+interface Primitive extends SchemaNode {
+  kind: "primitive";
+  name: // JS
+  | "string"
+    | "number"
+    | "boolean"
+    | "bigint"
+    | "symbol"
+    | "undefined"
+    | "null"
+    | "void"
+
+    // Extended JS
+    | "symbol"
+
+    // TS
+    | "object"
+    | "unknown"
+    | "any"
+    | "never";
+}
+
 interface Union extends SchemaNode {
   kind: "union";
-  items: SchemaNode[];
+  items: AnySchemaNode[];
 }
 
 interface Intersection extends SchemaNode {
   kind: "intersection";
-  items: SchemaNode[];
+  items: AnySchemaNode[];
+}
+
+interface TemplateLiteral extends SchemaNode {
+  kind: "template-literal";
+  items: AnySchemaNode[];
 }
 
 interface Literal extends SchemaNode {
   kind: "literal";
-  value: boolean | string | number | ts.PseudoBigInt | undefined;
+  value: boolean | string | number | bigint | undefined;
 }
 
 interface Object extends SchemaNode {
@@ -46,17 +70,19 @@ interface Object extends SchemaNode {
 }
 interface Array extends SchemaNode {
   kind: "array";
-  items: SchemaNode;
+  items: AnySchemaNode;
 }
 interface Tuple extends SchemaNode {
   kind: "tuple";
-  items: SchemaNode[];
+  items: AnySchemaNode[];
 }
 
 export type AnySchemaNode =
+  | Primitive
   | Union
   | Intersection
   | Literal
+  | TemplateLiteral
   | Object
   | Array
   | Tuple
@@ -85,7 +111,12 @@ export function convertTSTypeToSchema(
 
     const objectFlags = (type as ts.ObjectType).objectFlags;
 
-    const target = isTypeReference(type) && type.target;
+    const literalOrPrimitive =
+      convertLiteralOrPrimitive(type) ||
+      convertTemplateLiteralType(type, typesHandled);
+    if (literalOrPrimitive) {
+      return literalOrPrimitive;
+    }
 
     if (type.isUnion()) {
       const items = type.types.map((t) => convertType(t, typesHandled));
@@ -97,48 +128,34 @@ export function convertTSTypeToSchema(
         ),
       };
     } else if (type.isIntersection()) {
-      const items = type.types.map((t) => convertType(t, typesHandled));
+      let allObjects = true;
+      const items = type.types.map((t) => {
+        if (t.isLiteral()) {
+          allObjects = false;
+          return convertType(t, typesHandled);
+        }
+
+        const apparentType = checker.getApparentType(t);
+        if (
+          !(t.flags & ts.TypeFlags.Object) ||
+          !(apparentType.flags & ts.TypeFlags.Object)
+        ) {
+          allObjects = false;
+        }
+        return convertType(apparentType, typesHandled);
+      });
+
+      // If we consist of objects only, then merge we can merge them
+      if (allObjects) {
+        return convertObjectType(type, typesHandled);
+      }
+
       return {
         kind: "intersection",
         items,
         flags: dumpFlags(type.flags, ts.TypeFlags).concat(
           dumpFlags(objectFlags, ts.ObjectFlags)
         ),
-      };
-    } else if (type.isLiteral()) {
-      return {
-        kind: "literal",
-        value: type.value,
-      };
-    } else if (type.flags & ts.TypeFlags.BooleanLiteral) {
-      return {
-        kind: "literal",
-        value: (type as any).intrinsicName === "true",
-      };
-    } else if (type.flags & ts.TypeFlags.Number) {
-      return {
-        kind: "number",
-      };
-    } else if (type.flags & ts.TypeFlags.String) {
-      return {
-        kind: "string",
-      };
-    } else if (type.flags & ts.TypeFlags.Any) {
-      return {
-        kind: "any",
-      };
-    } else if (type.flags & ts.TypeFlags.Never) {
-      return {
-        kind: "never",
-      };
-    } else if (type.flags & ts.TypeFlags.UniqueESSymbol) {
-      // TODO: disable?
-      return {
-        kind: "literal",
-        value: checker.typeToString(type),
-        // flags: dumpFlags(type.flags, ts.TypeFlags).concat(
-        //   dumpFlags(objectFlags, ts.ObjectFlags)
-        // ),
       };
     } else if (type.isClass()) {
       return {
@@ -171,32 +188,6 @@ export function convertTSTypeToSchema(
       );
       invariant(arrayValueType, "Array type has no number index type");
 
-      const length = arrayValueType.getProperty("length");
-      const lengthDeclaration = getSymbolDeclaration(length);
-      const lengthType =
-        length &&
-        lengthDeclaration &&
-        checker.getTypeOfSymbolAtLocation(length, lengthDeclaration);
-
-      // TODO: Array for template types
-
-      if (verbose) {
-        console.log({
-          kind: "array",
-          items: convertType(arrayValueType, typesHandled),
-          flags: dumpFlags(type.flags, ts.TypeFlags).concat(
-            dumpFlags(objectFlags, ts.ObjectFlags)
-          ),
-          length: lengthType && checker.typeToString(lengthType),
-          isTuple: target && isTupleType(target),
-          tupleRef: isTupleTypeReference(type),
-          tupleType: isTupleType(type),
-          targetFlags: dumpFlags((target as any).flags, ts.TypeFlags),
-          isTypeRef: isTypeReference(type),
-        });
-        console.log(type);
-      }
-
       return {
         kind: "array",
         items: convertType(arrayValueType, typesHandled),
@@ -205,72 +196,30 @@ export function convertTSTypeToSchema(
         ),
       };
     } else if (type.flags & ts.TypeFlags.Object) {
+      const objectFlags = (type as ts.ObjectType).objectFlags;
       if (type.getCallSignatures().length > 0) {
         return {
-          kind: "error",
-          extra:
-            "function " +
-            checker.typeToString(type) +
-            " " +
-            JSON.stringify(dumpSymbol(type.getSymbol(), checker)),
+          kind: "function",
+          extra: checker.typeToString(type),
         };
       }
 
-      const properties = type
-        .getProperties()
-        .map((p): [string, SchemaNode] => {
-          const propertyDeclaration = getSymbolDeclaration(p);
-          if (!propertyDeclaration) {
-            return [
-              p.getName(),
-              {
-                kind: "error",
-                extra: "no-declaration",
-                flags: dumpFlags(type.flags, ts.TypeFlags).concat(
-                  dumpFlags(objectFlags, ts.ObjectFlags)
-                ),
-              },
-            ];
-          }
+      if (type.symbol?.getName() === "Date") {
+        const declaration = getSymbolDeclaration(type.symbol);
+        if (
+          declaration &&
+          declaration.getSourceFile().fileName.includes("lib.es5.d.ts")
+        ) {
+          return {
+            kind: "literal",
+            value: "Date",
+          };
+        }
+      }
 
-          try {
-            const propertyType = checker.getTypeOfSymbolAtLocation(
-              p,
-              propertyDeclaration
-            );
-
-            if (p.getName() === "workingOut_") {
-              verbose = true;
-              console.log(propertyDeclaration);
-              console.log("propertyType", propertyType);
-            }
-
-            return [p.getName(), convertType(propertyType, typesHandled)];
-          } finally {
-            if (p.getName() === "workingOut") {
-              verbose = false;
-            }
-          }
-        })
-        .reduce(
-          (acc, [key, value]) => ({ ...acc, [JSON.stringify(key)]: value }),
-          {}
-        );
-
-      return {
-        kind: "object",
-        properties,
-        flags: dumpFlags(type.flags, ts.TypeFlags).concat(
-          dumpFlags(objectFlags, ts.ObjectFlags)
-        ),
-      };
-    } else if (type.flags & ts.TypeFlags.TypeParameter) {
-      console.log("typeParameter", checker.getApparentType(type));
-      return {
-        kind: "error",
-        extra: "type-parameter",
-      };
+      return convertObjectType(type, typesHandled);
     } else {
+      /* istanbul ignore next Sanity */
       console.log(
         type,
         Object.keys(type),
@@ -279,8 +228,156 @@ export function convertTSTypeToSchema(
         dumpFlags(type.flags, ts.TypeFlags),
         type.symbol && dumpSymbol(type.symbol, checker)
       );
+
+      /* istanbul ignore next Sanity */
       throw new Error(`Unsupported type ${checker.typeToString(type)}`);
     }
   }
   return convertType(type);
+
+  function convertObjectType(
+    type: ts.Type,
+    typesHandled: Set<ts.Type>
+  ): Object {
+    const properties = type
+      .getProperties()
+      .map((p): [string, SchemaNode] => {
+        const propertyDeclaration = getSymbolDeclaration(p);
+        if (!propertyDeclaration) {
+          return [
+            p.getName(),
+            {
+              kind: "error",
+              extra: "no-declaration",
+            },
+          ];
+        }
+
+        const propertyType = checker.getTypeOfSymbolAtLocation(
+          p,
+          propertyDeclaration
+        );
+
+        return [p.getName(), convertType(propertyType, typesHandled)];
+      })
+      .reduce((acc, [key, value]) => ({ ...acc, [key]: value }), {});
+
+    return {
+      kind: "object",
+      properties,
+    };
+  }
+
+  function convertTemplateLiteralType(
+    type: ts.Type,
+    typesHandled: Set<ts.Type>
+  ): TemplateLiteral | undefined {
+    if (type.flags & ts.TypeFlags.TemplateLiteral) {
+      const templateType = type as ts.TemplateLiteralType;
+      const itemTypes = templateType.texts
+        .flatMap((text, i) => {
+          const textSchema: Literal | undefined = text
+            ? { kind: "literal", value: text }
+            : undefined;
+
+          return [
+            textSchema!,
+            templateType.types[i] &&
+              convertType(templateType.types[i], typesHandled),
+          ];
+        })
+        .filter(Boolean);
+
+      return {
+        kind: "template-literal",
+        items: itemTypes,
+      };
+    }
+  }
+}
+
+function convertLiteralOrPrimitive(
+  type: ts.Type
+): Literal | Primitive | undefined {
+  if (type.flags & ts.TypeFlags.BigIntLiteral) {
+    const literalType = type as ts.BigIntLiteralType;
+    return {
+      kind: "literal",
+      value: BigInt(
+        literalType.value.negative ? "-" : "" + literalType.value.base10Value
+      ),
+    };
+  } else if (type.isLiteral()) {
+    const literalType = type as ts.LiteralType;
+    return {
+      kind: "literal",
+      value: literalType.value as Exclude<
+        ts.LiteralType["value"],
+        ts.PseudoBigInt
+      >,
+    };
+  } else if (type.flags & ts.TypeFlags.BooleanLiteral) {
+    return {
+      kind: "literal",
+      value: (type as any).intrinsicName === "true",
+    };
+  } else if (type.flags & ts.TypeFlags.Number) {
+    return {
+      kind: "primitive",
+      name: "number",
+    };
+  } else if (type.flags & ts.TypeFlags.BigInt) {
+    return {
+      kind: "primitive",
+      name: "bigint",
+    };
+  } else if (type.flags & ts.TypeFlags.String) {
+    return {
+      kind: "primitive",
+      name: "string",
+    };
+  } else if (type.flags & ts.TypeFlags.Any) {
+    return {
+      kind: "primitive",
+      name: "any",
+    };
+  } else if (type.flags & ts.TypeFlags.Never) {
+    return {
+      kind: "primitive",
+      name: "never",
+    };
+  } else if (type.flags & ts.TypeFlags.Unknown) {
+    return {
+      kind: "primitive",
+      name: "unknown",
+    };
+  } else if (type.flags & ts.TypeFlags.Null) {
+    return {
+      kind: "primitive",
+      name: "null",
+    };
+  } else if (type.flags & ts.TypeFlags.Undefined) {
+    return {
+      kind: "primitive",
+      name: "undefined",
+    };
+  } else if (type.flags & ts.TypeFlags.Void) {
+    return {
+      kind: "primitive",
+      name: "void",
+    };
+  } else if (
+    type.flags & ts.TypeFlags.ESSymbol ||
+    type.flags & ts.TypeFlags.UniqueESSymbol
+  ) {
+    return {
+      kind: "primitive",
+      name: "symbol",
+    };
+  } else if (type.flags & ts.TypeFlags.NonPrimitive) {
+    return {
+      kind: "primitive",
+      name: "object",
+    };
+  }
 }

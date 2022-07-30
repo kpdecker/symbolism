@@ -21,18 +21,18 @@ export function printSchemaNode(schema: AnySchemaNode): string {
       .join("\n");
   }
   switch (schema.kind) {
-    case "number":
-      return "number";
-    case "string":
-      return "string";
-    case "any":
-    case "never":
-      return schema.kind;
+    case "primitive":
+      invariant("name" in schema);
+      return schema.name;
     case "literal":
       invariant("value" in schema);
-      return typeof schema.value === "string"
-        ? `"${schema.value}"`
-        : schema.value + "";
+      if (typeof schema.value === "string") {
+        return `"${schema.value}"`;
+      }
+      if (typeof schema.value === "bigint") {
+        return `${schema.value}n`;
+      }
+      return schema.value + "";
     case "array":
       invariant("items" in schema);
       return `(${printSchemaNode(schema.items)})[]`;
@@ -44,7 +44,9 @@ export function printSchemaNode(schema: AnySchemaNode): string {
 
       const keys = Object.keys(schema.properties);
       if (keys.length === 1) {
-        return `{ ${keys[0]}: ${printSchemaNode(schema.properties[keys[0]])} }`;
+        return `{ ${JSON.stringify(keys[0])}: ${printSchemaNode(
+          schema.properties[keys[0]]
+        )} }`;
       }
 
       return (
@@ -54,15 +56,17 @@ export function printSchemaNode(schema: AnySchemaNode): string {
             .sort()
             .map((name) => {
               const property = schema.properties[name];
-              return `  ${name}: ${printSchemaNode(property)},`;
+              return `  ${JSON.stringify(name)}: ${printSchemaNode(property)},`;
             })
             .join("\n")
         ) +
         "}"
       );
+    case "function":
+      return JSON.stringify("function " + schema.extra);
     case "error":
-      console.log(schema);
-      return " // error! " + schema.extra;
+      // console.log(schema, new Error().stack);
+      return JSON.stringify("error! " + schema.extra);
     case "union":
     case "intersection":
       invariant("items" in schema);
@@ -71,6 +75,17 @@ export function printSchemaNode(schema: AnySchemaNode): string {
   ${separator} ${printString(
         schema.items.map(printSchemaNode).sort().join(separator)
       )}`;
+    case "template-literal":
+      invariant("items" in schema);
+      return `\`${schema.items
+        .map((child) => {
+          if (child.kind === "literal" && "value" in child) {
+            return child.value;
+          }
+          return "${" + printSchemaNode(child) + "}";
+        })
+        .join("")}\``;
+
     default:
       const gottaCatchEmAll: never = schema;
       throw new Error(`Unsupported schema kind ${(schema as any).kind}`);
