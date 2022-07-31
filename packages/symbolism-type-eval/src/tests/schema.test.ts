@@ -471,6 +471,33 @@ describe("type schema converter", () => {
     });
   });
 
+  describe("template literal types", () => {
+    it("should handle template literal types", () => {
+      const { type, declaration, checker } = testType(`
+        type Bar = string;
+        type Type = \`foo \${Bar}\`;
+      `);
+
+      expect(printSchema(convertTSTypeToSchema(type, declaration, checker)))
+        .toMatchInlineSnapshot(`
+        "type foo = \`foo \${string}\`;
+        "
+      `);
+    });
+    it("should flatten concrete templates", () => {
+      const { type, declaration, checker } = testType(`
+        type Bar = "foo" | "bar";
+        type Type = \`foo \${Bar}\`;
+      `);
+
+      expect(printSchema(convertTSTypeToSchema(type, declaration, checker)))
+        .toMatchInlineSnapshot(`
+        "type foo = \\"foo bar\\" | \\"foo foo\\";
+        "
+      `);
+    });
+  });
+
   it.todo("should convert calls to schema parameters");
   it.todo("should infer type from template string value");
   it.todo("should narrow based on executed code");
