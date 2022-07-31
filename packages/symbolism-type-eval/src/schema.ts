@@ -157,14 +157,6 @@ export function convertTSTypeToSchema(
           dumpFlags(objectFlags, ts.ObjectFlags)
         ),
       };
-    } else if (type.isClass()) {
-      return {
-        kind: "error",
-        extra: "class",
-        flags: dumpFlags(type.flags, ts.TypeFlags).concat(
-          dumpFlags(objectFlags, ts.ObjectFlags)
-        ),
-      };
     } else if (isTupleTypeReference(type)) {
       // TODO: Rest and optional params
       const items: SchemaNode[] = checker
@@ -195,7 +187,7 @@ export function convertTSTypeToSchema(
           dumpFlags(objectFlags, ts.ObjectFlags)
         ),
       };
-    } else if (type.flags & ts.TypeFlags.Object) {
+    } else if (type.flags & ts.TypeFlags.Object || type.isClassOrInterface()) {
       const objectFlags = (type as ts.ObjectType).objectFlags;
       if (type.getCallSignatures().length > 0) {
         return {

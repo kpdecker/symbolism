@@ -157,13 +157,12 @@ describe("type schema converter", () => {
   });
 
   describe("objects", () => {
-    it.todo("should handle classes");
-    it("should handle interfaces", () => {
+    it("should handle interfaces and classes", () => {
       const { type, declaration, checker } = testType(`
         interface CSSProps  {
           color?: string
         }
-        interface NestedSelector  {
+        class NestedSelector  {
           prop: CSSProps;
         }
         interface Type {
