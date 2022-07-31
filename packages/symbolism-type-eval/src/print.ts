@@ -1,5 +1,4 @@
 import { format } from "prettier";
-import invariant from "tiny-invariant";
 import ts from "typescript";
 import type { AnySchemaNode } from "./schema";
 
@@ -23,10 +22,8 @@ export function printSchemaNode(schema: AnySchemaNode): string {
   }
   switch (schema.kind) {
     case "primitive":
-      invariant("name" in schema);
       return schema.name;
     case "literal":
-      invariant("value" in schema);
       if (typeof schema.value === "string") {
         return `"${schema.value}"`;
       }
@@ -35,10 +32,8 @@ export function printSchemaNode(schema: AnySchemaNode): string {
       }
       return schema.value + "";
     case "array":
-      invariant("items" in schema);
       return `(${printSchemaNode(schema.items)})[]`;
     case "tuple":
-      invariant("items" in schema);
       return `[${schema.items
         .map((item, i) => {
           const elementFlags = schema.elementFlags[i];
@@ -54,8 +49,6 @@ export function printSchemaNode(schema: AnySchemaNode): string {
         })
         .join(", ")}]`;
     case "object":
-      invariant("properties" in schema);
-
       const keys = Object.keys(schema.properties);
       if (keys.length === 1) {
         return `{ ${JSON.stringify(keys[0])}: ${printSchemaNode(
@@ -77,7 +70,6 @@ export function printSchemaNode(schema: AnySchemaNode): string {
         "}"
       );
     case "function":
-      invariant("parameters" in schema);
       return `(${schema.parameters
         .map(({ name, schema }) => `${name}: ${printSchemaNode(schema)}`)
         .join(", ")}) => ${printSchemaNode(schema.returnType)}`;
@@ -86,17 +78,15 @@ export function printSchemaNode(schema: AnySchemaNode): string {
       return JSON.stringify("error! " + schema.extra);
     case "union":
     case "intersection":
-      invariant("items" in schema);
       const separator = schema.kind === "union" ? "\n  | " : "\n  & ";
       return `
   ${separator} ${printString(
         schema.items.map(printSchemaNode).sort().join(separator)
       )}`;
     case "template-literal":
-      invariant("items" in schema);
       return `\`${schema.items
         .map((child) => {
-          if (child.kind === "literal" && "value" in child) {
+          if (child.kind === "literal") {
             return child.value;
           }
           return "${" + printSchemaNode(child) + "}";
