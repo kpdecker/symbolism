@@ -172,7 +172,10 @@ const nodeHandlers: Record<ts.SyntaxKind, DefinitionOperation> = {
   [ts.SyntaxKind.TypeReference]: directTypeAndSymbol,
   [ts.SyntaxKind.FunctionType]: directTypeAndSymbol,
   [ts.SyntaxKind.ConstructorType]: directTypeAndSymbol,
-  [ts.SyntaxKind.TypeQuery]: directTypeAndSymbol,
+  [ts.SyntaxKind.TypeQuery](node, checker) {
+    invariantNode(node, ts.isTypeQueryNode);
+    return defineSymbol(node.exprName, checker);
+  },
   [ts.SyntaxKind.TypeLiteral]: directTypeAndSymbol,
   [ts.SyntaxKind.ArrayType]: directTypeAndSymbol,
   [ts.SyntaxKind.TupleType]: directTypeAndSymbol,
