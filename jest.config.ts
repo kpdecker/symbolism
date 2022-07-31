@@ -1,6 +1,4 @@
 export default {
-  preset: "ts-jest",
-
   cacheDirectory: "node_modules/.cache/jest",
 
   // Automatically clear mock calls, instances, contexts and results before every test
@@ -10,7 +8,8 @@ export default {
   collectCoverage: true,
   collectCoverageFrom: ["packages/*/src/**/*.{ts,tsx}"],
   coverageDirectory: "coverage",
-  coverageProvider: "v8",
+  coverageProvider: "babel",
+  // coverageProvider: "v8",
 
   // An array of regexp pattern strings used to skip coverage collection
   coveragePathIgnorePatterns: ["/node_modules/", "/test/", "/dist/"],
