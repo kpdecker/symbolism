@@ -75,6 +75,7 @@ interface Array extends SchemaNode {
 interface Tuple extends SchemaNode {
   kind: "tuple";
   items: AnySchemaNode[];
+  elementFlags: readonly ts.ElementFlags[];
 }
 
 export type AnySchemaNode =
@@ -158,17 +159,17 @@ export function convertTSTypeToSchema(
         ),
       };
     } else if (isTupleTypeReference(type)) {
-      // TODO: Rest and optional params
-      const items: SchemaNode[] = checker
-        .getTypeArguments(type)
-        .map((elementType) => convertType(elementType, typesHandled));
+      const tupleType = type.target;
+
+      const typeArguments = checker.getTypeArguments(type);
+      const items: SchemaNode[] = typeArguments.map((elementType) =>
+        convertType(elementType, typesHandled)
+      );
 
       return {
         kind: "tuple",
         items,
-        flags: dumpFlags(type.flags, ts.TypeFlags).concat(
-          dumpFlags(objectFlags, ts.ObjectFlags)
-        ),
+        elementFlags: tupleType.elementFlags,
       };
     } else if (
       (checker as any).isArrayType(type) ||

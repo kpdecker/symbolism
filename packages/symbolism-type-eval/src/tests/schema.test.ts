@@ -240,6 +240,75 @@ describe("type schema converter", () => {
       `);
     });
   });
+  describe("arrays", () => {
+    it("should pull type from array literals", () => {
+      const { type, declaration, checker, sourceFile } = testType(`
+        const x = [1, 2, 3];
+      `);
+
+      const xNodes = findIdentifiers(sourceFile, "x");
+
+      let xType = checker.getTypeAtLocation(xNodes[0]);
+      expect(printSchema(convertTSTypeToSchema(xType, declaration, checker)))
+        .toMatchInlineSnapshot(`
+        "type foo = number[];
+        "
+      `);
+    });
+
+    it("should pull type from const array literals", () => {
+      const { type, declaration, checker, sourceFile } = testType(`
+        const x = [1, 2, 3] as const;
+      `);
+
+      const xNodes = findIdentifiers(sourceFile, "x");
+
+      let xType = checker.getTypeAtLocation(xNodes[0]);
+      expect(printSchema(convertTSTypeToSchema(xType, declaration, checker)))
+        .toMatchInlineSnapshot(`
+        "type foo = [1, 2, 3];
+        "
+      `);
+    });
+  });
+  describe("tuples", () => {
+    // (Tuple = 1 << 3), // Synthesized generic tuple type
+    it("should pull type from tuples", () => {
+      const { type, declaration, checker } = testType(`
+        type Type = [1, 2, 3];
+      `);
+
+      expect(printSchema(convertTSTypeToSchema(type, declaration, checker)))
+        .toMatchInlineSnapshot(`
+        "type foo = [1, 2, 3];
+        "
+      `);
+    });
+    it("should handle tuples with rest and optional", () => {
+      const { type, declaration, checker } = testType(`
+        type Type = [1, 2, 3, ...string[], number?];
+      `);
+
+      expect(printSchema(convertTSTypeToSchema(type, declaration, checker)))
+        .toMatchInlineSnapshot(`
+        "type foo = [1, 2, 3, ...string[], number?];
+        "
+      `);
+    });
+    it("should handle variadic tuples", () => {
+      const { type, declaration, checker } = testType(`
+        type GenericType<T> = [1, ...T];
+        type Type = GenericType<[string, "bar"]>;
+      `);
+
+      expect(printSchema(convertTSTypeToSchema(type, declaration, checker)))
+        .toMatchInlineSnapshot(`
+        "type foo = [1, string, \\"bar\\"];
+        "
+      `);
+    });
+  });
+
   it.todo("should convert calls to schema parameters");
   it.todo("should infer type from template string value");
   it.todo("should narrow based on executed code");

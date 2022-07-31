@@ -1,5 +1,6 @@
 import { format } from "prettier";
 import invariant from "tiny-invariant";
+import ts from "typescript";
 import type { AnySchemaNode } from "./schema";
 
 export function printSchema(schema: AnySchemaNode): string {
@@ -38,7 +39,20 @@ export function printSchemaNode(schema: AnySchemaNode): string {
       return `(${printSchemaNode(schema.items)})[]`;
     case "tuple":
       invariant("items" in schema);
-      return `[${schema.items.map(printSchemaNode).join(", ")}]`;
+      return `[${schema.items
+        .map((item, i) => {
+          const elementFlags = schema.elementFlags[i];
+          const isRest = elementFlags & ts.ElementFlags.Rest;
+          const isOptional = elementFlags & ts.ElementFlags.Optional;
+
+          return (
+            (isRest ? "..." : "") +
+            printSchemaNode(item) +
+            (isRest ? "[]" : "") +
+            (isOptional ? "?" : "")
+          );
+        })
+        .join(", ")}]`;
     case "object":
       invariant("properties" in schema);
 
