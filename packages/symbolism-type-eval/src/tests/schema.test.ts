@@ -95,29 +95,54 @@ describe("type schema converter", () => {
   });
   it("should merge intersections", () => {
     const { type, declaration, checker } = testType(`
+      type Generic<T> = {foo: T} | {bar: T};
+      type GenericIntersection<T> = {foo: T} & {bar: T};
       type Type = {
         neverIntersection: 1 & 2 & 3;
         narrowIntersection: 1 & number;
         reducingIntersection: { foo: 4, bar: 5} & { foo: number };
         extendingIntersection: { foo: 4, bar: 5} & { food: number };
         mixedIntersection: 1 & { foo: number };
+        genericIntersection: Generic<number> & Generic<string>;
+        genericIntersectionWithIntersect: GenericIntersection<number> & GenericIntersection<string>;
+        unknownIntersection: unknown & 1;
+        nullIntersection: null & 1;
+        emptyIntersection: {} & 1;
       };
     `);
     expect(printSchema(convertTSTypeToSchema(type, declaration, checker)))
       .toMatchInlineSnapshot(`
       "type foo = {
+        emptyIntersection: 1 & {};
         extendingIntersection: {
           bar: 5;
           foo: 4;
           food: number;
         };
+        genericIntersection:
+          | {
+              bar: number;
+              foo: string;
+            }
+          | {
+              bar: string;
+              foo: number;
+            }
+          | { bar: never }
+          | { foo: never };
+        genericIntersectionWithIntersect: {
+          bar: never;
+          foo: never;
+        };
         mixedIntersection: 1 & { foo: number };
         narrowIntersection: 1;
         neverIntersection: never;
+        nullIntersection: never;
         reducingIntersection: {
           bar: 5;
           foo: 4;
         };
+        unknownIntersection: 1;
       };
       "
     `);
@@ -125,12 +150,19 @@ describe("type schema converter", () => {
 
   it("should merge union", () => {
     const { type, declaration, checker } = testType(`
+      type Generic<T> = {foo: T} | {bar: T};
+      type GenericIntersection<T> = {foo: T} & {bar: T};
       type Type = {
         directUnion: 1 | 2 | 3;
         wideningUnion: 1 | number;
         overlappingUnion: { foo: 4, bar: 5} | { foo: number };
         disjointUnion: { foo: 4, bar: 5} | { food: number };
         mixedUnion: 1 | { foo: number };
+        genericUnion: Generic<number> | Generic<string>;
+        genericUnionWithIntersect: GenericIntersection<number> | GenericIntersection<string>;
+        unknownUnion: unknown | 1;
+        nullUnion: null | 1;
+        emptyUnion: {} | 1;
       };
     `);
     expect(printSchema(convertTSTypeToSchema(type, declaration, checker)))
@@ -143,13 +175,30 @@ describe("type schema converter", () => {
               foo: 4;
             }
           | { food: number };
+        emptyUnion: 1 | {};
+        genericUnion:
+          | { bar: number }
+          | { bar: string }
+          | { foo: number }
+          | { foo: string };
+        genericUnionWithIntersect:
+          | {
+              bar: number;
+              foo: number;
+            }
+          | {
+              bar: string;
+              foo: string;
+            };
         mixedUnion: 1 | { foo: number };
+        nullUnion: 1;
         overlappingUnion:
           | {
               bar: 5;
               foo: 4;
             }
           | { foo: number };
+        unknownUnion: unknown;
         wideningUnion: number;
       };
       "
