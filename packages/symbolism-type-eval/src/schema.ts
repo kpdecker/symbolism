@@ -78,6 +78,12 @@ interface Tuple extends SchemaNode {
   elementFlags: readonly ts.ElementFlags[];
 }
 
+interface FunctionSchema extends SchemaNode {
+  kind: "function";
+  parameters: { name: string; schema: AnySchemaNode }[];
+  returnType: AnySchemaNode;
+}
+
 export type AnySchemaNode =
   | Primitive
   | Union
@@ -87,6 +93,7 @@ export type AnySchemaNode =
   | Object
   | Array
   | Tuple
+  | FunctionSchema
   | SchemaNode;
 
 let verbose = false;
@@ -190,11 +197,33 @@ export function convertTSTypeToSchema(
       };
     } else if (type.flags & ts.TypeFlags.Object || type.isClassOrInterface()) {
       const objectFlags = (type as ts.ObjectType).objectFlags;
-      if (type.getCallSignatures().length > 0) {
-        return {
-          kind: "function",
-          extra: checker.typeToString(type),
-        };
+      const callSignatures = type.getCallSignatures();
+      if (callSignatures.length > 0) {
+        function convertSignature(signature: ts.Signature): FunctionSchema {
+          return {
+            kind: "function",
+            parameters: signature.parameters.map((parameter) => {
+              const declaration = getSymbolDeclaration(parameter);
+              invariant(declaration, "Parameter has no declaration");
+
+              return {
+                name: parameter.name,
+                schema: convertType(
+                  checker.getTypeAtLocation(declaration),
+                  typesHandled
+                ),
+              };
+            }),
+            returnType: convertType(signature.getReturnType(), typesHandled),
+          };
+        }
+        if (callSignatures.length > 1) {
+          return {
+            kind: "union",
+            items: callSignatures.map(convertSignature),
+          };
+        }
+        return convertSignature(callSignatures[0]);
       }
 
       if (type.symbol?.getName() === "Date") {

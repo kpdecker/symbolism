@@ -161,9 +161,11 @@ describe("type schema converter", () => {
       const { type, declaration, checker } = testType(`
         interface CSSProps  {
           color?: string
+          interfaceFunction: (foo: "bar") => string;
         }
         class NestedSelector  {
           prop: CSSProps;
+          classFunction: () => void;
         }
         interface Type {
           nested?: NestedSelector
@@ -171,7 +173,15 @@ describe("type schema converter", () => {
       `);
       expect(printSchema(convertTSTypeToSchema(type, declaration, checker)))
         .toMatchInlineSnapshot(`
-        "type foo = { nested: { prop: { color: string } } };
+        "type foo = {
+          nested: {
+            classFunction: () => void;
+            prop: {
+              color: string;
+              interfaceFunction: (foo: \\"bar\\") => string;
+            };
+          };
+        };
         "
       `);
     });

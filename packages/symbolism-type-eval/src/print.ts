@@ -77,7 +77,10 @@ export function printSchemaNode(schema: AnySchemaNode): string {
         "}"
       );
     case "function":
-      return JSON.stringify("function " + schema.extra);
+      invariant("parameters" in schema);
+      return `(${schema.parameters
+        .map(({ name, schema }) => `${name}: ${printSchemaNode(schema)}`)
+        .join(", ")}) => ${printSchemaNode(schema.returnType)}`;
     case "error":
       // console.log(schema, new Error().stack);
       return JSON.stringify("error! " + schema.extra);
