@@ -318,6 +318,24 @@ describe("type schema converter", () => {
         "
       `);
     });
+
+    it("should handle circular types", () => {
+      const { type, declaration, checker } = testType(`
+        type Type = {
+          foo: Type;
+          date: Date;
+        };
+      `);
+
+      expect(printSchema(convertTSTypeToSchema(type, declaration, checker)))
+        .toMatchInlineSnapshot(`
+        "type foo = {
+          date: \\"Date\\";
+          foo: \\"error! Circular type\\";
+        };
+        "
+      `);
+    });
   });
   describe("arrays", () => {
     it("should pull type from array literals", () => {
