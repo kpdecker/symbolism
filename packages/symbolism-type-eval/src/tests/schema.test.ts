@@ -234,7 +234,27 @@ describe("type schema converter", () => {
         "
       `);
     });
-    it.todo("should handle index signatures");
+    it("should handle index signatures", () => {
+      const { type, declaration, checker } = testType(`
+        type Source = {
+          directUnion: 1 | 2 | 3;
+          wideningUnion: 1 | number;
+        };
+        type Type = {
+          [key: string]: "foo" | "bar";
+        } & {
+          other: keyof Source;
+        }
+      `);
+      expect(printSchema(convertTSTypeToSchema(type, declaration, checker)))
+        .toMatchInlineSnapshot(`
+        "type foo = {
+          __index: \\"bar\\" | \\"foo\\";
+          other: \\"directUnion\\" | \\"wideningUnion\\";
+        };
+        "
+      `);
+    });
     it("should handle mapped types", () => {
       // ts.ObjectFlags.Mapped;
       const { type, declaration, checker } = testType(`

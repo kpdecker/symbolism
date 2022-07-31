@@ -261,7 +261,7 @@ export function convertTSTypeToSchema(
     type: ts.Type,
     typesHandled: Set<ts.Type>
   ): Object {
-    const properties = type
+    const properties: Record<string, AnySchemaNode> = type
       .getProperties()
       .map((p): [string, SchemaNode] => {
         const propertyDeclaration = getSymbolDeclaration(p);
@@ -283,6 +283,11 @@ export function convertTSTypeToSchema(
         return [p.getName(), convertType(propertyType, typesHandled)];
       })
       .reduce((acc, [key, value]) => ({ ...acc, [key]: value }), {});
+
+    const stringIndexType = type.getStringIndexType();
+    if (stringIndexType) {
+      properties["__index"] = convertType(stringIndexType, typesHandled);
+    }
 
     return {
       kind: "object",
