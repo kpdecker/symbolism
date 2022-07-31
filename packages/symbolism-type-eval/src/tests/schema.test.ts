@@ -368,6 +368,71 @@ describe("type schema converter", () => {
     });
   });
 
+  describe("generics", () => {
+    it("should handle resolved generics", () => {
+      const { type, declaration, checker } = testType(`
+          interface CSSProps  {
+            color?: string;
+            backgroundColor?: string;
+          }
+          interface NestedSelector<T extends CSSProps>  {
+            prop: T;
+          }
+          interface GenericType<T extends CSSProps> {
+            nested?: NestedSelector<T>
+          }
+
+          type Type = GenericType<{ color: "red" }>;
+        `);
+      expect(printSchema(convertTSTypeToSchema(type, declaration, checker)))
+        .toMatchInlineSnapshot(`
+        "type foo = { nested: { prop: { color: \\"red\\" } } };
+        "
+      `);
+    });
+    it("should handle implicitly resolved generics", () => {
+      const { type, declaration, checker } = testType(`
+          interface CSSProps  {
+            color?: string;
+            backgroundColor?: string;
+          }
+          interface NestedSelector<T extends CSSProps>  {
+            prop: T;
+          }
+          interface Type<T extends CSSProps> {
+            nested?: NestedSelector<T>
+          }
+        `);
+      expect(printSchema(convertTSTypeToSchema(type, declaration, checker)))
+        .toMatchInlineSnapshot(`
+        "type foo = {
+          nested: {
+            prop: {
+              backgroundColor: string;
+              color: string;
+            };
+          };
+        };
+        "
+      `);
+    });
+    it("should handle unresolved generics", () => {
+      const { type, declaration, checker } = testType(`
+          interface NestedSelector<T>  {
+            prop: T;
+          }
+          interface Type<T extends CSSProps> {
+            nested?: NestedSelector<T>
+          }
+        `);
+      expect(printSchema(convertTSTypeToSchema(type, declaration, checker)))
+        .toMatchInlineSnapshot(`
+        "type foo = { nested: { prop: any } };
+        "
+      `);
+    });
+  });
+
   it.todo("should convert calls to schema parameters");
   it.todo("should infer type from template string value");
   it.todo("should narrow based on executed code");
