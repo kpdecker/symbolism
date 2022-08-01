@@ -74,6 +74,17 @@ export interface FunctionSchema extends SchemaNode {
   returnType: AnySchemaNode;
 }
 
+export interface IndexSchema extends SchemaNode {
+  kind: "index";
+  type: AnySchemaNode;
+}
+
+export interface IndexAccessSchema extends SchemaNode {
+  kind: "index-access";
+  object: AnySchemaNode;
+  index: AnySchemaNode;
+}
+
 export interface ErrorSchema extends SchemaNode {
   kind: "error";
 }
@@ -87,6 +98,8 @@ export type AnySchemaNode =
   | ObjectSchema
   | ArraySchema
   | TupleSchema
+  | IndexSchema
+  | IndexAccessSchema
   | FunctionSchema
   | ErrorSchema;
 
@@ -263,6 +276,24 @@ export function convertTSTypeToSchema(
         findContextNode(type, contextNode),
         typesHandled
       );
+    } else if (type.flags & ts.TypeFlags.Index) {
+      const index = type as ts.IndexType;
+
+      return {
+        kind: "index",
+        type: convertType(
+          index.type,
+          findContextNode(index.type, contextNode),
+          typesHandled
+        ),
+      };
+    } else if (type.flags & ts.TypeFlags.IndexedAccess) {
+      const indexAccess = type as ts.IndexedAccessType;
+      return {
+        kind: "index-access",
+        object: convertType(indexAccess.objectType, contextNode, typesHandled),
+        index: convertType(indexAccess.indexType, contextNode, typesHandled),
+      };
     } else {
       /* istanbul ignore next Sanity */
       console.log(

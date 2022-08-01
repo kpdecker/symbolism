@@ -529,6 +529,25 @@ describe("type schema converter", () => {
     });
   });
 
+  it("should handle index access type", () => {
+    const { type, declaration, checker } = testType(`
+        type Pairs<T> = {
+          [TKey in keyof T]: {
+            key: TKey;
+            value: T[TKey];
+          };
+        };
+
+        type Type<T> = Pairs<T>[keyof T];
+      `);
+
+    expect(printSchema(convertTSTypeToSchema(type, declaration, checker)))
+      .toMatchInlineSnapshot(`
+      "{}[keyof {}];
+      "
+    `);
+  });
+
   it.todo("should convert calls to schema parameters");
   it.todo("should narrow based on executed code");
 });

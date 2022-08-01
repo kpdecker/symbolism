@@ -75,6 +75,12 @@ export function printSchemaNode(schema: AnySchemaNode): string {
       return `(${schema.parameters
         .map(({ name, schema }) => `${name}: ${printSchemaNode(schema)}`)
         .join(", ")}) => ${printSchemaNode(schema.returnType)}`;
+    case "index":
+      return `keyof ${printSchemaNode(schema.type)}`;
+    case "index-access":
+      return `${printSchemaNode(schema.object)}[${printSchemaNode(
+        schema.index
+      )}]`;
     case "error":
       // console.log(schema, new Error().stack);
       return JSON.stringify("error! " + schema.extra);
