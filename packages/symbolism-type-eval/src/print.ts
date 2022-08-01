@@ -3,9 +3,11 @@ import ts from "typescript";
 import type { AnySchemaNode } from "./schema";
 
 export function printSchema(schema: AnySchemaNode): string {
-  const unformattedText = "type foo = " + printSchemaNode(schema);
+  const unformattedText = printSchemaNode(schema);
   try {
-    return format(unformattedText, { parser: "typescript" });
+    return format("type foo = " + unformattedText, {
+      parser: "typescript",
+    }).replace(/^type foo = /, "");
   } catch (err) {
     console.log(err);
     // console.log(unformattedText);

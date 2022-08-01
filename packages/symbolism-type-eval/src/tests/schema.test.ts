@@ -65,7 +65,7 @@ describe("type schema converter", () => {
 
     expect(printSchema(convertTSTypeToSchema(type, declaration, checker)))
       .toMatchInlineSnapshot(`
-      "type foo = {
+      "{
         any: any;
         array: string[];
         bar: \\"foo\\";
@@ -113,7 +113,7 @@ describe("type schema converter", () => {
     `);
     expect(printSchema(convertTSTypeToSchema(type, declaration, checker)))
       .toMatchInlineSnapshot(`
-      "type foo = {
+      "{
         emptyIntersection: 1 & {};
         extendingIntersection: {
           bar: 5;
@@ -168,7 +168,7 @@ describe("type schema converter", () => {
     `);
     expect(printSchema(convertTSTypeToSchema(type, declaration, checker)))
       .toMatchInlineSnapshot(`
-      "type foo = {
+      "{
         directUnion: 1 | 2 | 3;
         disjointUnion:
           | {
@@ -223,7 +223,7 @@ describe("type schema converter", () => {
       `);
       expect(printSchema(convertTSTypeToSchema(type, declaration, checker)))
         .toMatchInlineSnapshot(`
-        "type foo = {
+        "{
           nested: {
             classFunction: () => void;
             prop: {
@@ -249,7 +249,7 @@ describe("type schema converter", () => {
       `);
       expect(printSchema(convertTSTypeToSchema(type, declaration, checker)))
         .toMatchInlineSnapshot(`
-        "type foo = {
+        "{
           __index: \\"bar\\" | \\"foo\\";
           other: \\"directUnion\\" | \\"wideningUnion\\";
         };
@@ -272,7 +272,7 @@ describe("type schema converter", () => {
       `);
       expect(printSchema(convertTSTypeToSchema(type, declaration, checker)))
         .toMatchInlineSnapshot(`
-        "type foo = {
+        "{
           directUnion: \\"bar\\" | \\"foo\\";
           disjointUnion: \\"bar\\" | \\"foo\\";
           mixedUnion: \\"bar\\" | \\"foo\\";
@@ -299,7 +299,7 @@ describe("type schema converter", () => {
       `);
       expect(printSchema(convertTSTypeToSchema(type, declaration, checker)))
         .toMatchInlineSnapshot(`
-        "type foo = {
+        "{
           first: \\"first\\";
           second: \\"second\\";
         };
@@ -315,7 +315,7 @@ describe("type schema converter", () => {
 
       expect(printSchema(convertTSTypeToSchema(type, declaration, checker)))
         .toMatchInlineSnapshot(`
-        "type foo = { date: \\"Date\\" };
+        "{ date: \\"Date\\" };
         "
       `);
     });
@@ -330,7 +330,7 @@ describe("type schema converter", () => {
 
       expect(printSchema(convertTSTypeToSchema(type, declaration, checker)))
         .toMatchInlineSnapshot(`
-        "type foo = {
+        "{
           date: \\"Date\\";
           foo: \\"error! Circular type\\";
         };
@@ -349,7 +349,7 @@ describe("type schema converter", () => {
       let xType = checker.getTypeAtLocation(xNodes[0]);
       expect(printSchema(convertTSTypeToSchema(xType, declaration, checker)))
         .toMatchInlineSnapshot(`
-        "type foo = number[];
+        "number[];
         "
       `);
     });
@@ -364,7 +364,7 @@ describe("type schema converter", () => {
       let xType = checker.getTypeAtLocation(xNodes[0]);
       expect(printSchema(convertTSTypeToSchema(xType, declaration, checker)))
         .toMatchInlineSnapshot(`
-        "type foo = [1, 2, 3];
+        "[1, 2, 3];
         "
       `);
     });
@@ -378,7 +378,7 @@ describe("type schema converter", () => {
 
       expect(printSchema(convertTSTypeToSchema(type, declaration, checker)))
         .toMatchInlineSnapshot(`
-        "type foo = [1, 2, 3];
+        "[1, 2, 3];
         "
       `);
     });
@@ -389,7 +389,7 @@ describe("type schema converter", () => {
 
       expect(printSchema(convertTSTypeToSchema(type, declaration, checker)))
         .toMatchInlineSnapshot(`
-        "type foo = [1, 2, 3, ...string[], number?];
+        "[1, 2, 3, ...string[], number?];
         "
       `);
     });
@@ -401,7 +401,7 @@ describe("type schema converter", () => {
 
       expect(printSchema(convertTSTypeToSchema(type, declaration, checker)))
         .toMatchInlineSnapshot(`
-        "type foo = [1, string, \\"bar\\"];
+        "[1, string, \\"bar\\"];
         "
       `);
     });
@@ -425,7 +425,7 @@ describe("type schema converter", () => {
         `);
       expect(printSchema(convertTSTypeToSchema(type, declaration, checker)))
         .toMatchInlineSnapshot(`
-        "type foo = { nested: { prop: { color: \\"red\\" } } };
+        "{ nested: { prop: { color: \\"red\\" } } };
         "
       `);
     });
@@ -444,7 +444,7 @@ describe("type schema converter", () => {
         `);
       expect(printSchema(convertTSTypeToSchema(type, declaration, checker)))
         .toMatchInlineSnapshot(`
-        "type foo = {
+        "{
           nested: {
             prop: {
               backgroundColor: string;
@@ -466,7 +466,7 @@ describe("type schema converter", () => {
         `);
       expect(printSchema(convertTSTypeToSchema(type, declaration, checker)))
         .toMatchInlineSnapshot(`
-        "type foo = { nested: { prop: any } };
+        "{ nested: { prop: any } };
         "
       `);
     });
@@ -481,7 +481,7 @@ describe("type schema converter", () => {
 
       expect(printSchema(convertTSTypeToSchema(type, declaration, checker)))
         .toMatchInlineSnapshot(`
-        "type foo = \`foo \${string}\`;
+        "\`foo \${string}\`;
         "
       `);
     });
@@ -493,13 +493,12 @@ describe("type schema converter", () => {
 
       expect(printSchema(convertTSTypeToSchema(type, declaration, checker)))
         .toMatchInlineSnapshot(`
-        "type foo = \\"foo bar\\" | \\"foo foo\\";
+        "\\"foo bar\\" | \\"foo foo\\";
         "
       `);
     });
   });
 
   it.todo("should convert calls to schema parameters");
-  it.todo("should infer type from template string value");
   it.todo("should narrow based on executed code");
 });
