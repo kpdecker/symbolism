@@ -650,4 +650,5 @@ describe("type schema converter", () => {
         return printSchema(convertTSTypeToSchema(type, nodes[0], checker));
       }
     });
+  });
 });
