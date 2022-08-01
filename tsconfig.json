@@ -28,6 +28,20 @@
     // "rootDir": "./",                                  /* Specify the root folder within your source files. */
     "moduleResolution": "node" /* Specify how TypeScript looks up a file from a given module specifier. */,
     "baseUrl": "./" /* Specify the base directory to resolve non-relative module names. */,
+    "paths": {
+      "@symbolism/coverage": ["./packages/symbolism-coverage/src/index.ts"],
+      "@symbolism/definitions": [
+        "./packages/symbolism-definitions/src/index.ts"
+      ],
+      "@symbolism/symbol-table": [
+        "./packages/symbolism-symbol-table/src/index.ts"
+      ],
+      "@symbolism/test": ["./packages/symbolism-test/src/index.ts"],
+      "@symbolism/ts-debug": ["./packages/symbolism-ts-debug/src/index.ts"],
+      "@symbolism/ts-utils": ["./packages/symbolism-ts-utils/src/index.ts"],
+      "@symbolism/type-eval": ["./packages/symbolism-type-eval/src/index.ts"],
+      "@symbolism/utils": ["./packages/symbolism-utils/src/index.ts"]
+    },
 
     // "rootDirs": [],                                   /* Allow multiple folders to be treated as one when resolving modules. */
     // "typeRoots": [],                                  /* Specify multiple folders that act like './node_modules/@types'. */
@@ -80,5 +94,5 @@
     "skipLibCheck": true /* Skip type checking all .d.ts files. */
   },
 
-  "exclude": ["node_modules", "dist"]
+  "exclude": ["node_modules", "**/dist/**"]
 }
