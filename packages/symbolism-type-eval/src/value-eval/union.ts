@@ -38,7 +38,7 @@ export function expandSchemaList({
       const item = items[i];
       const priorItem = finalItems[finalItems.length - 1];
 
-      const merged = merger(item, priorItem);
+      const merged = item && priorItem && merger(item, priorItem);
 
       if (merged) {
         finalItems[finalItems.length - 1] = merged;
