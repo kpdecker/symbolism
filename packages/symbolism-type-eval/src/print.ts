@@ -72,9 +72,9 @@ export function printSchemaNode(schema: AnySchemaNode): string {
         "}"
       );
     case "function":
-      return `(${schema.parameters
+      return `((${schema.parameters
         .map(({ name, schema }) => `${name}: ${printSchemaNode(schema)}`)
-        .join(", ")}) => ${printSchemaNode(schema.returnType)}`;
+        .join(", ")}) => ${printSchemaNode(schema.returnType)})`;
     case "index":
       return `keyof ${printSchemaNode(schema.type)}`;
     case "index-access":
