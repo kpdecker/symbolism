@@ -497,6 +497,36 @@ describe("type schema converter", () => {
         "
       `);
     });
+    it("should load types from runtime code", () => {
+      const { type, declaration, checker } = testType(`
+        declare const bar: "foo" | "bar";
+        const foo = \`foo \${bar}\`
+        const type = \`\${foo}d\`
+        type Type = typeof type;
+      `);
+
+      expect(printSchema(convertTSTypeToSchema(type, declaration, checker)))
+        .toMatchInlineSnapshot(`
+        "\\"foo bard\\" | \\"foo food\\";
+        "
+      `);
+    });
+    it("should load types from runtime code", () => {
+      const { type, declaration, checker } = testType(`
+        declare const bar: "foo" | "bar";
+        const foo = \`foo \${bar}\`
+        const type = {
+          foo: \`\${foo}d\`
+        }
+        type Type = typeof type;
+      `);
+
+      expect(printSchema(convertTSTypeToSchema(type, declaration, checker)))
+        .toMatchInlineSnapshot(`
+        "{ foo: \\"foo bard\\" | \\"foo food\\" };
+        "
+      `);
+    });
   });
 
   it.todo("should convert calls to schema parameters");

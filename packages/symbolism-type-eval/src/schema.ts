@@ -5,6 +5,7 @@ import {
   isTupleTypeReference,
 } from "@symbolism/ts-utils";
 import { dumpFlags, dumpSymbol } from "@symbolism/ts-debug";
+import { narrowTypeFromValues } from "./value-eval";
 
 interface SchemaNode {
   flags?: string[];
@@ -89,15 +90,14 @@ export type AnySchemaNode =
   | FunctionSchema
   | ErrorSchema;
 
-let verbose = false;
-
 export function convertTSTypeToSchema(
-  type: ts.Type,
-  contextNode: ts.Node,
+  _type: ts.Type,
+  _contextNode: ts.Node,
   checker: ts.TypeChecker
 ) {
   function convertType(
     type: ts.Type,
+    contextNode: ts.Node,
     priorTypesHandled = new Set<ts.Type>()
   ): AnySchemaNode {
     if (type.flags & ts.TypeFlags.TypeParameter) {
@@ -114,13 +114,15 @@ export function convertTSTypeToSchema(
 
     const literalOrPrimitive =
       convertLiteralOrPrimitive(type, contextNode, typesHandled) ||
-      convertTemplateLiteralType(type, typesHandled);
+      convertTemplateLiteralType(type, contextNode, typesHandled);
     if (literalOrPrimitive) {
       return literalOrPrimitive;
     }
 
     if (type.isUnion()) {
-      const items = type.types.map((t) => convertType(t, typesHandled));
+      const items = type.types.map((t) =>
+        convertType(t, findContextNode(t, contextNode), typesHandled)
+      );
       return {
         kind: "union",
         items,
@@ -133,7 +135,7 @@ export function convertTSTypeToSchema(
       const items = type.types.map((t) => {
         if (t.isLiteral()) {
           allObjects = false;
-          return convertType(t, typesHandled);
+          return convertType(t, findContextNode(t, contextNode), typesHandled);
         }
 
         const apparentType = checker.getApparentType(t);
@@ -143,12 +145,20 @@ export function convertTSTypeToSchema(
         ) {
           allObjects = false;
         }
-        return convertType(apparentType, typesHandled);
+        return convertType(
+          apparentType,
+          findContextNode(apparentType, contextNode),
+          typesHandled
+        );
       });
 
       // If we consist of objects only, then merge we can merge them
       if (allObjects) {
-        return convertObjectType(type, typesHandled);
+        return convertObjectType(
+          type,
+          findContextNode(type, contextNode),
+          typesHandled
+        );
       }
 
       return {
@@ -163,7 +173,11 @@ export function convertTSTypeToSchema(
 
       const typeArguments = checker.getTypeArguments(type);
       const items: AnySchemaNode[] = typeArguments.map((elementType) =>
-        convertType(elementType, typesHandled)
+        convertType(
+          elementType,
+          findContextNode(elementType, contextNode),
+          typesHandled
+        )
       );
 
       return {
@@ -183,7 +197,11 @@ export function convertTSTypeToSchema(
 
       return {
         kind: "array",
-        items: convertType(arrayValueType, typesHandled),
+        items: convertType(
+          arrayValueType,
+          findContextNode(arrayValueType, contextNode),
+          typesHandled
+        ),
         flags: dumpFlags(type.flags, ts.TypeFlags).concat(
           dumpFlags(objectFlags, ts.ObjectFlags)
         ),
@@ -193,21 +211,29 @@ export function convertTSTypeToSchema(
       const callSignatures = type.getCallSignatures();
       if (callSignatures.length > 0) {
         function convertSignature(signature: ts.Signature): FunctionSchema {
+          const returnType = signature.getReturnType();
           return {
             kind: "function",
             parameters: signature.parameters.map((parameter) => {
-              const declaration = getSymbolDeclaration(parameter);
+              const declaration = getSymbolDeclaration(
+                parameter
+              ) as ts.ParameterDeclaration;
               invariant(declaration, "Parameter has no declaration");
 
               return {
                 name: parameter.name,
                 schema: convertType(
                   checker.getTypeAtLocation(declaration),
+                  declaration,
                   typesHandled
                 ),
               };
             }),
-            returnType: convertType(signature.getReturnType(), typesHandled),
+            returnType: convertType(
+              returnType,
+              findContextNode(returnType, contextNode),
+              typesHandled
+            ),
           };
         }
         if (callSignatures.length > 1) {
@@ -232,7 +258,11 @@ export function convertTSTypeToSchema(
         }
       }
 
-      return convertObjectType(type, typesHandled);
+      return convertObjectType(
+        type,
+        findContextNode(type, contextNode),
+        typesHandled
+      );
     } else {
       /* istanbul ignore next Sanity */
       console.log(
@@ -248,10 +278,23 @@ export function convertTSTypeToSchema(
       throw new Error(`Unsupported type ${checker.typeToString(type)}`);
     }
   }
-  return convertType(type);
+
+  return convertType(_type, _contextNode);
+
+  function findContextNode(type: ts.Type, contextNode: ts.Node): ts.Node {
+    if (type.symbol) {
+      const declaration = getSymbolDeclaration(type.symbol);
+      if (declaration) {
+        return declaration;
+      }
+    }
+
+    return contextNode;
+  }
 
   function convertObjectType(
     type: ts.Type,
+    contextNode: ts.Node,
     typesHandled: Set<ts.Type>
   ): ObjectSchema {
     const properties: Record<string, AnySchemaNode> = type
@@ -273,14 +316,21 @@ export function convertTSTypeToSchema(
           propertyDeclaration
         );
 
-        return [p.getName(), convertType(propertyType, typesHandled)];
+        return [
+          p.getName(),
+          convertType(propertyType, propertyDeclaration, typesHandled),
+        ];
       })
       .reduce((acc, [key, value]) => ({ ...acc, [key]: value }), {});
 
     // Note that this is not typescript syntax compliant
     const stringIndexType = type.getStringIndexType();
     if (stringIndexType) {
-      properties["__index"] = convertType(stringIndexType, typesHandled);
+      properties["__index"] = convertType(
+        stringIndexType,
+        findContextNode(stringIndexType, contextNode),
+        typesHandled
+      );
     }
 
     return {
@@ -291,6 +341,7 @@ export function convertTSTypeToSchema(
 
   function convertTemplateLiteralType(
     type: ts.Type,
+    contextNode: ts.Node,
     typesHandled: Set<ts.Type>
   ): TemplateLiteralSchema | undefined {
     if (type.flags & ts.TypeFlags.TemplateLiteral) {
@@ -301,10 +352,15 @@ export function convertTSTypeToSchema(
             ? { kind: "literal", value: text }
             : undefined;
 
+          const itemType = templateType.types[i];
           return [
             textSchema!,
-            templateType.types[i] &&
-              convertType(templateType.types[i], typesHandled),
+            itemType &&
+              convertType(
+                itemType,
+                findContextNode(itemType, contextNode),
+                typesHandled
+              ),
           ];
         })
         .filter(Boolean);
@@ -344,35 +400,45 @@ export function convertTSTypeToSchema(
         value: (type as any).intrinsicName === "true",
       };
     } else if (type.flags & ts.TypeFlags.Number) {
-      return {
-        kind: "primitive",
-        name: "number",
-      };
+      return (
+        narrowTypeFromValues(type, contextNode, checker, typesHandled) || {
+          kind: "primitive",
+          name: "number",
+        }
+      );
     } else if (type.flags & ts.TypeFlags.BigInt) {
-      return {
-        kind: "primitive",
-        name: "bigint",
-      };
+      return (
+        narrowTypeFromValues(type, contextNode, checker, typesHandled) || {
+          kind: "primitive",
+          name: "bigint",
+        }
+      );
     } else if (type.flags & ts.TypeFlags.String) {
-      return {
-        kind: "primitive",
-        name: "string",
-      };
+      return (
+        narrowTypeFromValues(type, contextNode, checker, typesHandled) || {
+          kind: "primitive",
+          name: "string",
+        }
+      );
     } else if (type.flags & ts.TypeFlags.Any) {
-      return {
-        kind: "primitive",
-        name: "any",
-      };
+      return (
+        narrowTypeFromValues(type, contextNode, checker, typesHandled) || {
+          kind: "primitive",
+          name: "any",
+        }
+      );
     } else if (type.flags & ts.TypeFlags.Never) {
       return {
         kind: "primitive",
         name: "never",
       };
     } else if (type.flags & ts.TypeFlags.Unknown) {
-      return {
-        kind: "primitive",
-        name: "unknown",
-      };
+      return (
+        narrowTypeFromValues(type, contextNode, checker, typesHandled) || {
+          kind: "primitive",
+          name: "unknown",
+        }
+      );
     } else if (type.flags & ts.TypeFlags.Null) {
       return {
         kind: "primitive",

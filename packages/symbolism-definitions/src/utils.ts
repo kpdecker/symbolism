@@ -11,7 +11,7 @@ import {
 
 export type DefinitionSymbol = {
   symbol: ts.Symbol | undefined;
-  declaration: ts.Node | undefined;
+  declaration: ts.Declaration | undefined;
   type: ts.Type | undefined;
 };
 export type DefinitionOperation = (
