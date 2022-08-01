@@ -47,16 +47,10 @@ export function isAssignmentExpression(
     case ts.SyntaxKind.LessThanLessThanEqualsToken:
     case ts.SyntaxKind.GreaterThanGreaterThanGreaterThanEqualsToken:
     case ts.SyntaxKind.GreaterThanGreaterThanEqualsToken:
-    case ts.SyntaxKind.BarBarEqualsToken:
-    case ts.SyntaxKind.AmpersandAmpersandEqualsToken:
-    case ts.SyntaxKind.QuestionQuestionEqualsToken:
-    case ts.SyntaxKind.EqualsToken:
     case ts.SyntaxKind.AmpersandAmpersandEqualsToken:
     case ts.SyntaxKind.BarBarEqualsToken:
     case ts.SyntaxKind.QuestionQuestionEqualsToken:
     case ts.SyntaxKind.EqualsToken:
-    case ts.SyntaxKind.PlusEqualsToken:
-    case ts.SyntaxKind.MinusEqualsToken:
       return true;
 
     default:
