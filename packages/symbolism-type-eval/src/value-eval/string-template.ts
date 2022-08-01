@@ -4,6 +4,7 @@ import ts from "typescript";
 import { convertValueDeclaration } from ".";
 import { isLiteralUnion } from "../classify";
 import { AnySchemaNode, convertTSTypeToSchema } from "../schema";
+import { expandSchemaList } from "./union";
 
 export function convertTemplateLiteralValue(
   node: ts.TemplateExpression,
@@ -88,37 +89,30 @@ export function convertTemplateLiteralValue(
     });
   }
 
-  const unionSchemas = unionExpansion.map((items): AnySchemaNode => {
-    const finalItems: AnySchemaNode[] = [];
-    for (let i = 0; i < items.length; i++) {
-      const item = items[i];
-      const priorItem = finalItems[finalItems.length - 1];
-
+  const expandedSchemas = expandSchemaList({
+    items: flattenedItems,
+    merger: (item, priorItem) => {
       if (item.kind === "literal" && priorItem?.kind === "literal") {
-        finalItems[finalItems.length - 1] = {
+        return {
           kind: "literal",
           value: "" + priorItem.value + item.value,
         };
-      } else {
-        finalItems.push(item);
       }
-    }
-
-    if (finalItems.length === 1) {
-      return finalItems[0];
-    }
-
-    return {
-      kind: "template-literal",
-      items: finalItems,
-    };
+      return undefined;
+    },
+    finalizer: (itemSet) => {
+      return {
+        kind: "template-literal",
+        items: itemSet,
+      };
+    },
   });
 
-  if (unionSchemas.length === 1) {
-    return unionSchemas[0];
+  if (expandedSchemas.length === 1) {
+    return expandedSchemas[0];
   }
   return {
     kind: "union",
-    items: unionSchemas,
+    items: expandedSchemas,
   };
 }
