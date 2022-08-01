@@ -10,7 +10,10 @@ export function isConcreteSchema(type: AnySchemaNode): boolean {
   if (
     type.kind === "primitive" ||
     type.kind === "function" ||
-    type.kind === "error"
+    type.kind === "error" ||
+    // Type checker would have resolved this if it was concrete.
+    type.kind === "index" ||
+    type.kind === "index-access"
   ) {
     return false;
   }
