@@ -1,6 +1,6 @@
 {
   "name": "@symbolism/symbol-table",
-  "version": "0.0.2",
+  "version": "0.1.0",
   "description": "Symbolism project symbol table",
   "author": "Kevin Decker <kpdecker@gmail.com>",
   "license": "MIT",
@@ -10,11 +10,11 @@
   },
   "main": "dist/symbolism-symbol-table.cjs.js",
   "dependencies": {
-    "@symbolism/definitions": "^0.0.2",
-    "@symbolism/paths": "^0.0.2",
-    "@symbolism/ts-debug": "^0.0.2",
-    "@symbolism/ts-utils": "^0.0.2",
-    "@symbolism/utils": "^0.0.2",
+    "@symbolism/definitions": "^0.1.0",
+    "@symbolism/paths": "^0.1.0",
+    "@symbolism/ts-debug": "^0.1.0",
+    "@symbolism/ts-utils": "^0.1.0",
+    "@symbolism/utils": "^0.1.0",
     "tiny-invariant": "^1.2.0"
   },
   "peerDependencies": {

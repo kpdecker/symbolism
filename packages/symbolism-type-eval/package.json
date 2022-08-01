@@ -1,6 +1,6 @@
 {
   "name": "@symbolism/type-eval",
-  "version": "0.0.2",
+  "version": "0.1.0",
   "description": "Symbolism utilities",
   "main": "dist/symbolism-type-eval.cjs.js",
   "author": "Kevin Decker <kpdecker@gmail.com>",
@@ -10,9 +10,9 @@
     "url": "git+https://github.com/kpdecker/symbolism.git"
   },
   "dependencies": {
-    "@symbolism/definitions": "0.0.2",
-    "@symbolism/ts-debug": "0.0.2",
-    "@symbolism/ts-utils": "0.0.2",
+    "@symbolism/definitions": "0.1.0",
+    "@symbolism/ts-debug": "0.1.0",
+    "@symbolism/ts-utils": "0.1.0",
     "prettier": "^2.7.1",
     "tiny-invariant": "^1.2.0"
   },
