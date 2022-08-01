@@ -14,6 +14,7 @@ function testType(source: string, name = "Type") {
     type: checker.getTypeAtLocation(node),
     declaration: node,
     program,
+    sourceFile,
     checker,
   };
 }
