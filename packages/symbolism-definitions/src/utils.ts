@@ -1,6 +1,7 @@
 import ts from "typescript";
 import { logDebug } from "@symbolism/utils";
 import {
+  getSymbolDeclaration,
   invariantNode,
   isArraySymbol,
   isErrorType,
@@ -10,6 +11,7 @@ import {
 
 export type DefinitionSymbol = {
   symbol: ts.Symbol | undefined;
+  declaration: ts.Node | undefined;
   type: ts.Type | undefined;
 };
 export type DefinitionOperation = (
@@ -34,6 +36,7 @@ export function contextualTypeAndSymbol(
   if (contextType) {
     return getArrayType({
       symbol: contextType.symbol,
+      declaration: getSymbolDeclaration(contextType.symbol),
       type: contextType,
     });
   }
@@ -61,7 +64,8 @@ export function directTypeAndSymbol(
   }
 
   return {
-    symbol: symbol ? symbol : type.symbol,
+    symbol: symbol || type.symbol,
+    declaration: getSymbolDeclaration(symbol || type.symbol),
     type,
   };
 }
@@ -99,7 +103,11 @@ export function getPropertySymbol(
 
   // Two distinct objects here lets us track both the property in code and
   // the ultimate type that it resolves to.
-  return { symbol, type: propertyType };
+  return {
+    symbol,
+    declaration: getSymbolDeclaration(symbol),
+    type: propertyType,
+  };
 }
 
 export function getArrayType(inferred: DefinitionSymbol) {
@@ -110,6 +118,7 @@ export function getArrayType(inferred: DefinitionSymbol) {
   if (symbol && isArraySymbol(symbol) && numberIndexType) {
     return {
       symbol: numberIndexType?.symbol || symbol,
+      declaration: getSymbolDeclaration(numberIndexType?.symbol || symbol),
       type: numberIndexType,
     };
   }

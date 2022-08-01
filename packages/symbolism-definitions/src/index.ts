@@ -15,6 +15,7 @@ import {
 } from "./utils";
 import { followSymbol } from "./follow-symbol";
 import {
+  getSymbolDeclaration,
   invariantNode,
   isAssignmentExpression,
   isNamedDeclaration,
@@ -338,6 +339,7 @@ function defineProperties(node: ts.Node, checker: ts.TypeChecker) {
         return followSymbol(
           {
             symbol: shorthandSymbol,
+            declaration: getSymbolDeclaration(shorthandSymbol),
             type: checker.getTypeOfSymbolAtLocation(shorthandSymbol, node),
           },
           checker
@@ -394,6 +396,7 @@ function defineBindingElement(node: ts.Node, checker: ts.TypeChecker) {
         return {
           type: typeArgument,
           symbol: typeArgument.symbol,
+          declaration: getSymbolDeclaration(typeArgument.symbol),
         };
       }
     }
@@ -441,6 +444,7 @@ function defineTaggedTemplate(node: ts.Node, checker: ts.TypeChecker) {
         return {
           type: returnType,
           symbol: returnType.symbol,
+          declaration: getSymbolDeclaration(returnType.symbol),
         };
       }
     }

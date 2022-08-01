@@ -1,4 +1,4 @@
-import { invariantNode } from "@symbolism/ts-utils";
+import { getSymbolDeclaration, invariantNode } from "@symbolism/ts-utils";
 import ts, { findAncestor } from "typescript";
 import { defineSymbol } from "./index";
 import {
@@ -20,6 +20,7 @@ export const classOperators = nodeOperators({
     if (thisType) {
       return {
         symbol: thisType.symbol,
+        declaration: getSymbolDeclaration(thisType.symbol),
         type: thisType,
       };
     }

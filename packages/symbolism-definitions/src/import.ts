@@ -36,6 +36,7 @@ export const importOperators = nodeOperators({
       return {
         type: checker.getTypeAtLocation(memberDeclaration),
         symbol: member,
+        declaration: memberDeclaration,
       };
     } else {
       logWarn(`Could not find member ${name} in ${externalModule.name}`);

@@ -22,6 +22,7 @@ export function followSymbol(
     );
     return {
       symbol: symbolTarget,
+      declaration: targetDeclaration,
       type: definition.type,
     };
   }
@@ -37,6 +38,7 @@ export function followSymbol(
     ) {
       return {
         symbol: followedDefinition.symbol,
+        declaration: getSymbolDeclaration(followedDefinition.symbol),
         type: definition.type,
       };
     }

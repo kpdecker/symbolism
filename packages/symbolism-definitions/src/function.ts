@@ -40,6 +40,7 @@ function defineCallReturn(node: ts.Node, checker: ts.TypeChecker) {
         return {
           type: returnType,
           symbol: returnType.symbol,
+          declaration: getSymbolDeclaration(returnType.symbol),
         };
       }
     }
