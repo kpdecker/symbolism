@@ -86,11 +86,10 @@ export function printSchemaNode(schema: AnySchemaNode): string {
       return JSON.stringify("error! " + schema.extra);
     case "union":
     case "intersection":
-      const separator = schema.kind === "union" ? "\n  | " : "\n  & ";
-      return `
-  ${separator} ${printString(
+      const separator = schema.kind === "union" ? " | " : " & ";
+      return `(${printString(
         schema.items.map(printSchemaNode).sort().join(separator)
-      )}`;
+      )})`;
     case "template-literal":
       return `\`${schema.items
         .map((child) => {
