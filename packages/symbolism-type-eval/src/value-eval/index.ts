@@ -26,17 +26,13 @@ export function narrowTypeFromValues(
   }
 
   if (contextNode) {
-    // If we are using the context node, we will need to resolve where it lives.
-    const contextDefinition = defineSymbol(contextNode, checker);
-    if (contextDefinition?.declaration) {
-      const contextSchema = convertValueDeclaration(
-        contextDefinition?.declaration,
-        checker,
-        typesHandled
-      );
-      if (contextSchema) {
-        return contextSchema;
-      }
+    const contextSchema = convertValueExpression(
+      contextNode as ts.Expression,
+      checker,
+      typesHandled
+    );
+    if (contextSchema) {
+      return contextSchema;
     }
   }
 }
