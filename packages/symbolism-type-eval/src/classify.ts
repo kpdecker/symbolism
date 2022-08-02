@@ -14,8 +14,14 @@ export function isConcreteSchema(
   }
 
   if (
+    type.kind === "primitive" &&
+    ["undefined", "void", "null"].includes(type.name)
+  ) {
+    return true;
+  }
+
+  if (
     type.kind === "primitive" ||
-    type.kind === "function" ||
     type.kind === "error" ||
     // Type checker would have resolved this if it was concrete.
     type.kind === "index" ||
@@ -45,6 +51,13 @@ export function isConcreteSchema(
     return Object.values(type.properties).every(isConcreteSchema);
   }
 
+  if (type.kind === "function") {
+    return (
+      type.parameters.every(({ schema }) => isConcreteSchema(schema)) &&
+      isConcreteSchema(type.returnType)
+    );
+  }
+
   const gottaCatchEmAll: never = type;
   throw new Error("Not implemented");
 }
@@ -52,5 +65,16 @@ export function isConcreteSchema(
 export function isLiteralUnion(type: AnySchemaNode): type is UnionSchema {
   return (
     type.kind === "union" && type.items.every((item) => item.kind === "literal")
+  );
+}
+
+export function isNumericSchema(type: AnySchemaNode): boolean {
+  if (type.kind === "union" || type.kind === "intersection") {
+    return type.items.every(isNumericSchema);
+  }
+
+  return (
+    (type.kind === "primitive" && type.name === "number") ||
+    (type.kind === "literal" && typeof type.value === "number")
   );
 }
