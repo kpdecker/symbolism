@@ -1,18 +1,20 @@
 import invariant from "tiny-invariant";
-import ts from "typescript";
-import { AnySchemaNode, UnionSchema } from "../schema";
+import { AnySchemaNode } from "../schema";
 
 export function expandSchemaList({
   items,
   merger,
-  finalizer,
+  finalizer = (items) => ({
+    kind: "union",
+    items,
+  }),
 }: {
   items: AnySchemaNode[];
   merger: (
     item: AnySchemaNode,
     priorItem: AnySchemaNode
   ) => AnySchemaNode | undefined;
-  finalizer: (itemSet: AnySchemaNode[]) => AnySchemaNode;
+  finalizer?: (itemSet: AnySchemaNode[]) => AnySchemaNode;
 }): AnySchemaNode[] {
   const unionIndexes = items
     .map((item, index) => (item.kind === "union" ? index : -1))

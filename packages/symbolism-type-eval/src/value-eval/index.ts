@@ -184,12 +184,6 @@ export function convertValueExpression(
           };
         }
       },
-      finalizer(schemas) {
-        return {
-          kind: "union",
-          items: schemas,
-        };
-      },
     });
 
     if (expandedSchema.length === 1) {
