@@ -7,7 +7,7 @@ export function filterSymbolsToFile(symbols: SymbolTable, fileName: string) {
     return symbols;
   }
 
-  const filteredSymbols: SymbolTable = new Map();
+  const filteredSymbols = new SymbolTable();
 
   symbols.forEach((references, symbol) => {
     const symbolFileName = resolve(

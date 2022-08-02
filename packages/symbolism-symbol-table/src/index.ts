@@ -10,20 +10,33 @@ import {
   NodeError,
 } from "@symbolism/utils";
 import { defineSymbol } from "@symbolism/definitions";
-import { getNodePath } from "@symbolism/paths";
+import { getNodePath, pathMatchesTokenFilter } from "@symbolism/paths";
 import { getSymbolDeclaration, isIntrinsicType } from "@symbolism/ts-utils";
 import { dumpNode, dumpSymbol } from "@symbolism/ts-debug";
 
 export * from "./symbol-filters";
 
-export type SymbolTable = Map<ts.Symbol, Set<ts.Node>>;
+export class SymbolTable extends Map<ts.Symbol, Set<ts.Node>> {
+  lookup(pathFilter: string, checker: ts.TypeChecker) {
+    return Array.from(this.keys()).filter((key) => {
+      if (
+        pathMatchesTokenFilter(
+          getNodePath(getSymbolDeclaration(key)!, checker),
+          pathFilter
+        )
+      ) {
+        return key;
+      }
+    });
+  }
+}
 
 export function parseSymbolTable(program: ts.Program, config: Config) {
   const sourceFiles = program
     .getSourceFiles()
     .filter(({ fileName }) => !config.exclude(fileName));
 
-  const symbols: SymbolTable = new Map();
+  const symbols = new SymbolTable();
 
   const checker = program.getTypeChecker();
   sourceFiles.forEach((sourceFile) => {
