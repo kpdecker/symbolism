@@ -340,14 +340,14 @@ describe("type schema converter", () => {
   });
   describe("arrays", () => {
     it("should pull type from array literals", () => {
-      const { type, declaration, checker, sourceFile } = testType(`
+      const { checker, sourceFile } = testType(`
         const x = [1, 2, 3];
       `);
 
       const xNodes = findIdentifiers(sourceFile, "x");
 
       let xType = checker.getTypeAtLocation(xNodes[0]);
-      expect(printSchema(convertTSTypeToSchema(xType, declaration, checker)))
+      expect(printSchema(convertTSTypeToSchema(xType, xNodes[0], checker)))
         .toMatchInlineSnapshot(`
         "number[];
         "
@@ -355,14 +355,14 @@ describe("type schema converter", () => {
     });
 
     it("should pull type from const array literals", () => {
-      const { type, declaration, checker, sourceFile } = testType(`
+      const { checker, sourceFile } = testType(`
         const x = [1, 2, 3] as const;
       `);
 
       const xNodes = findIdentifiers(sourceFile, "x");
 
       let xType = checker.getTypeAtLocation(xNodes[0]);
-      expect(printSchema(convertTSTypeToSchema(xType, declaration, checker)))
+      expect(printSchema(convertTSTypeToSchema(xType, xNodes[0], checker)))
         .toMatchInlineSnapshot(`
         "[1, 2, 3];
         "
