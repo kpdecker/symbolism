@@ -72,7 +72,11 @@ export interface TupleSchema extends SchemaNode {
 
 export interface FunctionSchema extends SchemaNode {
   kind: "function";
-  parameters: { name: string; schema: AnySchemaNode }[];
+  parameters: {
+    name: string;
+    schema: AnySchemaNode;
+    symbol: ts.Symbol | undefined;
+  }[];
   returnType: AnySchemaNode;
 }
 
@@ -249,6 +253,7 @@ export function convertTSTypeToSchema(
                   declaration,
                   typesHandled
                 ),
+                symbol: parameter,
               };
             }),
             returnType: convertType(

@@ -63,6 +63,60 @@ export function isConcreteSchema(
   throw new Error("Not implemented");
 }
 
+export function nonConcreteInputs(type: AnySchemaNode | undefined): ts.Node[] {
+  if (!type) {
+    return [];
+  }
+
+  if (
+    type.kind === "primitive" &&
+    ["undefined", "void", "null"].includes(type.name)
+  ) {
+    return [];
+  }
+
+  if (
+    type.kind === "primitive" ||
+    type.kind === "error" ||
+    // Type checker would have resolved this if it was concrete.
+    type.kind === "index" ||
+    type.kind === "index-access"
+  ) {
+    return [type.node];
+  }
+
+  if (type.kind === "literal") {
+    return [];
+  }
+
+  if (
+    type.kind === "union" ||
+    type.kind === "intersection" ||
+    type.kind === "tuple" ||
+    type.kind === "template-literal" ||
+    type.kind === "binary-expression"
+  ) {
+    return type.items.flatMap(nonConcreteInputs);
+  }
+
+  if (type.kind === "array") {
+    return nonConcreteInputs(type.items);
+  }
+
+  if (type.kind === "object") {
+    return Object.values(type.properties).flatMap(nonConcreteInputs);
+  }
+
+  if (type.kind === "function") {
+    return nonConcreteInputs(type.returnType).concat(
+      ...type.parameters.flatMap(({ schema }) => nonConcreteInputs(schema))
+    );
+  }
+
+  const gottaCatchEmAll: never = type;
+  throw new Error("Not implemented");
+}
+
 export function isLiteralUnion(type: AnySchemaNode): type is UnionSchema {
   return (
     type.kind === "union" && type.items.every((item) => item.kind === "literal")
