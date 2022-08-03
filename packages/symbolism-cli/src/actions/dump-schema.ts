@@ -1,7 +1,11 @@
 import { Command } from "commander";
 import { resolve } from "path";
 import ts from "typescript";
-import { convertTSTypeToSchema, printSchema } from "@symbolism/type-eval";
+import {
+  convertTSTypeToSchema,
+  printSchema,
+  SchemaContext,
+} from "@symbolism/type-eval";
 import { getSymbolDeclaration } from "@symbolism/ts-utils";
 import { getCliConfig, initTypescript } from "@symbolism/utils";
 
@@ -38,6 +42,8 @@ function dumpSchema(filePath: string, symbolName: string) {
   const type = checker.getTypeAtLocation(exportDeclaration);
 
   console.log(
-    printSchema(convertTSTypeToSchema(type, exportDeclaration, checker))
+    printSchema(
+      convertTSTypeToSchema(type, new SchemaContext(exportDeclaration, checker))
+    )
   );
 }

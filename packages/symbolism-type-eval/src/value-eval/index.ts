@@ -1,25 +1,23 @@
 import { defineSymbol } from "@symbolism/definitions";
 import { getSymbolDeclaration } from "@symbolism/ts-utils";
 import ts from "typescript";
-import { AnySchemaNode, convertTSTypeToSchema } from "../schema";
+import { AnySchemaNode, convertTSTypeToSchema, SchemaContext } from "../schema";
 import { evaluateBinaryExpressionSchema } from "./binary-expression";
 import { convertTemplateLiteralValue } from "./string-template";
 import { expandSchemaList } from "./union";
 
 export function narrowTypeFromValues(
   type: ts.Type,
-  contextNode: ts.Node,
-  checker: ts.TypeChecker,
-  typesHandled: Set<ts.Type>
+  context: SchemaContext
 ): AnySchemaNode | undefined {
+  const { contextNode, checker, typesHandled } = context;
+
   const symbol = type.getSymbol();
   const symbolDeclaration = getSymbolDeclaration(symbol);
 
   if (symbolDeclaration) {
     const symbolSchema = convertValueDeclaration(
-      symbolDeclaration,
-      checker,
-      typesHandled
+      ...context.cloneNode(symbolDeclaration)
     );
     if (symbolSchema) {
       return symbolSchema;
@@ -31,9 +29,7 @@ export function narrowTypeFromValues(
     const contextDefinition = defineSymbol(contextNode, checker);
     if (contextDefinition?.declaration) {
       const contextSchema = convertValueDeclaration(
-        contextDefinition?.declaration,
-        checker,
-        typesHandled
+        ...context.cloneNode(contextDefinition.declaration)
       );
       if (contextSchema) {
         return contextSchema;
@@ -41,9 +37,7 @@ export function narrowTypeFromValues(
     }
 
     const contextSchema = convertValueExpression(
-      contextNode as ts.Expression,
-      checker,
-      typesHandled
+      ...context.cloneNode(contextNode as ts.Expression)
     );
     if (contextSchema) {
       return contextSchema;
@@ -53,8 +47,7 @@ export function narrowTypeFromValues(
 
 export function convertValueDeclaration(
   node: ts.Declaration,
-  checker: ts.TypeChecker,
-  typesHandled: Set<ts.Type>
+  context: SchemaContext
 ): AnySchemaNode | undefined {
   if (
     ts.isVariableDeclaration(node) ||
@@ -65,27 +58,28 @@ export function convertValueDeclaration(
     ts.isPropertyAssignment(node)
   ) {
     if (node.initializer) {
-      return convertValueExpression(node.initializer, checker, typesHandled);
+      return convertValueExpression(...context.cloneNode(node.initializer));
     }
   }
   if (ts.isExpressionStatement(node)) {
-    return convertValueExpression(node.expression, checker, typesHandled);
+    return convertValueExpression(...context.cloneNode(node.expression));
   }
   if (ts.isTypeAliasDeclaration(node)) {
-    const secondDefinition = defineSymbol(node.type, checker);
+    const secondDefinition = defineSymbol(node.type, context.checker);
     const secondDeclaration = getSymbolDeclaration(secondDefinition?.symbol);
 
     if (secondDeclaration) {
-      return convertValueDeclaration(secondDeclaration, checker, typesHandled);
+      return convertValueDeclaration(...context.cloneNode(secondDeclaration));
     }
   }
 }
 
 export function convertValueExpression(
   node: ts.Expression,
-  checker: ts.TypeChecker,
-  typesHandled: Set<ts.Type>
+  context: SchemaContext
 ): AnySchemaNode | undefined {
+  const { checker, typesHandled } = context;
+
   if (ts.isIdentifier(node)) {
     const identifierDefinition = defineSymbol(node, checker);
     const identifierDeclaration = getSymbolDeclaration(
@@ -94,15 +88,13 @@ export function convertValueExpression(
 
     if (identifierDeclaration) {
       return convertValueDeclaration(
-        identifierDeclaration,
-        checker,
-        typesHandled
+        ...context.cloneNode(identifierDeclaration)
       );
     }
   }
 
   if (ts.isTemplateExpression(node)) {
-    return convertTemplateLiteralValue(node, checker, typesHandled);
+    return convertTemplateLiteralValue(node, context);
   }
 
   if (ts.isBinaryExpression(node)) {
@@ -156,11 +148,11 @@ export function convertValueExpression(
       case ts.SyntaxKind.AmpersandAmpersandEqualsToken:
       case ts.SyntaxKind.BarBarEqualsToken:
       case ts.SyntaxKind.QuestionQuestionEqualsToken:
-        return convertNode(node.right);
+        return convertNode(node.right, context);
 
       case ts.SyntaxKind.EqualsToken:
       case ts.SyntaxKind.CommaToken:
-        return convertValueExpression(node.right, checker, typesHandled);
+        return convertValueExpression(...context.cloneNode(node.right));
 
       default:
         const defaultAssertion: never = operator;
@@ -172,8 +164,8 @@ export function convertValueExpression(
     node: ts.BinaryExpression,
     operatorKind: ts.BinaryOperator
   ): AnySchemaNode {
-    const leftSchema = convertNode(node.left);
-    const rightSchema = convertNode(node.right);
+    const leftSchema = convertNode(node.left, context);
+    const rightSchema = convertNode(node.right, context);
 
     return evaluateBinaryExpressionSchema(
       leftSchema,
@@ -182,11 +174,13 @@ export function convertValueExpression(
     );
   }
 
-  function convertNode(node: ts.Node) {
+  function convertNode(node: ts.Node, context: SchemaContext) {
     const definition = defineSymbol(node, checker);
 
     return definition?.declaration && definition?.type
-      ? convertTSTypeToSchema(definition.type, definition.declaration, checker)
-      : convertTSTypeToSchema(checker.getTypeAtLocation(node), node, checker);
+      ? convertTSTypeToSchema(...context.clone(definition.type))
+      : convertTSTypeToSchema(
+          ...context.clone(checker.getTypeAtLocation(node))
+        );
   }
 }

@@ -3,14 +3,15 @@ import invariant from "tiny-invariant";
 import ts from "typescript";
 import { convertValueDeclaration } from ".";
 import { isLiteralUnion } from "../classify";
-import { AnySchemaNode, convertTSTypeToSchema } from "../schema";
+import { AnySchemaNode, convertTSTypeToSchema, SchemaContext } from "../schema";
 import { expandSchemaList } from "./union";
 
 export function convertTemplateLiteralValue(
   node: ts.TemplateExpression,
-  checker: ts.TypeChecker,
-  typesHandled: Set<ts.Type>
+  context: SchemaContext
 ): AnySchemaNode {
+  const { checker } = context;
+
   const itemTypes: AnySchemaNode[] = [];
   if (node.head.text) {
     itemTypes.push({
@@ -25,17 +26,13 @@ export function convertTemplateLiteralValue(
     let expressionSchema: AnySchemaNode | undefined;
     if (expressionDefinition?.declaration) {
       expressionSchema = convertValueDeclaration(
-        expressionDefinition.declaration,
-        checker,
-        typesHandled
+        ...context.cloneNode(expressionDefinition.declaration)
       );
     }
     if (!expressionSchema) {
       // Note creating a new infinite loop context. This may be a mistake.
       expressionSchema = convertTSTypeToSchema(
-        checker.getTypeAtLocation(templateSpan.expression),
-        templateSpan.expression,
-        checker
+        ...context.clone(checker.getTypeAtLocation(templateSpan.expression))
       );
     }
     if (expressionSchema) {
