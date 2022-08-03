@@ -2,6 +2,7 @@ import { defineSymbol } from "@symbolism/definitions";
 import { getSymbolDeclaration } from "@symbolism/ts-utils";
 import ts from "typescript";
 import { AnySchemaNode, convertTSTypeToSchema } from "../schema";
+import { evaluateBinaryExpressionSchema } from "./binary-expression";
 import { convertTemplateLiteralValue } from "./string-template";
 import { expandSchemaList } from "./union";
 
@@ -125,43 +126,29 @@ export function convertValueExpression(
 
       case ts.SyntaxKind.PlusToken:
       case ts.SyntaxKind.PlusEqualsToken:
-        return convertArithmeticOperation(node, (a, b) => a + b);
-
       case ts.SyntaxKind.MinusToken:
       case ts.SyntaxKind.MinusEqualsToken:
-        return convertArithmeticOperation(node, (a, b) => a - b);
-
       case ts.SyntaxKind.AsteriskAsteriskToken:
       case ts.SyntaxKind.AsteriskAsteriskEqualsToken:
-        return convertArithmeticOperation(node, (a, b) => a ** b);
       case ts.SyntaxKind.AsteriskToken:
       case ts.SyntaxKind.AsteriskEqualsToken:
-        return convertArithmeticOperation(node, (a, b) => a * b);
       case ts.SyntaxKind.SlashToken:
       case ts.SyntaxKind.SlashEqualsToken:
-        return convertArithmeticOperation(node, (a, b) => a / b);
       case ts.SyntaxKind.PercentToken:
       case ts.SyntaxKind.PercentEqualsToken:
-        return convertArithmeticOperation(node, (a, b) => a % b);
       case ts.SyntaxKind.AmpersandToken:
       case ts.SyntaxKind.AmpersandEqualsToken:
-        return convertArithmeticOperation(node, (a, b) => a & b);
       case ts.SyntaxKind.BarToken:
       case ts.SyntaxKind.BarEqualsToken:
-        return convertArithmeticOperation(node, (a, b) => a | b);
       case ts.SyntaxKind.CaretToken:
       case ts.SyntaxKind.CaretEqualsToken:
-        return convertArithmeticOperation(node, (a, b) => a ^ b);
-      //
       case ts.SyntaxKind.LessThanLessThanToken:
       case ts.SyntaxKind.LessThanLessThanEqualsToken:
-        return convertArithmeticOperation(node, (a, b) => a << b);
       case ts.SyntaxKind.GreaterThanGreaterThanGreaterThanToken:
       case ts.SyntaxKind.GreaterThanGreaterThanGreaterThanEqualsToken:
-        return convertArithmeticOperation(node, (a, b) => a >>> b);
       case ts.SyntaxKind.GreaterThanGreaterThanToken:
       case ts.SyntaxKind.GreaterThanGreaterThanEqualsToken:
-        return convertArithmeticOperation(node, (a, b) => a >> b);
+        return convertArithmeticOperation(node, operator);
 
       case ts.SyntaxKind.QuestionQuestionToken:
       case ts.SyntaxKind.AmpersandAmpersandToken:
@@ -169,7 +156,7 @@ export function convertValueExpression(
       case ts.SyntaxKind.AmpersandAmpersandEqualsToken:
       case ts.SyntaxKind.BarBarEqualsToken:
       case ts.SyntaxKind.QuestionQuestionEqualsToken:
-        return convertSide(node, "right");
+        return convertNode(node.right);
 
       case ts.SyntaxKind.EqualsToken:
       case ts.SyntaxKind.CommaToken:
@@ -183,42 +170,23 @@ export function convertValueExpression(
 
   function convertArithmeticOperation(
     node: ts.BinaryExpression,
-    operator: (a: any, b: any) => any
+    operatorKind: ts.BinaryOperator
   ): AnySchemaNode {
-    const leftSchema = convertSide(node, "left");
-    const rightSchema = convertSide(node, "right");
+    const leftSchema = convertNode(node.left);
+    const rightSchema = convertNode(node.right);
 
-    const expandedSchema = expandSchemaList({
-      items: [leftSchema, rightSchema],
-      merger(right, left) {
-        if (left.kind === "literal" && right.kind === "literal") {
-          return {
-            kind: "literal",
-            value: operator(left.value, right.value),
-          };
-        }
-      },
-    });
-
-    if (expandedSchema.length === 1) {
-      return expandedSchema[0];
-    }
-
-    return {
-      kind: "union",
-      items: expandedSchema,
-    };
+    return evaluateBinaryExpressionSchema(
+      leftSchema,
+      rightSchema,
+      operatorKind
+    );
   }
 
-  function convertSide(node: ts.BinaryExpression, side: "right" | "left") {
-    const definition = defineSymbol(node[side], checker);
+  function convertNode(node: ts.Node) {
+    const definition = defineSymbol(node, checker);
 
     return definition?.declaration && definition?.type
       ? convertTSTypeToSchema(definition.type, definition.declaration, checker)
-      : convertTSTypeToSchema(
-          checker.getTypeAtLocation(node[side]),
-          node,
-          checker
-        );
+      : convertTSTypeToSchema(checker.getTypeAtLocation(node), node, checker);
   }
 }

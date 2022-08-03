@@ -38,7 +38,8 @@ export function isConcreteSchema(
     type.kind === "union" ||
     type.kind === "intersection" ||
     type.kind === "tuple" ||
-    type.kind === "template-literal"
+    type.kind === "template-literal" ||
+    type.kind === "binary-expression"
   ) {
     return type.items.every(isConcreteSchema);
   }

@@ -58,3 +58,71 @@ export function expandSchemaList({
 
   return unionSchemas;
 }
+
+export function expandUnions({
+  items,
+  merger,
+}: {
+  items: AnySchemaNode[];
+  merger: (
+    item: AnySchemaNode,
+    priorItem: AnySchemaNode
+  ) => AnySchemaNode | undefined;
+}): AnySchemaNode[][] {
+  const unionIndexes = items
+    .map((item, index) => (item.kind === "union" ? index : -1))
+    .filter((index) => index >= 0);
+
+  let unionExpansion = [items];
+  for (const index of unionIndexes) {
+    const union = items[index];
+    invariant(union.kind === "union", "Expected union");
+
+    unionExpansion = union.items.flatMap((item) => {
+      return unionExpansion.map((items) => {
+        const newItems = [...items];
+        newItems.splice(index, 1, item);
+        return newItems;
+      });
+    });
+  }
+
+  const unionSchemas = unionExpansion.map((items): AnySchemaNode[] => {
+    const finalItems: AnySchemaNode[] = [];
+    for (let i = 0; i < items.length; i++) {
+      const item = items[i];
+      const priorItem = finalItems[finalItems.length - 1];
+
+      const merged = item && priorItem && merger(item, priorItem);
+
+      if (merged) {
+        finalItems[finalItems.length - 1] = merged;
+      } else {
+        finalItems.push(item);
+      }
+    }
+
+    return finalItems;
+  });
+
+  return unionSchemas;
+}
+
+export function unionSchemas(
+  priorValue: AnySchemaNode | undefined,
+  newValue: AnySchemaNode
+): AnySchemaNode {
+  if (!priorValue) {
+    return newValue;
+  }
+  if (priorValue.kind === "union") {
+    return {
+      kind: "union",
+      items: [...priorValue.items, newValue],
+    };
+  }
+  return {
+    kind: "union",
+    items: [priorValue, newValue],
+  };
+}

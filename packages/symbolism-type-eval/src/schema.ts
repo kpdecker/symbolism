@@ -5,7 +5,8 @@ import {
   isTupleTypeReference,
 } from "@symbolism/ts-utils";
 import { dumpFlags, dumpSymbol } from "@symbolism/ts-debug";
-import { narrowTypeFromValues } from "./value-eval";
+import { convertValueExpression, narrowTypeFromValues } from "./value-eval";
+import { evaluateBinaryExpressionSchema } from "./value-eval/binary-expression";
 
 interface SchemaNode {
   flags?: string[];
@@ -75,6 +76,12 @@ export interface FunctionSchema extends SchemaNode {
   returnType: AnySchemaNode;
 }
 
+export interface BinaryExpressionSchema extends SchemaNode {
+  kind: "binary-expression";
+  operator: ts.BinaryOperator;
+  items: AnySchemaNode[];
+}
+
 export interface IndexSchema extends SchemaNode {
   kind: "index";
   type: AnySchemaNode;
@@ -105,6 +112,7 @@ export type AnySchemaNode =
   | IndexSchema
   | IndexAccessSchema
   | FunctionSchema
+  | BinaryExpressionSchema
   | ErrorSchema;
 
 export function convertTSTypeToSchema(

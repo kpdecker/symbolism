@@ -1,6 +1,7 @@
 import { format } from "prettier";
 import ts from "typescript";
 import type { AnySchemaNode } from "./schema";
+import { binaryExpressionOperatorToken } from "./value-eval/binary-expression";
 
 export function printSchema(schema: AnySchemaNode): string {
   const unformattedText = printSchemaNode(schema);
@@ -75,6 +76,12 @@ export function printSchemaNode(schema: AnySchemaNode): string {
       return `((${schema.parameters
         .map(({ name, schema }) => `${name}: ${printSchemaNode(schema)}`)
         .join(", ")}) => ${printSchemaNode(schema.returnType)})`;
+    case "binary-expression":
+      return `(${printSchemaNode(
+        schema.items[0]
+      )} ${binaryExpressionOperatorToken(schema.operator)} ${printSchemaNode(
+        schema.items[1]
+      )})`;
     case "index":
       return `keyof ${printSchemaNode(schema.type)}`;
     case "index-access":
