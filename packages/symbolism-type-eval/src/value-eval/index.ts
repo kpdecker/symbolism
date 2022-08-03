@@ -120,6 +120,7 @@ export function convertValueExpression(
         return {
           kind: "primitive",
           name: "boolean",
+          node: node,
         };
 
       case ts.SyntaxKind.PlusToken:

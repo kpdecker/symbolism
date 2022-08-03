@@ -32,6 +32,7 @@ export interface PrimitiveSchema extends SchemaNode {
     | "unknown"
     | "any"
     | "never";
+  node: ts.Node;
 }
 
 export interface UnionSchema extends SchemaNode {
@@ -77,16 +78,19 @@ export interface FunctionSchema extends SchemaNode {
 export interface IndexSchema extends SchemaNode {
   kind: "index";
   type: AnySchemaNode;
+  node: ts.Node;
 }
 
 export interface IndexAccessSchema extends SchemaNode {
   kind: "index-access";
   object: AnySchemaNode;
   index: AnySchemaNode;
+  node: ts.Node;
 }
 
 export interface ErrorSchema extends SchemaNode {
   kind: "error";
+  node: ts.Node;
 }
 
 export type AnySchemaNode =
@@ -119,7 +123,7 @@ export function convertTSTypeToSchema(
     const typesHandled = new Set<ts.Type>(priorTypesHandled);
 
     if (typesHandled.has(type)) {
-      return { kind: "error", extra: "Circular type" };
+      return { kind: "error", extra: "Circular type", node: contextNode };
     }
     typesHandled.add(type);
 
@@ -139,9 +143,6 @@ export function convertTSTypeToSchema(
       return {
         kind: "union",
         items,
-        flags: dumpFlags(type.flags, ts.TypeFlags).concat(
-          dumpFlags(objectFlags, ts.ObjectFlags)
-        ),
       };
     } else if (type.isIntersection()) {
       let allObjects = true;
@@ -279,13 +280,11 @@ export function convertTSTypeToSchema(
     } else if (type.flags & ts.TypeFlags.Index) {
       const index = type as ts.IndexType;
 
+      const indexContextNode = findContextNode(index.type, contextNode);
       return {
         kind: "index",
-        type: convertType(
-          index.type,
-          findContextNode(index.type, contextNode),
-          typesHandled
-        ),
+        type: convertType(index.type, indexContextNode, typesHandled),
+        node: indexContextNode,
       };
     } else if (type.flags & ts.TypeFlags.IndexedAccess) {
       const indexAccess = type as ts.IndexedAccessType;
@@ -293,6 +292,7 @@ export function convertTSTypeToSchema(
         kind: "index-access",
         object: convertType(indexAccess.objectType, contextNode, typesHandled),
         index: convertType(indexAccess.indexType, contextNode, typesHandled),
+        node: contextNode,
       };
     } else {
       /* istanbul ignore next Sanity */
@@ -338,6 +338,7 @@ export function convertTSTypeToSchema(
             {
               kind: "error",
               extra: "no-declaration",
+              node: contextNode,
             },
           ];
         }
@@ -435,6 +436,7 @@ export function convertTSTypeToSchema(
         narrowTypeFromValues(type, contextNode, checker, typesHandled) || {
           kind: "primitive",
           name: "number",
+          node: contextNode,
         }
       );
     } else if (type.flags & ts.TypeFlags.BigInt) {
@@ -442,6 +444,7 @@ export function convertTSTypeToSchema(
         narrowTypeFromValues(type, contextNode, checker, typesHandled) || {
           kind: "primitive",
           name: "bigint",
+          node: contextNode,
         }
       );
     } else if (type.flags & ts.TypeFlags.String) {
@@ -449,6 +452,7 @@ export function convertTSTypeToSchema(
         narrowTypeFromValues(type, contextNode, checker, typesHandled) || {
           kind: "primitive",
           name: "string",
+          node: contextNode,
         }
       );
     } else if (type.flags & ts.TypeFlags.Any) {
@@ -456,34 +460,40 @@ export function convertTSTypeToSchema(
         narrowTypeFromValues(type, contextNode, checker, typesHandled) || {
           kind: "primitive",
           name: "any",
+          node: contextNode,
         }
       );
     } else if (type.flags & ts.TypeFlags.Never) {
       return {
         kind: "primitive",
         name: "never",
+        node: contextNode,
       };
     } else if (type.flags & ts.TypeFlags.Unknown) {
       return (
         narrowTypeFromValues(type, contextNode, checker, typesHandled) || {
           kind: "primitive",
           name: "unknown",
+          node: contextNode,
         }
       );
     } else if (type.flags & ts.TypeFlags.Null) {
       return {
         kind: "primitive",
         name: "null",
+        node: contextNode,
       };
     } else if (type.flags & ts.TypeFlags.Undefined) {
       return {
         kind: "primitive",
         name: "undefined",
+        node: contextNode,
       };
     } else if (type.flags & ts.TypeFlags.Void) {
       return {
         kind: "primitive",
         name: "void",
+        node: contextNode,
       };
     } else if (
       type.flags & ts.TypeFlags.ESSymbol ||
@@ -492,11 +502,13 @@ export function convertTSTypeToSchema(
       return {
         kind: "primitive",
         name: "symbol",
+        node: contextNode,
       };
     } else if (type.flags & ts.TypeFlags.NonPrimitive) {
       return {
         kind: "primitive",
         name: "object",
+        node: contextNode,
       };
     }
   }
