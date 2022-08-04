@@ -58,14 +58,14 @@ function dumpSchema(
 
   console.log(
     options.json
-      ? format(
-          `(${JSON.stringify(
-            createJsonSchema({
-              $id: options.json,
-              $comment: options.comment,
-              schema,
-            })
-          )})`
+      ? JSON.stringify(
+          createJsonSchema({
+            $id: options.json,
+            $comment: options.comment,
+            schema,
+          }),
+          undefined,
+          2
         )
       : printSchema(schema)
   );

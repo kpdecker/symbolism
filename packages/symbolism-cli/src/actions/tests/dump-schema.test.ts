@@ -43,16 +43,23 @@ describe("dumpSchema", () => {
     ]);
 
     expect(spy.mock.calls[0][0]).toMatchInlineSnapshot(`
-      "({
-        $schema: \\"https://json-schema.org/draft/2020-12/schema\\",
-        $id: \\"foo\\",
-        type: \\"object\\",
-        properties: {
-          bar: { type: \\"string\\", enum: [\\"bar\\", \\"bat\\"] },
-          merged: { type: \\"number\\" },
-        },
-      });
-      "
+      "{
+        \\"$schema\\": \\"https://json-schema.org/draft/2020-12/schema\\",
+        \\"$id\\": \\"foo\\",
+        \\"type\\": \\"object\\",
+        \\"properties\\": {
+          \\"bar\\": {
+            \\"type\\": \\"string\\",
+            \\"enum\\": [
+              \\"bar\\",
+              \\"bat\\"
+            ]
+          },
+          \\"merged\\": {
+            \\"type\\": \\"number\\"
+          }
+        }
+      }"
     `);
   });
 });
