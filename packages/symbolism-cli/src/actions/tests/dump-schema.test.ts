@@ -10,7 +10,7 @@ describe("dumpSchema", () => {
     const program = new Command();
     initDumpSchema(program);
 
-    const spy = jest.spyOn(console, "log");
+    const spy = jest.spyOn(console, "log").mockImplementation(() => {});
     program.parse([
       "foo",
       "foo",
@@ -31,7 +31,7 @@ describe("dumpSchema", () => {
     const program = new Command();
     initDumpSchema(program);
 
-    const spy = jest.spyOn(console, "log");
+    const spy = jest.spyOn(console, "log").mockImplementation(() => {});
     program.parse([
       "foo",
       "foo",
