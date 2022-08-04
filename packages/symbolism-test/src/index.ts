@@ -1,6 +1,13 @@
 import path from "path";
 import ts from "typescript";
 
+// Used for dumpSchema unit test
+declare module "./dump-symbol" {
+  export interface Schema {
+    merged: number;
+  }
+}
+
 export function mockProgram(sourceFiles: Record<string, string>) {
   const host: ts.CompilerHost = {
     fileExists(fileName) {

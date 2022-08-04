@@ -2,7 +2,7 @@ import { existsSync, readFileSync } from "fs";
 import ts from "typescript";
 import { Config } from "./config";
 
-export function initTypescript(config: Config) {
+export function initTypescript(config: Config, filePath?: string) {
   const configPath = ts.findConfigFile(
     config.baseDir,
     ts.sys.fileExists,
@@ -28,7 +28,8 @@ export function initTypescript(config: Config) {
   }
 
   const servicesHost: ts.LanguageServiceHost = {
-    getScriptFileNames: () => config.entryPoints,
+    getScriptFileNames: () =>
+      filePath ? [filePath, ...config.entryPoints] : config.entryPoints,
     getScriptVersion: (fileName) => "1",
     getScriptSnapshot: (fileName) => {
       if (!existsSync(fileName)) {

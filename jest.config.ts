@@ -12,7 +12,12 @@ export default {
   // coverageProvider: "v8",
 
   // An array of regexp pattern strings used to skip coverage collection
-  coveragePathIgnorePatterns: ["/node_modules/", "/test/", "/dist/"],
+  coveragePathIgnorePatterns: [
+    "/node_modules/",
+    "/test/",
+    "/dist/",
+    "symbolism-test",
+  ],
 
   // A list of reporter names that Jest uses when writing coverage reports
   // coverageReporters: [

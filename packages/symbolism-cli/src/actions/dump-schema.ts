@@ -25,7 +25,7 @@ function dumpSchema(
   options: OptionValues
 ) {
   const config = getCliConfig();
-  const services = initTypescript(config);
+  const services = initTypescript(config, filePath);
   const program = services.getProgram();
   if (!program) {
     throw new Error("Failed to create program");
