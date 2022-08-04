@@ -1,4 +1,4 @@
 {
   "entryPoints": ["packages/*/src/index.ts"],
-  "tokens": ["ts"]
+  "tokens": ["ts", "defineSymbol"]
 }
