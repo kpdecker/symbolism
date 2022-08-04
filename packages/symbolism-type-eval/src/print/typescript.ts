@@ -1,7 +1,7 @@
 import { format } from "prettier";
 import ts from "typescript";
-import type { AnySchemaNode } from "./schema";
-import { binaryExpressionOperatorToken } from "./value-eval/binary-expression";
+import type { AnySchemaNode } from "../schema";
+import { binaryExpressionOperatorToken } from "../value-eval/binary-expression";
 
 export function printSchema(schema: AnySchemaNode): string {
   const unformattedText = printSchemaNode(schema);

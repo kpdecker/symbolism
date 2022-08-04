@@ -1,7 +1,6 @@
 import { mockProgram } from "@symbolism/test";
 import { findIdentifiers } from "@symbolism/ts-utils";
-import ts from "typescript";
-import { printSchema } from "../print";
+import { printSchema } from "../print/typescript";
 import { convertTSTypeToSchema, SchemaContext } from "../schema";
 
 function testType(source: string, name = "Type") {
