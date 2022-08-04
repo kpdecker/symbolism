@@ -1,5 +1,18 @@
 # @symbolism/definitions
 
+## 0.2.0
+
+### Minor Changes
+
+- Add json schema output to dumpSchema command
+
+### Patch Changes
+
+- Updated dependencies
+  - @symbolism/ts-debug@0.2.0
+  - @symbolism/ts-utils@0.2.0
+  - @symbolism/utils@0.2.0
+
 ## 0.1.0
 
 ### Minor Changes

@@ -1,6 +1,6 @@
 {
   "name": "@symbolism/paths",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Symbolism utilities",
   "main": "dist/symbolism-paths.cjs.js",
   "author": "Kevin Decker <kpdecker@gmail.com>",
@@ -10,9 +10,9 @@
     "url": "git+https://github.com/kpdecker/symbolism.git"
   },
   "dependencies": {
-    "@symbolism/utils": "^0.1.0",
-    "@symbolism/ts-debug": "^0.1.0",
-    "@symbolism/ts-utils": "^0.1.0",
+    "@symbolism/utils": "^0.2.0",
+    "@symbolism/ts-debug": "^0.2.0",
+    "@symbolism/ts-utils": "^0.2.0",
     "tiny-invariant": "^1.2.0"
   },
   "peerDependencies": {
