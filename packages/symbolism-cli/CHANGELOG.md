@@ -1,5 +1,11 @@
 # @symbolism/cli
 
+## 0.2.1
+
+### Patch Changes
+
+- e16637e: Fix JSON output for json schema
+
 ## 0.2.0
 
 ### Minor Changes

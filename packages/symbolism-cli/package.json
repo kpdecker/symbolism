@@ -1,6 +1,6 @@
 {
   "name": "@symbolism/cli",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Coverage assertions for specific code tokens.",
   "main": "dist/symbolism-cli.cjs.js",
   "bin": {
