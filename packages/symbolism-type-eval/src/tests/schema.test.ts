@@ -629,7 +629,7 @@ describe("type schema converter", () => {
         "
       `);
       expect(testNode("modulo")).toMatchInlineSnapshot(`
-        "0 | 1 | 1;
+        "0 | 1;
         "
       `);
       expect(testNode("exponent")).toMatchInlineSnapshot(`

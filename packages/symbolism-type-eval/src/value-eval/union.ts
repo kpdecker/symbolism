@@ -1,4 +1,5 @@
 import invariant from "tiny-invariant";
+import { areSchemasEqual } from "../classify";
 import { AnySchemaNode } from "../schema";
 
 export function expandSchemaList({
@@ -105,7 +106,18 @@ export function expandUnions({
     return finalItems;
   });
 
-  return unionSchemas;
+  // Filter identical items
+  return unionSchemas.filter(
+    (items, itemIndex) =>
+      unionSchemas.findIndex(
+        (needle, needleI) =>
+          itemIndex < needleI &&
+          items.length === needle.length &&
+          items.every((item, schemaIndex) =>
+            areSchemasEqual(item, needle[schemaIndex])
+          )
+      ) < 0
+  );
 }
 
 export function unionSchemas(

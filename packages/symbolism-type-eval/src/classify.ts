@@ -133,3 +133,69 @@ export function isNumericSchema(type: AnySchemaNode): boolean {
     (type.kind === "literal" && typeof type.value === "number")
   );
 }
+
+export function areSchemasEqual(a: AnySchemaNode, b: AnySchemaNode): boolean {
+  if (a.kind === "primitive") {
+    return a.kind === b.kind && a.name === b.name;
+  }
+
+  if (
+    a.kind === "error" ||
+    // Type checker would have resolved this if it was concrete.
+    a.kind === "index" ||
+    a.kind === "index-access"
+  ) {
+    return a.kind === b.kind && a.node === b.node;
+  }
+
+  if (a.kind === "literal") {
+    return b.kind === "literal" && a.value === b.value;
+  }
+
+  if (
+    a.kind === "union" ||
+    a.kind === "intersection" ||
+    a.kind === "tuple" ||
+    a.kind === "template-literal" ||
+    a.kind === "binary-expression"
+  ) {
+    return (
+      a.kind === b.kind &&
+      a.items.length === b.items.length &&
+      a.items.every((item, index) => areSchemasEqual(item, b.items[index]))
+    );
+  }
+
+  if (a.kind === "array") {
+    return b.kind === "array" && areSchemasEqual(a.items, b.items);
+  }
+
+  if (a.kind === "object") {
+    if (b.kind !== "object") {
+      return false;
+    }
+
+    const aProperties = Object.keys(a.properties);
+    const bProperties = Object.keys(b.properties);
+    return (
+      aProperties.length === bProperties.length &&
+      aProperties.every((key) =>
+        areSchemasEqual(a.properties[key], b.properties[key])
+      )
+    );
+  }
+
+  if (a.kind === "function") {
+    return (
+      b.kind === "function" &&
+      areSchemasEqual(a.returnType, b.returnType) &&
+      a.parameters.length === b.parameters.length &&
+      a.parameters.every((parameter, i) =>
+        areSchemasEqual(parameter.schema, b.parameters[i].schema)
+      )
+    );
+  }
+
+  const gottaCatchEmAll: never = a;
+  throw new Error("Not implemented");
+}
