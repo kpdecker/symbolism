@@ -8,6 +8,7 @@ import {
 import { dumpFlags, dumpSymbol } from "@symbolism/ts-debug";
 import { convertValueExpression, narrowTypeFromValues } from "./value-eval";
 import { evaluateBinaryExpressionSchema } from "./value-eval/binary-expression";
+import { normalizeTemplateLiteralSchema } from "./value-eval/string-template";
 
 interface SchemaNode {
   flags?: string[];
@@ -391,7 +392,7 @@ function convertObjectType(
 function convertTemplateLiteralType(
   type: ts.Type,
   context: SchemaContext
-): TemplateLiteralSchema | undefined {
+): AnySchemaNode | undefined {
   if (type.flags & ts.TypeFlags.TemplateLiteral) {
     const templateType = type as ts.TemplateLiteralType;
     const itemTypes = templateType.texts
@@ -408,10 +409,7 @@ function convertTemplateLiteralType(
       })
       .filter(Boolean);
 
-    return {
-      kind: "template-literal",
-      items: itemTypes,
-    };
+    return normalizeTemplateLiteralSchema(itemTypes);
   }
 }
 

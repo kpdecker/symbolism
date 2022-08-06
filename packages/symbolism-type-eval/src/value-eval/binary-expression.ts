@@ -1,5 +1,6 @@
 import ts from "typescript";
 import { AnySchemaNode } from "../schema";
+import { normalizeTemplateLiteralSchema } from "./string-template";
 import { expandUnions } from "./union";
 
 export function evaluateBinaryExpressionSchema(
@@ -62,6 +63,10 @@ export function evaluateBinaryExpressionSchema(
       break;
   }
 
+  const isAddition =
+    operatorKind === ts.SyntaxKind.PlusToken ||
+    operatorKind === ts.SyntaxKind.PlusEqualsToken;
+
   const expandedSchema = expandUnions({
     items: [leftSchema, rightSchema],
     merger(right, left) {
@@ -70,13 +75,20 @@ export function evaluateBinaryExpressionSchema(
           kind: "literal",
           value: operator(left.value, right.value),
         };
+      } else if (
+        isAddition &&
+        ((left.kind === "literal" && typeof left.value === "string") ||
+          (right.kind === "literal" && typeof right.value === "string"))
+      ) {
+        // Convert to template type. Note that we do this only for strings
+        // because template literals can fully describe abstract strings.
+        return normalizeTemplateLiteralSchema([left, right]);
       }
     },
   }).map((itemSet): AnySchemaNode => {
     if (itemSet.length === 1) {
       return itemSet[0];
     }
-    console.log("itemSet", itemSet);
     return {
       kind: "binary-expression",
       operator: operatorKind,
