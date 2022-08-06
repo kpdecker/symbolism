@@ -1,4 +1,3 @@
-import invariant from "tiny-invariant";
 import ts from "typescript";
 import { AnySchemaNode, UnionSchema } from "./schema";
 
@@ -124,13 +123,31 @@ export function isLiteralUnion(type: AnySchemaNode): type is UnionSchema {
 }
 
 export function isNumericSchema(type: AnySchemaNode): boolean {
-  if (type.kind === "union" || type.kind === "intersection") {
+  if (
+    type.kind === "union" ||
+    type.kind === "intersection" ||
+    type.kind === "binary-expression"
+  ) {
     return type.items.every(isNumericSchema);
   }
 
   return (
     (type.kind === "primitive" && type.name === "number") ||
     (type.kind === "literal" && typeof type.value === "number")
+  );
+}
+export function isBooleanSchema(type: AnySchemaNode): boolean {
+  if (
+    type.kind === "union" ||
+    type.kind === "intersection" ||
+    type.kind === "binary-expression"
+  ) {
+    return type.items.every(isBooleanSchema);
+  }
+
+  return (
+    (type.kind === "primitive" && type.name === "boolean") ||
+    (type.kind === "literal" && typeof type.value === "boolean")
   );
 }
 
