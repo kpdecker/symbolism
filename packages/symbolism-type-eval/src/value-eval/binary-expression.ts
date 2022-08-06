@@ -1,7 +1,99 @@
 import ts from "typescript";
-import { AnySchemaNode } from "../schema";
+import { convertNode, convertValueExpression } from ".";
+import { isConcreteSchema } from "../classify";
+import { AnySchemaNode, SchemaContext } from "../schema";
+import { booleanPrimitiveSchema } from "../well-known-schemas";
 import { normalizeTemplateLiteralSchema } from "./string-template";
 import { expandUnions } from "./union";
+
+export function convertBinaryExpression(
+  node: ts.Node,
+  context: SchemaContext
+): AnySchemaNode | undefined {
+  if (!ts.isBinaryExpression(node)) {
+    return undefined;
+  }
+
+  const leftSchema = convertNode(node.left, context);
+  const rightSchema = convertNode(node.right, context);
+
+  const operator = node.operatorToken.kind as ts.BinaryOperator;
+  switch (operator) {
+    case ts.SyntaxKind.GreaterThanToken:
+    case ts.SyntaxKind.GreaterThanEqualsToken:
+    case ts.SyntaxKind.LessThanToken:
+    case ts.SyntaxKind.LessThanEqualsToken:
+    case ts.SyntaxKind.EqualsEqualsToken:
+    case ts.SyntaxKind.EqualsEqualsEqualsToken:
+    case ts.SyntaxKind.ExclamationEqualsToken:
+    case ts.SyntaxKind.ExclamationEqualsEqualsToken:
+      return convertArithmeticOperation();
+
+    case ts.SyntaxKind.InKeyword:
+    case ts.SyntaxKind.InstanceOfKeyword:
+      return booleanPrimitiveSchema;
+
+    case ts.SyntaxKind.PlusToken:
+    case ts.SyntaxKind.PlusEqualsToken:
+    case ts.SyntaxKind.MinusToken:
+    case ts.SyntaxKind.MinusEqualsToken:
+    case ts.SyntaxKind.AsteriskAsteriskToken:
+    case ts.SyntaxKind.AsteriskAsteriskEqualsToken:
+    case ts.SyntaxKind.AsteriskToken:
+    case ts.SyntaxKind.AsteriskEqualsToken:
+    case ts.SyntaxKind.SlashToken:
+    case ts.SyntaxKind.SlashEqualsToken:
+    case ts.SyntaxKind.PercentToken:
+    case ts.SyntaxKind.PercentEqualsToken:
+    case ts.SyntaxKind.AmpersandToken:
+    case ts.SyntaxKind.AmpersandEqualsToken:
+    case ts.SyntaxKind.BarToken:
+    case ts.SyntaxKind.BarEqualsToken:
+    case ts.SyntaxKind.CaretToken:
+    case ts.SyntaxKind.CaretEqualsToken:
+    case ts.SyntaxKind.LessThanLessThanToken:
+    case ts.SyntaxKind.LessThanLessThanEqualsToken:
+    case ts.SyntaxKind.GreaterThanGreaterThanGreaterThanToken:
+    case ts.SyntaxKind.GreaterThanGreaterThanGreaterThanEqualsToken:
+    case ts.SyntaxKind.GreaterThanGreaterThanToken:
+    case ts.SyntaxKind.GreaterThanGreaterThanEqualsToken:
+      return convertArithmeticOperation();
+
+    case ts.SyntaxKind.QuestionQuestionToken:
+      if (isConcreteSchema(leftSchema)) {
+        if (
+          leftSchema.kind === "primitive" &&
+          leftSchema.name === "undefined"
+        ) {
+          return rightSchema;
+        }
+        return leftSchema;
+      }
+      return {
+        kind: "union",
+        items: [leftSchema, rightSchema],
+      };
+    case ts.SyntaxKind.AmpersandAmpersandToken:
+    case ts.SyntaxKind.BarBarToken:
+    case ts.SyntaxKind.AmpersandAmpersandEqualsToken:
+    case ts.SyntaxKind.BarBarEqualsToken:
+    case ts.SyntaxKind.QuestionQuestionEqualsToken:
+      return convertArithmeticOperation();
+
+    case ts.SyntaxKind.EqualsToken:
+    case ts.SyntaxKind.CommaToken:
+      return convertValueExpression(...context.cloneNode(node.right));
+
+    default:
+      const defaultAssertion: never = operator;
+      /* istanbul ignore next */
+      throw new Error(`Unhandled operator: ${ts.SyntaxKind[operator]}`);
+  }
+
+  function convertArithmeticOperation() {
+    return evaluateBinaryExpressionSchema(leftSchema, rightSchema, operator);
+  }
+}
 
 export function evaluateBinaryExpressionSchema(
   leftSchema: AnySchemaNode,
@@ -61,6 +153,44 @@ export function evaluateBinaryExpressionSchema(
     case ts.SyntaxKind.GreaterThanGreaterThanEqualsToken:
       operator = (a, b) => a >> b;
       break;
+
+    case ts.SyntaxKind.EqualsEqualsToken:
+      operator = (a, b) => a == b;
+      break;
+    case ts.SyntaxKind.EqualsEqualsEqualsToken:
+      operator = (a, b) => a === b;
+      break;
+    case ts.SyntaxKind.ExclamationEqualsToken:
+      operator = (a, b) => a != b;
+      break;
+    case ts.SyntaxKind.ExclamationEqualsEqualsToken:
+      operator = (a, b) => a !== b;
+      break;
+    case ts.SyntaxKind.GreaterThanToken:
+      operator = (a, b) => a > b;
+      break;
+    case ts.SyntaxKind.GreaterThanEqualsToken:
+      operator = (a, b) => a >= b;
+      break;
+    case ts.SyntaxKind.LessThanToken:
+      operator = (a, b) => a < b;
+      break;
+    case ts.SyntaxKind.LessThanEqualsToken:
+      operator = (a, b) => a <= b;
+      break;
+
+    case ts.SyntaxKind.BarBarToken:
+      operator = (a, b) => a || b;
+      break;
+    case ts.SyntaxKind.AmpersandAmpersandToken:
+      operator = (a, b) => a && b;
+      break;
+
+    default:
+      /* istanbul ignore next */
+      throw new Error(
+        `Unsupported binary operator: ${ts.SyntaxKind[operatorKind]}`
+      );
   }
 
   const isAddition =

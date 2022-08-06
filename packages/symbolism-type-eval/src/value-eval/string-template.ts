@@ -30,9 +30,8 @@ export function convertTemplateLiteralValue(
       );
     }
     if (!expressionSchema) {
-      // Note creating a new infinite loop context. This may be a mistake.
       expressionSchema = convertTSTypeToSchema(
-        ...context.clone(checker.getTypeAtLocation(templateSpan.expression))
+        ...context.clone(undefined, templateSpan.expression)
       );
     }
     if (expressionSchema) {

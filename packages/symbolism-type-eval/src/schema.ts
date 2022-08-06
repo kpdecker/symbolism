@@ -7,8 +7,8 @@ import {
 } from "@symbolism/ts-utils";
 import { dumpFlags, dumpSymbol } from "@symbolism/ts-debug";
 import { convertValueExpression, narrowTypeFromValues } from "./value-eval";
-import { evaluateBinaryExpressionSchema } from "./value-eval/binary-expression";
 import { normalizeTemplateLiteralSchema } from "./value-eval/string-template";
+import { booleanPrimitiveSchema } from "./well-known-schemas";
 
 interface SchemaNode {
   flags?: string[];
@@ -176,6 +176,12 @@ export function convertTSTypeToSchema(
 ): AnySchemaNode {
   const { contextNode, checker, typesHandled } = context;
 
+  if (ts.isParenthesizedExpression(contextNode)) {
+    return convertTSTypeToSchema(
+      ...context.clone(type, contextNode.expression)
+    );
+  }
+
   if (type.flags & ts.TypeFlags.TypeParameter) {
     type = checker.getApparentType(type);
   }
@@ -193,7 +199,9 @@ export function convertTSTypeToSchema(
 
   const literalOrPrimitive =
     convertLiteralOrPrimitive(type, context) ||
-    convertTemplateLiteralType(type, context);
+    convertTemplateLiteralType(type, context) ||
+    // Prefer our node-based resolution when possible
+    narrowTypeFromValues(type, context);
   if (literalOrPrimitive) {
     return literalOrPrimitive;
   }
@@ -280,7 +288,7 @@ export function convertTSTypeToSchema(
             return {
               name: parameter.name,
               schema: convertTSTypeToSchema(
-                ...context.clone(checker.getTypeAtLocation(declaration))
+                ...context.clone(undefined, declaration)
               ),
               symbol: parameter,
             };
@@ -446,6 +454,10 @@ function convertLiteralOrPrimitive(
         ts.PseudoBigInt
       >,
     };
+  } else if (type.flags & ts.TypeFlags.Boolean) {
+    return (
+      narrowTypeFromValues(...context.clone(type)) || booleanPrimitiveSchema
+    );
   } else if (type.flags & ts.TypeFlags.BooleanLiteral) {
     return {
       kind: "literal",

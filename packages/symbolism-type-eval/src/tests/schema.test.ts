@@ -536,7 +536,7 @@ describe("type schema converter", () => {
         "
       `);
     });
-    it("should load types from runtime code", () => {
+    it("should load types from runtime object literal", () => {
       const { type, declaration, context } = testType(`
         declare const bar: "foo" | "bar";
         const foo = \`foo \${bar}\`
@@ -573,111 +573,5 @@ describe("type schema converter", () => {
       "{}[keyof {}];
       "
     `);
-  });
-
-  it.todo("should convert calls to schema parameters");
-
-  describe("runtime narrowing", () => {
-    it("should narrow string binary operations", () => {
-      const { type, declaration, checker, sourceFile } = testType(`
-        type Source = {
-          directUnion: 1 | 2 | 3;
-        };
-        declare const source: Source;
-
-        const add = source.directUnion + "foo";
-        const addNumber = source.directUnion + 1;
-        const subtract = source.directUnion - "foo";
-        const subtractNumber = source.directUnion - 1;
-        const multiply = source.directUnion * 2;
-        const divide = source.directUnion / 2;
-        const modulo = source.directUnion % 2;
-        const exponent = source.directUnion ** 2;
-        const equals = source.directUnion === "foo";
-        const notEquals = source.directUnion !== "foo";
-        const lessThan = source.directUnion < "foo";
-        const lessThanOrEqual = source.directUnion <= "foo";
-        const greaterThan = source.directUnion > "foo";
-        const greaterThanOrEqual = source.directUnion >= "foo";
-        const inOperator = "foo" in source.directUnion;
-        const instanceOf = source.directUnion instanceof String;
-      `);
-
-      expect(testNode("add")).toMatchInlineSnapshot(`
-        "\\"1foo\\" | \\"2foo\\" | \\"3foo\\";
-        "
-      `);
-      expect(testNode("addNumber")).toMatchInlineSnapshot(`
-        "2 | 3 | 4;
-        "
-      `);
-      expect(testNode("subtract")).toMatchInlineSnapshot(`
-        "NaN | NaN | NaN;
-        "
-      `);
-      expect(testNode("subtractNumber")).toMatchInlineSnapshot(`
-        "0 | 1 | 2;
-        "
-      `);
-
-      expect(testNode("multiply")).toMatchInlineSnapshot(`
-        "2 | 4 | 6;
-        "
-      `);
-      expect(testNode("divide")).toMatchInlineSnapshot(`
-        "0.5 | 1 | 1.5;
-        "
-      `);
-      expect(testNode("modulo")).toMatchInlineSnapshot(`
-        "0 | 1;
-        "
-      `);
-      expect(testNode("exponent")).toMatchInlineSnapshot(`
-        "1 | 4 | 9;
-        "
-      `);
-
-      expect(testNode("equals")).toMatchInlineSnapshot(`
-        "false | true;
-        "
-      `);
-      expect(testNode("notEquals")).toMatchInlineSnapshot(`
-        "false | true;
-        "
-      `);
-      expect(testNode("lessThan")).toMatchInlineSnapshot(`
-        "false | true;
-        "
-      `);
-      expect(testNode("lessThanOrEqual")).toMatchInlineSnapshot(`
-        "false | true;
-        "
-      `);
-      expect(testNode("greaterThan")).toMatchInlineSnapshot(`
-        "false | true;
-        "
-      `);
-      expect(testNode("greaterThanOrEqual")).toMatchInlineSnapshot(`
-        "false | true;
-        "
-      `);
-
-      expect(testNode("inOperator")).toMatchInlineSnapshot(`
-        "false | true;
-        "
-      `);
-      expect(testNode("instanceOf")).toMatchInlineSnapshot(`
-        "false | true;
-        "
-      `);
-
-      function testNode(name: string) {
-        const nodes = findIdentifiers(sourceFile, name);
-        const type = checker.getTypeAtLocation(nodes[0]);
-        return printSchema(
-          convertTSTypeToSchema(type, new SchemaContext(nodes[0], checker))
-        );
-      }
-    });
   });
 });
