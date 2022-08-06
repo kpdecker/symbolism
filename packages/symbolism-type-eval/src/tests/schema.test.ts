@@ -343,7 +343,7 @@ describe("type schema converter", () => {
       ).toMatchInlineSnapshot(`
         "{
           date: \\"Date\\";
-          foo: \\"error! Circular type\\";
+          foo: \\"error! Circular type Type\\";
         };
         "
       `);

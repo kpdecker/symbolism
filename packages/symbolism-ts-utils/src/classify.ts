@@ -108,6 +108,7 @@ const intrinsicTypes =
   ts.TypeFlags.Undefined |
   ts.TypeFlags.Null |
   ts.TypeFlags.Never |
+  ts.TypeFlags.UniqueESSymbol |
   ts.TypeFlags.NonPrimitive;
 
 export function isIntrinsicType(type: ts.Type) {

@@ -2,6 +2,7 @@ import invariant from "tiny-invariant";
 import ts from "typescript";
 import {
   getSymbolDeclaration,
+  isIntrinsicType,
   isTupleTypeReference,
 } from "@symbolism/ts-utils";
 import { dumpFlags, dumpSymbol } from "@symbolism/ts-debug";
@@ -175,8 +176,12 @@ export function convertTSTypeToSchema(
     type = checker.getApparentType(type);
   }
 
-  if (typesHandled.has(type)) {
-    return { kind: "error", extra: "Circular type", node: contextNode };
+  if (!isIntrinsicType(type) && typesHandled.has(type)) {
+    return {
+      kind: "error",
+      extra: "Circular type " + checker.typeToString(type),
+      node: contextNode,
+    };
   }
   typesHandled.add(type);
 
