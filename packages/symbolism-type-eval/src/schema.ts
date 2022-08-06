@@ -2,6 +2,7 @@ import invariant from "tiny-invariant";
 import ts from "typescript";
 import {
   getSymbolDeclaration,
+  invariantNode,
   isIntrinsicType,
   isTupleTypeReference,
 } from "@symbolism/ts-utils";
@@ -273,6 +274,22 @@ export function convertTSTypeToSchema(
     };
   } else if (type.flags & ts.TypeFlags.Object || type.isClassOrInterface()) {
     const objectFlags = (type as ts.ObjectType).objectFlags;
+
+    // If we have an object literal, then perform static analysis on the
+    // runtime code to refine further than the default checker evaluation.
+    if (objectFlags & ts.ObjectFlags.ObjectLiteral) {
+      const declaration = getSymbolDeclaration(type.symbol);
+      if (declaration) {
+        invariantNode(declaration, ts.isObjectLiteralExpression);
+        const valueSchema = convertValueExpression(
+          ...context.cloneNode(declaration)
+        );
+        if (valueSchema) {
+          return valueSchema;
+        }
+      }
+    }
+
     const callSignatures = type.getCallSignatures();
     if (callSignatures.length > 0) {
       function convertSignature(signature: ts.Signature): FunctionSchema {
@@ -357,6 +374,14 @@ function convertObjectType(
   context: SchemaContext
 ): AnySchemaNode {
   const { contextNode, checker } = context;
+
+  if (ts.isObjectLiteralExpression(contextNode)) {
+    const sourceType = convertValueExpression(contextNode, context);
+    if (sourceType) {
+      return sourceType;
+    }
+  }
+
   const properties: Record<string, AnySchemaNode> = type
     .getProperties()
     .map((p): [string, AnySchemaNode] => {

@@ -3,6 +3,7 @@ import { getSymbolDeclaration } from "@symbolism/ts-utils";
 import ts from "typescript";
 import { AnySchemaNode, convertTSTypeToSchema, SchemaContext } from "../schema";
 import { convertBinaryExpression } from "./binary-expression";
+import { convertObjectLiteralValue } from "./object";
 import { convertTemplateLiteralValue } from "./string-template";
 
 export function narrowTypeFromValues(
@@ -102,6 +103,14 @@ export function convertValueExpression(
 
   if (ts.isBinaryExpression(node)) {
     return convertBinaryExpression(node, context);
+  }
+
+  if (ts.isObjectLiteralExpression(node)) {
+    return convertObjectLiteralValue(node, context);
+  }
+
+  if (ts.isComputedPropertyName(node)) {
+    return convertValueExpression(...context.cloneNode(node.expression));
   }
 }
 
