@@ -257,8 +257,8 @@ describe("type schema converter", () => {
         printSchema(convertTSTypeToSchema(...context.clone(type, declaration)))
       ).toMatchInlineSnapshot(`
         "{
-          __index: \\"bar\\" | \\"foo\\";
           other: \\"directUnion\\" | \\"wideningUnion\\";
+          [k: string]: \\"bar\\" | \\"foo\\";
         };
         "
       `);

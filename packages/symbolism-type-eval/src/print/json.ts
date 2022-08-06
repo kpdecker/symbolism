@@ -3,6 +3,7 @@ import { JsonObject } from "type-fest";
 import ts from "typescript";
 import { isNumericSchema } from "../classify";
 import type { AnySchemaNode } from "../schema";
+import { schemaToRegEx } from "../string";
 import { printSchemaNode } from "./typescript";
 
 export function createJsonSchema(params: {
@@ -57,6 +58,12 @@ export function schemaToJson(schema: AnySchemaNode): JsonObject {
             acc[name] = schemaToJson(schema.properties[name]);
             return acc;
           }, {} as Record<string, JsonObject>),
+        patternProperties: schema.abstractIndexKeys.length
+          ? schema.abstractIndexKeys.reduce((acc, { key, value }) => {
+              acc[schemaToRegEx(key) + ""] = schemaToJson(value);
+              return acc;
+            }, {} as Record<string, JsonObject>)
+          : undefined,
       };
     case "function":
       return {
@@ -91,7 +98,6 @@ export function schemaToJson(schema: AnySchemaNode): JsonObject {
         message: JSON.stringify("error! " + schema.extra),
       };
     case "union":
-      // TODO: Enum breakout?
       const anyOf = schema.items.map(schemaToJson);
       const literals = anyOf.filter((item) => item.const);
       if (literals.length === schema.items.length) {
@@ -110,15 +116,7 @@ export function schemaToJson(schema: AnySchemaNode): JsonObject {
     case "template-literal":
       return {
         type: "string",
-        pattern: `^${schema.items
-          .map((child) => {
-            if (child.kind === "literal") {
-              // TODO: Regex escape
-              return child.value;
-            }
-            return ".*";
-          })
-          .join("")}$`,
+        pattern: schemaToRegEx(schema) + "",
       };
 
     default:

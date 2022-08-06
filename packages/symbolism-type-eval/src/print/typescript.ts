@@ -53,23 +53,25 @@ export function printSchemaNode(schema: AnySchemaNode): string {
         .join(", ")}]`;
     case "object":
       const keys = Object.keys(schema.properties);
-      if (keys.length === 1) {
+      if (keys.length === 1 && schema.abstractIndexKeys.length === 0) {
         return `{ ${JSON.stringify(keys[0])}: ${printSchemaNode(
           schema.properties[keys[0]]
         )} }`;
       }
-
       return (
         "{\n" +
-        printString(
-          Object.keys(schema.properties)
-            .sort()
-            .map((name) => {
-              const property = schema.properties[name];
-              return `  ${JSON.stringify(name)}: ${printSchemaNode(property)},`;
-            })
-            .join("\n")
-        ) +
+        Object.keys(schema.properties)
+          .sort()
+          .map((name) => {
+            const property = schema.properties[name];
+            return `  ${JSON.stringify(name)}: ${printSchemaNode(property)},`;
+          })
+          .join("\n") +
+        schema.abstractIndexKeys
+          .map(({ key, value }) => {
+            return `  [k: ${printSchemaNode(key)}]: ${printSchemaNode(value)},`;
+          })
+          .join("\n") +
         "}"
       );
     case "function":

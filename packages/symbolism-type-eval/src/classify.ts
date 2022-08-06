@@ -48,7 +48,10 @@ export function isConcreteSchema(
   }
 
   if (type.kind === "object") {
-    return Object.values(type.properties).every(isConcreteSchema);
+    return (
+      Object.values(type.properties).every(isConcreteSchema) &&
+      !type.abstractIndexKeys.length
+    );
   }
 
   if (type.kind === "function") {
@@ -103,7 +106,15 @@ export function nonConcreteInputs(type: AnySchemaNode | undefined): ts.Node[] {
   }
 
   if (type.kind === "object") {
-    return Object.values(type.properties).flatMap(nonConcreteInputs);
+    const abstractKeysSymbols = type.abstractIndexKeys.flatMap((abstractKey) =>
+      nonConcreteInputs(abstractKey.key).concat(
+        nonConcreteInputs(abstractKey.value)
+      )
+    );
+
+    return Object.values(type.properties)
+      .flatMap(nonConcreteInputs)
+      .concat(abstractKeysSymbols);
   }
 
   if (type.kind === "function") {
@@ -198,6 +209,12 @@ export function areSchemasEqual(a: AnySchemaNode, b: AnySchemaNode): boolean {
       aProperties.length === bProperties.length &&
       aProperties.every((key) =>
         areSchemasEqual(a.properties[key], b.properties[key])
+      ) &&
+      a.abstractIndexKeys.length === b.abstractIndexKeys.length &&
+      a.abstractIndexKeys.every(
+        (aIndexKey, i) =>
+          areSchemasEqual(aIndexKey.key, b.abstractIndexKeys[i].key) &&
+          areSchemasEqual(aIndexKey.value, b.abstractIndexKeys[i].value)
       )
     );
   }

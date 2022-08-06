@@ -61,6 +61,9 @@ export interface LiteralSchema extends SchemaNode {
 export interface ObjectSchema extends SchemaNode {
   kind: "object";
   properties: { [key: string]: AnySchemaNode };
+
+  // Computed properties that are not fully resolved
+  abstractIndexKeys: { key: AnySchemaNode; value: AnySchemaNode }[];
 }
 export interface ArraySchema extends SchemaNode {
   kind: "array";
@@ -344,7 +347,7 @@ export function convertTSTypeToSchema(
 function convertObjectType(
   type: ts.Type,
   context: SchemaContext
-): ObjectSchema {
+): AnySchemaNode {
   const { contextNode, checker } = context;
   const properties: Record<string, AnySchemaNode> = type
     .getProperties()
@@ -376,16 +379,23 @@ function convertObjectType(
     .reduce((acc, [key, value]) => ({ ...acc, [key]: value }), {});
 
   // Note that this is not typescript syntax compliant
-  const stringIndexType = type.getStringIndexType();
-  if (stringIndexType) {
-    properties["__index"] = convertTSTypeToSchema(
-      ...context.clone(stringIndexType)
-    );
-  }
+  const abstractIndexKeys: ObjectSchema["abstractIndexKeys"] = [];
+
+  checker.getIndexInfosOfType(type).forEach((indexInfo) => {
+    abstractIndexKeys.push({
+      key: convertTSTypeToSchema(
+        ...context.clone(indexInfo.keyType, indexInfo.declaration)
+      ),
+      value: convertTSTypeToSchema(
+        ...context.clone(indexInfo.type, indexInfo.declaration)
+      ),
+    });
+  });
 
   return {
     kind: "object",
     properties,
+    abstractIndexKeys,
   };
 }
 
