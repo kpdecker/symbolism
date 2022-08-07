@@ -1,5 +1,8 @@
 import ts from "typescript";
 import { getSymbolDeclaration } from "@symbolism/ts-utils";
+import { FunctionCallInfo } from "./calls";
+import { SymbolTable } from "@symbolism/symbol-table";
+import invariant from "tiny-invariant";
 
 export class SchemaContext {
   contextNode: ts.Node;
@@ -28,14 +31,14 @@ export class SchemaContext {
     }
 
     const ret = new SchemaContext(node, this.checker);
-    ret.typesHandled = new Set<ts.Type>(this.typesHandled);
+    this.cloneProps(ret);
 
     return [type, ret] as const;
   }
 
   cloneNode<T extends ts.Node>(node: T) {
     const ret = new SchemaContext(node, this.checker);
-    ret.typesHandled = new Set<ts.Type>(this.typesHandled);
+    this.cloneProps(ret);
 
     return [node, ret] as const;
   }
@@ -44,5 +47,32 @@ export class SchemaContext {
     this.contextNode = contextNode;
     this.checker = checker;
     this.typesHandled = new Set<ts.Type>();
+  }
+
+  protected cloneProps(newInstance: SchemaContext) {
+    newInstance.typesHandled = new Set<ts.Type>(this.typesHandled);
+  }
+}
+
+export class CallContext extends SchemaContext {
+  callCache = new Map<ts.Node, FunctionCallInfo[]>();
+  symbols: SymbolTable;
+
+  constructor(
+    symbol: ts.Symbol,
+    symbols: SymbolTable,
+    checker: ts.TypeChecker
+  ) {
+    const declaration = getSymbolDeclaration(symbol);
+    invariant(declaration, "Symbol has no declaration");
+
+    super(declaration, checker);
+    this.symbols = symbols;
+  }
+
+  protected override cloneProps(newInstance: CallContext) {
+    super.cloneProps(newInstance);
+    newInstance.callCache = new Map(this.callCache);
+    newInstance.symbols = this.symbols;
   }
 }

@@ -1,6 +1,6 @@
 import { mockProgram } from "@symbolism/test";
 import { getSymbolDeclaration } from "@symbolism/ts-utils";
-import { SchemaContext } from "../../context";
+import { CallContext, SchemaContext } from "../../context";
 import { parseSymbolTable } from "@symbolism/symbol-table";
 import { loadFunctionCalls } from "..";
 import { printCalls } from "../../print/calls";
@@ -51,8 +51,7 @@ describe("call arguments lookup", () => {
     const foo = symbolTable.lookup("foo", checker);
     const calls = loadFunctionCalls(
       foo[0],
-      symbolTable,
-      new SchemaContext(getSymbolDeclaration(foo[0])!, checker)
+      new CallContext(foo[0], symbolTable, checker)
     );
     expect(printCalls(calls)).toMatchInlineSnapshot(`
       "foo(1);
@@ -77,8 +76,7 @@ describe("call arguments lookup", () => {
     const foo = symbolTable.lookup("foo", checker);
     const calls = loadFunctionCalls(
       foo[0],
-      symbolTable,
-      new SchemaContext(getSymbolDeclaration(foo[0])!, checker)
+      new CallContext(foo[0], symbolTable, checker)
     );
     expect(printCalls(calls)).toMatchInlineSnapshot(`
       "foo({
@@ -125,8 +123,7 @@ describe("call arguments lookup", () => {
     const foo = symbolTable.lookup("foo", checker);
     const calls = loadFunctionCalls(
       foo[0],
-      symbolTable,
-      new SchemaContext(getSymbolDeclaration(foo[0])!, checker)
+      new CallContext(foo[0], symbolTable, checker)
     );
     expect(printCalls(calls)).toMatchInlineSnapshot(`
       "foo(56890);

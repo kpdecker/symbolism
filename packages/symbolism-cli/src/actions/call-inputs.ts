@@ -5,6 +5,7 @@ import { getSymbolDeclaration } from "@symbolism/ts-utils";
 import { getCliConfig, initTypescript } from "@symbolism/utils";
 import { parseSymbolTable } from "@symbolism/symbol-table";
 import {
+  CallContext,
   loadFunctionCalls,
   printCalls,
   SchemaContext,
@@ -47,8 +48,7 @@ export function callInputs(filePath: string, symbolName: string) {
 
   const argumentTypes = loadFunctionCalls(
     exportSymbol,
-    symbols,
-    new SchemaContext(getSymbolDeclaration(exportSymbol)!, checker)
+    new CallContext(exportSymbol, symbols, checker)
   );
 
   console.log(printCalls(argumentTypes));
