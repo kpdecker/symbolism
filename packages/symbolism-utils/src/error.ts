@@ -1,3 +1,4 @@
+import { dumpNode } from "@symbolism/ts-debug";
 import ts from "typescript";
 
 export class NodeError extends Error {
@@ -10,11 +11,16 @@ export class NodeError extends Error {
     checker: ts.TypeChecker,
     cause?: Error
   ) {
-    super(
-      `${message} for ${node.getSourceFile().fileName} ${
-        ts.SyntaxKind[node.kind]
-      }: ${node.getText().split("\n")[0]}`
-    );
+    let dump;
+    try {
+      dump = JSON.stringify(dumpNode(node, checker), null, 2);
+    } catch (e) {
+      dump = `${node.getSourceFile().fileName} ${ts.SyntaxKind[node.kind]}: ${
+        node.getText().split("\n")[0]
+      }`;
+    }
+
+    super(`${message} for ${dump}`);
 
     if ((cause as any)?.isNodeError) {
       return cause as NodeError;

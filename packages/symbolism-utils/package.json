@@ -13,7 +13,8 @@
     "commander": "^9.3.0",
     "glob": "^8.0.3",
     "minimatch": "^5.1.0",
-    "tiny-invariant": "^1.2.0"
+    "tiny-invariant": "^1.2.0",
+    "@symbolism/ts-debug": "^0.2.0"
   },
   "peerDependencies": {
     "typescript": "^4.7.4"

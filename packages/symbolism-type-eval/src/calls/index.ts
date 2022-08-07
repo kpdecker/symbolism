@@ -7,7 +7,7 @@ import { dumpNode, dumpSymbol } from "@symbolism/ts-debug";
 import { areSchemasEqual, nonConcreteInputs } from "../classify";
 import { resolveSymbolsInSchema } from "../value-eval/symbol";
 import { defineSymbol } from "@symbolism/definitions";
-import { removeDuplicates } from "@symbolism/utils";
+import { NodeError, removeDuplicates } from "@symbolism/utils";
 
 export type FunctionCallInfo = {
   callExpression: ts.CallExpression;
@@ -40,7 +40,16 @@ function convertFunctionCalls(
   const collectedCalls: FunctionCallInfo[] = [];
 
   calls.forEach((callExpression) => {
-    convertCall(callExpression, context, collectedCalls);
+    try {
+      convertCall(callExpression, context, collectedCalls);
+    } catch (e: any) {
+      throw new NodeError(
+        "Error converting call",
+        callExpression,
+        context.checker,
+        e
+      );
+    }
   });
 
   return removeDuplicates(collectedCalls, (a, b) => {
@@ -124,8 +133,8 @@ function convertCall(
   let partiallyResolvedArgSchemas: AnySchemaNode[][] = [];
 
   // Outer call should always be bound
+  const firstDeclaration = functionDeclarations.shift()!;
   {
-    const firstDeclaration = functionDeclarations.shift()!;
     const upstreamCall = upstreamCalls.get(firstDeclaration);
     upstreamCall?.forEach((call) => {
       // Inject the arguments into the call
@@ -153,6 +162,7 @@ function convertCall(
     // TODO: Figure out how to record where this return was used
     console.log(
       "multiple declarations",
+      dumpNode(firstDeclaration, checker),
       ...functionDeclarations.map((declaration) =>
         dumpNode(declaration, checker)
       )
