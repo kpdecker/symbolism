@@ -110,7 +110,7 @@ export function schemaToJson(schema: AnySchemaNode): JsonObject {
       };
     case "intersection":
       return {
-        oneOf: schema.items.map(printSchemaNode),
+        oneOf: schema.items.map(schemaToJson),
       };
     case "template-literal":
       return {
