@@ -7,7 +7,6 @@ import { areSchemasEqual, nonConcreteInputs } from "../classify";
 import { resolveSymbolsInSchema } from "../value-eval/symbol";
 import { defineSymbol } from "@symbolism/definitions";
 import { removeDuplicates } from "@symbolism/utils";
-import { finalizeSchema } from "../finalize";
 
 export type FunctionCallInfo = {
   callExpression: ts.CallExpression;
@@ -148,7 +147,9 @@ function convertFunctionCalls(
       // TODO: Figure out how to record where this return was used
       console.log(
         "multiple declarations",
-        dumpNode(functionDeclarations[0], checker)
+        ...functionDeclarations.map((declaration) =>
+          dumpNode(declaration, checker)
+        )
       );
     }
 
