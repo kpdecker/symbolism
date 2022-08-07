@@ -62,15 +62,15 @@ describe("react", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 13,
-            "fileName": "@types/react/index.d.ts",
-            "kind": "PropertySignature",
-            "line": 3171,
-            "name": "div: React.DetailedHTMLProps<React.HTMLAttributes<HTMLDivElement>, HTMLDivElement>;",
-            "path": "global.JSX.IntrinsicElements.div",
+            "column": 15,
+            "fileName": "@emotion/styled/types/index.d.ts",
+            "kind": "VariableDeclaration",
+            "line": 31,
+            "name": "styled: CreateStyled",
+            "path": "styled",
           },
         ],
-        "type": "CreateStyledComponent<{ theme?: Theme; as?: ElementType<any>; }, DetailedHTMLProps<HTMLAttributes<HTMLDivElement>, HTMLDivElement>, {}>",
+        "type": "CreateStyled",
       }
     `);
   });

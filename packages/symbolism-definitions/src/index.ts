@@ -291,14 +291,7 @@ function defineIdentifier(node: ts.Node, checker: ts.TypeChecker) {
     // Identifier pass through
     if (
       (isNamedDeclaration(node.parent) && node.parent.name === node) ||
-      ts.isBindingElement(node.parent) ||
-      ts.isPropertyAccessExpression(node.parent) ||
-      ts.isEnumMember(node.parent) ||
-      isAssignmentExpression(node.parent) ||
-      ts.isVariableDeclaration(node.parent) ||
-      ts.isJsxAttribute(node.parent) ||
-      ts.isClassExpression(node.parent) ||
-      ts.isInterfaceDeclaration(node.parent)
+      (isAssignmentExpression(node.parent) && node.parent.left === node)
     ) {
       const parentDefinition = defineSymbol(node.parent, checker);
       if (parentDefinition) {

@@ -1,4 +1,5 @@
 import { dumpSymbol } from "@symbolism/ts-debug";
+import { findIdentifiers } from "@symbolism/ts-utils";
 import ts from "typescript";
 import { dumpInferred, mockProgram } from "../../test/utils";
 import { defineSymbol } from "../index";
@@ -74,6 +75,34 @@ describe("infer variable declaration", () => {
             "line": 2,
             "name": "x = { foo: \\"foo\\" }",
             "path": "x",
+          },
+        ],
+        "type": "{ foo: string; }",
+      }
+    `);
+  });
+
+  it("should not use variable declaration for initializer", () => {
+    const program = mockProgram({
+      "test.ts": `
+        const y = { foo: "foo" };
+        const x = y;
+      `,
+    });
+    const checker = program.getTypeChecker();
+    const yNodes = findIdentifiers(program.getSourceFile("test.ts")!, "y");
+
+    const type = defineSymbol(yNodes[1], checker);
+    expect(dumpInferred(type, checker)).toMatchInlineSnapshot(`
+      Object {
+        "symbol": Array [
+          Object {
+            "column": 15,
+            "fileName": "test.ts",
+            "kind": "VariableDeclaration",
+            "line": 2,
+            "name": "y = { foo: \\"foo\\" }",
+            "path": "y",
           },
         ],
         "type": "{ foo: string; }",
