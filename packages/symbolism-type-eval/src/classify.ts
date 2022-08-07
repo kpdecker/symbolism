@@ -1,3 +1,5 @@
+import { removeDuplicates } from "@symbolism/utils";
+import invariant from "tiny-invariant";
 import ts from "typescript";
 import { AnySchemaNode, UnionSchema } from "./schema";
 
@@ -65,65 +67,68 @@ export function isConcreteSchema(
   throw new Error("Not implemented");
 }
 
-export function nonConcreteInputs(type: AnySchemaNode | undefined): ts.Node[] {
-  if (!type) {
+export function nonConcreteInputs(
+  schema: AnySchemaNode | undefined
+): ts.Node[] {
+  if (!schema) {
     return [];
   }
 
   if (
-    type.kind === "primitive" &&
-    ["undefined", "void", "null"].includes(type.name)
+    schema.kind === "primitive" &&
+    ["undefined", "void", "null"].includes(schema.name)
   ) {
     return [];
   }
 
   if (
-    type.kind === "primitive" ||
-    type.kind === "error" ||
+    schema.kind === "primitive" ||
+    schema.kind === "error" ||
     // Type checker would have resolved this if it was concrete.
-    type.kind === "index" ||
-    type.kind === "index-access"
+    schema.kind === "index" ||
+    schema.kind === "index-access"
   ) {
-    return [type.node];
+    return [schema.node];
   }
 
-  if (type.kind === "literal") {
+  if (schema.kind === "literal") {
     return [];
   }
 
   if (
-    type.kind === "union" ||
-    type.kind === "intersection" ||
-    type.kind === "tuple" ||
-    type.kind === "template-literal" ||
-    type.kind === "binary-expression"
+    schema.kind === "union" ||
+    schema.kind === "intersection" ||
+    schema.kind === "tuple" ||
+    schema.kind === "template-literal" ||
+    schema.kind === "binary-expression"
   ) {
-    return type.items.flatMap(nonConcreteInputs);
+    return schema.items.flatMap(nonConcreteInputs);
   }
 
-  if (type.kind === "array") {
-    return nonConcreteInputs(type.items);
+  if (schema.kind === "array") {
+    return nonConcreteInputs(schema.items);
   }
 
-  if (type.kind === "object") {
-    const abstractKeysSymbols = type.abstractIndexKeys.flatMap((abstractKey) =>
-      nonConcreteInputs(abstractKey.key).concat(
-        nonConcreteInputs(abstractKey.value)
-      )
+  if (schema.kind === "object") {
+    const abstractKeysSymbols = schema.abstractIndexKeys.flatMap(
+      (abstractKey) =>
+        nonConcreteInputs(abstractKey.key).concat(
+          nonConcreteInputs(abstractKey.value)
+        )
     );
 
-    return Object.values(type.properties)
+    return Object.values(schema.properties)
       .flatMap(nonConcreteInputs)
       .concat(abstractKeysSymbols);
   }
 
-  if (type.kind === "function") {
-    return nonConcreteInputs(type.returnType).concat(
-      ...type.parameters.flatMap(({ schema }) => nonConcreteInputs(schema))
+  if (schema.kind === "function") {
+    return nonConcreteInputs(schema.returnType).concat(
+      ...schema.parameters.flatMap(({ schema }) => nonConcreteInputs(schema))
     );
   }
 
-  const gottaCatchEmAll: never = type;
+  const gottaCatchEmAll: never = schema;
   throw new Error("Not implemented");
 }
 
@@ -162,7 +167,28 @@ export function isBooleanSchema(type: AnySchemaNode): boolean {
   );
 }
 
-export function areSchemasEqual(a: AnySchemaNode, b: AnySchemaNode): boolean {
+export function removeDuplicateSchemas<
+  T extends AnySchemaNode | AnySchemaNode[]
+>(schemas: T[]) {
+  // Filter identical items
+  return removeDuplicates(schemas, areSchemasEqual);
+}
+export function areSchemasEqual(
+  a: AnySchemaNode | AnySchemaNode[],
+  b: AnySchemaNode | AnySchemaNode[]
+): boolean {
+  if (Array.isArray(a)) {
+    if (!Array.isArray(b)) {
+      return false;
+    }
+
+    return (
+      a.length === b.length &&
+      a.every((item, schemaIndex) => areSchemasEqual(item, b[schemaIndex]))
+    );
+  }
+  invariant(!Array.isArray(b));
+
   if (a.kind === "primitive") {
     return a.kind === b.kind && a.name === b.name;
   }
