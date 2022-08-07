@@ -10,6 +10,6 @@ export function printCalls(calls: FunctionCallInfo[]) {
 }
 function printCall(call: FunctionCallInfo) {
   return `${call.callExpression.expression.getText()}(${call.arguments
-    .map(printSchemaNode)
+    .map((item) => printSchemaNode(item, "js"))
     .join(", ")})`;
 }

@@ -60,7 +60,7 @@ describe("call arguments lookup", () => {
       foo(undefined);
       foo(1234);
       foo(2468);
-      foo(number);
+      foo(\`number\`);
       "
     `);
   });
@@ -131,7 +131,7 @@ describe("call arguments lookup", () => {
     expect(printCalls(calls)).toMatchInlineSnapshot(`
       "foo(56890);
       foo(28400);
-      foo((number + 1244) * 10 + 10);
+      foo((\`number\` + 1244) * 10 + 10);
       foo(56790);
       foo(5688);
       foo(5678);
