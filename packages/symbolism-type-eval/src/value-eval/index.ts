@@ -1,5 +1,6 @@
 import { defineSymbol } from "@symbolism/definitions";
 import { getSymbolDeclaration } from "@symbolism/ts-utils";
+import { NodeError } from "@symbolism/utils";
 import ts from "typescript";
 import { AnySchemaNode, convertTSTypeToSchema, SchemaContext } from "../schema";
 import { convertBinaryExpression } from "./binary-expression";
@@ -78,39 +79,56 @@ export function convertValueExpression(
   node: ts.Node,
   context: SchemaContext
 ): AnySchemaNode | undefined {
-  const { checker, typesHandled } = context;
+  try {
+    const { checker } = context;
 
-  if (ts.isParenthesizedExpression(node)) {
-    return convertValueExpression(...context.cloneNode(node.expression));
-  }
-
-  if (ts.isIdentifier(node)) {
-    const identifierDefinition = defineSymbol(node, checker);
-    const identifierDeclaration = getSymbolDeclaration(
-      identifierDefinition?.symbol
-    );
-
-    if (identifierDeclaration) {
-      return convertValueDeclaration(
-        ...context.cloneNode(identifierDeclaration)
-      );
+    if (ts.isParenthesizedExpression(node)) {
+      return convertValueExpression(...context.cloneNode(node.expression));
     }
-  }
 
-  if (ts.isTemplateExpression(node)) {
-    return convertTemplateLiteralValue(node, context);
-  }
+    if (ts.isIdentifier(node)) {
+      const identifierDefinition = defineSymbol(node, checker);
+      const identifierDeclaration = getSymbolDeclaration(
+        identifierDefinition?.symbol
+      );
 
-  if (ts.isBinaryExpression(node)) {
-    return convertBinaryExpression(node, context);
-  }
+      if (identifierDeclaration) {
+        return convertValueDeclaration(
+          ...context.cloneNode(identifierDeclaration)
+        );
+      }
+    }
 
-  if (ts.isObjectLiteralExpression(node)) {
-    return convertObjectLiteralValue(node, context);
-  }
+    if (
+      ts.isLiteralExpression(node) ||
+      [
+        ts.SyntaxKind.TrueKeyword,
+        ts.SyntaxKind.FalseKeyword,
+        ts.SyntaxKind.NullKeyword,
+        ts.SyntaxKind.UndefinedKeyword,
+        ts.SyntaxKind.VoidKeyword,
+      ].includes(node.kind)
+    ) {
+      return convertNode(node, context);
+    }
 
-  if (ts.isComputedPropertyName(node)) {
-    return convertValueExpression(...context.cloneNode(node.expression));
+    if (ts.isTemplateExpression(node)) {
+      return convertTemplateLiteralValue(node, context);
+    }
+
+    if (ts.isBinaryExpression(node)) {
+      return convertBinaryExpression(node, context);
+    }
+
+    if (ts.isObjectLiteralExpression(node)) {
+      return convertObjectLiteralValue(node, context);
+    }
+
+    if (ts.isComputedPropertyName(node)) {
+      return convertValueExpression(...context.cloneNode(node.expression));
+    }
+  } catch (err: any) {
+    throw new NodeError("Failed to convert value expression", node, err);
   }
 }
 
