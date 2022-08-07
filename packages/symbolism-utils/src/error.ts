@@ -16,6 +16,10 @@ export class NodeError extends Error {
       }: ${node.getText().split("\n")[0]}`
     );
 
+    if ((cause as any)?.isNodeError) {
+      return cause as NodeError;
+    }
+
     if (cause) {
       (this as any).cause = cause;
 
