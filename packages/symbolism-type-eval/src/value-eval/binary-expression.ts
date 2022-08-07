@@ -278,7 +278,32 @@ export function binaryExpressionOperatorToken(operatorKind: ts.BinaryOperator) {
     case ts.SyntaxKind.GreaterThanGreaterThanEqualsToken:
       return ">>";
 
+    case ts.SyntaxKind.EqualsEqualsToken:
+      return "==";
+    case ts.SyntaxKind.EqualsEqualsEqualsToken:
+      return "===";
+    case ts.SyntaxKind.ExclamationEqualsToken:
+      return "!=";
+    case ts.SyntaxKind.ExclamationEqualsEqualsToken:
+      return "!==";
+
+    case ts.SyntaxKind.GreaterThanToken:
+      return ">";
+    case ts.SyntaxKind.GreaterThanEqualsToken:
+      return ">=";
+    case ts.SyntaxKind.LessThanToken:
+      return "<";
+    case ts.SyntaxKind.LessThanEqualsToken:
+      return "<=";
+
+    case ts.SyntaxKind.BarBarToken:
+      return "||";
+    case ts.SyntaxKind.AmpersandAmpersandToken:
+      return "&&";
+
     default:
-      throw new Error(`Unsupported binary operator: ${operatorKind}`);
+      throw new Error(
+        `Unsupported binary operator: ${ts.SyntaxKind[operatorKind]}`
+      );
   }
 }
