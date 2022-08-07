@@ -1,4 +1,3 @@
-import { format } from "prettier";
 import { JsonObject } from "type-fest";
 import ts from "typescript";
 import { isNumericSchema } from "../classify";

@@ -1,7 +1,8 @@
 import ts, { findAncestor } from "typescript";
 
 import { SymbolTable } from "@symbolism/symbol-table";
-import { AnySchemaNode, convertTSTypeToSchema, SchemaContext } from "../schema";
+import { AnySchemaNode, convertTSTypeToSchema } from "../schema";
+import { SchemaContext } from "../context";
 import { dumpNode, dumpSymbol } from "@symbolism/ts-debug";
 import { areSchemasEqual, nonConcreteInputs } from "../classify";
 import { resolveSymbolsInSchema } from "../value-eval/symbol";

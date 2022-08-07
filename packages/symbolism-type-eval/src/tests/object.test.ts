@@ -1,7 +1,8 @@
 import { mockProgram } from "@symbolism/test";
 import { findIdentifiers } from "@symbolism/ts-utils";
 import { printSchema } from "../print/typescript";
-import { convertTSTypeToSchema, SchemaContext } from "../schema";
+import { convertTSTypeToSchema } from "../schema";
+import { SchemaContext } from "../context";
 import ts from "typescript";
 import { createJsonSchema } from "../print/json";
 

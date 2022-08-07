@@ -1,16 +1,11 @@
-import { dumpNode } from "@symbolism/ts-debug";
 import { NodeError } from "@symbolism/utils";
 import invariant from "tiny-invariant";
 import ts from "typescript";
 import { convertNode, convertValueExpression } from ".";
 import { isConcreteSchema } from "../classify";
 import { printSchema } from "../print/typescript";
-import {
-  AnySchemaNode,
-  convertTSTypeToSchema,
-  ObjectSchema,
-  SchemaContext,
-} from "../schema";
+import { AnySchemaNode, convertTSTypeToSchema, ObjectSchema } from "../schema";
+import { SchemaContext } from "../context";
 import { expandSchemaList } from "./union";
 
 export function convertObjectLiteralValue(

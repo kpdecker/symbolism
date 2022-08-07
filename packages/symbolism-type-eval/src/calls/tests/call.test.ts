@@ -1,6 +1,6 @@
 import { mockProgram } from "@symbolism/test";
 import { getSymbolDeclaration } from "@symbolism/ts-utils";
-import { SchemaContext } from "../../schema";
+import { SchemaContext } from "../../context";
 import { parseSymbolTable } from "@symbolism/symbol-table";
 import { loadFunctionCalls } from "..";
 import { printCalls } from "../../print/calls";

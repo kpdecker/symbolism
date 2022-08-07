@@ -9,7 +9,6 @@ import {
 } from "@symbolism/type-eval";
 import { getSymbolDeclaration } from "@symbolism/ts-utils";
 import { getCliConfig, initTypescript } from "@symbolism/utils";
-import { format } from "prettier";
 
 export function initDumpSchema(program: Command) {
   program

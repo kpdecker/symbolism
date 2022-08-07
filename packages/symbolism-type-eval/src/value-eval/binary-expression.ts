@@ -1,7 +1,8 @@
 import ts from "typescript";
 import { convertNode, convertValueExpression } from ".";
 import { isConcreteSchema } from "../classify";
-import { AnySchemaNode, SchemaContext } from "../schema";
+import { AnySchemaNode, BinaryExpressionSchema } from "../schema";
+import { SchemaContext } from "../context";
 import { booleanPrimitiveSchema } from "../well-known-schemas";
 import { normalizeTemplateLiteralSchema } from "./string-template";
 import { expandUnions } from "./union";

@@ -3,7 +3,8 @@ import invariant from "tiny-invariant";
 import ts from "typescript";
 import { convertValueDeclaration } from ".";
 import { isLiteralUnion } from "../classify";
-import { AnySchemaNode, convertTSTypeToSchema, SchemaContext } from "../schema";
+import { AnySchemaNode, convertTSTypeToSchema } from "../schema";
+import { SchemaContext } from "../context";
 import { expandSchemaList } from "./union";
 
 export function convertTemplateLiteralValue(

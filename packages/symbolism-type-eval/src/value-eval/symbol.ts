@@ -1,4 +1,3 @@
-import { dumpNode, dumpSymbol } from "@symbolism/ts-debug";
 import ts from "typescript";
 import { AnySchemaNode } from "../schema";
 import { evaluateBinaryExpressionSchema } from "./binary-expression";
