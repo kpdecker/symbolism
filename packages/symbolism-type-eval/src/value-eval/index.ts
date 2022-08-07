@@ -50,28 +50,37 @@ export function convertValueDeclaration(
   node: ts.Declaration,
   context: SchemaContext
 ): AnySchemaNode | undefined {
-  if (
-    ts.isVariableDeclaration(node) ||
-    ts.isParameter(node) ||
-    ts.isBindingElement(node) ||
-    ts.isPropertySignature(node) ||
-    ts.isPropertyDeclaration(node) ||
-    ts.isPropertyAssignment(node)
-  ) {
-    if (node.initializer) {
-      return convertValueExpression(...context.cloneNode(node.initializer));
+  try {
+    if (
+      ts.isVariableDeclaration(node) ||
+      ts.isParameter(node) ||
+      ts.isBindingElement(node) ||
+      ts.isPropertySignature(node) ||
+      ts.isPropertyDeclaration(node) ||
+      ts.isPropertyAssignment(node)
+    ) {
+      if (node.initializer) {
+        return convertValueExpression(...context.cloneNode(node.initializer));
+      }
     }
-  }
-  if (ts.isExpressionStatement(node)) {
-    return convertValueExpression(...context.cloneNode(node.expression));
-  }
-  if (ts.isTypeAliasDeclaration(node)) {
-    const secondDefinition = defineSymbol(node.type, context.checker);
-    const secondDeclaration = getSymbolDeclaration(secondDefinition?.symbol);
+    if (ts.isExpressionStatement(node)) {
+      return convertValueExpression(...context.cloneNode(node.expression));
+    }
+    if (ts.isTypeAliasDeclaration(node)) {
+      const secondDefinition = defineSymbol(node.type, context.checker);
+      const secondDeclaration = getSymbolDeclaration(secondDefinition?.symbol);
 
-    if (secondDeclaration) {
-      return convertValueDeclaration(...context.cloneNode(secondDeclaration));
+      if (secondDeclaration) {
+        return convertValueDeclaration(...context.cloneNode(secondDeclaration));
+      }
     }
+  } catch (err: any) {
+    throw new NodeError(
+      "Failed to convert value declaration",
+      node,
+      context.checker,
+      err
+    );
   }
 }
 
@@ -128,7 +137,12 @@ export function convertValueExpression(
       return convertValueExpression(...context.cloneNode(node.expression));
     }
   } catch (err: any) {
-    throw new NodeError("Failed to convert value expression", node, err);
+    throw new NodeError(
+      "Failed to convert value expression",
+      node,
+      context.checker,
+      err
+    );
   }
 }
 
