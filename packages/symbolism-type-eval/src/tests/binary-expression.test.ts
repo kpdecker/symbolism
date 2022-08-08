@@ -92,8 +92,7 @@ describe("type schema converter", () => {
       `);
 
       expect(testNode("combined")).toMatchInlineSnapshot(`
-        "type foo =
-          | \\"21fooNaNfalsefalsefalse\\"
+        " \\"21fooNaNfalsefalsefalse\\"
           | \\"21fooNaNfalsefalsetrue\\"
           | \\"22fooNaNfalsefalsefalse\\"
           | \\"22fooNaNfalsefalsetrue\\"
@@ -127,8 +126,7 @@ describe("type schema converter", () => {
       `);
 
       expect(testNode("combinedNumber")).toMatchInlineSnapshot(`
-        "type foo =
-          | 10
+        " 10
           | 10.5
           | 11
           | 11.5

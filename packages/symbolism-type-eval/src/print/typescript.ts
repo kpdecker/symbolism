@@ -11,7 +11,7 @@ function safeTypeFormat(unformattedText: string) {
   try {
     return format("type foo = " + unformattedText, {
       parser: "typescript",
-    }).replace(/^type foo = /, "");
+    }).replace(/^type foo =\s*\|?/m, "");
   } catch (err) {
     console.log(err);
     // console.log(unformattedText);
