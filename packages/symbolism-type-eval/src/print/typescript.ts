@@ -28,7 +28,7 @@ export function printSchemaNode(
       const formattedType = safeTypeFormat(type);
       const trimmedType = formattedType.trim().replace(/;$/, "");
 
-      const templateEscaped = trimmedType.replace(/[`$\\]/g, "$&");
+      const templateEscaped = escapeTemplate(trimmedType);
       return "`" + templateEscaped + "`";
     }
     return type;
@@ -84,6 +84,7 @@ export function printSchemaNode(
             )},`;
           })
           .join("\n") +
+        "\n" +
         schema.abstractIndexKeys
           .map(({ key, value }) => {
             if (target === "ts") {
@@ -106,13 +107,13 @@ export function printSchemaNode(
         .join(", ")}) => ${printSchemaNode(schema.returnType, "ts")})`;
       return wrapTsType(typeString);
     case "binary-expression":
-      return `(${printSchemaNode(
+      return `\`${templateVar(
         schema.items[0],
         target
-      )} ${binaryExpressionOperatorToken(schema.operator)} ${printSchemaNode(
+      )} ${binaryExpressionOperatorToken(schema.operator)} ${templateVar(
         schema.items[1],
         target
-      )})`;
+      )}\``;
     case "index":
       return wrapTsType(`keyof ${printSchemaNode(schema.type, "ts")}`);
     case "index-access":
@@ -136,18 +137,22 @@ export function printSchemaNode(
       );
     case "template-literal":
       return wrapTsType(
-        `\`${schema.items
-          .map((child) => {
-            if (child.kind === "literal") {
-              return child.value;
-            }
-            return "${" + printSchemaNode(child, "ts") + "}";
-          })
-          .join("")}\``
+        `\`${schema.items.map((child) => templateVar(child, "ts")).join("")}\``
       );
 
     default:
       const gottaCatchEmAll: never = schema;
       throw new Error(`Unsupported schema kind ${(schema as any).kind}`);
   }
+}
+
+function escapeTemplate(text: string) {
+  return text.replace(/[`$\\]/g, "\\$&");
+}
+
+function templateVar(child: AnySchemaNode, target: "ts" | "js"): string {
+  if (child.kind === "literal") {
+    return escapeTemplate(child.value + "");
+  }
+  return "${" + printSchemaNode(child, target) + "}";
 }
