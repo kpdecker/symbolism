@@ -1,4 +1,4 @@
-import ts, { findAncestor } from "typescript";
+import ts, { CallExpression, findAncestor } from "typescript";
 
 import { SymbolTable } from "@symbolism/symbol-table";
 import { AnySchemaNode, convertTSTypeToSchema } from "../schema";
@@ -33,9 +33,28 @@ function convertFunctionCalls(
   const referenceSet = symbols.get(symbol);
   const references = referenceSet && Array.from(referenceSet);
 
-  const calls = (references?.map((reference) => reference.parent) ?? []).filter(
-    ts.isCallExpression
-  );
+  const calls = (references ?? [])
+    .map((reference) => {
+      const call = findAncestor(reference, ts.isCallExpression)!;
+      if (call) {
+        // Filter cases where this symbol is passed directly as an argument
+        // vs. being called.
+        const expressionStart = call.expression.getFullStart();
+        const expressionEnd = call.expression.getEnd();
+        const referenceStart = reference.getFullStart();
+        const referenceEnd = reference.getEnd();
+
+        if (
+          expressionStart <= referenceStart &&
+          referenceEnd <= expressionEnd
+        ) {
+          return call;
+        }
+      }
+
+      return undefined!;
+    })
+    .filter(Boolean);
 
   const collectedCalls: FunctionCallInfo[] = [];
 
@@ -44,7 +63,8 @@ function convertFunctionCalls(
       convertCall(callExpression, context, collectedCalls);
     } catch (e: any) {
       throw new NodeError(
-        "Error converting call",
+        "Error converting call " +
+          JSON.stringify(dumpSymbol(symbol, context.checker)),
         callExpression,
         context.checker,
         e

@@ -135,4 +135,19 @@ describe("call arguments lookup", () => {
       "
     `);
   });
+  it("should handle being passed to a call", () => {
+    const { checker, symbolTable, sourceFile } = testCall(`
+      declare function passed(a: any): number;
+      declare function foo(a: any): number;
+
+      passed(foo);
+    `);
+
+    const foo = symbolTable.lookup("foo", checker);
+    const calls = loadFunctionCalls(
+      foo[0],
+      new CallContext(foo[0], symbolTable, checker)
+    );
+    expect(printCalls(calls)).toMatchInlineSnapshot(`""`);
+  });
 });
