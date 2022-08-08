@@ -93,7 +93,7 @@ describe("type schema converter", () => {
         tuple: [string, number];
         undefined: undefined;
         unknown: unknown;
-        void: void;
+        void: undefined;
       };
       "
     `);
@@ -232,7 +232,7 @@ describe("type schema converter", () => {
       ).toMatchInlineSnapshot(`
         "{
           nested: {
-            classFunction: () => void;
+            classFunction: () => undefined;
             prop: {
               color: string;
               interfaceFunction: (foo: \\"bar\\") => string;

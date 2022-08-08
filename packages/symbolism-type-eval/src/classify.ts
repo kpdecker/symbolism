@@ -1,7 +1,7 @@
 import { removeDuplicates } from "@symbolism/utils";
 import invariant from "tiny-invariant";
 import ts from "typescript";
-import { AnySchemaNode, UnionSchema } from "./schema";
+import { AnySchemaNode, PrimitiveSchema, UnionSchema } from "./schema";
 
 /**
  * Determines if the schema is fully resolved without
@@ -14,10 +14,7 @@ export function isConcreteSchema(
     return false;
   }
 
-  if (
-    type.kind === "primitive" &&
-    ["undefined", "void", "null"].includes(type.name)
-  ) {
+  if (type.kind === "literal") {
     return true;
   }
 
@@ -29,10 +26,6 @@ export function isConcreteSchema(
     type.kind === "index-access"
   ) {
     return false;
-  }
-
-  if (type.kind === "literal") {
-    return true;
   }
 
   if (
@@ -74,10 +67,7 @@ export function nonConcreteInputs(
     return [];
   }
 
-  if (
-    schema.kind === "primitive" &&
-    ["undefined", "void", "null"].includes(schema.name)
-  ) {
+  if (schema.kind === "literal") {
     return [];
   }
 
@@ -89,10 +79,6 @@ export function nonConcreteInputs(
     schema.kind === "index-access"
   ) {
     return [schema.node];
-  }
-
-  if (schema.kind === "literal") {
-    return [];
   }
 
   if (

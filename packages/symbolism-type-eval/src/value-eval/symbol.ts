@@ -7,12 +7,7 @@ export function resolveSymbolsInSchema(
   symbolSchemas: Map<ts.Symbol, AnySchemaNode>,
   checker: ts.TypeChecker
 ): AnySchemaNode {
-  if (
-    !schema ||
-    schema.kind === "literal" ||
-    (schema.kind === "primitive" &&
-      ["undefined", "void", "null"].includes(schema.name))
-  ) {
+  if (!schema || schema.kind === "literal") {
     return schema;
   }
 

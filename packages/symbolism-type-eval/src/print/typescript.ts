@@ -36,13 +36,6 @@ export function printSchemaNode(
 
   switch (schema.kind) {
     case "primitive":
-      if (
-        schema.name === "undefined" ||
-        schema.name === "null" ||
-        schema.name === "void"
-      ) {
-        return schema.name;
-      }
       return wrapTsType(schema.name);
     case "literal":
       if (typeof schema.value === "string") {

@@ -25,9 +25,6 @@ export interface PrimitiveSchema extends SchemaNode {
     | "boolean"
     | "bigint"
     | "symbol"
-    | "undefined"
-    | "null"
-    | "void"
 
     // Extended JS
     | "symbol"
@@ -57,7 +54,7 @@ export interface TemplateLiteralSchema extends SchemaNode {
 
 export interface LiteralSchema extends SchemaNode {
   kind: "literal";
-  value: boolean | string | number | bigint | undefined;
+  value: boolean | string | number | bigint | undefined | null;
 }
 
 export interface ObjectSchema extends SchemaNode {
@@ -491,21 +488,18 @@ function convertLiteralOrPrimitive(
     );
   } else if (type.flags & ts.TypeFlags.Null) {
     return {
-      kind: "primitive",
-      name: "null",
-      node: contextNode,
+      kind: "literal",
+      value: null,
     };
   } else if (type.flags & ts.TypeFlags.Undefined) {
     return {
-      kind: "primitive",
-      name: "undefined",
-      node: contextNode,
+      kind: "literal",
+      value: undefined,
     };
   } else if (type.flags & ts.TypeFlags.Void) {
     return {
-      kind: "primitive",
-      name: "void",
-      node: contextNode,
+      kind: "literal",
+      value: void 0,
     };
   } else if (
     type.flags & ts.TypeFlags.ESSymbol ||
