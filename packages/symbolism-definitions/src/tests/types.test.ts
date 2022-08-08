@@ -1,6 +1,7 @@
+import { dumpDefinition } from "@symbolism/ts-debug";
 import { findIdentifiers, findNodesInTree } from "@symbolism/ts-utils";
 import ts from "typescript";
-import { dumpInferred, mockProgram } from "../../test/utils";
+import { mockProgram } from "../../test/utils";
 import { defineSymbol } from "../index";
 
 const program = mockProgram({
@@ -29,7 +30,7 @@ describe("types", () => {
     const nodes = lookupNamedToken("Foo");
 
     // Identity
-    expect(dumpInferred(defineSymbol(nodes[0].parent, checker), checker))
+    expect(dumpDefinition(defineSymbol(nodes[0].parent, checker), checker))
       .toMatchInlineSnapshot(`
       Object {
         "symbol": Array [
@@ -47,7 +48,7 @@ describe("types", () => {
     `);
 
     // Extends
-    expect(dumpInferred(defineSymbol(nodes[1], checker), checker))
+    expect(dumpDefinition(defineSymbol(nodes[1], checker), checker))
       .toMatchInlineSnapshot(`
       Object {
         "symbol": Array [
@@ -65,7 +66,7 @@ describe("types", () => {
     `);
 
     // Intersection
-    expect(dumpInferred(defineSymbol(nodes[2], checker), checker))
+    expect(dumpDefinition(defineSymbol(nodes[2], checker), checker))
       .toMatchInlineSnapshot(`
       Object {
         "symbol": Array [
@@ -86,7 +87,7 @@ describe("types", () => {
     const nodes = lookupNamedToken("Extend");
 
     // Identity
-    expect(dumpInferred(defineSymbol(nodes[0].parent, checker), checker))
+    expect(dumpDefinition(defineSymbol(nodes[0].parent, checker), checker))
       .toMatchInlineSnapshot(`
       Object {
         "symbol": Array [
@@ -104,7 +105,7 @@ describe("types", () => {
     `);
 
     // Use
-    expect(dumpInferred(defineSymbol(nodes[1].parent, checker), checker))
+    expect(dumpDefinition(defineSymbol(nodes[1].parent, checker), checker))
       .toMatchInlineSnapshot(`
       Object {
         "symbol": Array [
@@ -125,7 +126,7 @@ describe("types", () => {
     const nodes = lookupNamedToken("IntersectionAlias");
 
     // Use
-    expect(dumpInferred(defineSymbol(nodes[0].parent, checker), checker))
+    expect(dumpDefinition(defineSymbol(nodes[0].parent, checker), checker))
       .toMatchInlineSnapshot(`
       Object {
         "symbol": Array [
@@ -142,7 +143,7 @@ describe("types", () => {
       }
     `);
 
-    expect(dumpInferred(defineSymbol(nodes[1], checker), checker))
+    expect(dumpDefinition(defineSymbol(nodes[1], checker), checker))
       .toMatchInlineSnapshot(`
       Object {
         "symbol": Array [
@@ -162,7 +163,7 @@ describe("types", () => {
   it("should handle type literal", () => {
     const nodes = findNodesInTree(sourceFile, ts.isTypeLiteralNode);
 
-    expect(dumpInferred(defineSymbol(nodes[0], checker), checker))
+    expect(dumpDefinition(defineSymbol(nodes[0], checker), checker))
       .toMatchInlineSnapshot(`
       Object {
         "symbol": Array [
@@ -184,7 +185,7 @@ describe("types", () => {
     const nodes = lookupNamedToken("extras");
 
     // Identity
-    expect(dumpInferred(defineSymbol(nodes[0].parent, checker), checker))
+    expect(dumpDefinition(defineSymbol(nodes[0].parent, checker), checker))
       .toMatchInlineSnapshot(`
       Object {
         "symbol": Array [
@@ -202,7 +203,7 @@ describe("types", () => {
     `);
 
     // Extends
-    expect(dumpInferred(defineSymbol(nodes[1], checker), checker))
+    expect(dumpDefinition(defineSymbol(nodes[1], checker), checker))
       .toMatchInlineSnapshot(`
       Object {
         "symbol": Array [

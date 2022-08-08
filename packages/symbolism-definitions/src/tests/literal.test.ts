@@ -1,7 +1,8 @@
+import { dumpDefinition } from "@symbolism/ts-debug";
 import { findIdentifiers, findNodeInTree } from "@symbolism/ts-utils";
 import invariant from "tiny-invariant";
 import ts from "typescript";
-import { dumpInferred, mockProgram } from "../../test/utils";
+import { mockProgram } from "../../test/utils";
 import { defineSymbol } from "../index";
 
 describe("infer object literal types", () => {
@@ -20,7 +21,7 @@ describe("infer object literal types", () => {
     )!;
 
     const objectType = defineSymbol(callStatement.arguments[1], checker)!;
-    expect(dumpInferred(objectType, checker)).toMatchInlineSnapshot(`
+    expect(dumpDefinition(objectType, checker)).toMatchInlineSnapshot(`
       Object {
         "symbol": Array [
           Object {
@@ -57,7 +58,7 @@ describe("infer object literal types", () => {
       varSymbol?.valueDeclaration?.initializer!,
       checker
     )!;
-    expect(dumpInferred(objectType, checker)).toMatchInlineSnapshot(`
+    expect(dumpDefinition(objectType, checker)).toMatchInlineSnapshot(`
       Object {
         "symbol": Array [
           Object {
@@ -93,7 +94,7 @@ describe("infer object literal types", () => {
     const objectNode = findNodeInTree(arrayNode, ts.isObjectLiteralExpression)!;
 
     const arrayType = defineSymbol(arrayNode, checker)!;
-    expect(dumpInferred(arrayType, checker)).toMatchInlineSnapshot(`
+    expect(dumpDefinition(arrayType, checker)).toMatchInlineSnapshot(`
       Object {
         "symbol": Array [
           Object {
@@ -110,7 +111,7 @@ describe("infer object literal types", () => {
     `);
 
     const objectType = defineSymbol(objectNode, checker)!;
-    expect(dumpInferred(objectType, checker)).toMatchInlineSnapshot(`
+    expect(dumpDefinition(objectType, checker)).toMatchInlineSnapshot(`
       Object {
         "symbol": Array [
           Object {
@@ -150,7 +151,7 @@ describe("infer object literal types", () => {
     const propertyNode = objectNode.properties[0];
 
     const objectType = defineSymbol(objectNode, checker)!;
-    expect(dumpInferred(objectType, checker)).toMatchInlineSnapshot(`
+    expect(dumpDefinition(objectType, checker)).toMatchInlineSnapshot(`
       Object {
         "symbol": Array [
           Object {
@@ -167,7 +168,7 @@ describe("infer object literal types", () => {
     `);
 
     const propertyType = defineSymbol(propertyNode, checker)!;
-    expect(dumpInferred(propertyType, checker)).toMatchInlineSnapshot(`
+    expect(dumpDefinition(propertyType, checker)).toMatchInlineSnapshot(`
       Object {
         "symbol": Array [
           Object {
@@ -207,7 +208,7 @@ describe("infer object literal types", () => {
     const propertyNode = nestedObjectNode.properties[0];
 
     const nestedObjectType = defineSymbol(nestedObjectNode, checker)!;
-    expect(dumpInferred(nestedObjectType, checker)).toMatchInlineSnapshot(`
+    expect(dumpDefinition(nestedObjectType, checker)).toMatchInlineSnapshot(`
       Object {
         "symbol": Array [
           Object {
@@ -224,7 +225,7 @@ describe("infer object literal types", () => {
     `);
 
     const propertyType = defineSymbol(propertyNode, checker)!;
-    expect(dumpInferred(propertyType, checker)).toMatchInlineSnapshot(`
+    expect(dumpDefinition(propertyType, checker)).toMatchInlineSnapshot(`
       Object {
         "symbol": Array [
           Object {
@@ -257,7 +258,7 @@ describe("infer object literal types", () => {
     );
 
     const inferred = defineSymbol(yNode!, checker);
-    expect(dumpInferred(inferred, checker)).toMatchInlineSnapshot(`
+    expect(dumpDefinition(inferred, checker)).toMatchInlineSnapshot(`
       Object {
         "symbol": Array [
           Object {
@@ -287,7 +288,7 @@ describe("infer object literal types", () => {
     );
 
     const inferred = defineSymbol(node!, checker);
-    expect(dumpInferred(inferred, checker)).toMatchInlineSnapshot(`
+    expect(dumpDefinition(inferred, checker)).toMatchInlineSnapshot(`
       Object {
         "symbol": Array [
           Object {
@@ -315,7 +316,7 @@ describe("infer object literal types", () => {
     const sourceFile = program.getSourceFile("test.ts")!;
     const nodes = findIdentifiers(sourceFile, "length");
 
-    expect(dumpInferred(defineSymbol(nodes[0], checker), checker))
+    expect(dumpDefinition(defineSymbol(nodes[0], checker), checker))
       .toMatchInlineSnapshot(`
       Object {
         "symbol": Array [

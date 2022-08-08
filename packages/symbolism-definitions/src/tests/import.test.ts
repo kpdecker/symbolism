@@ -1,5 +1,6 @@
+import { dumpDefinition } from "@symbolism/ts-debug";
 import { findIdentifiers } from "@symbolism/ts-utils";
-import { dumpInferred, mockProgram } from "../../test/utils";
+import { mockProgram } from "../../test/utils";
 import { defineSymbol } from "../index";
 
 const program = mockProgram({
@@ -36,7 +37,7 @@ describe("imports", () => {
     const stringValueNodes = lookupNamedToken("stringValue");
     const functionValueNodes = lookupNamedToken("functionValue");
 
-    expect(dumpInferred(defineSymbol(stringValueNodes[0], checker), checker))
+    expect(dumpDefinition(defineSymbol(stringValueNodes[0], checker), checker))
       .toMatchInlineSnapshot(`
       Object {
         "symbol": Array [
@@ -52,7 +53,7 @@ describe("imports", () => {
         "type": "\\"foo\\"",
       }
     `);
-    expect(dumpInferred(defineSymbol(stringValueNodes[1], checker), checker))
+    expect(dumpDefinition(defineSymbol(stringValueNodes[1], checker), checker))
       .toMatchInlineSnapshot(`
       Object {
         "symbol": Array [
@@ -70,7 +71,7 @@ describe("imports", () => {
     `);
 
     // In object literal
-    expect(dumpInferred(defineSymbol(stringValueNodes[2], checker), checker))
+    expect(dumpDefinition(defineSymbol(stringValueNodes[2], checker), checker))
       .toMatchInlineSnapshot(`
       Object {
         "symbol": Array [
@@ -87,8 +88,9 @@ describe("imports", () => {
       }
     `);
 
-    expect(dumpInferred(defineSymbol(functionValueNodes[0], checker), checker))
-      .toMatchInlineSnapshot(`
+    expect(
+      dumpDefinition(defineSymbol(functionValueNodes[0], checker), checker)
+    ).toMatchInlineSnapshot(`
       Object {
         "symbol": Array [
           Object {
@@ -103,8 +105,9 @@ describe("imports", () => {
         "type": "() => void",
       }
     `);
-    expect(dumpInferred(defineSymbol(functionValueNodes[1], checker), checker))
-      .toMatchInlineSnapshot(`
+    expect(
+      dumpDefinition(defineSymbol(functionValueNodes[1], checker), checker)
+    ).toMatchInlineSnapshot(`
       Object {
         "symbol": Array [
           Object {
@@ -124,7 +127,7 @@ describe("imports", () => {
     const stringValueNodes = lookupNamedToken("stringValue");
     const functionValueNodes = lookupNamedToken("functionValue");
 
-    expect(dumpInferred(defineSymbol(stringValueNodes[2], checker), checker))
+    expect(dumpDefinition(defineSymbol(stringValueNodes[2], checker), checker))
       .toMatchInlineSnapshot(`
       Object {
         "symbol": Array [
@@ -141,8 +144,9 @@ describe("imports", () => {
       }
     `);
 
-    expect(dumpInferred(defineSymbol(functionValueNodes[2], checker), checker))
-      .toMatchInlineSnapshot(`
+    expect(
+      dumpDefinition(defineSymbol(functionValueNodes[2], checker), checker)
+    ).toMatchInlineSnapshot(`
       Object {
         "symbol": Array [
           Object {

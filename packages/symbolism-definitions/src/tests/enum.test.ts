@@ -1,6 +1,7 @@
+import { dumpDefinition } from "@symbolism/ts-debug";
 import { findIdentifiers } from "@symbolism/ts-utils";
 import ts, { findAncestor } from "typescript";
-import { dumpInferred, mockProgram } from "../../test/utils";
+import { mockProgram } from "../../test/utils";
 import { defineSymbol } from "../index";
 
 describe("infer enum", () => {
@@ -18,7 +19,7 @@ describe("infer enum", () => {
 
     const declarationNode = findAncestor(nodes[0], ts.isEnumDeclaration)!;
     const enumDeclaration = defineSymbol(declarationNode, checker);
-    expect(dumpInferred(enumDeclaration, checker)).toMatchInlineSnapshot(`
+    expect(dumpDefinition(enumDeclaration, checker)).toMatchInlineSnapshot(`
       Object {
         "symbol": Array [
           Object {
@@ -35,7 +36,7 @@ describe("infer enum", () => {
     `);
 
     const declarationMember = defineSymbol(nodes[0].parent, checker);
-    expect(dumpInferred(declarationMember, checker)).toMatchInlineSnapshot(`
+    expect(dumpDefinition(declarationMember, checker)).toMatchInlineSnapshot(`
       Object {
         "symbol": Array [
           Object {
@@ -52,7 +53,8 @@ describe("infer enum", () => {
     `);
 
     const declarationIdentifier = defineSymbol(nodes[0], checker);
-    expect(dumpInferred(declarationIdentifier, checker)).toMatchInlineSnapshot(`
+    expect(dumpDefinition(declarationIdentifier, checker))
+      .toMatchInlineSnapshot(`
       Object {
         "symbol": Array [
           Object {
@@ -69,7 +71,7 @@ describe("infer enum", () => {
     `);
 
     const reference = defineSymbol(nodes[1], checker);
-    expect(dumpInferred(reference, checker)).toMatchInlineSnapshot(`
+    expect(dumpDefinition(reference, checker)).toMatchInlineSnapshot(`
       Object {
         "symbol": Array [
           Object {
@@ -93,7 +95,7 @@ describe("infer enum", () => {
       .filter((s) => ["x", "y"].includes(s.getName()));
 
     expect(
-      dumpInferred(
+      dumpDefinition(
         defineSymbol(varSymbol[0].valueDeclaration!, checker),
         checker
       )
@@ -113,7 +115,7 @@ describe("infer enum", () => {
       }
     `);
     expect(
-      dumpInferred(
+      dumpDefinition(
         defineSymbol(varSymbol[1].valueDeclaration!, checker),
         checker
       )

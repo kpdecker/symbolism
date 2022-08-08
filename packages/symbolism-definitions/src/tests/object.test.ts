@@ -1,5 +1,6 @@
+import { dumpDefinition } from "@symbolism/ts-debug";
 import { findIdentifiers } from "@symbolism/ts-utils";
-import { dumpInferred, mockProgram } from "../../test/utils";
+import { mockProgram } from "../../test/utils";
 import { defineSymbol } from "../index";
 
 const program = mockProgram({
@@ -35,7 +36,7 @@ describe("objects", () => {
     const nodes = lookupNamedToken("methodDeclare");
 
     // Identity
-    expect(dumpInferred(defineSymbol(nodes[0], checker), checker))
+    expect(dumpDefinition(defineSymbol(nodes[0], checker), checker))
       .toMatchInlineSnapshot(`
       Object {
         "symbol": Array [
@@ -53,7 +54,7 @@ describe("objects", () => {
     `);
 
     // Usage
-    expect(dumpInferred(defineSymbol(nodes[1], checker), checker))
+    expect(dumpDefinition(defineSymbol(nodes[1], checker), checker))
       .toMatchInlineSnapshot(`
       Object {
         "symbol": Array [
@@ -74,7 +75,7 @@ describe("objects", () => {
     const nodes = lookupNamedToken("getter");
 
     // Getter
-    expect(dumpInferred(defineSymbol(nodes[0], checker), checker))
+    expect(dumpDefinition(defineSymbol(nodes[0], checker), checker))
       .toMatchInlineSnapshot(`
       Object {
         "symbol": Array [
@@ -100,7 +101,7 @@ describe("objects", () => {
     `);
 
     // Setter
-    expect(dumpInferred(defineSymbol(nodes[1], checker), checker))
+    expect(dumpDefinition(defineSymbol(nodes[1], checker), checker))
       .toMatchInlineSnapshot(`
       Object {
         "symbol": Array [
@@ -126,7 +127,7 @@ describe("objects", () => {
     `);
 
     // Access
-    expect(dumpInferred(defineSymbol(nodes[2], checker), checker))
+    expect(dumpDefinition(defineSymbol(nodes[2], checker), checker))
       .toMatchInlineSnapshot(`
       Object {
         "symbol": Array [
@@ -152,7 +153,7 @@ describe("objects", () => {
     `);
 
     // Assignment
-    expect(dumpInferred(defineSymbol(nodes[3], checker), checker))
+    expect(dumpDefinition(defineSymbol(nodes[3], checker), checker))
       .toMatchInlineSnapshot(`
       Object {
         "symbol": Array [

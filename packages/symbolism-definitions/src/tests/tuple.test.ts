@@ -1,5 +1,6 @@
+import { dumpDefinition } from "@symbolism/ts-debug";
 import { findIdentifiers } from "@symbolism/ts-utils";
-import { dumpInferred, mockProgram } from "../../test/utils";
+import { mockProgram } from "../../test/utils";
 import { defineSymbol } from "../index";
 
 const program = mockProgram({
@@ -36,14 +37,14 @@ describe("infer tuple types", () => {
       "nestedDestructure"
     );
 
-    expect(dumpInferred(defineSymbol(destructureANodes[0], checker), checker))
+    expect(dumpDefinition(defineSymbol(destructureANodes[0], checker), checker))
       .toMatchInlineSnapshot(`
       Object {
         "symbol": Array [],
         "type": "string",
       }
     `);
-    expect(dumpInferred(defineSymbol(destructureANodes[1], checker), checker))
+    expect(dumpDefinition(defineSymbol(destructureANodes[1], checker), checker))
       .toMatchInlineSnapshot(`
       Object {
         "symbol": Array [
@@ -60,7 +61,7 @@ describe("infer tuple types", () => {
       }
     `);
 
-    expect(dumpInferred(defineSymbol(destructureBNodes[0], checker), checker))
+    expect(dumpDefinition(defineSymbol(destructureBNodes[0], checker), checker))
       .toMatchInlineSnapshot(`
       Object {
         "symbol": Array [
@@ -76,7 +77,7 @@ describe("infer tuple types", () => {
         "type": "ExplicitType",
       }
     `);
-    expect(dumpInferred(defineSymbol(destructureBNodes[1], checker), checker))
+    expect(dumpDefinition(defineSymbol(destructureBNodes[1], checker), checker))
       .toMatchInlineSnapshot(`
       Object {
         "symbol": Array [
@@ -93,7 +94,7 @@ describe("infer tuple types", () => {
       }
     `);
 
-    expect(dumpInferred(defineSymbol(destructureCNodes[0], checker), checker))
+    expect(dumpDefinition(defineSymbol(destructureCNodes[0], checker), checker))
       .toMatchInlineSnapshot(`
       Object {
         "symbol": Array [],
@@ -102,7 +103,7 @@ describe("infer tuple types", () => {
     `);
 
     expect(
-      dumpInferred(defineSymbol(nestedDestructureNodes[0], checker), checker)
+      dumpDefinition(defineSymbol(nestedDestructureNodes[0], checker), checker)
     ).toMatchInlineSnapshot(`
       Object {
         "symbol": Array [
@@ -126,14 +127,14 @@ describe("infer tuple types", () => {
     const paramCNodes = findIdentifiers(sourceFile, "paramC");
     const paramDNodes = findIdentifiers(sourceFile, "paramD");
 
-    expect(dumpInferred(defineSymbol(paramANodes[0], checker), checker))
+    expect(dumpDefinition(defineSymbol(paramANodes[0], checker), checker))
       .toMatchInlineSnapshot(`
       Object {
         "symbol": Array [],
         "type": "string",
       }
     `);
-    expect(dumpInferred(defineSymbol(paramANodes[1], checker), checker))
+    expect(dumpDefinition(defineSymbol(paramANodes[1], checker), checker))
       .toMatchInlineSnapshot(`
       Object {
         "symbol": Array [
@@ -150,7 +151,7 @@ describe("infer tuple types", () => {
       }
     `);
 
-    expect(dumpInferred(defineSymbol(paramBNodes[0], checker), checker))
+    expect(dumpDefinition(defineSymbol(paramBNodes[0], checker), checker))
       .toMatchInlineSnapshot(`
       Object {
         "symbol": Array [
@@ -166,7 +167,7 @@ describe("infer tuple types", () => {
         "type": "ExplicitType",
       }
     `);
-    expect(dumpInferred(defineSymbol(paramBNodes[1], checker), checker))
+    expect(dumpDefinition(defineSymbol(paramBNodes[1], checker), checker))
       .toMatchInlineSnapshot(`
       Object {
         "symbol": Array [
@@ -183,7 +184,7 @@ describe("infer tuple types", () => {
       }
     `);
 
-    expect(dumpInferred(defineSymbol(paramCNodes[0], checker), checker))
+    expect(dumpDefinition(defineSymbol(paramCNodes[0], checker), checker))
       .toMatchInlineSnapshot(`
       Object {
         "symbol": Array [],
@@ -191,7 +192,7 @@ describe("infer tuple types", () => {
       }
     `);
 
-    expect(dumpInferred(defineSymbol(paramDNodes[0], checker), checker))
+    expect(dumpDefinition(defineSymbol(paramDNodes[0], checker), checker))
       .toMatchInlineSnapshot(`
       Object {
         "symbol": Array [
@@ -213,7 +214,7 @@ describe("infer tuple types", () => {
     const stateyNodes = findIdentifiers(sourceFile, "statey");
     const setStateyNodes = findIdentifiers(sourceFile, "setStatey");
 
-    expect(dumpInferred(defineSymbol(stateyNodes[0], checker), checker))
+    expect(dumpDefinition(defineSymbol(stateyNodes[0], checker), checker))
       .toMatchInlineSnapshot(`
       Object {
         "symbol": Array [
@@ -274,7 +275,7 @@ describe("infer tuple types", () => {
         "type": "(string | ExplicitType)[]",
       }
     `);
-    expect(dumpInferred(defineSymbol(setStateyNodes[0], checker), checker))
+    expect(dumpDefinition(defineSymbol(setStateyNodes[0], checker), checker))
       .toMatchInlineSnapshot(`
       Object {
         "symbol": Array [

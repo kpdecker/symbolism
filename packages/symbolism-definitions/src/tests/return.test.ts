@@ -1,6 +1,7 @@
+import { dumpDefinition } from "@symbolism/ts-debug";
 import { findNodeInTree } from "@symbolism/ts-utils";
 import ts from "typescript";
-import { dumpInferred, mockProgram } from "../../test/utils";
+import { mockProgram } from "../../test/utils";
 import { defineSymbol } from "../index";
 
 describe("infer return type", () => {
@@ -19,7 +20,7 @@ describe("infer return type", () => {
       ts.isReturnStatement
     );
     const type = defineSymbol(returnStatement!, checker)!;
-    expect(dumpInferred(type, checker)).toMatchInlineSnapshot(`
+    expect(dumpDefinition(type, checker)).toMatchInlineSnapshot(`
       Object {
         "symbol": Array [
           Object {
@@ -49,7 +50,7 @@ describe("infer return type", () => {
       ts.isReturnStatement
     );
     const type = defineSymbol(returnStatement!, checker)!;
-    expect(dumpInferred(type, checker)).toMatchInlineSnapshot(`
+    expect(dumpDefinition(type, checker)).toMatchInlineSnapshot(`
       Object {
         "symbol": Array [
           Object {
@@ -79,6 +80,6 @@ describe("infer return type", () => {
       ts.isReturnStatement
     );
     const type = defineSymbol(returnStatement!, checker)!;
-    expect(dumpInferred(type, checker)).toMatchInlineSnapshot(`null`);
+    expect(dumpDefinition(type, checker)).toMatchInlineSnapshot(`null`);
   });
 });

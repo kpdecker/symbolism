@@ -1,6 +1,7 @@
+import { dumpDefinition } from "@symbolism/ts-debug";
 import { findNodeInTree } from "@symbolism/ts-utils";
 import ts from "typescript";
-import { dumpInferred, mockProgram } from "../../test/utils";
+import { mockProgram } from "../../test/utils";
 import { defineSymbol } from "../index";
 
 describe("infer call parameter type", () => {
@@ -20,7 +21,7 @@ describe("infer call parameter type", () => {
     )!;
 
     const stringArgument = defineSymbol(callStatement.arguments[0], checker)!;
-    expect(dumpInferred(stringArgument, checker)).toMatchInlineSnapshot(`
+    expect(dumpDefinition(stringArgument, checker)).toMatchInlineSnapshot(`
       Object {
         "symbol": Array [
           Object {
@@ -37,7 +38,7 @@ describe("infer call parameter type", () => {
     `);
 
     const objectArgument = defineSymbol(callStatement.arguments[1], checker)!;
-    expect(dumpInferred(objectArgument, checker)).toMatchInlineSnapshot(`
+    expect(dumpDefinition(objectArgument, checker)).toMatchInlineSnapshot(`
       Object {
         "symbol": Array [
           Object {
@@ -68,7 +69,7 @@ describe("infer call parameter type", () => {
     )!;
 
     const stringArgument = defineSymbol(callStatement.arguments[0], checker)!;
-    expect(dumpInferred(stringArgument, checker)).toMatchInlineSnapshot(`
+    expect(dumpDefinition(stringArgument, checker)).toMatchInlineSnapshot(`
       Object {
         "symbol": Array [
           Object {
@@ -85,7 +86,7 @@ describe("infer call parameter type", () => {
     `);
 
     const objectArgument = defineSymbol(callStatement.arguments[1], checker)!;
-    expect(dumpInferred(objectArgument, checker)).toMatchInlineSnapshot(`
+    expect(dumpDefinition(objectArgument, checker)).toMatchInlineSnapshot(`
       Object {
         "symbol": Array [
           Object {

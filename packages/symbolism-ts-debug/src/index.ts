@@ -1,3 +1,4 @@
+import type { defineSymbol } from "@symbolism/definitions";
 import { getNodePath } from "@symbolism/paths";
 import { isIntrinsicType, lineAndColumn } from "@symbolism/ts-utils";
 import invariant from "tiny-invariant";
@@ -26,6 +27,28 @@ export function dumpFlags(
     }
   });
   return ret;
+}
+
+export function dumpDefinition(
+  inferred: ReturnType<typeof defineSymbol>,
+  checker: ts.TypeChecker
+) {
+  if (!inferred) {
+    return inferred;
+  }
+  const symbol = dumpSymbol(inferred!.symbol, checker);
+  const declarations = symbol.declaration.map((x) => {
+    return {
+      ...x,
+      fileName: x.fileName.includes("node_modules")
+        ? x.fileName.replace(/.*\/node_modules\//, "")
+        : x.fileName,
+    };
+  });
+  return {
+    type: checker.typeToString(inferred?.type!),
+    symbol: declarations,
+  };
 }
 
 export function dumpSymbol(

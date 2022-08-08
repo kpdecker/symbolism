@@ -1,6 +1,6 @@
-import { dumpNode } from "@symbolism/ts-debug";
+import { dumpDefinition, dumpNode } from "@symbolism/ts-debug";
 import { findIdentifiers } from "@symbolism/ts-utils";
-import { dumpInferred, mockProgram } from "../../test/utils";
+import { mockProgram } from "../../test/utils";
 import { defineSymbol } from "../index";
 
 const program = mockProgram({
@@ -36,7 +36,7 @@ describe("well known", () => {
         "path": "Promise.then",
       }
     `);
-    expect(dumpInferred(definition, checker)).toMatchInlineSnapshot(`
+    expect(dumpDefinition(definition, checker)).toMatchInlineSnapshot(`
       Object {
         "symbol": Array [
           Object {
@@ -65,7 +65,7 @@ describe("well known", () => {
         "path": "then",
       }
     `);
-    expect(dumpInferred(definition, checker)).toMatchInlineSnapshot(`
+    expect(dumpDefinition(definition, checker)).toMatchInlineSnapshot(`
       Object {
         "symbol": Array [
           Object {
@@ -95,7 +95,7 @@ describe("well known", () => {
         "path": "JSON.parse",
       }
     `);
-    expect(dumpInferred(defineSymbol(nodes[0], checker), checker))
+    expect(dumpDefinition(defineSymbol(nodes[0], checker), checker))
       .toMatchInlineSnapshot(`
       Object {
         "symbol": Array [
@@ -122,7 +122,7 @@ describe("well known", () => {
         "path": "JSON.parse",
       }
     `);
-    expect(dumpInferred(defineSymbol(nodes[1], checker), checker))
+    expect(dumpDefinition(defineSymbol(nodes[1], checker), checker))
       .toMatchInlineSnapshot(`
       Object {
         "symbol": Array [

@@ -1,6 +1,7 @@
+import { dumpDefinition } from "@symbolism/ts-debug";
 import { findIdentifiers, findNodeInTree } from "@symbolism/ts-utils";
 import ts from "typescript";
-import { dumpInferred, mockProgram } from "../../test/utils";
+import { mockProgram } from "../../test/utils";
 import { defineSymbol } from "../index";
 
 const program = mockProgram({
@@ -58,7 +59,7 @@ describe("react", () => {
   it("should resolve imported types", () => {
     const styledNodes = findIdentifiers(sourceFile, "styled");
     const styledDefinition = defineSymbol(styledNodes[1], checker);
-    expect(dumpInferred(styledDefinition, checker)).toMatchInlineSnapshot(`
+    expect(dumpDefinition(styledDefinition, checker)).toMatchInlineSnapshot(`
       Object {
         "symbol": Array [
           Object {
@@ -80,7 +81,7 @@ describe("react", () => {
       simpleTemplateNodes[1],
       checker
     );
-    expect(dumpInferred(simpleTemplateDefinition, checker))
+    expect(dumpDefinition(simpleTemplateDefinition, checker))
       .toMatchInlineSnapshot(`
       Object {
         "symbol": Array [
@@ -103,7 +104,7 @@ describe("react", () => {
       genericTemplateNodes[1],
       checker
     );
-    expect(dumpInferred(genericTemplateDefinition, checker))
+    expect(dumpDefinition(genericTemplateDefinition, checker))
       .toMatchInlineSnapshot(`
       Object {
         "symbol": Array [
@@ -123,7 +124,7 @@ describe("react", () => {
   it("should resolve jsx attributes in styled template", () => {
     const propertyNodes = findIdentifiers(sourceFile, "myProp");
     const arrowDefinition = defineSymbol(propertyNodes[2].parent, checker);
-    expect(dumpInferred(arrowDefinition, checker)).toMatchInlineSnapshot(`
+    expect(dumpDefinition(arrowDefinition, checker)).toMatchInlineSnapshot(`
       Object {
         "symbol": Array [
           Object {
@@ -139,7 +140,7 @@ describe("react", () => {
       }
     `);
     const propertyDefinition = defineSymbol(propertyNodes[1], checker);
-    expect(dumpInferred(propertyDefinition, checker)).toMatchInlineSnapshot(`
+    expect(dumpDefinition(propertyDefinition, checker)).toMatchInlineSnapshot(`
       Object {
         "symbol": Array [
           Object {
@@ -158,7 +159,7 @@ describe("react", () => {
   it("should resolve jsx attributes", () => {
     const propertyNodes = findIdentifiers(sourceFile, "myProp");
     const propertyDefinition = defineSymbol(propertyNodes[3], checker);
-    expect(dumpInferred(propertyDefinition, checker)).toMatchInlineSnapshot(`
+    expect(dumpDefinition(propertyDefinition, checker)).toMatchInlineSnapshot(`
       Object {
         "symbol": Array [
           Object {
@@ -177,7 +178,7 @@ describe("react", () => {
   it("should handle jsx expressions", () => {
     const fooNodes = findIdentifiers(sourceFile, "foo");
     const fooDefinition = defineSymbol(fooNodes[1], checker);
-    expect(dumpInferred(fooDefinition, checker)).toMatchInlineSnapshot(`
+    expect(dumpDefinition(fooDefinition, checker)).toMatchInlineSnapshot(`
       Object {
         "symbol": Array [
           Object {
@@ -193,7 +194,7 @@ describe("react", () => {
       }
     `);
     const fooExpression = defineSymbol(fooNodes[1].parent, checker);
-    expect(dumpInferred(fooExpression, checker)).toMatchInlineSnapshot(`
+    expect(dumpDefinition(fooExpression, checker)).toMatchInlineSnapshot(`
       Object {
         "symbol": Array [
           Object {
@@ -213,7 +214,7 @@ describe("react", () => {
     const styledNodes = findIdentifiers(sourceFile, "bat");
     const componentNode = styledNodes[1].parent;
     const styledDefinition = defineSymbol(componentNode, checker);
-    expect(dumpInferred(styledDefinition, checker)).toMatchInlineSnapshot(`
+    expect(dumpDefinition(styledDefinition, checker)).toMatchInlineSnapshot(`
       Object {
         "symbol": Array [
           Object {
@@ -232,7 +233,8 @@ describe("react", () => {
   it("should resolve jsx return", () => {
     const myComponentNodes = findIdentifiers(sourceFile, "MyComponent");
     const myComponentDefinition = defineSymbol(myComponentNodes[0], checker);
-    expect(dumpInferred(myComponentDefinition, checker)).toMatchInlineSnapshot(`
+    expect(dumpDefinition(myComponentDefinition, checker))
+      .toMatchInlineSnapshot(`
       Object {
         "symbol": Array [
           Object {
@@ -252,7 +254,7 @@ describe("react", () => {
     const styledNodes = findIdentifiers(sourceFile, "Bar");
     const componentNode = styledNodes[1].parent;
     const styledDefinition = defineSymbol(componentNode, checker);
-    expect(dumpInferred(styledDefinition, checker)).toMatchInlineSnapshot(`
+    expect(dumpDefinition(styledDefinition, checker)).toMatchInlineSnapshot(`
       Object {
         "symbol": Array [
           Object {
@@ -272,7 +274,7 @@ describe("react", () => {
     const styledNodes = findIdentifiers(sourceFile, "div");
     const componentNode = styledNodes[2].parent;
     const styledDefinition = defineSymbol(componentNode, checker);
-    const dump = dumpInferred(styledDefinition, checker);
+    const dump = dumpDefinition(styledDefinition, checker);
     expect(dump).toMatchInlineSnapshot(`
       Object {
         "symbol": Array [
@@ -291,7 +293,7 @@ describe("react", () => {
   });
   it("should resolve fragments", () => {
     const fragmentNode = findNodeInTree(sourceFile, ts.isJsxFragment)!;
-    expect(dumpInferred(defineSymbol(fragmentNode, checker), checker))
+    expect(dumpDefinition(defineSymbol(fragmentNode, checker), checker))
       .toMatchInlineSnapshot(`
       Object {
         "symbol": Array [],
@@ -299,7 +301,10 @@ describe("react", () => {
       }
     `);
     expect(
-      dumpInferred(defineSymbol(fragmentNode.closingFragment, checker), checker)
+      dumpDefinition(
+        defineSymbol(fragmentNode.closingFragment, checker),
+        checker
+      )
     ).toMatchInlineSnapshot(`
       Object {
         "symbol": Array [],
@@ -312,7 +317,7 @@ describe("react", () => {
     const childrenNodes = findIdentifiers(sourceFile, "children");
 
     // Declaration
-    expect(dumpInferred(defineSymbol(childrenNodes[1], checker), checker))
+    expect(dumpDefinition(defineSymbol(childrenNodes[1], checker), checker))
       .toMatchInlineSnapshot(`
       Object {
         "symbol": Array [
@@ -330,7 +335,7 @@ describe("react", () => {
     `);
 
     // Destructure
-    expect(dumpInferred(defineSymbol(childrenNodes[0], checker), checker))
+    expect(dumpDefinition(defineSymbol(childrenNodes[0], checker), checker))
       .toMatchInlineSnapshot(`
       Object {
         "symbol": Array [
@@ -348,7 +353,7 @@ describe("react", () => {
     `);
 
     // Use
-    expect(dumpInferred(defineSymbol(childrenNodes[2], checker), checker))
+    expect(dumpDefinition(defineSymbol(childrenNodes[2], checker), checker))
       .toMatchInlineSnapshot(`
       Object {
         "symbol": Array [
@@ -368,7 +373,7 @@ describe("react", () => {
 
   it("should ignore dash props", () => {
     const ignorePropNodes = findIdentifiers(sourceFile, "ignore-prop");
-    expect(dumpInferred(defineSymbol(ignorePropNodes[0], checker), checker))
+    expect(dumpDefinition(defineSymbol(ignorePropNodes[0], checker), checker))
       .toMatchInlineSnapshot(`
       Object {
         "symbol": Array [
@@ -390,7 +395,7 @@ describe("react", () => {
     const ignorePropNodes = findIdentifiers(sourceFile, "anyProp");
 
     // Attribute
-    expect(dumpInferred(defineSymbol(ignorePropNodes[0], checker), checker))
+    expect(dumpDefinition(defineSymbol(ignorePropNodes[0], checker), checker))
       .toMatchInlineSnapshot(`
       Object {
         "symbol": Array [
@@ -408,7 +413,7 @@ describe("react", () => {
     `);
 
     // Definition
-    expect(dumpInferred(defineSymbol(ignorePropNodes[1], checker), checker))
+    expect(dumpDefinition(defineSymbol(ignorePropNodes[1], checker), checker))
       .toMatchInlineSnapshot(`
       Object {
         "symbol": Array [
@@ -426,7 +431,7 @@ describe("react", () => {
     `);
 
     // Use
-    expect(dumpInferred(defineSymbol(ignorePropNodes[2], checker), checker))
+    expect(dumpDefinition(defineSymbol(ignorePropNodes[2], checker), checker))
       .toMatchInlineSnapshot(`
       Object {
         "symbol": Array [

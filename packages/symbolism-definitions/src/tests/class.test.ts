@@ -1,6 +1,7 @@
+import { dumpDefinition } from "@symbolism/ts-debug";
 import { findNodesInTree } from "@symbolism/ts-utils";
 import ts from "typescript";
-import { dumpInferred, mockProgram } from "../../test/utils";
+import { mockProgram } from "../../test/utils";
 import { defineSymbol } from "../index";
 
 const program = mockProgram({
@@ -75,7 +76,7 @@ describe("classes", () => {
     const nodes = lookupNamedToken("DeclaredClass");
 
     // Identity
-    expect(dumpInferred(defineSymbol(nodes[0], checker), checker))
+    expect(dumpDefinition(defineSymbol(nodes[0], checker), checker))
       .toMatchInlineSnapshot(`
       Object {
         "symbol": Array [
@@ -93,7 +94,7 @@ describe("classes", () => {
     `);
 
     // Instantiate
-    expect(dumpInferred(defineSymbol(nodes[1], checker), checker))
+    expect(dumpDefinition(defineSymbol(nodes[1], checker), checker))
       .toMatchInlineSnapshot(`
       Object {
         "symbol": Array [
@@ -111,7 +112,7 @@ describe("classes", () => {
     `);
 
     // Extends
-    expect(dumpInferred(defineSymbol(nodes[2], checker), checker))
+    expect(dumpDefinition(defineSymbol(nodes[2], checker), checker))
       .toMatchInlineSnapshot(`
       Object {
         "symbol": Array [
@@ -132,7 +133,7 @@ describe("classes", () => {
     const nodes = lookupNamedToken("Expression");
 
     // Identity
-    expect(dumpInferred(defineSymbol(nodes[0], checker), checker))
+    expect(dumpDefinition(defineSymbol(nodes[0], checker), checker))
       .toMatchInlineSnapshot(`
       Object {
         "symbol": Array [
@@ -150,7 +151,7 @@ describe("classes", () => {
     `);
 
     // Use
-    expect(dumpInferred(defineSymbol(nodes[1], checker), checker))
+    expect(dumpDefinition(defineSymbol(nodes[1], checker), checker))
       .toMatchInlineSnapshot(`
       Object {
         "symbol": Array [
@@ -170,7 +171,7 @@ describe("classes", () => {
   it("should resolve implements", () => {
     const nodes = lookupNamedToken("Foo");
 
-    expect(dumpInferred(defineSymbol(nodes[1], checker), checker))
+    expect(dumpDefinition(defineSymbol(nodes[1], checker), checker))
       .toMatchInlineSnapshot(`
       Object {
         "symbol": Array [
@@ -192,7 +193,7 @@ describe("classes", () => {
     const nodes = lookupNamedToken("foo");
 
     // Identity
-    expect(dumpInferred(defineSymbol(nodes[0], checker), checker))
+    expect(dumpDefinition(defineSymbol(nodes[0], checker), checker))
       .toMatchInlineSnapshot(`
       Object {
         "symbol": Array [
@@ -210,7 +211,7 @@ describe("classes", () => {
     `);
 
     // Implementation
-    expect(dumpInferred(defineSymbol(nodes[1], checker), checker))
+    expect(dumpDefinition(defineSymbol(nodes[1], checker), checker))
       .toMatchInlineSnapshot(`
       Object {
         "symbol": Array [
@@ -228,7 +229,7 @@ describe("classes", () => {
     `);
 
     //  Extends Definition
-    expect(dumpInferred(defineSymbol(nodes[2], checker), checker))
+    expect(dumpDefinition(defineSymbol(nodes[2], checker), checker))
       .toMatchInlineSnapshot(`
       Object {
         "symbol": Array [
@@ -246,7 +247,7 @@ describe("classes", () => {
     `);
 
     // Reference
-    expect(dumpInferred(defineSymbol(nodes[3], checker), checker))
+    expect(dumpDefinition(defineSymbol(nodes[3], checker), checker))
       .toMatchInlineSnapshot(`
       Object {
         "symbol": Array [
@@ -267,7 +268,7 @@ describe("classes", () => {
     const nodes = lookupNamedToken("length");
 
     // Getter
-    expect(dumpInferred(defineSymbol(nodes[0], checker), checker))
+    expect(dumpDefinition(defineSymbol(nodes[0], checker), checker))
       .toMatchInlineSnapshot(`
       Object {
         "symbol": Array [
@@ -293,7 +294,7 @@ describe("classes", () => {
     `);
 
     // Setter
-    expect(dumpInferred(defineSymbol(nodes[1], checker), checker))
+    expect(dumpDefinition(defineSymbol(nodes[1], checker), checker))
       .toMatchInlineSnapshot(`
       Object {
         "symbol": Array [
@@ -319,7 +320,7 @@ describe("classes", () => {
     `);
 
     //  Read
-    expect(dumpInferred(defineSymbol(nodes[2], checker), checker))
+    expect(dumpDefinition(defineSymbol(nodes[2], checker), checker))
       .toMatchInlineSnapshot(`
       Object {
         "symbol": Array [
@@ -345,7 +346,7 @@ describe("classes", () => {
     `);
 
     // Assign
-    expect(dumpInferred(defineSymbol(nodes[3], checker), checker))
+    expect(dumpDefinition(defineSymbol(nodes[3], checker), checker))
       .toMatchInlineSnapshot(`
       Object {
         "symbol": Array [
@@ -375,7 +376,7 @@ describe("classes", () => {
       sourceFile,
       ts.isConstructorDeclaration
     );
-    expect(dumpInferred(defineSymbol(constructorNodes[0], checker), checker))
+    expect(dumpDefinition(defineSymbol(constructorNodes[0], checker), checker))
       .toMatchInlineSnapshot(`
       Object {
         "symbol": Array [
@@ -397,7 +398,7 @@ describe("classes", () => {
       (node): node is ts.SuperExpression =>
         node.kind === ts.SyntaxKind.SuperKeyword
     );
-    expect(dumpInferred(defineSymbol(superNodes[0], checker), checker))
+    expect(dumpDefinition(defineSymbol(superNodes[0], checker), checker))
       .toMatchInlineSnapshot(`
       Object {
         "symbol": Array [
@@ -413,7 +414,7 @@ describe("classes", () => {
         "type": "typeof DeclaredClass",
       }
     `);
-    expect(dumpInferred(defineSymbol(superNodes[1], checker), checker))
+    expect(dumpDefinition(defineSymbol(superNodes[1], checker), checker))
       .toMatchInlineSnapshot(`
       Object {
         "symbol": Array [
@@ -435,7 +436,7 @@ describe("classes", () => {
     const nodes = lookupNamedToken("methodDeclare");
 
     // Identity
-    expect(dumpInferred(defineSymbol(nodes[0], checker), checker))
+    expect(dumpDefinition(defineSymbol(nodes[0], checker), checker))
       .toMatchInlineSnapshot(`
       Object {
         "symbol": Array [
@@ -453,7 +454,7 @@ describe("classes", () => {
     `);
 
     // Override
-    expect(dumpInferred(defineSymbol(nodes[1], checker), checker))
+    expect(dumpDefinition(defineSymbol(nodes[1], checker), checker))
       .toMatchInlineSnapshot(`
       Object {
         "symbol": Array [
@@ -469,7 +470,7 @@ describe("classes", () => {
         "type": "() => string",
       }
     `);
-    expect(dumpInferred(defineSymbol(nodes[2], checker), checker))
+    expect(dumpDefinition(defineSymbol(nodes[2], checker), checker))
       .toMatchInlineSnapshot(`
       Object {
         "symbol": Array [
@@ -491,7 +492,7 @@ describe("classes", () => {
     const nodes = lookupNamedToken("readonlyParameterProp");
 
     // Identity
-    expect(dumpInferred(defineSymbol(nodes[0], checker), checker))
+    expect(dumpDefinition(defineSymbol(nodes[0], checker), checker))
       .toMatchInlineSnapshot(`
       Object {
         "symbol": Array [
@@ -509,7 +510,7 @@ describe("classes", () => {
     `);
 
     // Access
-    expect(dumpInferred(defineSymbol(nodes[1], checker), checker))
+    expect(dumpDefinition(defineSymbol(nodes[1], checker), checker))
       .toMatchInlineSnapshot(`
       Object {
         "symbol": Array [
@@ -531,7 +532,7 @@ describe("classes", () => {
     const nodes = lookupNamedToken("propParent");
 
     // Identity
-    expect(dumpInferred(defineSymbol(nodes[0], checker), checker))
+    expect(dumpDefinition(defineSymbol(nodes[0], checker), checker))
       .toMatchInlineSnapshot(`
       Object {
         "symbol": Array [
@@ -549,7 +550,7 @@ describe("classes", () => {
     `);
 
     // Access
-    expect(dumpInferred(defineSymbol(nodes[1], checker), checker))
+    expect(dumpDefinition(defineSymbol(nodes[1], checker), checker))
       .toMatchInlineSnapshot(`
       Object {
         "symbol": Array [
@@ -570,7 +571,7 @@ describe("classes", () => {
     const nodes = lookupNamedToken("propInit");
 
     // Identity
-    expect(dumpInferred(defineSymbol(nodes[0], checker), checker))
+    expect(dumpDefinition(defineSymbol(nodes[0], checker), checker))
       .toMatchInlineSnapshot(`
       Object {
         "symbol": Array [
@@ -588,7 +589,7 @@ describe("classes", () => {
     `);
 
     // Access
-    expect(dumpInferred(defineSymbol(nodes[1], checker), checker))
+    expect(dumpDefinition(defineSymbol(nodes[1], checker), checker))
       .toMatchInlineSnapshot(`
       Object {
         "symbol": Array [
@@ -610,7 +611,7 @@ describe("classes", () => {
     const nodes = findNodesInTree(sourceFile, ts.isPrivateIdentifier);
 
     // Declaration
-    expect(dumpInferred(defineSymbol(nodes[0], checker), checker))
+    expect(dumpDefinition(defineSymbol(nodes[0], checker), checker))
       .toMatchInlineSnapshot(`
       Object {
         "symbol": Array [
@@ -628,7 +629,7 @@ describe("classes", () => {
     `);
 
     // Reference
-    expect(dumpInferred(defineSymbol(nodes[1], checker), checker))
+    expect(dumpDefinition(defineSymbol(nodes[1], checker), checker))
       .toMatchInlineSnapshot(`
       Object {
         "symbol": Array [
@@ -646,7 +647,7 @@ describe("classes", () => {
     `);
 
     // Assign
-    expect(dumpInferred(defineSymbol(nodes[2], checker), checker))
+    expect(dumpDefinition(defineSymbol(nodes[2], checker), checker))
       .toMatchInlineSnapshot(`
       Object {
         "symbol": Array [
@@ -670,7 +671,7 @@ describe("classes", () => {
       (node): node is ts.OverrideKeyword =>
         node.kind === ts.SyntaxKind.OverrideKeyword
     );
-    expect(dumpInferred(defineSymbol(overrideNodes[0], checker), checker))
+    expect(dumpDefinition(defineSymbol(overrideNodes[0], checker), checker))
       .toMatchInlineSnapshot(`
       Object {
         "symbol": Array [
@@ -694,7 +695,7 @@ describe("classes", () => {
     );
 
     // Access in declaration class
-    expect(dumpInferred(defineSymbol(thisNodes[0], checker), checker))
+    expect(dumpDefinition(defineSymbol(thisNodes[0], checker), checker))
       .toMatchInlineSnapshot(`
       Object {
         "symbol": Array [
@@ -712,7 +713,7 @@ describe("classes", () => {
     `);
 
     // Access of parent in subclass
-    expect(dumpInferred(defineSymbol(thisNodes[2], checker), checker))
+    expect(dumpDefinition(defineSymbol(thisNodes[2], checker), checker))
       .toMatchInlineSnapshot(`
       Object {
         "symbol": Array [
@@ -730,7 +731,7 @@ describe("classes", () => {
     `);
 
     // Access of self in subclass
-    expect(dumpInferred(defineSymbol(thisNodes[3], checker), checker))
+    expect(dumpDefinition(defineSymbol(thisNodes[3], checker), checker))
       .toMatchInlineSnapshot(`
       Object {
         "symbol": Array [
@@ -748,7 +749,7 @@ describe("classes", () => {
     `);
 
     // Via this type
-    expect(dumpInferred(defineSymbol(thisNodes[8], checker), checker))
+    expect(dumpDefinition(defineSymbol(thisNodes[8], checker), checker))
       .toMatchInlineSnapshot(`
       Object {
         "symbol": Array [
@@ -764,7 +765,7 @@ describe("classes", () => {
         "type": "DeclaredClass",
       }
     `);
-    expect(dumpInferred(defineSymbol(thisNodes[8].parent, checker), checker))
+    expect(dumpDefinition(defineSymbol(thisNodes[8].parent, checker), checker))
       .toMatchInlineSnapshot(`
       Object {
         "symbol": Array [

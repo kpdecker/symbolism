@@ -1,7 +1,7 @@
-import { dumpSymbol } from "@symbolism/ts-debug";
+import { dumpDefinition, dumpSymbol } from "@symbolism/ts-debug";
 import { findIdentifiers } from "@symbolism/ts-utils";
 import ts from "typescript";
-import { dumpInferred, mockProgram } from "../../test/utils";
+import { mockProgram } from "../../test/utils";
 import { defineSymbol } from "../index";
 
 describe("infer variable declaration", () => {
@@ -21,7 +21,7 @@ describe("infer variable declaration", () => {
       .find((s) => s.getName() === "x");
 
     const type = defineSymbol(varSymbol?.valueDeclaration!, checker);
-    expect(dumpInferred(type, checker)).toMatchInlineSnapshot(`
+    expect(dumpDefinition(type, checker)).toMatchInlineSnapshot(`
       Object {
         "symbol": Array [
           Object {
@@ -65,7 +65,7 @@ describe("infer variable declaration", () => {
       .find((s) => s.getName() === "x");
 
     const type = defineSymbol(varSymbol?.valueDeclaration!, checker);
-    expect(dumpInferred(type, checker)).toMatchInlineSnapshot(`
+    expect(dumpDefinition(type, checker)).toMatchInlineSnapshot(`
       Object {
         "symbol": Array [
           Object {
@@ -93,7 +93,7 @@ describe("infer variable declaration", () => {
     const yNodes = findIdentifiers(program.getSourceFile("test.ts")!, "y");
 
     const type = defineSymbol(yNodes[1], checker);
-    expect(dumpInferred(type, checker)).toMatchInlineSnapshot(`
+    expect(dumpDefinition(type, checker)).toMatchInlineSnapshot(`
       Object {
         "symbol": Array [
           Object {

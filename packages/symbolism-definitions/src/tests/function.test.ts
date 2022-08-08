@@ -1,6 +1,7 @@
+import { dumpDefinition } from "@symbolism/ts-debug";
 import { findIdentifiers, findNodeInTree } from "@symbolism/ts-utils";
 import ts from "typescript";
-import { dumpInferred, mockProgram } from "../../test/utils";
+import { mockProgram } from "../../test/utils";
 import { defineSymbol } from "../index";
 
 describe("infer functions", () => {
@@ -16,7 +17,7 @@ describe("infer functions", () => {
 
     const expressionNode = findNodeInTree(sourceFile, ts.isFunctionExpression)!;
     const expressionSymbol = defineSymbol(expressionNode, checker);
-    expect(dumpInferred(expressionSymbol, checker)).toMatchInlineSnapshot(`
+    expect(dumpDefinition(expressionSymbol, checker)).toMatchInlineSnapshot(`
       Object {
         "symbol": Array [
           Object {
@@ -35,7 +36,7 @@ describe("infer functions", () => {
     const nodes = findIdentifiers(sourceFile, "foo");
 
     const reference = defineSymbol(nodes[0], checker);
-    expect(dumpInferred(reference, checker)).toMatchInlineSnapshot(`
+    expect(dumpDefinition(reference, checker)).toMatchInlineSnapshot(`
       Object {
         "symbol": Array [
           Object {
@@ -65,7 +66,7 @@ describe("infer functions", () => {
     const sourceFile = program.getSourceFile("test.ts")!;
 
     const node = findNodeInTree(sourceFile, ts.isYieldExpression)!;
-    expect(dumpInferred(defineSymbol(node, checker), checker))
+    expect(dumpDefinition(defineSymbol(node, checker), checker))
       .toMatchInlineSnapshot(`
       Object {
         "symbol": Array [],
@@ -91,7 +92,7 @@ describe("infer functions", () => {
     const nodes = findIdentifiers(sourceFile, "foo");
 
     // Declaration
-    expect(dumpInferred(defineSymbol(nodes[0], checker), checker))
+    expect(dumpDefinition(defineSymbol(nodes[0], checker), checker))
       .toMatchInlineSnapshot(`
       Object {
         "symbol": Array [
@@ -109,7 +110,7 @@ describe("infer functions", () => {
     `);
 
     // Destructure
-    expect(dumpInferred(defineSymbol(nodes[1], checker), checker))
+    expect(dumpDefinition(defineSymbol(nodes[1], checker), checker))
       .toMatchInlineSnapshot(`
       Object {
         "symbol": Array [
@@ -127,7 +128,7 @@ describe("infer functions", () => {
     `);
 
     // Use
-    expect(dumpInferred(defineSymbol(nodes[2], checker), checker))
+    expect(dumpDefinition(defineSymbol(nodes[2], checker), checker))
       .toMatchInlineSnapshot(`
       Object {
         "symbol": Array [
@@ -145,7 +146,7 @@ describe("infer functions", () => {
     `);
 
     // Shorthand property
-    expect(dumpInferred(defineSymbol(nodes[3], checker), checker))
+    expect(dumpDefinition(defineSymbol(nodes[3], checker), checker))
       .toMatchInlineSnapshot(`
       Object {
         "symbol": Array [
