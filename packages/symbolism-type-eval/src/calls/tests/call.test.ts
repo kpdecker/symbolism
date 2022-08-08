@@ -1,6 +1,5 @@
 import { mockProgram } from "@symbolism/test";
-import { getSymbolDeclaration } from "@symbolism/ts-utils";
-import { CallContext, SchemaContext } from "../../context";
+import { CallContext } from "../../context";
 import { parseSymbolTable } from "@symbolism/symbol-table";
 import { loadFunctionCalls } from "..";
 import { printCalls } from "../../print/calls";
@@ -132,6 +131,26 @@ describe("call arguments lookup", () => {
       foo(56790);
       foo(5688);
       foo(5678);
+      "
+    `);
+  });
+
+  it("should handle partially resolved calls in callbacks", () => {
+    const { checker, symbolTable, sourceFile } = testCall(`
+      declare function foo(a: any): number;
+
+      bar().then((bat) => {
+        foo("foo", bat);
+      });
+    `);
+
+    const foo = symbolTable.lookup("foo", checker);
+    const calls = loadFunctionCalls(
+      foo[0],
+      new CallContext(foo[0], symbolTable, checker)
+    );
+    expect(printCalls(calls)).toMatchInlineSnapshot(`
+      "foo(\\"foo\\", \`any\`);
       "
     `);
   });

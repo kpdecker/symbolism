@@ -81,7 +81,7 @@ function convertCall(
   callExpression: ts.CallExpression,
   context: CallContext,
   collectedCalls: FunctionCallInfo[]
-): FunctionCallInfo | undefined {
+) {
   const { checker } = context;
 
   const signature = checker.getResolvedSignature(callExpression)!;
@@ -156,23 +156,28 @@ function convertCall(
   const firstDeclaration = functionDeclarations.shift()!;
   {
     const upstreamCall = upstreamCalls.get(firstDeclaration);
-    upstreamCall?.forEach((call) => {
-      // Inject the arguments into the call
-      const symbolMap = new Map<ts.Symbol, AnySchemaNode>();
-      parameterInputs.forEach((node) => {
-        if (node.parent === firstDeclaration) {
-          const symbol = checker.getSymbolAtLocation(node.name)!;
-          const parameterIndex = node.parent.parameters.indexOf(node);
+    if (!upstreamCall?.length) {
+      // If we have no calls at this level, then there is nothing to resolve for any thing inside.
+      partiallyResolvedArgSchemas.push(argSchemas.map((arg) => arg.schema));
+    } else {
+      upstreamCall.forEach((call) => {
+        // Inject the arguments into the call
+        const symbolMap = new Map<ts.Symbol, AnySchemaNode>();
+        parameterInputs.forEach((node) => {
+          if (node.parent === firstDeclaration) {
+            const symbol = checker.getSymbolAtLocation(node.name)!;
+            const parameterIndex = node.parent.parameters.indexOf(node);
 
-          symbolMap.set(symbol, call.arguments[parameterIndex]);
-        }
+            symbolMap.set(symbol, call.arguments[parameterIndex]);
+          }
+        });
+        partiallyResolvedArgSchemas.push(
+          argSchemas.map((arg) =>
+            resolveSymbolsInSchema(arg.schema, symbolMap, checker)
+          )
+        );
       });
-      partiallyResolvedArgSchemas.push(
-        argSchemas.map((arg) =>
-          resolveSymbolsInSchema(arg.schema, symbolMap, checker)
-        )
-      );
-    });
+    }
   }
 
   if (functionDeclarations.length) {
@@ -190,7 +195,6 @@ function convertCall(
   }
 
   partiallyResolvedArgSchemas.forEach((argSchemas) => {
-    callExpression.parent;
     collectedCalls.push({
       callExpression,
       arguments: argSchemas,
