@@ -7,10 +7,17 @@ export const neverSchema: Readonly<PrimitiveSchema> = {
   node: undefined,
 };
 
-export const booleanPrimitiveSchema: UnionSchema = {
+export const booleanPrimitiveSchema: Readonly<UnionSchema> = {
   kind: "union",
   items: [
     { kind: "literal", value: true },
     { kind: "literal", value: false },
   ],
+};
+
+export const numberPrimitiveSchema: Readonly<PrimitiveSchema> = {
+  kind: "primitive",
+  name: "number",
+  // @ts-expect-error Would rather error early than debug an infinite loop.
+  node: undefined,
 };
