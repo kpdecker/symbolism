@@ -21,6 +21,7 @@
   },
   "dependencies": {
     "@symbolism/coverage": "^0.2.0",
+    "@symbolism/definitions": "^0.2.0",
     "@symbolism/paths": "^0.2.0",
     "@symbolism/symbol-table": "^0.2.0",
     "@symbolism/ts-debug": "^0.2.0",
