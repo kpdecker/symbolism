@@ -174,9 +174,13 @@ export function removeDuplicateSchemas<
   return removeDuplicates(schemas, areSchemasEqual);
 }
 export function areSchemasEqual(
-  a: AnySchemaNode | AnySchemaNode[],
-  b: AnySchemaNode | AnySchemaNode[]
+  a: AnySchemaNode | AnySchemaNode[] | undefined,
+  b: AnySchemaNode | AnySchemaNode[] | undefined
 ): boolean {
+  if (!a || !b) {
+    return a === b;
+  }
+
   if (Array.isArray(a)) {
     if (!Array.isArray(b)) {
       return false;
