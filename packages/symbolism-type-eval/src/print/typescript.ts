@@ -25,10 +25,6 @@ export function printSchemaNode(
 ): string {
   function wrapTsType(type: string): string {
     if (target === "js") {
-      if (type === "string") {
-        return "string";
-      }
-
       const formattedType = safeTypeFormat(type);
       const trimmedType = formattedType.trim().replace(/;$/, "");
 
