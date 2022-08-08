@@ -7,30 +7,41 @@ import {
   parseSymbolTable,
 } from "@symbolism/symbol-table";
 import { getCliConfig, initTypescript } from "@symbolism/utils";
+import { getNodePath, pathMatchesTokenFilter } from "@symbolism/paths";
+import { getSymbolDeclaration } from "@symbolism/ts-utils";
 
 export function initDumpSymbols(program: Command) {
   program
     .command("dumpSymbols")
     .action(dumpSymbols)
-    .option("-f, --file <file>", "Filter to symbols defined in file");
+    .option("-f, --file <file>", "Filter to symbols defined in file")
+    .option("-p, --path <symbolPath>", "Filter to symbols with path matcher");
 }
 
 function dumpSymbols(opts: OptionValues) {
   const config = getCliConfig();
-  const services = initTypescript(config);
+  const services = initTypescript(config, opts.file);
   const program = services.getProgram();
   if (!program) {
     throw new Error("Failed to create program");
   }
 
+  const checker = program.getTypeChecker();
+
   const symbols = filterSymbolsToFile(
     parseSymbolTable(program, config),
-    resolve(opts.file)
+    opts.file
   );
 
-  const summary = extractSymbolSummary(symbols, program.getTypeChecker());
+  const summary = extractSymbolSummary(symbols, checker);
   summary.forEach((symbol) => {
     invariant(symbol.size > 0, "Symbol has no size");
+    if (opts.path) {
+      if (!pathMatchesTokenFilter(symbol.path, opts.path)) {
+        return;
+      }
+    }
+
     console.log(symbol.path + ": " + symbol.size);
   });
 }

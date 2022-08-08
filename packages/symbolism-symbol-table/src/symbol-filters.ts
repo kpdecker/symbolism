@@ -7,14 +7,20 @@ export function filterSymbolsToFile(symbols: SymbolTable, fileName: string) {
     return symbols;
   }
 
+  const resolvedFileName = resolve(fileName);
+
   const filteredSymbols = new SymbolTable();
 
   symbols.forEach((references, symbol) => {
-    const symbolFileName = resolve(
+    let symbolFileName = resolve(
       getSymbolDeclaration(symbol)!.getSourceFile().fileName
     );
 
-    if (symbolFileName === fileName) {
+    if (symbolFileName.includes("node_modules")) {
+      symbolFileName = symbolFileName.replace(/.*\/node_modules\//g, "");
+    }
+
+    if (symbolFileName === resolvedFileName || symbolFileName === fileName) {
       filteredSymbols.set(symbol, references);
     }
   });
