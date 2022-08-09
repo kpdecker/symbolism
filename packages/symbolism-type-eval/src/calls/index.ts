@@ -3,11 +3,12 @@ import ts, { CallExpression, findAncestor } from "typescript";
 import { SymbolTable } from "@symbolism/symbol-table";
 import { AnySchemaNode, convertTSTypeToSchema } from "../schema";
 import { CallContext, SchemaContext } from "../context";
-import { dumpNode, dumpSymbol } from "@symbolism/ts-debug";
+import { dumpNode, dumpSchema, dumpSymbol } from "@symbolism/ts-debug";
 import { areSchemasEqual, nonConcreteInputs } from "../classify";
 import { resolveSymbolsInSchema } from "../value-eval/symbol";
 import { defineSymbol } from "@symbolism/definitions";
 import { NodeError, removeDuplicates } from "@symbolism/utils";
+import { expandUnions } from "../value-eval/union";
 
 export type FunctionCallInfo = {
   callExpression: ts.CallExpression;
@@ -128,12 +129,6 @@ function convertCall(
     new Set(Array.from(parameterInputs.values()).map((node) => node.parent))
   ).sort((a, b) => a.pos - b.pos);
 
-  // If there are no parameters, then report the call as a concrete call.
-  if (!functionDeclarations.length) {
-    collectedCalls.push(identitySchema);
-    return;
-  }
-
   // We have parameters that need to be resolved via upstream calls.
   const upstreamCalls = new Map<ts.SignatureDeclaration, FunctionCallInfo[]>();
   functionDeclarations.forEach((declaration) => {
@@ -144,17 +139,11 @@ function convertCall(
     upstreamCalls.set(declaration, upstreamCall);
   });
 
-  if (!functionDeclarations.length) {
-    // No calls, emit the abstract schema
-    collectedCalls.push(identitySchema);
-    return;
-  }
-
   let partiallyResolvedArgSchemas: AnySchemaNode[][] = [];
 
   // Outer call should always be bound
   const firstDeclaration = functionDeclarations.shift()!;
-  {
+  if (firstDeclaration) {
     const upstreamCall = upstreamCalls.get(firstDeclaration);
     if (!upstreamCall?.length) {
       // If we have no calls at this level, then there is nothing to resolve for any thing inside.
@@ -178,6 +167,9 @@ function convertCall(
         );
       });
     }
+  } else {
+    // No calls, so everything is resolved.
+    partiallyResolvedArgSchemas.push(argSchemas.map((arg) => arg.schema));
   }
 
   if (functionDeclarations.length) {
@@ -195,10 +187,19 @@ function convertCall(
   }
 
   partiallyResolvedArgSchemas.forEach((argSchemas) => {
-    collectedCalls.push({
-      callExpression,
-      arguments: argSchemas,
-      symbols: parameterSymbols,
+    const expandedArgs = expandUnions({
+      items: argSchemas,
+      merger() {
+        return undefined;
+      },
+    });
+
+    expandedArgs.forEach((args) => {
+      collectedCalls.push({
+        callExpression,
+        arguments: args,
+        symbols: parameterSymbols,
+      });
     });
   });
 }
