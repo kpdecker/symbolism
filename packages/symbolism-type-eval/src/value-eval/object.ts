@@ -25,6 +25,7 @@ export function convertObjectLiteralValue(
     const propertyName = ts.isComputedPropertyName(name)
       ? convertValueExpression(...context.cloneNode(name.expression))
       : name.text;
+    invariant(propertyName, "Expected property name");
 
     if (typeof propertyName === "string") {
       return [propertyName];

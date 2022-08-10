@@ -254,7 +254,10 @@ export function dumpSymbolTable(symbols: SymbolTable, checker: ts.TypeChecker) {
 
     symbolMap.forEach((node) => {
       ret.set(source, ret.get(source) || []);
-      ret.get(source)!.push(dumpNode(node, checker));
+
+      const dumpedNode = dumpNode(node, checker);
+      invariant(dumpedNode, "Node is undefined");
+      ret.get(source)!.push(dumpedNode);
     });
   });
 

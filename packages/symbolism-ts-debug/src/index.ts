@@ -40,9 +40,9 @@ export function dumpDefinition(
   const declarations = symbol.declaration.map((x) => {
     return {
       ...x,
-      fileName: x.fileName.includes("node_modules")
+      fileName: x?.fileName.includes("node_modules")
         ? x.fileName.replace(/.*\/node_modules\//, "")
-        : x.fileName,
+        : x?.fileName,
     };
   });
   return {
@@ -104,14 +104,7 @@ export function dumpNode(
   omitPath = false
 ) {
   if (!node) {
-    return {
-      kind: "Undefined",
-      name: "undefined",
-      fileName: "undefined",
-      path: "undefined",
-      line: 1,
-      column: 1,
-    };
+    return undefined;
   }
 
   const sourceFile = node.getSourceFile();

@@ -42,7 +42,7 @@ export function findCoverageLocations(config: Config) {
     ) {
       referencingNodes.forEach((referencingNode) => {
         const sourceFile = referencingNode.getSourceFile();
-        const node = dumpNode(referencingNode, checker);
+        const node = dumpNode(referencingNode, checker)!;
         const lineAndChar = sourceFile?.getLineAndCharacterOfPosition(
           referencingNode.getStart()
         );
