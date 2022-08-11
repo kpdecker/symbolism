@@ -266,8 +266,7 @@ function defineIdentifier(node: ts.Node, checker: ts.TypeChecker) {
       ts.isObjectLiteralExpression(node.parent) ||
       ts.isArrayLiteralExpression(node.parent) ||
       ts.isCallExpression(node.parent) ||
-      ts.isNewExpression(node.parent) ||
-      ts.isArrowFunction(node.parent)
+      ts.isNewExpression(node.parent)
     ) {
       const contextSymbol = contextualTypeAndSymbol(node, checker);
       const contextType = contextSymbol?.type;

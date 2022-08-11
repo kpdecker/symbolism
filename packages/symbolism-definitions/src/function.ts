@@ -1,4 +1,8 @@
-import { getSymbolDeclaration, invariantNode } from "@symbolism/ts-utils";
+import {
+  getSymbolDeclaration,
+  invariantNode,
+  isNamedDeclaration,
+} from "@symbolism/ts-utils";
 import ts, { findAncestor } from "typescript";
 import { defineSymbol } from "./index";
 import { directTypeAndSymbol, nodeOperators } from "./utils";
@@ -6,12 +10,20 @@ import { directTypeAndSymbol, nodeOperators } from "./utils";
 export const functionOperators = nodeOperators({
   [ts.SyntaxKind.CallExpression]: defineCallReturn,
   [ts.SyntaxKind.NewExpression]: defineCallReturn,
-  [ts.SyntaxKind.ArrowFunction]: defineCallReturn,
 
   [ts.SyntaxKind.FunctionExpression](node, checker) {
     return defineSymbol(node.parent, checker);
   },
   [ts.SyntaxKind.FunctionDeclaration]: directTypeAndSymbol,
+  [ts.SyntaxKind.ArrowFunction](node, checker) {
+    invariantNode(node, ts.isArrowFunction);
+
+    if (isNamedDeclaration(node.parent) && node.parent.name) {
+      return directTypeAndSymbol(node.parent.name, checker);
+    }
+
+    return directTypeAndSymbol(node, checker);
+  },
   [ts.SyntaxKind.Parameter](node, checker) {
     invariantNode(node, ts.isParameter);
 
@@ -44,9 +56,6 @@ function defineCallReturn(node: ts.Node, checker: ts.TypeChecker) {
         };
       }
     }
-  }
-  if (ts.isArrowFunction(node)) {
-    return directTypeAndSymbol(node, checker);
   }
 }
 

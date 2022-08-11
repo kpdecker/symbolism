@@ -33,6 +33,7 @@
       "@symbolism/definitions": [
         "./packages/symbolism-definitions/src/index.ts"
       ],
+      "@symbolism/paths": ["./packages/symbolism-paths/src/index.ts"],
       "@symbolism/symbol-table": [
         "./packages/symbolism-symbol-table/src/index.ts"
       ],

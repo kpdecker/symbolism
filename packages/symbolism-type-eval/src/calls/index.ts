@@ -3,12 +3,13 @@ import ts, { CallExpression, findAncestor } from "typescript";
 import { SymbolTable } from "@symbolism/symbol-table";
 import { AnySchemaNode, convertTSTypeToSchema } from "../schema";
 import { CallContext, SchemaContext } from "../context";
-import { dumpNode, dumpSchema, dumpSymbol } from "@symbolism/ts-debug";
+import { dumpNode, dumpSymbol } from "@symbolism/ts-debug";
 import { areSchemasEqual, nonConcreteInputs } from "../classify";
 import { resolveSymbolsInSchema } from "../value-eval/symbol";
 import { defineSymbol } from "@symbolism/definitions";
 import { NodeError, removeDuplicates } from "@symbolism/utils";
 import { expandUnions } from "../value-eval/union";
+import { isNamedDeclaration } from "@symbolism/ts-utils";
 
 export type FunctionCallInfo = {
   callExpression: ts.CallExpression;
@@ -132,10 +133,31 @@ function convertCall(
   // We have parameters that need to be resolved via upstream calls.
   const upstreamCalls = new Map<ts.SignatureDeclaration, FunctionCallInfo[]>();
   functionDeclarations.forEach((declaration) => {
-    const upstreamCall = convertFunctionCalls(
-      checker.getSymbolAtLocation(declaration.name || declaration.parent)!,
-      context
-    );
+    let symbol: ts.Symbol | undefined =
+      checker.getSymbolAtLocation(declaration);
+    if (declaration.name) {
+      symbol = context.checker.getSymbolAtLocation(declaration.name);
+    } else if (
+      isNamedDeclaration(declaration.parent) &&
+      declaration.parent.name
+    ) {
+      symbol = context.checker.getSymbolAtLocation(declaration.parent.name);
+    } else {
+      symbol = context.checker.getSymbolAtLocation(declaration.parent);
+    }
+    if (!symbol) {
+      // This was likely renamed or passed into a function as an argument.
+      // For now we can't go any further than this. In the future we may
+      // be able to go further if we trace the callbacks.
+      // throw new NodeError(
+      //   "Could not find symbol",
+      //   declaration,
+      //   context.checker
+      // );
+      return;
+    }
+
+    const upstreamCall = convertFunctionCalls(symbol, context);
     upstreamCalls.set(declaration, upstreamCall);
   });
 

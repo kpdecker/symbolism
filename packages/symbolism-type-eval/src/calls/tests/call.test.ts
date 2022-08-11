@@ -6,10 +6,10 @@ import { printCalls } from "../../print/calls";
 
 function testCall(source: string) {
   const program = mockProgram({
-    "test.ts": source,
+    "test.tsx": source,
   });
   const checker = program.getTypeChecker();
-  const sourceFile = program.getSourceFile("test.ts")!;
+  const sourceFile = program.getSourceFile("test.tsx")!;
 
   const symbolTable = parseSymbolTable(program, {
     exclude() {
@@ -17,7 +17,7 @@ function testCall(source: string) {
     },
     baseDir: ".",
     coverageJsonPath: "coverage.json",
-    entryPoints: ["test.ts"],
+    entryPoints: ["test.tsx"],
     tokens: [],
     tsConfigPath: "tsconfig.json",
   });
@@ -53,12 +53,12 @@ describe("call arguments lookup", () => {
       new CallContext(foo[0], symbolTable, checker)
     );
     expect(printCalls(calls)).toMatchInlineSnapshot(`
-      "foo(1);
-      foo(2);
-      foo(undefined);
+      "foo(arg as number);
+      foo(1);
       foo(1234);
+      foo(2);
       foo(2468);
-      foo(\`number\`);
+      foo(undefined);
       "
     `);
   });
@@ -125,12 +125,12 @@ describe("call arguments lookup", () => {
       new CallContext(foo[0], symbolTable, checker)
     );
     expect(printCalls(calls)).toMatchInlineSnapshot(`
-      "foo(56890);
+      "foo(arg as \`\${number} + 1244 * 10 + 10\`);
       foo(28400);
-      foo((\`number\` + 1244) * 10 + 10);
+      foo(5678);
       foo(56790);
       foo(5688);
-      foo(5678);
+      foo(56890);
       "
     `);
   });
@@ -150,7 +150,7 @@ describe("call arguments lookup", () => {
       new CallContext(foo[0], symbolTable, checker)
     );
     expect(printCalls(calls)).toMatchInlineSnapshot(`
-      "foo(\\"foo\\", \`any\`);
+      "foo(\\"foo\\", arg as any);
       "
     `);
   });
@@ -168,5 +168,59 @@ describe("call arguments lookup", () => {
       new CallContext(foo[0], symbolTable, checker)
     );
     expect(printCalls(calls)).toMatchInlineSnapshot(`""`);
+  });
+
+  it("should resolve named arrows", () => {
+    // TODO: const theNewOne = makeNamey;
+    const { checker, symbolTable } = testCall(`
+      import i18n from "i18next";
+      const name = "namey";
+
+      const makeNamey = (key: string, properties = {}) =>
+        i18n.t(
+          \`\${name}:nameName:\${key}\`,
+          properties
+        );
+
+      makeNamey("McNameFace");
+      makeNamey("Anti-Sub")
+    `);
+
+    const foo = symbolTable.lookup("TFunction", checker);
+    const calls = loadFunctionCalls(
+      foo[0],
+      new CallContext(foo[0], symbolTable, checker)
+    );
+    expect(printCalls(calls)).toMatchInlineSnapshot(`
+      "i18n.t(\`namey:nameName:Anti-Sub\`, {});
+      i18n.t(\`namey:nameName:McNameFace\`, {});
+      "
+    `);
+  });
+
+  it("should handle string templates", () => {
+    const { checker, symbolTable, sourceFile } = testCall(`
+      declare const value: { bar: number };
+      declare const obj: {foo: (a: any) => number};
+
+      class Foo {
+        bar: number;
+        render() {
+          return (
+            <div>{obj.foo(\`foo:\${this.bar}\`)}</div>
+          );
+        }
+      }
+    `);
+
+    const foo = symbolTable.lookup("foo", checker);
+    const calls = loadFunctionCalls(
+      foo[0],
+      new CallContext(foo[0], symbolTable, checker)
+    );
+    expect(printCalls(calls)).toMatchInlineSnapshot(`
+      "obj.foo(arg as \`foo:\${number}\`);
+      "
+    `);
   });
 });
