@@ -62,10 +62,7 @@ export function convertBinaryExpression(
 
     case ts.SyntaxKind.QuestionQuestionToken:
       if (isConcreteSchema(leftSchema)) {
-        if (
-          leftSchema.kind === "primitive" &&
-          leftSchema.name === "undefined"
-        ) {
+        if (leftSchema.kind === "literal" && leftSchema.value === undefined) {
           return rightSchema;
         }
         return leftSchema;
