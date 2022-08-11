@@ -94,23 +94,32 @@ export function parseSymbolTable(program: ts.Program, config: Config) {
         let definitionSymbol: ts.Symbol | null | undefined;
 
         let handlerUsed = "";
-        const pickSymbol = (handler: string, symbol: ts.Symbol | undefined) => {
+        function pickSymbol(handler: string, symbol: ts.Symbol | undefined) {
           if (symbol) {
             definitionSymbol = symbol;
             handlerUsed = handler;
           }
-        };
+        }
 
         try {
           const symbol = checker.getSymbolAtLocation(node);
           if (!symbol) {
-            logVerbose("No Symbol:", dumpNode(node, checker));
+            logVerbose(
+              "No Symbol:",
+              dumpNode(node, checker),
+              dumpSymbol(checker.getSymbolAtLocation(node.parent), checker)
+            );
             return;
           }
 
           const type = checker.getTypeAtLocation(node);
           if (isIntrinsicType(type)) {
-            logVerbose("Intrinsic Symbol:", dumpNode(node, checker));
+            logVerbose(
+              "Intrinsic Symbol:",
+              dumpNode(node, checker),
+              dumpSymbol(symbol, checker),
+              checker.typeToString(type)
+            );
             return;
           }
 
@@ -179,7 +188,12 @@ export function parseSymbolTable(program: ts.Program, config: Config) {
             return;
           }
 
-          logDebug("Symbol:", handlerUsed, dumpNode(node, checker));
+          logDebug(
+            "Symbol:",
+            handlerUsed,
+            dumpNode(node, checker),
+            dumpSymbol(symbol, checker)
+          );
 
           // TODO: Allow for multiple definitions (i.e. root type and variable declaration)?
           const symbolMap = symbols.get(definitionSymbol) || new Set();

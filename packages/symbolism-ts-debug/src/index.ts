@@ -1,4 +1,6 @@
 import type { defineSymbol } from "@symbolism/definitions";
+import type { AnySchemaNode } from "@symbolism/type-eval";
+
 import { getNodePath } from "@symbolism/paths";
 import { isIntrinsicType, lineAndColumn } from "@symbolism/ts-utils";
 import invariant from "tiny-invariant";
@@ -56,9 +58,8 @@ export function dumpSymbol(
   checker: ts.TypeChecker
 ) {
   const declarations = symbol?.declarations || [];
-  const declarationDump: ReturnType<typeof dumpNode>[] = declarations.map(
-    (node) => dumpNode(node, checker)
-  );
+  const declarationDump: NonNullable<ReturnType<typeof dumpNode>>[] =
+    declarations.map((node) => dumpNode(node, checker)!).filter(Boolean);
 
   if (symbol && !declarations.length) {
     const name = symbol.getName();
@@ -144,4 +145,17 @@ export function dumpNode(
   ret.name = name;
 
   return ret;
+}
+
+export function dumpSchema(schema: AnySchemaNode | AnySchemaNode[]) {
+  return JSON.stringify(
+    schema,
+    (key, value) => {
+      if (key === "node") {
+        return (value as ts.Node).getText();
+      }
+      return value;
+    },
+    2
+  );
 }

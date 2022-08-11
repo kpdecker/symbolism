@@ -63,8 +63,12 @@ export class CallContext extends SchemaContext {
     symbols: SymbolTable,
     checker: ts.TypeChecker
   ) {
+    invariant(symbol, "symbol must be defined");
+
     const declaration = getSymbolDeclaration(symbol);
-    invariant(declaration, "Symbol has no declaration");
+    if (!declaration) {
+      throw new Error(`Unable to find declaration for symbol ${symbol.name}`);
+    }
 
     super(declaration, checker);
     this.symbols = symbols;

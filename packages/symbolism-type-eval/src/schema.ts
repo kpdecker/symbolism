@@ -413,6 +413,7 @@ function convertLiteralOrPrimitive(
   context: SchemaContext
 ): AnySchemaNode | undefined {
   const { contextNode } = context;
+  invariant(typeof contextNode === "object", "No context node");
 
   if (type.flags & ts.TypeFlags.BigIntLiteral) {
     const literalType = type as ts.BigIntLiteralType;
