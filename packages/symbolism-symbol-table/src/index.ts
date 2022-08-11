@@ -39,7 +39,7 @@ export function parseSymbolTable(program: ts.Program, config: Config) {
   const symbols = new SymbolTable();
 
   const checker = program.getTypeChecker();
-  sourceFiles.forEach((sourceFile) => {
+  sourceFiles.forEach((sourceFile): void => {
     if (config.exclude(sourceFile.fileName)) {
       return;
     }
@@ -120,13 +120,17 @@ export function parseSymbolTable(program: ts.Program, config: Config) {
               dumpSymbol(symbol, checker),
               checker.typeToString(type)
             );
-            return;
+            pickSymbol("intrinsic", symbol);
           }
 
           const symbolDeclaration = getSymbolDeclaration(symbol);
 
-          // If the type checker resolved a direct type, use that
-          pickSymbol("type-symbol", type?.getSymbol());
+          // If the type checker resolved a direct type, use that, if it's
+          // not transient.
+          const typeSymbol = type?.getSymbol();
+          if (!(typeSymbol?.flags! & ts.SymbolFlags.Transient)) {
+            pickSymbol("type-symbol", typeSymbol);
+          }
 
           if (!getSymbolDeclaration(definitionSymbol)) {
             const defineType = defineSymbol(node, checker);
