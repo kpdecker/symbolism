@@ -7,9 +7,7 @@ import { AnySchemaNode, PrimitiveSchema, UnionSchema } from "./schema";
  * Determines if the schema is fully resolved without
  * any non-finite values.
  */
-export function isConcreteSchema(
-  type: AnySchemaNode | undefined
-): type is AnySchemaNode {
+export function isConcreteSchema(type: AnySchemaNode | undefined): boolean {
   if (!type) {
     return false;
   }

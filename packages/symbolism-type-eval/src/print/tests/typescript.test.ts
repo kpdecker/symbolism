@@ -1,6 +1,37 @@
 import ts from "typescript";
-import { AnySchemaNode, ObjectSchema } from "../../schema";
+import {
+  AnySchemaNode,
+  ArraySchema,
+  ObjectSchema,
+  TemplateLiteralSchema,
+} from "../../schema";
 import { printSchema } from "../typescript";
+
+const simpleObject: ObjectSchema = {
+  kind: "object",
+  properties: {
+    foo: {
+      kind: "primitive",
+      name: "any",
+      node: undefined!,
+    },
+  },
+  abstractIndexKeys: [],
+};
+
+const templateLiteral: TemplateLiteralSchema = {
+  kind: "template-literal",
+  items: [
+    { kind: "literal", value: "string!`" },
+    {
+      kind: "intersection",
+      items: [
+        { kind: "primitive", name: "string", node: undefined! },
+        { kind: "primitive", name: "number", node: undefined! },
+      ],
+    },
+  ],
+};
 
 const objectTest: ObjectSchema = {
   kind: "object",
@@ -33,22 +64,7 @@ const objectTest: ObjectSchema = {
     },
     union: {
       kind: "union",
-      items: [
-        {
-          kind: "template-literal",
-          items: [
-            { kind: "literal", value: "string!`" },
-            {
-              kind: "intersection",
-              items: [
-                { kind: "primitive", name: "string", node: undefined! },
-                { kind: "primitive", name: "number", node: undefined! },
-              ],
-            },
-          ],
-        },
-        { kind: "literal", value: "union!" },
-      ],
+      items: [templateLiteral, { kind: "literal", value: "union!" }],
     },
   },
 
@@ -59,12 +75,14 @@ const objectTest: ObjectSchema = {
         items: [
           { kind: "literal", value: "string" },
           { kind: "primitive", name: "boolean", node: undefined! },
+          simpleObject,
         ],
       },
       value: {
         kind: "tuple",
         items: [
           { kind: "primitive", name: "string", node: undefined! },
+          simpleObject,
           { kind: "primitive", name: "number", node: undefined! },
         ],
         elementFlags: [],
@@ -75,6 +93,7 @@ const objectTest: ObjectSchema = {
         kind: "union",
         items: [
           { kind: "literal", value: "union!" },
+          simpleObject,
           { kind: "literal", value: "union¡" },
         ],
       },
@@ -97,6 +116,11 @@ const objectTest: ObjectSchema = {
   ],
 };
 
+const arrayTest: ArraySchema = {
+  kind: "array",
+  items: templateLiteral,
+};
+
 describe("typescript formatter", () => {
   it("should output a valid ts file", () => {
     expect(printSchema(objectTest)).toMatchInlineSnapshot(`
@@ -106,9 +130,13 @@ describe("typescript formatter", () => {
         num: number;
         str: string;
         union: \\"union!\\" | \`string!\\\\\`\${number & string}\`;
-        [k: \`string\${boolean}\`]: [string, number];
-        [k: \\"union!\\" | \\"union¡\\"]: \`42 + \${\`32 + \${number}\`}\`;
+        [k: \`string\${boolean}\${{ foo: any }}\`]: [string, { foo: any }, number];
+        [k: \\"union!\\" | \\"union¡\\" | { foo: any }]: \`42 + 32 + \${number}\`;
       };
+      "
+    `);
+    expect(printSchema(arrayTest)).toMatchInlineSnapshot(`
+      "\`string!\\\\\`\${number & string}\`[];
       "
     `);
   });

@@ -119,7 +119,7 @@ describe("type schema converter", () => {
       printSchema(convertTSTypeToSchema(...context.clone(type, declaration)))
     ).toMatchInlineSnapshot(`
       "{
-        emptyIntersection: 1 & {};
+        emptyIntersection: {} & 1;
         extendingIntersection: {
           bar: 5;
           foo: 4;
@@ -140,7 +140,7 @@ describe("type schema converter", () => {
           bar: never;
           foo: never;
         };
-        mixedIntersection: 1 & { foo: number };
+        mixedIntersection: { foo: number } & 1;
         narrowIntersection: 1;
         neverIntersection: never;
         nullIntersection: never;
@@ -182,7 +182,7 @@ describe("type schema converter", () => {
               foo: 4;
             }
           | { food: number };
-        emptyUnion: 1 | {};
+        emptyUnion: {} | 1;
         genericUnion:
           | { bar: number }
           | { bar: string }
@@ -197,7 +197,7 @@ describe("type schema converter", () => {
               bar: string;
               foo: string;
             };
-        mixedUnion: 1 | { foo: number };
+        mixedUnion: { foo: number } | 1;
         nullUnion: 1;
         overlappingUnion:
           | {

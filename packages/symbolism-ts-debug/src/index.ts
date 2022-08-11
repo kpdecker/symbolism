@@ -152,7 +152,7 @@ export function dumpSchema(schema: AnySchemaNode | AnySchemaNode[]) {
     schema,
     (key, value) => {
       if (key === "node") {
-        return (value as ts.Node).getText();
+        return (value as ts.Node)?.getText();
       }
       return value;
     },

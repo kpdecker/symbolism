@@ -1,18 +1,23 @@
+import { dumpSchema } from "@symbolism/ts-debug";
 import { format } from "prettier";
 import ts from "typescript";
 import type { AnySchemaNode } from "../schema";
 import { binaryExpressionOperatorToken } from "../value-eval/binary-expression";
 
-export function printSchema(schema: AnySchemaNode): string {
-  return safeTypeFormat(printSchemaNode(schema, "ts"));
+export function printSchema(
+  schema: AnySchemaNode,
+  target: "ts" | "js" = "ts"
+): string {
+  return safeTypeFormat(printSchemaNode(schema, target), schema);
 }
 
-function safeTypeFormat(unformattedText: string) {
+function safeTypeFormat(unformattedText: string, schema: AnySchemaNode) {
   try {
     return format("type foo = " + unformattedText, {
       parser: "typescript",
     }).replace(/^type foo =\s*\|?/m, "");
   } catch (err) {
+    console.log(dumpSchema(schema));
     console.log(err);
     // console.log(unformattedText);
     return unformattedText;
@@ -25,11 +30,10 @@ export function printSchemaNode(
 ): string {
   function wrapTsType(type: string): string {
     if (target === "js") {
-      const formattedType = safeTypeFormat(type);
-      const trimmedType = formattedType.trim().replace(/;$/, "");
+      const formattedType = safeTypeFormat(convertToTemplate(type), schema);
+      const trimmedType = formattedType.trim().replace(/;\$/m, "");
 
-      const templateEscaped = escapeTemplate(trimmedType);
-      return "`" + templateEscaped + "`";
+      return trimmedType;
     }
     return type;
   }
@@ -39,7 +43,7 @@ export function printSchemaNode(
       return wrapTsType(schema.name);
     case "literal":
       if (typeof schema.value === "string") {
-        return `"${schema.value}"`;
+        return JSON.stringify(schema.value);
       }
       if (typeof schema.value === "bigint") {
         return `${schema.value}n`;
@@ -48,32 +52,30 @@ export function printSchemaNode(
     case "array":
       return wrapTsType(`(${printSchemaNode(schema.items, "ts")})[]`);
     case "tuple":
-      return wrapTsType(
-        `[${schema.items
-          .map((item, i) => {
-            const elementFlags = schema.elementFlags[i];
-            const isRest = elementFlags & ts.ElementFlags.Rest;
-            const isOptional = elementFlags & ts.ElementFlags.Optional;
+      return `[${schema.items
+        .map((item, i) => {
+          const elementFlags = schema.elementFlags[i];
+          const isRest = elementFlags & ts.ElementFlags.Rest;
+          const isOptional = elementFlags & ts.ElementFlags.Optional;
 
-            return (
-              (isRest ? "..." : "") +
-              printSchemaNode(item, "ts") +
-              (isRest ? "[]" : "") +
-              (isOptional ? "?" : "")
-            );
-          })
-          .join(", ")}]`
-      );
+          return (
+            (isRest ? "..." : "") +
+            printSchemaNode(item, "ts") +
+            (isRest ? "[]" : "") +
+            (isOptional ? "?" : "")
+          );
+        })
+        .join(", ")}]`;
     case "object":
       const keys = Object.keys(schema.properties);
       if (keys.length === 1 && schema.abstractIndexKeys.length === 0) {
-        return `{ ${JSON.stringify(keys[0])}: ${printSchemaNode(
+        return `({ ${JSON.stringify(keys[0])}: ${printSchemaNode(
           schema.properties[keys[0]],
           target
-        )} }`;
+        )} })`;
       }
       return (
-        "{\n" +
+        "({\n" +
         Object.keys(schema.properties)
           .sort()
           .map((name) => {
@@ -99,7 +101,7 @@ export function printSchemaNode(
             )},`;
           })
           .join("\n") +
-        "}"
+        "})"
       );
     case "function":
       const typeString = `((${schema.parameters
@@ -109,10 +111,12 @@ export function printSchemaNode(
     case "binary-expression":
       return `\`${templateVar(
         schema.items[0],
-        target
+        target,
+        true
       )} ${binaryExpressionOperatorToken(schema.operator)} ${templateVar(
         schema.items[1],
-        target
+        target,
+        true
       )}\``;
     case "index":
       return wrapTsType(`keyof ${printSchemaNode(schema.type, "ts")}`);
@@ -131,13 +135,15 @@ export function printSchemaNode(
       const separator = schema.kind === "union" ? " | " : " & ";
       return wrapTsType(
         `(${schema.items
-          .map((item) => printSchemaNode(item, "ts"))
+          .map((item) => templateVar(item, "ts", target === "js"))
           .sort()
           .join(separator)})`
       );
     case "template-literal":
       return wrapTsType(
-        `\`${schema.items.map((child) => templateVar(child, "ts")).join("")}\``
+        `\`${schema.items
+          .map((child) => templateVar(child, "ts", true))
+          .join("")}\``
       );
 
     default:
@@ -146,13 +152,36 @@ export function printSchemaNode(
   }
 }
 
+function convertToTemplate(text: string) {
+  return "`" + unescapeTemplate(text) + "`";
+}
 function escapeTemplate(text: string) {
   return text.replace(/[`$\\]/g, "\\$&");
 }
+function unescapeTemplate(text: string) {
+  if (text.startsWith("`") && text.endsWith("`")) {
+    return text.replace(/^`|`$/g, "").replace(/\\([`$\\])/g, "$1");
+  } else {
+    return text;
+  }
+}
 
-function templateVar(child: AnySchemaNode, target: "ts" | "js"): string {
-  if (child.kind === "literal") {
+function templateVar(
+  child: AnySchemaNode,
+  target: "ts" | "js",
+  forTemplate: boolean
+): string {
+  if (child.kind === "literal" && forTemplate) {
     return escapeTemplate(child.value + "");
   }
-  return "${" + printSchemaNode(child, target) + "}";
+  if (
+    (child.kind === "template-literal" || child.kind === "binary-expression") &&
+    forTemplate
+  ) {
+    return printSchemaNode(child, target).replace(/^`|`$/g, "");
+  }
+  if (forTemplate) {
+    return "${" + printSchemaNode(child, target) + "}";
+  }
+  return printSchemaNode(child, target);
 }
