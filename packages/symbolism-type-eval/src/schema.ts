@@ -8,7 +8,10 @@ import {
 } from "@symbolism/ts-utils";
 import { dumpFlags, dumpSymbol } from "@symbolism/ts-debug";
 import { convertValueExpression, narrowTypeFromValues } from "./value-eval";
-import { normalizeTemplateLiteralSchema } from "./value-eval/string-template";
+import {
+  convertTemplateLiteralValue,
+  normalizeTemplateLiteralSchema,
+} from "./value-eval/string-template";
 import { booleanPrimitiveSchema } from "./well-known-schemas";
 import { SchemaContext } from "./context";
 
@@ -389,6 +392,18 @@ function convertTemplateLiteralType(
   context: SchemaContext
 ): AnySchemaNode | undefined {
   if (type.flags & ts.TypeFlags.TemplateLiteral) {
+    let { contextNode } = context;
+    if (ts.isIdentifier(contextNode)) {
+      contextNode = contextNode.parent;
+    }
+
+    if (ts.isTemplateExpression(contextNode)) {
+      // Unable to map expressions from type to nodes, so we need our own eval
+      return convertTemplateLiteralValue(contextNode, context);
+    }
+
+    // But if we're (presumably) in a type declaration we can (only) use the TypeChecker
+    // result.
     const templateType = type as ts.TemplateLiteralType;
     const itemTypes = templateType.texts
       .flatMap((text, i) => {
