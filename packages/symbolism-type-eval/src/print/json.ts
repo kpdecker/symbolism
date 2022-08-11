@@ -28,7 +28,7 @@ export function schemaToJson(schema: AnySchemaNode): JsonObject {
       if (typeof schema.value === "bigint") {
         return { const: `"${schema.value}"` };
       }
-      return { const: schema.value };
+      return { const: schema.value ?? null };
     case "array":
       return {
         type: "array",
