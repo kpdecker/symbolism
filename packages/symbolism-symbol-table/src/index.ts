@@ -133,7 +133,9 @@ export function parseSymbolTable(program: ts.Program, config: Config) {
           }
 
           if (!getSymbolDeclaration(definitionSymbol)) {
-            const defineType = defineSymbol(node, checker);
+            const defineType = defineSymbol(node, checker, {
+              chooseLocal: false,
+            });
             pickSymbol("define-symbol", defineType?.symbol);
           }
 

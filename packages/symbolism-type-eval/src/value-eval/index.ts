@@ -28,7 +28,9 @@ export function narrowTypeFromValues(
 
   if (contextNode) {
     // If we are using the context node, we will need to resolve where it lives.
-    const contextDefinition = defineSymbol(contextNode, checker);
+    const contextDefinition = defineSymbol(contextNode, checker, {
+      chooseLocal: false,
+    });
     if (contextDefinition?.declaration) {
       const contextSchema = convertValueDeclaration(
         ...context.cloneNode(contextDefinition.declaration)
@@ -68,7 +70,9 @@ export function convertValueDeclaration(
       return convertValueExpression(...context.cloneNode(node.expression));
     }
     if (ts.isTypeAliasDeclaration(node)) {
-      const secondDefinition = defineSymbol(node.type, context.checker);
+      const secondDefinition = defineSymbol(node.type, context.checker, {
+        chooseLocal: false,
+      });
       const secondDeclaration = getSymbolDeclaration(secondDefinition?.symbol);
 
       if (secondDeclaration) {
@@ -97,7 +101,9 @@ export function convertValueExpression(
     }
 
     if (ts.isIdentifier(node)) {
-      const identifierDefinition = defineSymbol(node, checker);
+      const identifierDefinition = defineSymbol(node, checker, {
+        chooseLocal: false,
+      });
       const identifierDeclaration = getSymbolDeclaration(
         identifierDefinition?.symbol
       );
@@ -150,7 +156,7 @@ export function convertValueExpression(
 export function convertNode(node: ts.Node, context: SchemaContext) {
   const { checker } = context;
 
-  const definition = defineSymbol(node, checker);
+  const definition = defineSymbol(node, checker, { chooseLocal: false });
 
   return definition?.declaration && definition?.type
     ? convertTSTypeToSchema(...context.clone(definition.type, node))

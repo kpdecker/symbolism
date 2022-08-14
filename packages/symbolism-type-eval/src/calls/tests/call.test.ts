@@ -223,4 +223,55 @@ describe("call arguments lookup", () => {
       "
     `);
   });
+
+  /**
+   * Define symbol resolves shorthand properties to the object, not
+   * the local value by default. This created infinite loops within
+   * the call recursion.
+   */
+  it("should handle object literals with shorthand", () => {
+    const { checker, symbolTable, sourceFile } = testCall(`
+      declare const foo: (value) => void;
+
+      function bat(data: {
+        value: number;
+        bat: number;
+      }) {
+        foo(data);
+      }
+
+      function bar(value) {
+        bat({
+          value,
+          bat: 1 + 9
+        });
+      }
+
+      bar("foo");
+      bar(true);
+    `);
+
+    const foo = symbolTable.lookup("foo", checker);
+    const calls = loadFunctionCalls(
+      foo[0],
+      new CallContext(foo[0], symbolTable, checker)
+    );
+    `
+      "foo(\\"foo\\");
+      foo({
+        bar: true,
+        bat: 10,
+      });
+      "
+    `;
+    expect(printCalls(calls)).toMatchInlineSnapshot(`
+      "foo(
+        arg as {
+          bat: number;
+          value: number;
+        }
+      );
+      "
+    `);
+  });
 });

@@ -14,7 +14,10 @@ export function testStatement(source: string) {
   const sourceFile = program.getSourceFile("test.ts")!;
   const node = sourceFile.statements[0];
 
-  return dumpDefinition(defineSymbol(node, checker)!, checker);
+  return dumpDefinition(
+    defineSymbol(node, checker, { chooseLocal: false })!,
+    checker
+  );
 }
 
 export function testExpression(source: string) {
@@ -25,5 +28,8 @@ export function testExpression(source: string) {
   const sourceFile = program.getSourceFile("test.ts")!;
   const node = findNodeInTree(sourceFile, ts.isVariableDeclaration);
 
-  return dumpDefinition(defineSymbol(node?.initializer!, checker)!, checker);
+  return dumpDefinition(
+    defineSymbol(node?.initializer!, checker, { chooseLocal: false })!,
+    checker
+  );
 }

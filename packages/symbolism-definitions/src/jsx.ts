@@ -12,20 +12,20 @@ import { invariantNode } from "@symbolism/ts-utils";
 import { dumpNode } from "@symbolism/ts-debug";
 
 export const jsxSymbolHandlers = nodeOperators({
-  [ts.SyntaxKind.JsxElement](node, checker) {
+  [ts.SyntaxKind.JsxElement](node, checker, options) {
     invariantNode(node, ts.isJsxElement);
-    return defineSymbol(node.openingElement, checker);
+    return defineSymbol(node.openingElement, checker, options);
   },
   [ts.SyntaxKind.JsxOpeningElement]: handleElementDeclaration,
   [ts.SyntaxKind.JsxSelfClosingElement]: handleElementDeclaration,
-  [ts.SyntaxKind.JsxClosingElement](node, checker) {
+  [ts.SyntaxKind.JsxClosingElement](node, checker, options) {
     invariantNode(node, ts.isJsxClosingElement);
-    return defineSymbol(node.parent, checker);
+    return defineSymbol(node.parent, checker, options);
   },
 
-  [ts.SyntaxKind.JsxFragment](node, checker) {
+  [ts.SyntaxKind.JsxFragment](node, checker, options) {
     invariantNode(node, ts.isJsxFragment);
-    return defineSymbol(node.openingFragment, checker);
+    return defineSymbol(node.openingFragment, checker, options);
   },
   [ts.SyntaxKind.JsxOpeningFragment]: directTypeAndSymbol,
   [ts.SyntaxKind.JsxClosingFragment]: directTypeAndSymbol,
@@ -39,9 +39,9 @@ export const jsxSymbolHandlers = nodeOperators({
   },
 
   [ts.SyntaxKind.JsxAttributes]: contextualTypeAndSymbol,
-  [ts.SyntaxKind.JsxAttribute](node, checker) {
+  [ts.SyntaxKind.JsxAttribute](node, checker, options) {
     invariantNode(node, ts.isJsxAttribute);
-    const properties = defineSymbol(node.parent, checker);
+    const properties = defineSymbol(node.parent, checker, options);
     if (!properties) {
       logDebug(`No properties for ${dumpNode(node.parent, checker)}`);
       return directTypeAndSymbol(node, checker);
@@ -83,9 +83,9 @@ export const jsxSymbolHandlers = nodeOperators({
 
     return propertyDefinition;
   },
-  [ts.SyntaxKind.JsxSpreadAttribute](node, checker) {
+  [ts.SyntaxKind.JsxSpreadAttribute](node, checker, options) {
     invariantNode(node, ts.isJsxSpreadAttribute);
-    return defineSymbol(node.expression, checker);
+    return defineSymbol(node.expression, checker, options);
   },
 });
 

@@ -33,6 +33,6 @@ function dumpSymbol(
   );
   const node = getNodeAtPosition(sourceFile, position);
 
-  const definition = defineSymbol(node, checker);
+  const definition = defineSymbol(node, checker, { chooseLocal: false });
   console.log(dumpDefinition(definition, checker));
 }

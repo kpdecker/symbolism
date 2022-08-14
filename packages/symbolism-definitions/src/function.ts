@@ -11,8 +11,8 @@ export const functionOperators = nodeOperators({
   [ts.SyntaxKind.CallExpression]: defineCallReturn,
   [ts.SyntaxKind.NewExpression]: defineCallReturn,
 
-  [ts.SyntaxKind.FunctionExpression](node, checker) {
-    return defineSymbol(node.parent, checker);
+  [ts.SyntaxKind.FunctionExpression](node, checker, options) {
+    return defineSymbol(node.parent, checker, options);
   },
   [ts.SyntaxKind.FunctionDeclaration]: directTypeAndSymbol,
   [ts.SyntaxKind.ArrowFunction](node, checker) {

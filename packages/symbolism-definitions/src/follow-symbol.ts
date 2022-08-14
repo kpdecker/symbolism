@@ -1,12 +1,13 @@
 import ts from "typescript";
 import invariant from "tiny-invariant";
-import { DefinitionSymbol } from "./utils";
+import { DefinitionOptions, DefinitionSymbol } from "./utils";
 import { defineSymbol } from "./index";
 import { getSymbolDeclaration, getSymbolTarget } from "@symbolism/ts-utils";
 
 export function followSymbol(
   definition: DefinitionSymbol | undefined | null,
-  checker: ts.TypeChecker
+  checker: ts.TypeChecker,
+  options: DefinitionOptions
 ) {
   const { symbol } = definition || {};
   if (!symbol || !definition) {
@@ -29,7 +30,7 @@ export function followSymbol(
 
   const typeDeclaration = getSymbolDeclaration(symbol);
   if (typeDeclaration) {
-    const followedDefinition = defineSymbol(typeDeclaration, checker);
+    const followedDefinition = defineSymbol(typeDeclaration, checker, options);
 
     if (
       // Check that we have a fully resolved definition

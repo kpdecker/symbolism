@@ -1,8 +1,7 @@
 import ts, { CallExpression, findAncestor } from "typescript";
 
-import { SymbolTable } from "@symbolism/symbol-table";
 import { AnySchemaNode, convertTSTypeToSchema } from "../schema";
-import { CallContext, SchemaContext } from "../context";
+import { CallContext } from "../context";
 import { dumpNode, dumpSymbol } from "@symbolism/ts-debug";
 import { areSchemasEqual, nonConcreteInputs } from "../classify";
 import { resolveSymbolsInSchema } from "../value-eval/symbol";
@@ -21,12 +20,12 @@ export function loadFunctionCalls(
   symbol: ts.Symbol,
   context: CallContext
 ): FunctionCallInfo[] {
-  const functionCalls = convertFunctionCalls(symbol, context);
+  const functionCalls = convertFunctionCallsForSymbol(symbol, context);
 
   // TODO: Flatten binary expressions, etc
   return functionCalls;
 }
-function convertFunctionCalls(
+function convertFunctionCallsForSymbol(
   symbol: ts.Symbol,
   context: CallContext
 ): FunctionCallInfo[] {
@@ -94,7 +93,9 @@ function convertCall(
 
     const inputs = nonConcreteInputs(schema);
     const inputSymbols = inputs.map((input) =>
-      defineSymbol(input, context.checker)
+      defineSymbol(input, context.checker, {
+        chooseLocal: true,
+      })
     );
 
     return {
@@ -157,7 +158,7 @@ function convertCall(
       return;
     }
 
-    const upstreamCall = convertFunctionCalls(symbol, context);
+    const upstreamCall = convertFunctionCallsForSymbol(symbol, context);
     upstreamCalls.set(declaration, upstreamCall);
   });
 

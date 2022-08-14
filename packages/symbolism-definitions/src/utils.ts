@@ -14,9 +14,11 @@ export type DefinitionSymbol = {
   declaration: ts.Declaration | undefined;
   type: ts.Type | undefined;
 };
+export type DefinitionOptions = { chooseLocal?: boolean };
 export type DefinitionOperation = (
   node: ts.Node,
-  checker: ts.TypeChecker
+  checker: ts.TypeChecker,
+  options: DefinitionOptions
 ) => DefinitionSymbol | undefined | null;
 
 export function nodeOperators<

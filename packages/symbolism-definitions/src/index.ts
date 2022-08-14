@@ -12,6 +12,7 @@ import {
   DefinitionOperation,
   directTypeAndSymbol,
   getArrayType,
+  DefinitionOptions,
 } from "./utils";
 import { followSymbol } from "./follow-symbol";
 import {
@@ -52,9 +53,9 @@ const nodeHandlers: Record<ts.SyntaxKind, DefinitionOperation> = {
 
   // Expressions
   [ts.SyntaxKind.ArrayLiteralExpression]: contextualTypeAndSymbol,
-  [ts.SyntaxKind.SpreadElement](node, checker) {
+  [ts.SyntaxKind.SpreadElement](node, checker, options) {
     invariantNode(node, ts.isSpreadElement);
-    return defineSymbol(node.expression, checker);
+    return defineSymbol(node.expression, checker, options);
   },
   [ts.SyntaxKind.ObjectLiteralExpression]: contextualTypeAndSymbol,
   [ts.SyntaxKind.PropertyAccessExpression]: defineProperties,
@@ -64,9 +65,9 @@ const nodeHandlers: Record<ts.SyntaxKind, DefinitionOperation> = {
   [ts.SyntaxKind.ComputedPropertyName]: directTypeAndSymbol,
 
   [ts.SyntaxKind.ElementAccessExpression]: defineProperties,
-  [ts.SyntaxKind.ParenthesizedExpression](node, checker) {
+  [ts.SyntaxKind.ParenthesizedExpression](node, checker, options) {
     invariantNode(node, ts.isParenthesizedExpression);
-    return defineSymbol(node.expression, checker);
+    return defineSymbol(node.expression, checker, options);
   },
   [ts.SyntaxKind.DeleteExpression]: directTypeAndSymbol,
   [ts.SyntaxKind.AwaitExpression]: directTypeAndSymbol,
@@ -92,9 +93,9 @@ const nodeHandlers: Record<ts.SyntaxKind, DefinitionOperation> = {
   [ts.SyntaxKind.OmittedExpression]: nopHandler,
   [ts.SyntaxKind.AsExpression]: directTypeAndSymbol,
   [ts.SyntaxKind.TypeAssertionExpression]: directTypeAndSymbol,
-  [ts.SyntaxKind.NonNullExpression](node, checker) {
+  [ts.SyntaxKind.NonNullExpression](node, checker, options) {
     invariantNode(node, ts.isNonNullExpression);
-    return defineSymbol(node.expression, checker);
+    return defineSymbol(node.expression, checker, options);
   },
   [ts.SyntaxKind.CommaListExpression]: directTypeAndSymbol,
 
@@ -105,12 +106,9 @@ const nodeHandlers: Record<ts.SyntaxKind, DefinitionOperation> = {
   [ts.SyntaxKind.TemplateSpan]: directTypeAndSymbol,
 
   // Statements
-  [ts.SyntaxKind.ExpressionStatement]: (
-    node: ts.Node,
-    checker: ts.TypeChecker
-  ) => {
+  [ts.SyntaxKind.ExpressionStatement](node, checker, options) {
     invariantNode(node, ts.isExpressionStatement);
-    return defineSymbol(node.expression, checker);
+    return defineSymbol(node.expression, checker, options);
   },
   [ts.SyntaxKind.EmptyStatement]: nopHandler,
   [ts.SyntaxKind.VariableStatement]: nopHandler,
@@ -121,9 +119,9 @@ const nodeHandlers: Record<ts.SyntaxKind, DefinitionOperation> = {
   [ts.SyntaxKind.ForInStatement]: nopHandler,
   [ts.SyntaxKind.ForOfStatement]: nopHandler,
   [ts.SyntaxKind.LabeledStatement]: nopHandler,
-  [ts.SyntaxKind.ThrowStatement](node, checker) {
+  [ts.SyntaxKind.ThrowStatement](node, checker, options) {
     invariantNode(node, ts.isThrowStatement);
-    return defineSymbol(node.expression, checker);
+    return defineSymbol(node.expression, checker, options);
   },
   [ts.SyntaxKind.ContinueStatement]: nopHandler,
   [ts.SyntaxKind.BreakStatement]: nopHandler,
@@ -151,9 +149,9 @@ const nodeHandlers: Record<ts.SyntaxKind, DefinitionOperation> = {
     invariantNode(node, ts.isEnumDeclaration);
     return directTypeAndSymbol(node.name, checker);
   },
-  [ts.SyntaxKind.EnumMember](node, checker) {
+  [ts.SyntaxKind.EnumMember](node, checker, options) {
     invariantNode(node, ts.isEnumMember);
-    const parentDefinition = defineSymbol(node.parent, checker);
+    const parentDefinition = defineSymbol(node.parent, checker, options);
     const type = parentDefinition?.type;
     debugger;
     if (!type) {
@@ -162,8 +160,8 @@ const nodeHandlers: Record<ts.SyntaxKind, DefinitionOperation> = {
 
     return getPropertySymbol(node, type, checker, node.name.getText());
   },
-  [ts.SyntaxKind.SyntaxList](node, checker) {
-    return defineSymbol(node.parent, checker);
+  [ts.SyntaxKind.SyntaxList](node, checker, options) {
+    return defineSymbol(node.parent, checker, options);
   },
 
   // Type Declarations
@@ -173,9 +171,9 @@ const nodeHandlers: Record<ts.SyntaxKind, DefinitionOperation> = {
   [ts.SyntaxKind.TypeReference]: directTypeAndSymbol,
   [ts.SyntaxKind.FunctionType]: directTypeAndSymbol,
   [ts.SyntaxKind.ConstructorType]: directTypeAndSymbol,
-  [ts.SyntaxKind.TypeQuery](node, checker) {
+  [ts.SyntaxKind.TypeQuery](node, checker, options) {
     invariantNode(node, ts.isTypeQueryNode);
-    return defineSymbol(node.exprName, checker);
+    return defineSymbol(node.exprName, checker, options);
   },
   [ts.SyntaxKind.TypeLiteral]: directTypeAndSymbol,
   [ts.SyntaxKind.ArrayType]: directTypeAndSymbol,
@@ -236,7 +234,11 @@ const nodeHandlers: Record<ts.SyntaxKind, DefinitionOperation> = {
   ...jsxSymbolHandlers,
 };
 
-export function defineSymbol(node: ts.Node, checker: ts.TypeChecker) {
+export function defineSymbol(
+  node: ts.Node,
+  checker: ts.TypeChecker,
+  options: { chooseLocal?: boolean } = {}
+) {
   logDebug(
     "defineSymbol",
     ts.SyntaxKind[node.kind],
@@ -247,7 +249,7 @@ export function defineSymbol(node: ts.Node, checker: ts.TypeChecker) {
   try {
     const nodeHandler = nodeHandlers[node.kind];
     if (nodeHandler) {
-      return nodeHandler(node, checker);
+      return nodeHandler(node, checker, options);
     }
   } catch (err) {
     if ((err as NodeError).isNodeError) {
@@ -260,7 +262,11 @@ export function defineSymbol(node: ts.Node, checker: ts.TypeChecker) {
   invariantNode(node);
 }
 
-function defineIdentifier(node: ts.Node, checker: ts.TypeChecker) {
+function defineIdentifier(
+  node: ts.Node,
+  checker: ts.TypeChecker,
+  options: DefinitionOptions
+) {
   if (ts.isIdentifier(node)) {
     if (
       ts.isObjectLiteralExpression(node.parent) ||
@@ -276,7 +282,7 @@ function defineIdentifier(node: ts.Node, checker: ts.TypeChecker) {
         // Failover to what has a symbol since that can be tracked
         contextType.symbol
       ) {
-        return followSymbol(contextSymbol, checker);
+        return followSymbol(contextSymbol, checker, options);
       }
     }
 
@@ -292,13 +298,13 @@ function defineIdentifier(node: ts.Node, checker: ts.TypeChecker) {
       (isNamedDeclaration(node.parent) && node.parent.name === node) ||
       (isAssignmentExpression(node.parent) && node.parent.left === node)
     ) {
-      const parentDefinition = defineSymbol(node.parent, checker);
+      const parentDefinition = defineSymbol(node.parent, checker, options);
       if (parentDefinition) {
         return parentDefinition;
       }
     }
 
-    return followSymbol(directTypeAndSymbol(node, checker), checker);
+    return followSymbol(directTypeAndSymbol(node, checker), checker, options);
   }
 }
 
@@ -307,9 +313,13 @@ function defineVariableDeclaration(node: ts.Node, checker: ts.TypeChecker) {
   return directTypeAndSymbol(node.name, checker);
 }
 
-function defineProperties(node: ts.Node, checker: ts.TypeChecker) {
+function defineProperties(
+  node: ts.Node,
+  checker: ts.TypeChecker,
+  options: DefinitionOptions
+) {
   if (ts.isPropertyAssignment(node) || ts.isShorthandPropertyAssignment(node)) {
-    const objectType = defineSymbol(node.parent, checker);
+    const objectType = defineSymbol(node.parent, checker, options);
     if (!objectType || !objectType.type) {
       return;
     }
@@ -325,7 +335,10 @@ function defineProperties(node: ts.Node, checker: ts.TypeChecker) {
       }
     );
 
-    if (!propertyDefinition?.symbol && ts.isShorthandPropertyAssignment(node)) {
+    if (
+      (!propertyDefinition?.symbol || options.chooseLocal) &&
+      ts.isShorthandPropertyAssignment(node)
+    ) {
       const shorthandSymbol = checker.getShorthandAssignmentValueSymbol(node);
       if (shorthandSymbol) {
         return followSymbol(
@@ -334,7 +347,8 @@ function defineProperties(node: ts.Node, checker: ts.TypeChecker) {
             declaration: getSymbolDeclaration(shorthandSymbol),
             type: checker.getTypeOfSymbolAtLocation(shorthandSymbol, node),
           },
-          checker
+          checker,
+          options
         );
       }
 
@@ -356,14 +370,18 @@ function defineProperties(node: ts.Node, checker: ts.TypeChecker) {
       (ts.isMethodDeclaration(typeDeclaration) ||
         ts.isPropertyDeclaration(typeDeclaration))
     ) {
-      return defineSymbol(typeDeclaration, checker);
+      return defineSymbol(typeDeclaration, checker, options);
     }
 
     return type;
   }
 }
 
-function defineBindingElement(node: ts.Node, checker: ts.TypeChecker) {
+function defineBindingElement(
+  node: ts.Node,
+  checker: ts.TypeChecker,
+  options: DefinitionOptions
+) {
   if (ts.isBindingElement(node)) {
     if (node.dotDotDotToken) {
       // Spreads will be a synthetic type, just map directly
@@ -373,7 +391,7 @@ function defineBindingElement(node: ts.Node, checker: ts.TypeChecker) {
     }
 
     const bindingPattern = node.parent;
-    const bindingPatternType = defineSymbol(bindingPattern, checker);
+    const bindingPatternType = defineSymbol(bindingPattern, checker, options);
 
     const propertyName = ts.isArrayBindingPattern(bindingPattern)
       ? bindingPattern.elements.indexOf(node) + ""
@@ -420,7 +438,11 @@ function defineBindingElement(node: ts.Node, checker: ts.TypeChecker) {
       ts.isParameter(node.parent) ||
       ts.isBindingElement(node.parent)
     ) {
-      return followSymbol(defineSymbol(node.parent, checker), checker);
+      return followSymbol(
+        defineSymbol(node.parent, checker, options),
+        checker,
+        options
+      );
     }
 
     invariantNode(node.parent);

@@ -22,7 +22,11 @@ export function convertTemplateLiteralValue(
   }
 
   for (const templateSpan of node.templateSpans) {
-    const expressionDefinition = defineSymbol(templateSpan.expression, checker);
+    const expressionDefinition = defineSymbol(
+      templateSpan.expression,
+      checker,
+      { chooseLocal: false }
+    );
 
     let expressionSchema: AnySchemaNode | undefined;
     if (expressionDefinition?.declaration) {

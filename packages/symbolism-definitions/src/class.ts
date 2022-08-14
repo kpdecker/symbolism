@@ -13,7 +13,7 @@ export const classOperators = nodeOperators({
     return directTypeAndSymbol(node.parent, checker);
   },
   [ts.SyntaxKind.SuperKeyword]: directTypeAndSymbol,
-  [ts.SyntaxKind.ThisKeyword](node, checker) {
+  [ts.SyntaxKind.ThisKeyword](node, checker, options) {
     // Internal API: Couldn't find any other way to resolve proper type
     // consistently.
     const thisType = (checker as any).tryGetThisTypeAt(node);
@@ -30,7 +30,7 @@ export const classOperators = nodeOperators({
     // Hit the container class directly if we are able to.
     // The built in resolution can be hit or miss on what is returned.
     if (classNode) {
-      return defineSymbol(classNode, checker);
+      return defineSymbol(classNode, checker, options);
     }
 
     return directTypeAndSymbol(node, checker);
