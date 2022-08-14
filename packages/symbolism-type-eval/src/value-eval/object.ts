@@ -52,19 +52,38 @@ export function convertObjectLiteralValue(
     return propertyName! as AnySchemaNode;
   }
 
+  function spreadProperties(spreadSchema: AnySchemaNode, node: ts.Node) {
+    if (spreadSchema.kind === "object") {
+      Object.assign(properties, spreadSchema.properties);
+      abstractIndexKeys.push(...spreadSchema.abstractIndexKeys);
+    } else if (
+      spreadSchema.kind === "primitive" &&
+      spreadSchema.name === "any"
+    ) {
+      abstractIndexKeys.push({
+        key: spreadSchema,
+        value: spreadSchema,
+      });
+    } else if (spreadSchema.kind === "literal") {
+      /* NOP */
+    } else if (spreadSchema.kind === "union") {
+      // TODO: Consider expanding the union vs. inlining all props?
+      spreadSchema.items.forEach((item) => {
+        spreadProperties(item, node);
+      });
+    } else {
+      throw new NodeError(
+        `Spread not impl ${spreadSchema.kind} ${printSchema(spreadSchema)}`,
+        node,
+        context.checker
+      );
+    }
+  }
+
   node.properties.forEach((property) => {
     if (ts.isSpreadAssignment(property)) {
       const spreadSchema = convertNode(property.expression, context);
-      if (spreadSchema.kind === "object") {
-        Object.assign(properties, spreadSchema.properties);
-        abstractIndexKeys.push(...spreadSchema.abstractIndexKeys);
-      } else {
-        throw new NodeError(
-          `Not Impl ${spreadSchema.kind} ${printSchema(spreadSchema)}`,
-          property,
-          context.checker
-        );
-      }
+      spreadProperties(spreadSchema, property);
     } else if (ts.isPropertyAssignment(property)) {
       const schema = convertNode(property.initializer, context);
 

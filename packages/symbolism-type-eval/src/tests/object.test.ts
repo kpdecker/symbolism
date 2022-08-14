@@ -288,4 +288,64 @@ describe("type schema converter", () => {
       `);
     });
   });
+
+  it("should handle any spreads in object literals", () => {
+    const { type, context, sourceFile } = testType(`
+        type Source = {
+          directUnion: 1 | 2 | 3 | 4;
+        };
+
+        declare const source: any;
+        const literal = {
+            [source.directUnion + "foo"]: 0,
+            [source.directUnion + "bar"]: 0,
+            blat: "yes",
+            ...source,
+            undefinedSpread: {
+              dis: true,
+              ...undefined
+            },
+            nullSpread: {
+              dat: true,
+              ...null
+            },
+            objectSpread: {
+              deOther: true,
+              ...{}
+            },
+            objectSpread: {
+              deOther: true,
+              ...(source ? {foo: "bar"} : { baz: "qux" })
+            }
+        }
+        type Type = typeof literal;
+      `);
+
+    // Object literal becomes an anonymous type when referenced elsewhere
+    // Have to trace it to the source
+    const literalNode = findIdentifiers(sourceFile, "literal")[0];
+    const assignNode = literalNode.parent as ts.VariableDeclaration;
+    expect(
+      printSchema(
+        convertTSTypeToSchema(
+          ...context.clone(undefined, assignNode.initializer!)
+        )
+      )
+    ).toMatchInlineSnapshot(`
+      "{
+        blat: \\"yes\\";
+        nullSpread: { dat: true };
+        objectSpread: {
+          baz: \\"qux\\";
+          deOther: true;
+          foo: \\"bar\\";
+        };
+        undefinedSpread: { dis: true };
+        [k: \`\${any}foo\`]: 0;
+        [k: \`\${any}bar\`]: 0;
+        [k: any]: any;
+      };
+      "
+    `);
+  });
 });
