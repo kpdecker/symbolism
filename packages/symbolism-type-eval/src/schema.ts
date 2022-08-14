@@ -132,195 +132,201 @@ export function convertTSTypeToSchema(
 ): AnySchemaNode {
   const { contextNode, checker, typesHandled } = context;
 
-  if (ts.isParenthesizedExpression(contextNode)) {
-    return convertTSTypeToSchema(
-      ...context.clone(type, contextNode.expression)
-    );
-  }
-
-  if (type.flags & ts.TypeFlags.TypeParameter) {
-    type = checker.getApparentType(type);
-  }
-
-  if (!isIntrinsicType(type) && typesHandled.has(type)) {
-    return {
-      kind: "error",
-      extra: "Circular type " + checker.typeToString(type),
-      node: contextNode,
-    };
-  }
-  typesHandled.add(type);
-
-  const objectFlags = (type as ts.ObjectType).objectFlags;
-
-  const literalOrPrimitive =
-    convertLiteralOrPrimitive(type, context) ||
-    convertTemplateLiteralType(type, context) ||
-    // Prefer our node-based resolution when possible
-    narrowTypeFromValues(type, context);
-  if (literalOrPrimitive) {
-    return literalOrPrimitive;
-  }
-
-  if (type.isUnion()) {
-    const items = type.types.map((t) =>
-      convertTSTypeToSchema(...context.clone(t))
-    );
-    return {
-      kind: "union",
-      items,
-    };
-  } else if (type.isIntersection()) {
-    let allObjects = true;
-    const items = type.types.map((t) => {
-      if (t.isLiteral()) {
-        allObjects = false;
-        return convertTSTypeToSchema(...context.clone(t));
-      }
-
-      const apparentType = checker.getApparentType(t);
-      if (
-        !(t.flags & ts.TypeFlags.Object) ||
-        !(apparentType.flags & ts.TypeFlags.Object)
-      ) {
-        allObjects = false;
-      }
-      return convertTSTypeToSchema(...context.clone(apparentType));
-    });
-
-    // If we consist of objects only, then merge we can merge them
-    if (allObjects) {
-      return convertObjectType(...context.clone(type));
+  try {
+    if (ts.isParenthesizedExpression(contextNode)) {
+      return convertTSTypeToSchema(
+        ...context.clone(type, contextNode.expression)
+      );
     }
 
-    return {
-      kind: "intersection",
-      items,
-      flags: dumpFlags(type.flags, ts.TypeFlags).concat(
-        dumpFlags(objectFlags, ts.ObjectFlags)
-      ),
-    };
-  } else if (isTupleTypeReference(type)) {
-    const tupleType = type.target;
+    if (type.flags & ts.TypeFlags.TypeParameter) {
+      type = checker.getApparentType(type);
+    }
 
-    const typeArguments = checker.getTypeArguments(type);
-    const items: AnySchemaNode[] = typeArguments.map((elementType) =>
-      convertTSTypeToSchema(...context.clone(elementType))
-    );
+    if (!isIntrinsicType(type) && typesHandled.has(type)) {
+      return {
+        kind: "error",
+        extra: "Circular type " + checker.typeToString(type),
+        node: contextNode,
+      };
+    }
+    typesHandled.add(type);
 
-    return {
-      kind: "tuple",
-      items,
-      elementFlags: tupleType.elementFlags,
-    };
-  } else if ((checker as any).isArrayType(type) || type.getNumberIndexType()) {
-    const arrayValueType = checker.getIndexTypeOfType(
-      type,
-      ts.IndexKind.Number
-    );
-    invariant(arrayValueType, "Array type has no number index type");
-
-    return {
-      kind: "array",
-      items: convertTSTypeToSchema(...context.clone(arrayValueType)),
-      flags: dumpFlags(type.flags, ts.TypeFlags).concat(
-        dumpFlags(objectFlags, ts.ObjectFlags)
-      ),
-    };
-  } else if (type.flags & ts.TypeFlags.Object || type.isClassOrInterface()) {
     const objectFlags = (type as ts.ObjectType).objectFlags;
 
-    // If we have an object literal, then perform static analysis on the
-    // runtime code to refine further than the default checker evaluation.
-    if (objectFlags & ts.ObjectFlags.ObjectLiteral) {
-      const declaration = getSymbolDeclaration(type.symbol);
-      if (declaration) {
-        invariantNode(declaration, ts.isObjectLiteralExpression);
-        const valueSchema = convertValueExpression(
-          ...context.cloneNode(declaration)
-        );
-        if (valueSchema) {
-          return valueSchema;
+    const literalOrPrimitive =
+      convertLiteralOrPrimitive(type, context) ||
+      convertTemplateLiteralType(type, context) ||
+      // Prefer our node-based resolution when possible
+      narrowTypeFromValues(type, context);
+    if (literalOrPrimitive) {
+      return literalOrPrimitive;
+    }
+
+    if (type.isUnion()) {
+      const items = type.types.map((t) =>
+        convertTSTypeToSchema(...context.clone(t))
+      );
+      return {
+        kind: "union",
+        items,
+      };
+    } else if (type.isIntersection()) {
+      let allObjects = true;
+      const items = type.types.map((t) => {
+        if (t.isLiteral()) {
+          allObjects = false;
+          return convertTSTypeToSchema(...context.clone(t));
+        }
+
+        const apparentType = checker.getApparentType(t);
+        if (
+          !(t.flags & ts.TypeFlags.Object) ||
+          !(apparentType.flags & ts.TypeFlags.Object)
+        ) {
+          allObjects = false;
+        }
+        return convertTSTypeToSchema(...context.clone(apparentType));
+      });
+
+      // If we consist of objects only, then merge we can merge them
+      if (allObjects) {
+        return convertObjectType(...context.clone(type));
+      }
+
+      return {
+        kind: "intersection",
+        items,
+        flags: dumpFlags(type.flags, ts.TypeFlags).concat(
+          dumpFlags(objectFlags, ts.ObjectFlags)
+        ),
+      };
+    } else if (isTupleTypeReference(type)) {
+      const tupleType = type.target;
+
+      const typeArguments = checker.getTypeArguments(type);
+      const items: AnySchemaNode[] = typeArguments.map((elementType) =>
+        convertTSTypeToSchema(...context.clone(elementType))
+      );
+
+      return {
+        kind: "tuple",
+        items,
+        elementFlags: tupleType.elementFlags,
+      };
+    } else if ((checker as any).isArrayType(type)) {
+      const arrayValueType = checker.getIndexTypeOfType(
+        type,
+        ts.IndexKind.Number
+      );
+      invariant(arrayValueType, "Array type has no number index type");
+
+      return {
+        kind: "array",
+        items: convertTSTypeToSchema(...context.clone(arrayValueType)),
+        flags: dumpFlags(type.flags, ts.TypeFlags).concat(
+          dumpFlags(objectFlags, ts.ObjectFlags)
+        ),
+      };
+    } else if (type.flags & ts.TypeFlags.Object || type.isClassOrInterface()) {
+      const objectFlags = (type as ts.ObjectType).objectFlags;
+
+      // If we have an object literal, then perform static analysis on the
+      // runtime code to refine further than the default checker evaluation.
+      if (objectFlags & ts.ObjectFlags.ObjectLiteral) {
+        const declaration = getSymbolDeclaration(type.symbol);
+        if (declaration) {
+          invariantNode(declaration, ts.isObjectLiteralExpression);
+          const valueSchema = convertValueExpression(
+            ...context.cloneNode(declaration)
+          );
+          if (valueSchema) {
+            return valueSchema;
+          }
         }
       }
-    }
 
-    const callSignatures = type.getCallSignatures();
-    if (callSignatures.length > 0) {
-      function convertSignature(signature: ts.Signature): FunctionSchema {
-        const returnType = signature.getReturnType();
-        return {
-          kind: "function",
-          parameters: signature.parameters.map((parameter) => {
-            const declaration = getSymbolDeclaration(
-              parameter
-            ) as ts.ParameterDeclaration;
-            invariant(declaration, "Parameter has no declaration");
+      const callSignatures = type.getCallSignatures();
+      if (callSignatures.length > 0) {
+        function convertSignature(signature: ts.Signature): FunctionSchema {
+          const returnType = signature.getReturnType();
+          return {
+            kind: "function",
+            parameters: signature.parameters.map((parameter) => {
+              const declaration = getSymbolDeclaration(
+                parameter
+              ) as ts.ParameterDeclaration;
+              invariant(declaration, "Parameter has no declaration");
 
-            return {
-              name: parameter.name,
-              schema: convertTSTypeToSchema(
-                ...context.clone(undefined, declaration)
-              ),
-              symbol: parameter,
-            };
-          }),
-          returnType: convertTSTypeToSchema(...context.clone(returnType)),
-        };
+              return {
+                name: parameter.name,
+                schema: convertTSTypeToSchema(
+                  ...context.clone(undefined, declaration)
+                ),
+                symbol: parameter,
+              };
+            }),
+            returnType: convertTSTypeToSchema(...context.clone(returnType)),
+          };
+        }
+        if (callSignatures.length > 1) {
+          return {
+            kind: "union",
+            items: callSignatures.map(convertSignature),
+          };
+        }
+        return convertSignature(callSignatures[0]);
       }
-      if (callSignatures.length > 1) {
-        return {
-          kind: "union",
-          items: callSignatures.map(convertSignature),
-        };
+
+      if (type.symbol?.getName() === "Date") {
+        const declaration = getSymbolDeclaration(type.symbol);
+        if (
+          declaration &&
+          declaration.getSourceFile().fileName.includes("lib.es5.d.ts")
+        ) {
+          return {
+            kind: "literal",
+            value: "Date",
+          };
+        }
       }
-      return convertSignature(callSignatures[0]);
+
+      return convertObjectType(...context.clone(type));
+    } else if (type.flags & ts.TypeFlags.Index) {
+      const index = type as ts.IndexType;
+      const clone = context.clone(index.type);
+
+      return {
+        kind: "index",
+        type: convertTSTypeToSchema(...clone),
+        node: clone[1].contextNode,
+      };
+    } else if (type.flags & ts.TypeFlags.IndexedAccess) {
+      const indexAccess = type as ts.IndexedAccessType;
+      return {
+        kind: "index-access",
+        object: convertTSTypeToSchema(...context.clone(indexAccess.objectType)),
+        index: convertTSTypeToSchema(...context.clone(indexAccess.indexType)),
+        node: contextNode,
+      };
+    } else {
+      /* istanbul ignore next Sanity */
+      console.log(
+        type,
+        Object.keys(type),
+        type.isLiteral(),
+        type.isNumberLiteral(),
+        dumpFlags(type.flags, ts.TypeFlags),
+        type.symbol && dumpSymbol(type.symbol, checker)
+      );
+
+      /* istanbul ignore next Sanity */
+      throw new Error(`Unsupported type ${checker.typeToString(type)}`);
     }
-
-    if (type.symbol?.getName() === "Date") {
-      const declaration = getSymbolDeclaration(type.symbol);
-      if (
-        declaration &&
-        declaration.getSourceFile().fileName.includes("lib.es5.d.ts")
-      ) {
-        return {
-          kind: "literal",
-          value: "Date",
-        };
-      }
-    }
-
-    return convertObjectType(...context.clone(type));
-  } else if (type.flags & ts.TypeFlags.Index) {
-    const index = type as ts.IndexType;
-    const clone = context.clone(index.type);
-
-    return {
-      kind: "index",
-      type: convertTSTypeToSchema(...clone),
-      node: clone[1].contextNode,
-    };
-  } else if (type.flags & ts.TypeFlags.IndexedAccess) {
-    const indexAccess = type as ts.IndexedAccessType;
-    return {
-      kind: "index-access",
-      object: convertTSTypeToSchema(...context.clone(indexAccess.objectType)),
-      index: convertTSTypeToSchema(...context.clone(indexAccess.indexType)),
-      node: contextNode,
-    };
-  } else {
-    /* istanbul ignore next Sanity */
-    console.log(
-      type,
-      Object.keys(type),
-      type.isLiteral(),
-      type.isNumberLiteral(),
-      dumpFlags(type.flags, ts.TypeFlags),
-      type.symbol && dumpSymbol(type.symbol, checker)
-    );
-
-    /* istanbul ignore next Sanity */
-    throw new Error(`Unsupported type ${checker.typeToString(type)}`);
+  } catch (err) {
+    console.log(checker.typeToString(type));
+    console.error(err);
+    throw new Error(`Error converting type ${checker.typeToString(type)}`);
   }
 }
 
