@@ -38,16 +38,11 @@ function convertFunctionCallsForSymbol(
     .map((reference) => {
       const call = findAncestor(reference, ts.isCallExpression)!;
       if (call) {
-        // Filter cases where this symbol is passed directly as an argument
-        // vs. being called.
-        const expressionStart = call.expression.getFullStart();
-        const expressionEnd = call.expression.getEnd();
-        const referenceStart = reference.getFullStart();
-        const referenceEnd = reference.getEnd();
-
-        if (
-          expressionStart <= referenceStart &&
-          referenceEnd <= expressionEnd
+        if (call.expression === reference) {
+          return call;
+        } else if (
+          ts.isPropertyAccessExpression(call.expression) &&
+          call.expression.name === reference
         ) {
           return call;
         }

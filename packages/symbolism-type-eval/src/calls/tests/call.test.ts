@@ -256,14 +256,6 @@ describe("call arguments lookup", () => {
       foo[0],
       new CallContext(foo[0], symbolTable, checker)
     );
-    `
-      "foo(\\"foo\\");
-      foo({
-        bar: true,
-        bat: 10,
-      });
-      "
-    `;
     expect(printCalls(calls)).toMatchInlineSnapshot(`
       "foo(
         arg as {
@@ -271,6 +263,33 @@ describe("call arguments lookup", () => {
           value: number;
         }
       );
+      "
+    `);
+  });
+  it("should only resolve calls in expressions", () => {
+    const { checker, symbolTable } = testCall(`
+      declare const foo: (value) => void;
+
+      function bat(data) {
+        foo(data);
+      }
+
+      function bar(value) {
+        bat(value);
+      }
+      bar.baz = (val) => {};
+
+      bar("foo");
+      bar.baz(true);
+    `);
+
+    const foo = symbolTable.lookup("foo", checker);
+    const calls = loadFunctionCalls(
+      foo[0],
+      new CallContext(foo[0], symbolTable, checker)
+    );
+    expect(printCalls(calls)).toMatchInlineSnapshot(`
+      "foo(\\"foo\\");
       "
     `);
   });
