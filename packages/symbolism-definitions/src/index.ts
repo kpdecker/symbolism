@@ -269,10 +269,10 @@ function defineIdentifier(
 ) {
   if (ts.isIdentifier(node)) {
     if (
-      ts.isObjectLiteralExpression(node.parent) ||
-      ts.isArrayLiteralExpression(node.parent) ||
-      ts.isCallExpression(node.parent) ||
-      ts.isNewExpression(node.parent)
+      !options.chooseLocal &&
+      (ts.isArrayLiteralExpression(node.parent) ||
+        ts.isCallExpression(node.parent) ||
+        ts.isNewExpression(node.parent))
     ) {
       const contextSymbol = contextualTypeAndSymbol(node, checker);
       const contextType = contextSymbol?.type;
