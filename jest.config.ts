@@ -72,6 +72,7 @@ export default {
     "^@symbolism/definitions": "<rootDir>/packages/symbolism-definitions/src",
     "^@symbolism/paths": "<rootDir>/packages/symbolism-paths/src",
     "^@symbolism/symbol-table": "<rootDir>/packages/symbolism-symbol-table/src",
+    "^@symbolism/test": "<rootDir>/packages/symbolism-test/src",
     "^@symbolism/ts-utils": "<rootDir>/packages/symbolism-ts-utils/src",
     "^@symbolism/ts-debug": "<rootDir>/packages/symbolism-ts-debug/src",
     "^@symbolism/type-eval": "<rootDir>/packages/symbolism-type-eval/src",
