@@ -8,7 +8,7 @@
     "type": "git",
     "url": "git+https://github.com/kpdecker/symbolism.git"
   },
-  "main": "dist/symbolism-ts-utils.cjs.js",
+  "main": "dist/index.js",
   "dependencies": {
     "@symbolism/utils": "^0.2.0",
     "tiny-invariant": "^1.2.0"

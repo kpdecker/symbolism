@@ -2,7 +2,7 @@
   "name": "@symbolism/test",
   "version": "0.2.0",
   "description": "Symbolism utilities",
-  "main": "dist/symbolism-test.cjs.js",
+  "main": "dist/index.js",
   "author": "Kevin Decker <kpdecker@gmail.com>",
   "license": "MIT",
   "repository": {

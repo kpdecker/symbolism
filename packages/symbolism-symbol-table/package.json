@@ -8,7 +8,7 @@
     "type": "git",
     "url": "git+https://github.com/kpdecker/symbolism.git"
   },
-  "main": "dist/symbolism-symbol-table.cjs.js",
+  "main": "dist/index.js",
   "dependencies": {
     "@symbolism/definitions": "^0.2.0",
     "@symbolism/paths": "^0.2.0",

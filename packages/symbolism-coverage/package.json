@@ -2,7 +2,7 @@
   "name": "@symbolism/coverage",
   "version": "0.2.0",
   "description": "Coverage assertions for specific code tokens.",
-  "main": "dist/symbolism-coverage.cjs.js",
+  "main": "dist/index.js",
   "author": "Kevin Decker <kpdecker@gmail.com>",
   "license": "MIT",
   "repository": {
