@@ -1,2 +1,3 @@
 #!/usr/bin/env node
-require("../dist/symbolism-cli.cjs.js");
+require("source-map-support/register");
+require("../dist");
