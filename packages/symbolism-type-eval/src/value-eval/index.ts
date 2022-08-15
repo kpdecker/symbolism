@@ -1,12 +1,18 @@
 import { defineSymbol } from "@symbolism/definitions";
 import { getSymbolDeclaration } from "@symbolism/ts-utils";
-import { NodeError } from "@symbolism/utils";
+import { logDebug, NodeError } from "@symbolism/utils";
 import ts from "typescript";
 import { AnySchemaNode, convertTSTypeToSchema } from "../schema";
 import { SchemaContext } from "../context";
 import { convertBinaryExpression } from "./binary-expression";
 import { convertObjectLiteralValue } from "./object";
 import { convertTemplateLiteralValue } from "./string-template";
+import { convertArrayLiteralValue } from "./array";
+import { dumpNode } from "@symbolism/ts-debug";
+
+export type TypeEvalOptions = {
+  allowMissing?: boolean;
+};
 
 export function narrowTypeFromValues(
   type: ts.Type,
@@ -29,7 +35,10 @@ export function narrowTypeFromValues(
 
   if (symbolDeclaration) {
     const symbolSchema = convertValueDeclaration(
-      ...newContext.cloneNode(symbolDeclaration)
+      ...newContext.cloneNode(symbolDeclaration),
+      {
+        allowMissing: true,
+      }
     );
     if (symbolSchema) {
       return symbolSchema;
@@ -43,7 +52,10 @@ export function narrowTypeFromValues(
     });
     if (contextDefinition?.declaration) {
       const contextSchema = convertValueDeclaration(
-        ...newContext.cloneNode(contextDefinition.declaration)
+        ...newContext.cloneNode(contextDefinition.declaration),
+        {
+          allowMissing: true,
+        }
       );
       if (contextSchema) {
         return contextSchema;
@@ -51,7 +63,10 @@ export function narrowTypeFromValues(
     }
 
     const contextSchema = convertValueExpression(
-      ...newContext.cloneNode(contextNode as ts.Expression)
+      ...newContext.cloneNode(contextNode as ts.Expression),
+      {
+        allowMissing: true,
+      }
     );
     if (contextSchema) {
       return contextSchema;
@@ -61,7 +76,8 @@ export function narrowTypeFromValues(
 
 export function convertValueDeclaration(
   node: ts.Declaration,
-  context: SchemaContext
+  context: SchemaContext,
+  options: TypeEvalOptions
 ): AnySchemaNode | undefined {
   try {
     if (
@@ -73,11 +89,17 @@ export function convertValueDeclaration(
       ts.isPropertyAssignment(node)
     ) {
       if (node.initializer) {
-        return convertValueExpression(...context.cloneNode(node.initializer));
+        return convertValueExpression(
+          ...context.cloneNode(node.initializer),
+          options
+        );
       }
     }
     if (ts.isExpressionStatement(node)) {
-      return convertValueExpression(...context.cloneNode(node.expression));
+      return convertValueExpression(
+        ...context.cloneNode(node.expression),
+        options
+      );
     }
     if (ts.isTypeAliasDeclaration(node)) {
       const secondDefinition = defineSymbol(node.type, context.checker, {
@@ -86,7 +108,10 @@ export function convertValueDeclaration(
       const secondDeclaration = getSymbolDeclaration(secondDefinition?.symbol);
 
       if (secondDeclaration) {
-        return convertValueDeclaration(...context.cloneNode(secondDeclaration));
+        return convertValueDeclaration(
+          ...context.cloneNode(secondDeclaration),
+          options
+        );
       }
     }
   } catch (err: any) {
@@ -101,13 +126,17 @@ export function convertValueDeclaration(
 
 export function convertValueExpression(
   node: ts.Node,
-  context: SchemaContext
+  context: SchemaContext,
+  options: TypeEvalOptions
 ): AnySchemaNode | undefined {
   try {
     const { checker } = context;
 
     if (ts.isParenthesizedExpression(node)) {
-      return convertValueExpression(...context.cloneNode(node.expression));
+      return convertValueExpression(
+        ...context.cloneNode(node.expression),
+        options
+      );
     }
 
     if (ts.isIdentifier(node)) {
@@ -120,9 +149,16 @@ export function convertValueExpression(
 
       if (identifierDeclaration) {
         return convertValueDeclaration(
-          ...context.cloneNode(identifierDeclaration)
+          ...context.cloneNode(identifierDeclaration),
+          options
         );
       }
+
+      return {
+        kind: "primitive",
+        name: "any",
+        node,
+      };
     }
 
     if (
@@ -151,7 +187,73 @@ export function convertValueExpression(
     }
 
     if (ts.isComputedPropertyName(node)) {
-      return convertValueExpression(...context.cloneNode(node.expression));
+      return convertValueExpression(
+        ...context.cloneNode(node.expression),
+        options
+      );
+    }
+
+    if (ts.isElementAccessExpression(node)) {
+      const parentSchema = convertValueExpression(
+        ...context.cloneNode(node.expression),
+        { allowMissing: true }
+      ) || {
+        kind: "primitive",
+        name: "any",
+        node: node.expression,
+      };
+      const argumentSchema = convertValueExpression(
+        ...context.cloneNode(node.argumentExpression),
+        { allowMissing: true }
+      ) || {
+        kind: "primitive",
+        name: "any",
+        node: node.argumentExpression,
+      };
+
+      if (parentSchema.kind === "object") {
+        if (argumentSchema.kind === "primitive") {
+          return {
+            kind: "union",
+            items: [
+              Object.values(parentSchema.properties).concat(
+                parentSchema.abstractIndexKeys.map(({ value }) => value)
+              ),
+            ].flat(),
+          };
+        } else if (argumentSchema.kind === "literal") {
+          const argValue = argumentSchema.value as string | number;
+          if (argValue in parentSchema.properties) {
+            return parentSchema.properties[argValue];
+          }
+        } else {
+          return {
+            kind: "literal",
+            value: undefined,
+          };
+        }
+      } else if (parentSchema.kind === "array") {
+        return parentSchema.items;
+      } else if (
+        parentSchema.kind === "primitive" &&
+        parentSchema.name === "any"
+      ) {
+        return parentSchema;
+      }
+    }
+
+    if (ts.isArrayLiteralExpression(node)) {
+      return convertArrayLiteralValue(node, context);
+    }
+
+    if (!options.allowMissing) {
+      throw new Error(`Unsupported expression: ${ts.SyntaxKind[node.kind]}`);
+    } else {
+      logDebug(
+        `Unsupported expression: ${
+          ts.SyntaxKind[node.kind]
+        }\n\nNode: ${JSON.stringify(dumpNode(node, checker))}`
+      );
     }
   } catch (err: any) {
     throw new NodeError(

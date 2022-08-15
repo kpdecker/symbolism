@@ -348,4 +348,95 @@ describe("type schema converter", () => {
       "
     `);
   });
+
+  describe("object access", () => {
+    it("should handle object access", () => {
+      const { type, context, sourceFile } = testType(`
+        type Source = {
+          directUnion: 1 | 2 | 3 | 4;
+        };
+
+        declare const source: any;
+        const literal = {
+            [source.directUnion + "foo"]: 0,
+            [source.directUnion + "bar"]: 0,
+            blat: "yes",
+            objectSpread: {
+              deOther: true,
+              ...(source ? {foo: "bar"} : { baz: "qux" })
+            }
+        }
+
+        const primitiveLookup = literal[source];
+
+        const spreadName = "objectSpread";
+        const literalLookup = literal[spreadName]
+
+        const anyLookup = aaannyy[spreadName];
+
+        const objectObjectLookup = literal[literal];
+
+        const arr: number[] = [1, 2, 3];
+        const arrayLookup = arr[source];
+
+        const stringLookup = spreadName['length'];
+        const stringAbstractLookup = spreadName[source];
+
+        type Type = typeof literal;
+      `);
+
+      function testVar(name: string) {
+        const literalNode = findIdentifiers(sourceFile, name)[0];
+        const assignNode = literalNode.parent as ts.VariableDeclaration;
+        return printSchema(
+          convertTSTypeToSchema(
+            ...context.clone(undefined, assignNode.initializer!)
+          )
+        );
+      }
+
+      expect(testVar("primitiveLookup")).toMatchInlineSnapshot(`
+        " \\"yes\\"
+          | {
+              baz: \\"qux\\";
+              deOther: true;
+              foo: \\"bar\\";
+            }
+          | 0
+          | 0;
+        "
+      `);
+      expect(testVar("literalLookup")).toMatchInlineSnapshot(`
+        "{
+          baz: \\"qux\\";
+          deOther: true;
+          foo: \\"bar\\";
+        };
+        "
+      `);
+      expect(testVar("anyLookup")).toMatchInlineSnapshot(`
+        "any;
+        "
+      `);
+      expect(testVar("objectObjectLookup")).toMatchInlineSnapshot(`
+        "undefined;
+        "
+      `);
+
+      expect(testVar("arrayLookup")).toMatchInlineSnapshot(`
+        "1 | 2 | 3;
+        "
+      `);
+
+      expect(testVar("stringLookup")).toMatchInlineSnapshot(`
+        "number;
+        "
+      `);
+
+      expect(testVar("stringAbstractLookup")).toMatchInlineSnapshot(`
+        "\\"objectSpread\\"[any];
+        "
+      `);
+    });
+  });
 });

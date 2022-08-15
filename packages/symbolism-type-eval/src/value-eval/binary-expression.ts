@@ -80,7 +80,9 @@ export function convertBinaryExpression(
 
     case ts.SyntaxKind.EqualsToken:
     case ts.SyntaxKind.CommaToken:
-      return convertValueExpression(...context.cloneNode(node.right));
+      return convertValueExpression(...context.cloneNode(node.right), {
+        allowMissing: false,
+      });
 
     default:
       const defaultAssertion: never = operator;

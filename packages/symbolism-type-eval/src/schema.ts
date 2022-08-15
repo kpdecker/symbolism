@@ -239,7 +239,10 @@ export function convertTSTypeToSchema(
         if (declaration) {
           invariantNode(declaration, ts.isObjectLiteralExpression);
           const valueSchema = convertValueExpression(
-            ...context.cloneNode(declaration)
+            ...context.cloneNode(declaration),
+            {
+              allowMissing: true,
+            }
           );
           if (valueSchema) {
             return valueSchema;
@@ -341,7 +344,9 @@ function convertObjectType(
   const { contextNode, checker } = context;
 
   if (ts.isObjectLiteralExpression(contextNode)) {
-    const sourceType = convertValueExpression(contextNode, context);
+    const sourceType = convertValueExpression(contextNode, context, {
+      allowMissing: true,
+    });
     if (sourceType) {
       return sourceType;
     }

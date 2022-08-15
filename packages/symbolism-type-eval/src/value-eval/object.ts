@@ -23,7 +23,9 @@ export function convertObjectLiteralValue(
     name: ts.PropertyName
   ): string[] | AnySchemaNode {
     const propertyName = ts.isComputedPropertyName(name)
-      ? convertValueExpression(...context.cloneNode(name.expression))
+      ? convertValueExpression(...context.cloneNode(name.expression), {
+          allowMissing: false,
+        })
       : name.text;
     invariant(propertyName, "Expected property name");
 

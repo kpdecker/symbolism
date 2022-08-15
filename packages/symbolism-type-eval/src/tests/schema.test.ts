@@ -364,7 +364,7 @@ describe("type schema converter", () => {
           convertTSTypeToSchema(...context.clone(undefined, xNodes[0]))
         )
       ).toMatchInlineSnapshot(`
-        "number[];
+        "(1 | 2 | 3)[];
         "
       `);
     });
