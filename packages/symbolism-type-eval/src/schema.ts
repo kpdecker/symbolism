@@ -14,6 +14,7 @@ import {
 } from "./value-eval/string-template";
 import { booleanPrimitiveSchema } from "./well-known-schemas";
 import { SchemaContext } from "./context";
+import { NodeError } from "@symbolism/utils";
 
 interface SchemaNode {
   flags?: string[];
@@ -323,10 +324,13 @@ export function convertTSTypeToSchema(
       /* istanbul ignore next Sanity */
       throw new Error(`Unsupported type ${checker.typeToString(type)}`);
     }
-  } catch (err) {
-    console.log(checker.typeToString(type));
-    console.error(err);
-    throw new Error(`Error converting type ${checker.typeToString(type)}`);
+  } catch (err: any) {
+    throw new NodeError(
+      `Error converting type ${checker.typeToString(type)}`,
+      contextNode,
+      checker,
+      err
+    );
   }
 }
 

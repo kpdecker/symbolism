@@ -1,6 +1,17 @@
 import { dumpNode } from "@symbolism/ts-debug";
 import ts from "typescript";
 
+if (isRunningInJest()) {
+  const $super = Error.prepareStackTrace;
+  Error.prepareStackTrace = (error, stack) => {
+    let result = $super!(error, stack);
+    if ("cause" in error && (error as any).cause) {
+      result += "\n\nCaused by: " + (error as any).cause.stack;
+    }
+    return result;
+  };
+}
+
 export class NodeError extends Error {
   isNodeError = true;
   // cause: Error | undefined;
@@ -20,7 +31,8 @@ export class NodeError extends Error {
       }`;
     }
 
-    super(`${message} for ${dump}`);
+    super(`${message}\n\nNode: ${dump}`);
+    Error.captureStackTrace(this, this.constructor);
 
     if ((cause as any)?.isNodeError) {
       return cause as NodeError;
@@ -28,11 +40,6 @@ export class NodeError extends Error {
 
     if (cause) {
       (this as any).cause = cause;
-
-      if (isRunningInJest()) {
-        // Jest will not show the cause in the stack trace.
-        this.stack = this.stack + "\n\nCaused by: " + cause.stack;
-      }
     }
   }
 }

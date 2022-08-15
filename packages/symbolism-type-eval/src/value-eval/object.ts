@@ -44,7 +44,10 @@ export function convertObjectLiteralValue(
       });
 
       return expandedSchema.map((schema) => {
-        invariant(schema.kind === "literal");
+        invariant(
+          schema.kind === "literal",
+          `Expected literal but got ${schema.kind}`
+        );
         return "" + schema.value;
       });
     }
