@@ -367,6 +367,10 @@ describe("type schema converter", () => {
             }
         }
 
+        let union: {foo: "bar"} & { baz: "qux" };
+        const unionLookup = union[source];
+        const unionLookup2 = union["foo"];
+
         const primitiveLookup = literal[source];
 
         const spreadName = "objectSpread";
@@ -394,6 +398,15 @@ describe("type schema converter", () => {
           )
         );
       }
+
+      expect(testVar("unionLookup")).toMatchInlineSnapshot(`
+        "\\"bar\\" | \\"qux\\";
+        "
+      `);
+      expect(testVar("unionLookup2")).toMatchInlineSnapshot(`
+        "\\"bar\\";
+        "
+      `);
 
       expect(testVar("primitiveLookup")).toMatchInlineSnapshot(`
         " \\"yes\\"

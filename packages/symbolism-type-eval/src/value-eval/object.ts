@@ -1,12 +1,13 @@
-import { NodeError } from "@symbolism/utils";
+import { logDebug, NodeError } from "@symbolism/utils";
 import invariant from "tiny-invariant";
 import ts from "typescript";
-import { convertNode, convertValueExpression } from ".";
+import { convertNode, convertValueExpression, TypeEvalOptions } from ".";
 import { isConcreteSchema } from "../classify";
 import { printSchema } from "../print/typescript";
 import { AnySchemaNode, convertTSTypeToSchema, ObjectSchema } from "../schema";
 import { SchemaContext } from "../context";
-import { expandSchemaList } from "./union";
+import { expandSchemaList, unionProperties } from "./union";
+import { dumpNode } from "@symbolism/ts-debug";
 
 export function convertObjectLiteralValue(
   node: ts.Node,
@@ -145,4 +146,92 @@ export function convertObjectLiteralValue(
     properties,
     abstractIndexKeys,
   };
+}
+
+export function convertElementAccessExpression(
+  node: ts.ElementAccessExpression,
+  context: SchemaContext,
+  options: TypeEvalOptions
+): AnySchemaNode | undefined {
+  const parentSchema = convertValueExpression(
+    ...context.cloneNode(node.expression),
+    { allowMissing: true }
+  ) || {
+    kind: "primitive",
+    name: "any",
+    node: node.expression,
+  };
+  const argumentSchema = convertValueExpression(
+    ...context.cloneNode(node.argumentExpression),
+    { allowMissing: true }
+  ) || {
+    kind: "primitive",
+    name: "any",
+    node: node.argumentExpression,
+  };
+
+  if (argumentSchema.kind === "error") {
+    return argumentSchema;
+  }
+  if (parentSchema.kind === "error") {
+    return parentSchema;
+  }
+
+  if (argumentSchema.kind === "function") {
+    return argumentSchema;
+  }
+
+  if (parentSchema.kind === "object") {
+    if (argumentSchema.kind === "primitive") {
+      return {
+        kind: "union",
+        items: [
+          Object.values(parentSchema.properties).concat(
+            parentSchema.abstractIndexKeys.map(({ value }) => value)
+          ),
+        ].flat(),
+      };
+    } else if (argumentSchema.kind === "literal") {
+      const argValue = argumentSchema.value as string | number;
+      if (argValue in parentSchema.properties) {
+        return parentSchema.properties[argValue];
+      }
+    }
+
+    return {
+      kind: "literal",
+      value: undefined,
+    };
+  } else if (parentSchema.kind === "array") {
+    return parentSchema.items;
+  } else if (parentSchema.kind === "primitive") {
+    if (parentSchema.name === "any") {
+      return parentSchema;
+    }
+
+    // Resolve via TS
+    return argumentSchema;
+  } else if (parentSchema.kind === "literal") {
+    return argumentSchema;
+  } else if (parentSchema.kind === "union") {
+    if (argumentSchema.kind === "primitive") {
+      const properties = unionProperties(parentSchema);
+      return {
+        kind: "union",
+        items: Object.values(properties),
+      };
+    }
+
+    return argumentSchema;
+  }
+
+  if (!options.allowMissing) {
+    throw new Error(`Unsupported expression: ${ts.SyntaxKind[node.kind]}`);
+  } else {
+    logDebug(
+      `Unsupported expression: ${
+        ts.SyntaxKind[node.kind]
+      }\n\nNode: ${JSON.stringify(dumpNode(node, context.checker))}`
+    );
+  }
 }

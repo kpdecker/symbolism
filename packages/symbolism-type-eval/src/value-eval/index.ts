@@ -5,7 +5,10 @@ import ts from "typescript";
 import { AnySchemaNode, convertTSTypeToSchema } from "../schema";
 import { SchemaContext } from "../context";
 import { convertBinaryExpression } from "./binary-expression";
-import { convertObjectLiteralValue } from "./object";
+import {
+  convertElementAccessExpression,
+  convertObjectLiteralValue,
+} from "./object";
 import { convertTemplateLiteralValue } from "./string-template";
 import { convertArrayLiteralValue } from "./array";
 import { dumpNode } from "@symbolism/ts-debug";
@@ -93,6 +96,10 @@ export function convertValueDeclaration(
           ...context.cloneNode(node.initializer),
           options
         );
+      }
+      if ("type" in node && node.type) {
+        // TODO: Pass Opions?
+        return convertTSTypeToSchema(...context.clone(undefined, node.type));
       }
     }
     if (ts.isExpressionStatement(node)) {
@@ -194,52 +201,7 @@ export function convertValueExpression(
     }
 
     if (ts.isElementAccessExpression(node)) {
-      const parentSchema = convertValueExpression(
-        ...context.cloneNode(node.expression),
-        { allowMissing: true }
-      ) || {
-        kind: "primitive",
-        name: "any",
-        node: node.expression,
-      };
-      const argumentSchema = convertValueExpression(
-        ...context.cloneNode(node.argumentExpression),
-        { allowMissing: true }
-      ) || {
-        kind: "primitive",
-        name: "any",
-        node: node.argumentExpression,
-      };
-
-      if (parentSchema.kind === "object") {
-        if (argumentSchema.kind === "primitive") {
-          return {
-            kind: "union",
-            items: [
-              Object.values(parentSchema.properties).concat(
-                parentSchema.abstractIndexKeys.map(({ value }) => value)
-              ),
-            ].flat(),
-          };
-        } else if (argumentSchema.kind === "literal") {
-          const argValue = argumentSchema.value as string | number;
-          if (argValue in parentSchema.properties) {
-            return parentSchema.properties[argValue];
-          }
-        } else {
-          return {
-            kind: "literal",
-            value: undefined,
-          };
-        }
-      } else if (parentSchema.kind === "array") {
-        return parentSchema.items;
-      } else if (
-        parentSchema.kind === "primitive" &&
-        parentSchema.name === "any"
-      ) {
-        return parentSchema;
-      }
+      return convertElementAccessExpression(node, context, options);
     }
 
     if (ts.isArrayLiteralExpression(node)) {
