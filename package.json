@@ -9,8 +9,8 @@
     "lint": "tsc",
     "postinstall": "preconstruct dev",
     "clean": "rm -rf packages/*/dist",
-    "build": "for x in `ls packages/`; do babel --ignore '**/*.test.ts' -x '.js,.jsx,.es6,.es,.mjs,.cjs,.ts,.tsx' ./packages/$x/src --out-dir ./packages/$x/dist --source-maps true; done;",
-    "watch": "nodemon -e 'ts,tsx' --exec yarn build",
+    "build": "./scripts/build.sh",
+    "watch": "./scripts/build.sh watch",
     "changeset": "changeset",
     "version-packages": "yarn test & yarn lint && changeset version",
     "release": "yarn build && changeset publish"
