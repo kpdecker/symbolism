@@ -155,7 +155,10 @@ export function convertElementAccessExpression(
   context: SchemaContext
 ): AnySchemaNode | undefined {
   const parentSchema = convertValueExpression(
-    ...context.cloneNode(node.expression, { allowMissing: true })
+    ...context.cloneNode(node.expression, {
+      allowMissing: true,
+      includeTypeNodes: true,
+    })
   ) || {
     kind: "primitive",
     name: "any",

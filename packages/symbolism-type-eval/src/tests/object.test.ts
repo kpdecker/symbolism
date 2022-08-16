@@ -447,7 +447,7 @@ describe("type schema converter", () => {
       `);
 
       expect(testVar("stringAbstractLookup")).toMatchInlineSnapshot(`
-        "\\"objectSpread\\"[any];
+        "any;
         "
       `);
     });

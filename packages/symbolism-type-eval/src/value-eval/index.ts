@@ -11,10 +11,12 @@ import {
 } from "./object";
 import { convertTemplateLiteralValue } from "./string-template";
 import { convertArrayLiteralValue } from "./array";
-import { dumpNode } from "@symbolism/ts-debug";
+import { dumpNode, dumpSchema } from "@symbolism/ts-debug";
+import { areSchemasEqual } from "../classify";
 
 export type TypeEvalOptions = {
   allowMissing?: boolean;
+  includeTypeNodes?: boolean;
 };
 
 export function narrowTypeFromValues(
@@ -27,7 +29,11 @@ export function narrowTypeFromValues(
   const symbolDeclaration = getSymbolDeclaration(symbol);
 
   if (context.narrowingNode === contextNode) {
-    throw new NodeError("Circular narrowing node", contextNode, checker);
+    throw new NodeError(
+      "Circular narrowing node " + checker.typeToString(type),
+      contextNode,
+      checker
+    );
   }
 
   // Create a new context to create a new circular reference check scope.
@@ -92,8 +98,7 @@ export function convertValueDeclaration(
       if (node.initializer) {
         return convertValueExpression(...context.cloneNode(node.initializer));
       }
-      if ("type" in node && node.type) {
-        // TODO: Pass Opions?
+      if (context.options.includeTypeNodes && "type" in node && node.type) {
         return convertTSTypeToSchema(...context.clone(undefined, node.type));
       }
     }
@@ -213,7 +218,22 @@ export function convertNode(node: ts.Node, context: SchemaContext) {
 
   const definition = defineSymbol(node, checker, { chooseLocal: false });
 
-  return definition?.declaration && definition?.type
-    ? convertTSTypeToSchema(...context.clone(definition.type, node))
-    : convertTSTypeToSchema(...context.clone(undefined, node));
+  if (definition?.declaration && definition?.type) {
+    const schema = convertTSTypeToSchema(
+      ...context.clone(definition.type, definition.declaration)
+    );
+
+    // We want to evaluate the type against the declaration, but we want the
+    // schema to reference the usage to allow for replacement on call evaluation.
+    if ("node" in schema) {
+      return {
+        ...schema,
+        node,
+      };
+    }
+
+    return schema;
+  }
+
+  return convertTSTypeToSchema(...context.clone(undefined, node));
 }
