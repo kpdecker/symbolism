@@ -53,6 +53,7 @@ export class SchemaContext {
 export class CallContext extends SchemaContext {
   callCache = new Map<ts.Node, FunctionCallInfo[]>();
   symbols: SymbolTable;
+  symbolsHandled: ts.Symbol[];
 
   constructor(
     symbol: ts.Symbol,
@@ -68,11 +69,13 @@ export class CallContext extends SchemaContext {
 
     super(declaration, checker);
     this.symbols = symbols;
+    this.symbolsHandled = [];
   }
 
   protected override cloneProps(newInstance: CallContext) {
     super.cloneProps(newInstance);
     newInstance.callCache = new Map(this.callCache);
     newInstance.symbols = this.symbols;
+    newInstance.symbolsHandled = this.symbolsHandled.slice();
   }
 }

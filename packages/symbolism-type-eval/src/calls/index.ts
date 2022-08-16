@@ -1,4 +1,4 @@
-import ts, { CallExpression, findAncestor } from "typescript";
+import ts, { findAncestor } from "typescript";
 
 import { AnySchemaNode, convertTSTypeToSchema } from "../schema";
 import { CallContext } from "../context";
@@ -6,7 +6,7 @@ import { dumpNode, dumpSymbol } from "@symbolism/ts-debug";
 import { areSchemasEqual, nonConcreteInputs } from "../classify";
 import { resolveSymbolsInSchema } from "../value-eval/symbol";
 import { defineSymbol } from "@symbolism/definitions";
-import { NodeError, removeDuplicates } from "@symbolism/utils";
+import { logVerbose, NodeError, removeDuplicates } from "@symbolism/utils";
 import { expandUnions } from "../value-eval/union";
 import { isNamedDeclaration } from "@symbolism/ts-utils";
 
@@ -29,10 +29,19 @@ function convertFunctionCallsForSymbol(
   symbol: ts.Symbol,
   context: CallContext
 ): FunctionCallInfo[] {
-  const { symbols } = context;
+  const { symbols, checker } = context;
 
   const referenceSet = symbols.get(symbol);
   const references = referenceSet && Array.from(referenceSet);
+
+  logVerbose(
+    "Converting call",
+    dumpSymbol(symbol, checker),
+    "references",
+    references?.length
+  );
+
+  context.symbolsHandled.push(symbol);
 
   const calls = (references ?? [])
     .map((reference) => {
@@ -56,7 +65,7 @@ function convertFunctionCallsForSymbol(
 
   calls.forEach((callExpression) => {
     try {
-      convertCall(callExpression, context, collectedCalls);
+      convertCall(symbol, callExpression, context, collectedCalls);
     } catch (e: any) {
       throw new NodeError(
         "Error converting call " +
@@ -74,6 +83,7 @@ function convertFunctionCallsForSymbol(
 }
 
 function convertCall(
+  currentSymbol: ts.Symbol,
   callExpression: ts.CallExpression,
   context: CallContext,
   collectedCalls: FunctionCallInfo[]
@@ -151,6 +161,40 @@ function convertCall(
       //   context.checker
       // );
       return;
+    }
+
+    if (context.symbolsHandled.includes(symbol)) {
+      throw new Error(`Infinite recursion detected
+
+  Call Expression: ${JSON.stringify(dumpNode(callExpression, context.checker))}
+
+  Next Symbol: ${JSON.stringify(dumpSymbol(symbol, checker))}
+  Current Symbol: ${JSON.stringify(dumpSymbol(currentSymbol, checker))}
+
+  - ${context.symbolsHandled
+    .map((s) => JSON.stringify(dumpSymbol(s, checker)))
+    .join("\n  - ")}
+
+
+  Declaration: ${JSON.stringify(dumpNode(declaration, checker))}
+
+  Parameter Inputs:
+  - ${Array.from(parameterInputs)
+    .map((s) => JSON.stringify(dumpNode(s, checker)))
+    .join("\n  - ")}
+
+  Arg Schemas:
+  - ${argSchemas
+    .map(
+      (arg) =>
+        `\n    - ${arg.inputSymbols
+          .map((inputSymbol) =>
+            JSON.stringify(dumpSymbol(inputSymbol?.symbol, checker))
+          )
+          .join("\n    - ")}`
+    )
+    .join("\n  - ")}
+`);
     }
 
     const upstreamCall = convertFunctionCallsForSymbol(symbol, context);
