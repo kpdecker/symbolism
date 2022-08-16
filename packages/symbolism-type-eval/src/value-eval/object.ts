@@ -24,9 +24,11 @@ export function convertObjectLiteralValue(
     name: ts.PropertyName
   ): string[] | AnySchemaNode {
     const propertyName = ts.isComputedPropertyName(name)
-      ? convertValueExpression(...context.cloneNode(name.expression), {
-          allowMissing: false,
-        })
+      ? convertValueExpression(
+          ...context.cloneNode(name.expression, {
+            allowMissing: false,
+          })
+        )
       : name.text;
     invariant(propertyName, "Expected property name");
 
@@ -150,20 +152,17 @@ export function convertObjectLiteralValue(
 
 export function convertElementAccessExpression(
   node: ts.ElementAccessExpression,
-  context: SchemaContext,
-  options: TypeEvalOptions
+  context: SchemaContext
 ): AnySchemaNode | undefined {
   const parentSchema = convertValueExpression(
-    ...context.cloneNode(node.expression),
-    { allowMissing: true }
+    ...context.cloneNode(node.expression, { allowMissing: true })
   ) || {
     kind: "primitive",
     name: "any",
     node: node.expression,
   };
   const argumentSchema = convertValueExpression(
-    ...context.cloneNode(node.argumentExpression),
-    { allowMissing: true }
+    ...context.cloneNode(node.argumentExpression, { allowMissing: true })
   ) || {
     kind: "primitive",
     name: "any",
@@ -225,7 +224,7 @@ export function convertElementAccessExpression(
     return argumentSchema;
   }
 
-  if (!options.allowMissing) {
+  if (!context.options.allowMissing) {
     throw new Error(`Unsupported expression: ${ts.SyntaxKind[node.kind]}`);
   } else {
     logDebug(

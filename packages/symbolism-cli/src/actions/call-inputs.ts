@@ -30,7 +30,7 @@ export function callInputs(symbolPath: string, options: OptionValues) {
 
   const argumentTypes = loadFunctionCalls(
     symbol,
-    new CallContext(symbol, symbols, checker)
+    new CallContext(symbol, symbols, checker, {})
   );
 
   console.log(printCalls(argumentTypes));

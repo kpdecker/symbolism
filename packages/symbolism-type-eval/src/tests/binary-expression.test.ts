@@ -18,7 +18,7 @@ function testType(source: string, name = "Type") {
     sourceFile,
     checker,
 
-    context: new SchemaContext(node, checker),
+    context: new SchemaContext(node, checker, {}),
   };
 }
 
@@ -170,7 +170,7 @@ describe("type schema converter", () => {
         const nodes = findIdentifiers(sourceFile, name);
         const type = checker.getTypeAtLocation(nodes[0]);
         return printSchema(
-          convertTSTypeToSchema(type, new SchemaContext(nodes[0], checker))
+          convertTSTypeToSchema(type, new SchemaContext(nodes[0], checker, {}))
         );
       }
     });
@@ -317,7 +317,7 @@ describe("type schema converter", () => {
         const nodes = findIdentifiers(sourceFile, name);
         const type = checker.getTypeAtLocation(nodes[0]);
         return printSchema(
-          convertTSTypeToSchema(type, new SchemaContext(nodes[0], checker))
+          convertTSTypeToSchema(type, new SchemaContext(nodes[0], checker, {}))
         );
       }
     });
@@ -412,7 +412,7 @@ describe("type schema converter", () => {
         const nodes = findIdentifiers(sourceFile, name);
         const type = checker.getTypeAtLocation(nodes[0]);
         return printSchema(
-          convertTSTypeToSchema(type, new SchemaContext(nodes[0], checker))
+          convertTSTypeToSchema(type, new SchemaContext(nodes[0], checker, {}))
         );
       }
     });
@@ -435,7 +435,7 @@ describe("type schema converter", () => {
         const nodes = findIdentifiers(sourceFile, name);
         const type = checker.getTypeAtLocation(nodes[0]);
         return printSchema(
-          convertTSTypeToSchema(type, new SchemaContext(nodes[0], checker))
+          convertTSTypeToSchema(type, new SchemaContext(nodes[0], checker, {}))
         );
       }
     });

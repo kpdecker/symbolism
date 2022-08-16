@@ -20,7 +20,7 @@ function testType(source: string, name = "Type") {
     sourceFile,
     checker,
 
-    context: new SchemaContext(node, checker),
+    context: new SchemaContext(node, checker, {}),
   };
 }
 

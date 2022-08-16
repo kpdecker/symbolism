@@ -50,7 +50,7 @@ describe("call arguments lookup", () => {
     const foo = symbolTable.lookup("foo", checker);
     const calls = loadFunctionCalls(
       foo[0],
-      new CallContext(foo[0], symbolTable, checker)
+      new CallContext(foo[0], symbolTable, checker, {})
     );
     expect(printCalls(calls)).toMatchInlineSnapshot(`
       "foo(arg as number);
@@ -75,7 +75,7 @@ describe("call arguments lookup", () => {
     const foo = symbolTable.lookup("foo", checker);
     const calls = loadFunctionCalls(
       foo[0],
-      new CallContext(foo[0], symbolTable, checker)
+      new CallContext(foo[0], symbolTable, checker, {})
     );
     expect(printCalls(calls)).toMatchInlineSnapshot(`
       "foo({
@@ -122,7 +122,7 @@ describe("call arguments lookup", () => {
     const foo = symbolTable.lookup("foo", checker);
     const calls = loadFunctionCalls(
       foo[0],
-      new CallContext(foo[0], symbolTable, checker)
+      new CallContext(foo[0], symbolTable, checker, {})
     );
     expect(printCalls(calls)).toMatchInlineSnapshot(`
       "foo(arg as \`\${number} + 1244 * 10 + 10\`);
@@ -147,7 +147,7 @@ describe("call arguments lookup", () => {
     const foo = symbolTable.lookup("foo", checker);
     const calls = loadFunctionCalls(
       foo[0],
-      new CallContext(foo[0], symbolTable, checker)
+      new CallContext(foo[0], symbolTable, checker, {})
     );
     expect(printCalls(calls)).toMatchInlineSnapshot(`
       "foo(\\"foo\\", arg as any);
@@ -165,7 +165,7 @@ describe("call arguments lookup", () => {
     const foo = symbolTable.lookup("foo", checker);
     const calls = loadFunctionCalls(
       foo[0],
-      new CallContext(foo[0], symbolTable, checker)
+      new CallContext(foo[0], symbolTable, checker, {})
     );
     expect(printCalls(calls)).toMatchInlineSnapshot(`""`);
   });
@@ -189,7 +189,7 @@ describe("call arguments lookup", () => {
     const foo = symbolTable.lookup("TFunction", checker);
     const calls = loadFunctionCalls(
       foo[0],
-      new CallContext(foo[0], symbolTable, checker)
+      new CallContext(foo[0], symbolTable, checker, {})
     );
     expect(printCalls(calls)).toMatchInlineSnapshot(`
       "i18n.t(\`namey:nameName:Anti-Sub\`, {});
@@ -216,7 +216,7 @@ describe("call arguments lookup", () => {
     const foo = symbolTable.lookup("foo", checker);
     const calls = loadFunctionCalls(
       foo[0],
-      new CallContext(foo[0], symbolTable, checker)
+      new CallContext(foo[0], symbolTable, checker, {})
     );
     expect(printCalls(calls)).toMatchInlineSnapshot(`
       "obj.foo(arg as \`foo:\${number}\`);
@@ -254,7 +254,7 @@ describe("call arguments lookup", () => {
     const foo = symbolTable.lookup("foo", checker);
     const calls = loadFunctionCalls(
       foo[0],
-      new CallContext(foo[0], symbolTable, checker)
+      new CallContext(foo[0], symbolTable, checker, {})
     );
     expect(printCalls(calls)).toMatchInlineSnapshot(`
       "foo(
@@ -286,7 +286,7 @@ describe("call arguments lookup", () => {
     const foo = symbolTable.lookup("foo", checker);
     const calls = loadFunctionCalls(
       foo[0],
-      new CallContext(foo[0], symbolTable, checker)
+      new CallContext(foo[0], symbolTable, checker, {})
     );
     expect(printCalls(calls)).toMatchInlineSnapshot(`
       "foo(\\"foo\\");

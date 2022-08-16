@@ -52,7 +52,7 @@ function dumpSchema(
 
   const schema = convertTSTypeToSchema(
     type,
-    new SchemaContext(exportDeclaration, checker)
+    new SchemaContext(exportDeclaration, checker, {})
   );
 
   console.log(

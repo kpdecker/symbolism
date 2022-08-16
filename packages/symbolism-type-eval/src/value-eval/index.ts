@@ -33,15 +33,16 @@ export function narrowTypeFromValues(
   // Create a new context to create a new circular reference check scope.
   // This allows for independent resolution of these distinct types. The
   // narrowingNode check ensures that we don't infinitely recurse.
-  const newContext = new SchemaContext(contextNode, context.checker);
+  const newContext = new SchemaContext(
+    contextNode,
+    context.checker,
+    context.options
+  );
   newContext.narrowingNode = contextNode;
 
   if (symbolDeclaration) {
     const symbolSchema = convertValueDeclaration(
-      ...newContext.cloneNode(symbolDeclaration),
-      {
-        allowMissing: true,
-      }
+      ...newContext.cloneNode(symbolDeclaration, { allowMissing: true })
     );
     if (symbolSchema) {
       return symbolSchema;
@@ -55,10 +56,9 @@ export function narrowTypeFromValues(
     });
     if (contextDefinition?.declaration) {
       const contextSchema = convertValueDeclaration(
-        ...newContext.cloneNode(contextDefinition.declaration),
-        {
+        ...newContext.cloneNode(contextDefinition.declaration, {
           allowMissing: true,
-        }
+        })
       );
       if (contextSchema) {
         return contextSchema;
@@ -66,10 +66,9 @@ export function narrowTypeFromValues(
     }
 
     const contextSchema = convertValueExpression(
-      ...newContext.cloneNode(contextNode as ts.Expression),
-      {
+      ...newContext.cloneNode(contextNode as ts.Expression, {
         allowMissing: true,
-      }
+      })
     );
     if (contextSchema) {
       return contextSchema;
@@ -79,8 +78,7 @@ export function narrowTypeFromValues(
 
 export function convertValueDeclaration(
   node: ts.Declaration,
-  context: SchemaContext,
-  options: TypeEvalOptions
+  context: SchemaContext
 ): AnySchemaNode | undefined {
   try {
     if (
@@ -92,10 +90,7 @@ export function convertValueDeclaration(
       ts.isPropertyAssignment(node)
     ) {
       if (node.initializer) {
-        return convertValueExpression(
-          ...context.cloneNode(node.initializer),
-          options
-        );
+        return convertValueExpression(...context.cloneNode(node.initializer));
       }
       if ("type" in node && node.type) {
         // TODO: Pass Opions?
@@ -103,10 +98,7 @@ export function convertValueDeclaration(
       }
     }
     if (ts.isExpressionStatement(node)) {
-      return convertValueExpression(
-        ...context.cloneNode(node.expression),
-        options
-      );
+      return convertValueExpression(...context.cloneNode(node.expression));
     }
     if (ts.isTypeAliasDeclaration(node)) {
       const secondDefinition = defineSymbol(node.type, context.checker, {
@@ -115,10 +107,7 @@ export function convertValueDeclaration(
       const secondDeclaration = getSymbolDeclaration(secondDefinition?.symbol);
 
       if (secondDeclaration) {
-        return convertValueDeclaration(
-          ...context.cloneNode(secondDeclaration),
-          options
-        );
+        return convertValueDeclaration(...context.cloneNode(secondDeclaration));
       }
     }
   } catch (err: any) {
@@ -133,17 +122,13 @@ export function convertValueDeclaration(
 
 export function convertValueExpression(
   node: ts.Node,
-  context: SchemaContext,
-  options: TypeEvalOptions
+  context: SchemaContext
 ): AnySchemaNode | undefined {
   try {
     const { checker } = context;
 
     if (ts.isParenthesizedExpression(node)) {
-      return convertValueExpression(
-        ...context.cloneNode(node.expression),
-        options
-      );
+      return convertValueExpression(...context.cloneNode(node.expression));
     }
 
     if (ts.isIdentifier(node)) {
@@ -156,8 +141,7 @@ export function convertValueExpression(
 
       if (identifierDeclaration) {
         return convertValueDeclaration(
-          ...context.cloneNode(identifierDeclaration),
-          options
+          ...context.cloneNode(identifierDeclaration)
         );
       }
 
@@ -194,21 +178,18 @@ export function convertValueExpression(
     }
 
     if (ts.isComputedPropertyName(node)) {
-      return convertValueExpression(
-        ...context.cloneNode(node.expression),
-        options
-      );
+      return convertValueExpression(...context.cloneNode(node.expression));
     }
 
     if (ts.isElementAccessExpression(node)) {
-      return convertElementAccessExpression(node, context, options);
+      return convertElementAccessExpression(node, context);
     }
 
     if (ts.isArrayLiteralExpression(node)) {
       return convertArrayLiteralValue(node, context);
     }
 
-    if (!options.allowMissing) {
+    if (!context.options.allowMissing) {
       throw new Error(`Unsupported expression: ${ts.SyntaxKind[node.kind]}`);
     } else {
       logDebug(

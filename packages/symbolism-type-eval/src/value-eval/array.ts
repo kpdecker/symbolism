@@ -11,9 +11,9 @@ export function convertArrayLiteralValue(
   const elements = removeDuplicateSchemas<AnySchemaNode>(
     node.elements.map(
       (element) =>
-        convertValueExpression(element, context, {
-          allowMissing: false,
-        })!
+        convertValueExpression(
+          ...context.cloneNode(element, { allowMissing: false })
+        )!
     )
   );
 
