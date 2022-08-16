@@ -5,9 +5,10 @@ import { SymbolTable } from "@symbolism/symbol-table";
 import invariant from "tiny-invariant";
 
 export class SchemaContext {
-  contextNode: ts.Node;
-  checker: ts.TypeChecker;
-  typesHandled: Set<ts.Type>;
+  typesHandled: Set<ts.Type> = new Set<ts.Type>();
+  narrowingNode?: ts.Node;
+
+  constructor(public contextNode: ts.Node, public checker: ts.TypeChecker) {}
 
   findContextNode(type: ts.Type, contextNode: ts.Node): ts.Node {
     if (type.symbol) {
@@ -43,14 +44,9 @@ export class SchemaContext {
     return [node, ret] as const;
   }
 
-  constructor(contextNode: ts.Node, checker: ts.TypeChecker) {
-    this.contextNode = contextNode;
-    this.checker = checker;
-    this.typesHandled = new Set<ts.Type>();
-  }
-
   protected cloneProps(newInstance: SchemaContext) {
-    newInstance.typesHandled = new Set<ts.Type>(this.typesHandled);
+    newInstance.typesHandled = new Set(this.typesHandled);
+    newInstance.narrowingNode = this.narrowingNode;
   }
 }
 

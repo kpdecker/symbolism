@@ -17,9 +17,19 @@ export function narrowTypeFromValues(
   const symbol = type.getSymbol();
   const symbolDeclaration = getSymbolDeclaration(symbol);
 
+  if (context.narrowingNode === contextNode) {
+    throw new NodeError("Circular narrowing node", contextNode, checker);
+  }
+
+  // Create a new context to create a new circular reference check scope.
+  // This allows for independent resolution of these distinct types. The
+  // narrowingNode check ensures that we don't infinitely recurse.
+  const newContext = new SchemaContext(contextNode, context.checker);
+  newContext.narrowingNode = contextNode;
+
   if (symbolDeclaration) {
     const symbolSchema = convertValueDeclaration(
-      ...context.cloneNode(symbolDeclaration)
+      ...newContext.cloneNode(symbolDeclaration)
     );
     if (symbolSchema) {
       return symbolSchema;
@@ -33,7 +43,7 @@ export function narrowTypeFromValues(
     });
     if (contextDefinition?.declaration) {
       const contextSchema = convertValueDeclaration(
-        ...context.cloneNode(contextDefinition.declaration)
+        ...newContext.cloneNode(contextDefinition.declaration)
       );
       if (contextSchema) {
         return contextSchema;
@@ -41,7 +51,7 @@ export function narrowTypeFromValues(
     }
 
     const contextSchema = convertValueExpression(
-      ...context.cloneNode(contextNode as ts.Expression)
+      ...newContext.cloneNode(contextNode as ts.Expression)
     );
     if (contextSchema) {
       return contextSchema;
