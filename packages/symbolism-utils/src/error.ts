@@ -1,16 +1,14 @@
 import { dumpNode } from "@symbolism/ts-debug";
 import ts from "typescript";
 
-if (isRunningInJest()) {
-  const $super = Error.prepareStackTrace;
-  Error.prepareStackTrace = (error, stack) => {
-    let result = $super!(error, stack);
-    if ("cause" in error && (error as any).cause) {
-      result += "\n\nCaused by: " + (error as any).cause.stack;
-    }
-    return result;
-  };
-}
+const $prepareStackTrace = Error.prepareStackTrace;
+Error.prepareStackTrace = (error, stack) => {
+  let result = $prepareStackTrace!(error, stack);
+  if ("cause" in error && (error as any).cause) {
+    result += "\n\nCaused by: " + (error as any).cause.stack;
+  }
+  return result;
+};
 
 export class NodeError extends Error {
   isNodeError = true;
