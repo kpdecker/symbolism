@@ -41,8 +41,6 @@ function convertFunctionCallsForSymbol(
     references?.length
   );
 
-  context.symbolsHandled.push(symbol);
-
   const calls = (references ?? [])
     .map((reference) => {
       const call = findAncestor(reference, ts.isCallExpression)!;
@@ -164,13 +162,12 @@ function convertCall(
     }
 
     if (context.symbolsHandled.includes(symbol)) {
-      throw new Error(`Infinite recursion detected
-
-  Call Expression: ${JSON.stringify(dumpNode(callExpression, context.checker))}
-
+      throw new NodeError(
+        `Infinite recursion detected
   Next Symbol: ${JSON.stringify(dumpSymbol(symbol, checker))}
   Current Symbol: ${JSON.stringify(dumpSymbol(currentSymbol, checker))}
 
+  Symbols Seen:
   - ${context.symbolsHandled
     .map((s) => JSON.stringify(dumpSymbol(s, checker)))
     .join("\n  - ")}
@@ -194,10 +191,15 @@ function convertCall(
           .join("\n    - ")}`
     )
     .join("\n  - ")}
-`);
+`,
+        callExpression,
+        context.checker
+      );
     }
 
-    const upstreamCall = convertFunctionCallsForSymbol(symbol, context);
+    const upstreamCall = convertFunctionCallsForSymbol(
+      ...context.cloneSymbol(symbol)
+    );
     upstreamCalls.set(declaration, upstreamCall);
   });
 
