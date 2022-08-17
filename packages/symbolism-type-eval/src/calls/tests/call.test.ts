@@ -236,6 +236,7 @@ describe("call arguments lookup", () => {
       function bat(data: {
         value: number;
         bat: number;
+        nested: { bat: number };
       }) {
         foo(data);
       }
@@ -243,7 +244,8 @@ describe("call arguments lookup", () => {
       function bar(value) {
         bat({
           value,
-          bat: 1 + 9
+          bat: 1 + 9,
+          nested: { bat: 1 + 9 }
         });
       }
 
@@ -257,12 +259,16 @@ describe("call arguments lookup", () => {
       new CallContext(foo[0], symbolTable, checker, {})
     );
     expect(printCalls(calls)).toMatchInlineSnapshot(`
-      "foo(
-        arg as {
-          bat: number;
-          value: number;
-        }
-      );
+      "foo({
+        bat: 10,
+        nested: { bat: 10 },
+        value: \\"foo\\",
+      });
+      foo({
+        bat: 10,
+        nested: { bat: 10 },
+        value: true,
+      });
       "
     `);
   });
