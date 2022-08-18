@@ -65,7 +65,10 @@ export function narrowTypeFromValues(
     const contextDefinition = defineSymbol(contextNode, checker, {
       chooseLocal: false,
     });
-    if (contextDefinition?.declaration) {
+    if (
+      contextDefinition?.declaration &&
+      contextDefinition.declaration !== symbolDeclaration
+    ) {
       const contextSchema = convertValueDeclaration(
         ...newContext.cloneNode(contextDefinition.declaration, {
           allowMissing: true,
