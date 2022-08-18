@@ -28,6 +28,11 @@ export function narrowTypeFromValues(
   const symbol = type.getSymbol();
   const symbolDeclaration = getSymbolDeclaration(symbol);
 
+  // No narrowing to be done on type nodes, just use the checker evaluation.
+  if (symbolDeclaration && ts.isTypeNode(symbolDeclaration)) {
+    return undefined;
+  }
+
   if (context.narrowingNode === contextNode) {
     throw new NodeError(
       "Circular narrowing node " + checker.typeToString(type),
