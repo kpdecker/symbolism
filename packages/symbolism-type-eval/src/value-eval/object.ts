@@ -93,16 +93,22 @@ export function convertObjectLiteralValue(
       const spreadSchema = convertNode(property.expression, context);
       spreadProperties(spreadSchema, property);
     } else if (ts.isPropertyAssignment(property)) {
-      const schema = convertNode(property.initializer, context);
+      let schema = convertValueExpression(
+        ...context.cloneNode(property.initializer, {
+          allowMissing: false,
+        })
+      )!;
 
       setProperties(property.name, schema);
     } else if (ts.isShorthandPropertyAssignment(property)) {
       const propertyName = property.name.text;
-      const schema = convertNode(property.name, context);
+      const schema = convertValueExpression(
+        ...context.cloneNode(property.name, {
+          allowMissing: false,
+        })
+      )!;
 
-      if (schema) {
-        properties[propertyName] = schema;
-      }
+      properties[propertyName] = schema;
     } else if (
       ts.isMethodDeclaration(property) ||
       ts.isGetAccessorDeclaration(property) ||
@@ -117,7 +123,11 @@ export function convertObjectLiteralValue(
           ...context.clone(signature.getReturnType(), property)
         );
       } else {
-        schema = convertNode(property, context);
+        schema = convertValueExpression(
+          ...context.cloneNode(property, {
+            allowMissing: false,
+          })
+        )!;
       }
 
       setProperties(property.name, schema);
