@@ -1,6 +1,6 @@
 import { defineSymbol } from "@symbolism/definitions";
-import { getSymbolDeclaration } from "@symbolism/ts-utils";
-import { logDebug, NodeError } from "@symbolism/utils";
+import { getSymbolDeclaration, isIntrinsicType } from "@symbolism/ts-utils";
+import { logDebug, logInfo, logWarn, NodeError } from "@symbolism/utils";
 import ts from "typescript";
 import { AnySchemaNode, convertTSTypeToSchema } from "../schema";
 import { SchemaContext } from "../context";
@@ -140,6 +140,22 @@ export function convertValueExpression(
       const identifierDefinition = defineSymbol(node, checker, {
         chooseLocal: false,
       });
+
+      if (isIntrinsicType(identifierDefinition?.type)) {
+        const { type } = identifierDefinition!;
+        if (type?.flags! & ts.TypeFlags.Undefined) {
+          return {
+            kind: "literal",
+            value: undefined,
+          };
+        } else if (type?.flags! & ts.TypeFlags.Null) {
+          return {
+            kind: "literal",
+            value: null,
+          };
+        }
+      }
+
       const identifierDeclaration = getSymbolDeclaration(
         identifierDefinition?.symbol
       );
