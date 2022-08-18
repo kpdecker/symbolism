@@ -18,7 +18,7 @@ export function resolveSymbolsInSchema(
     schema.kind === "index" ||
     schema.kind === "index-access"
   ) {
-    const symbol = checker.getSymbolAtLocation(schema.node);
+    const symbol = getLocalSymbol(schema.node, checker);
     if (symbol && symbolSchemas.get(symbol)) {
       return symbolSchemas.get(symbol)!;
     }
@@ -95,4 +95,20 @@ export function resolveSymbolsInSchema(
 
   const gottaCatchEmAll: never = schema;
   throw new Error("Not implemented");
+}
+
+export function getLocalSymbol(
+  node: ts.Node | undefined,
+  checker: ts.TypeChecker
+): ts.Symbol | undefined {
+  if (node && ts.isShorthandPropertyAssignment(node)) {
+    return getLocalSymbol(node.name, checker);
+  }
+
+  return (
+    node &&
+    (ts.isShorthandPropertyAssignment(node.parent)
+      ? checker.getShorthandAssignmentValueSymbol(node.parent)
+      : checker.getSymbolAtLocation(node))
+  );
 }
