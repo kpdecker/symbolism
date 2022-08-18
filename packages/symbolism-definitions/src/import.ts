@@ -15,7 +15,7 @@ export const importOperators = nodeOperators({
   [ts.SyntaxKind.ImportSpecifier](node, checker) {
     const importDeclaration = findAncestor(node, ts.isImportDeclaration);
 
-    invariantNode(node, ts.isImportSpecifier);
+    invariantNode(node, checker, ts.isImportSpecifier);
     invariant(importDeclaration);
 
     const externalModule: ts.Symbol = (

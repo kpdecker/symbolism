@@ -10,12 +10,12 @@ import {
 
 export const jsxPathHandlers = pathHandler({
   [ts.SyntaxKind.JsxElement]: nopPath,
-  [ts.SyntaxKind.JsxOpeningElement]({ node, getParentPath }) {
-    invariantNode(node, ts.isJsxOpeningElement);
+  [ts.SyntaxKind.JsxOpeningElement]({ node, checker, getParentPath }) {
+    invariantNode(node, checker, ts.isJsxOpeningElement);
     return getParentPath() + "." + node.tagName.getText();
   },
-  [ts.SyntaxKind.JsxSelfClosingElement]({ node, getParentPath }) {
-    invariantNode(node, ts.isJsxSelfClosingElement);
+  [ts.SyntaxKind.JsxSelfClosingElement]({ node, checker, getParentPath }) {
+    invariantNode(node, checker, ts.isJsxSelfClosingElement);
     return getParentPath() + "." + node.tagName.getText();
   },
   [ts.SyntaxKind.JsxClosingElement]: skipNode,

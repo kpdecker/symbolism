@@ -54,7 +54,7 @@ const nodeHandlers: Record<ts.SyntaxKind, DefinitionOperation> = {
   // Expressions
   [ts.SyntaxKind.ArrayLiteralExpression]: contextualTypeAndSymbol,
   [ts.SyntaxKind.SpreadElement](node, checker, options) {
-    invariantNode(node, ts.isSpreadElement);
+    invariantNode(node, checker, ts.isSpreadElement);
     return defineSymbol(node.expression, checker, options);
   },
   [ts.SyntaxKind.ObjectLiteralExpression]: contextualTypeAndSymbol,
@@ -66,7 +66,7 @@ const nodeHandlers: Record<ts.SyntaxKind, DefinitionOperation> = {
 
   [ts.SyntaxKind.ElementAccessExpression]: defineProperties,
   [ts.SyntaxKind.ParenthesizedExpression](node, checker, options) {
-    invariantNode(node, ts.isParenthesizedExpression);
+    invariantNode(node, checker, ts.isParenthesizedExpression);
     return defineSymbol(node.expression, checker, options);
   },
   [ts.SyntaxKind.DeleteExpression]: directTypeAndSymbol,
@@ -74,7 +74,7 @@ const nodeHandlers: Record<ts.SyntaxKind, DefinitionOperation> = {
   [ts.SyntaxKind.PrefixUnaryExpression]: directTypeAndSymbol,
   [ts.SyntaxKind.PostfixUnaryExpression]: directTypeAndSymbol,
   [ts.SyntaxKind.BinaryExpression](node, checker) {
-    invariantNode(node, ts.isBinaryExpression);
+    invariantNode(node, checker, ts.isBinaryExpression);
 
     if (isAssignmentExpression(node)) {
       const left = contextualTypeAndSymbol(node.left, checker);
@@ -94,7 +94,7 @@ const nodeHandlers: Record<ts.SyntaxKind, DefinitionOperation> = {
   [ts.SyntaxKind.AsExpression]: directTypeAndSymbol,
   [ts.SyntaxKind.TypeAssertionExpression]: directTypeAndSymbol,
   [ts.SyntaxKind.NonNullExpression](node, checker, options) {
-    invariantNode(node, ts.isNonNullExpression);
+    invariantNode(node, checker, ts.isNonNullExpression);
     return defineSymbol(node.expression, checker, options);
   },
   [ts.SyntaxKind.CommaListExpression]: directTypeAndSymbol,
@@ -107,7 +107,7 @@ const nodeHandlers: Record<ts.SyntaxKind, DefinitionOperation> = {
 
   // Statements
   [ts.SyntaxKind.ExpressionStatement](node, checker, options) {
-    invariantNode(node, ts.isExpressionStatement);
+    invariantNode(node, checker, ts.isExpressionStatement);
     return defineSymbol(node.expression, checker, options);
   },
   [ts.SyntaxKind.EmptyStatement]: nopHandler,
@@ -120,7 +120,7 @@ const nodeHandlers: Record<ts.SyntaxKind, DefinitionOperation> = {
   [ts.SyntaxKind.ForOfStatement]: nopHandler,
   [ts.SyntaxKind.LabeledStatement]: nopHandler,
   [ts.SyntaxKind.ThrowStatement](node, checker, options) {
-    invariantNode(node, ts.isThrowStatement);
+    invariantNode(node, checker, ts.isThrowStatement);
     return defineSymbol(node.expression, checker, options);
   },
   [ts.SyntaxKind.ContinueStatement]: nopHandler,
@@ -146,11 +146,11 @@ const nodeHandlers: Record<ts.SyntaxKind, DefinitionOperation> = {
   [ts.SyntaxKind.VariableDeclarationList]: directTypeAndSymbol,
 
   [ts.SyntaxKind.EnumDeclaration](node, checker) {
-    invariantNode(node, ts.isEnumDeclaration);
+    invariantNode(node, checker, ts.isEnumDeclaration);
     return directTypeAndSymbol(node.name, checker);
   },
   [ts.SyntaxKind.EnumMember](node, checker, options) {
-    invariantNode(node, ts.isEnumMember);
+    invariantNode(node, checker, ts.isEnumMember);
     const parentDefinition = defineSymbol(node.parent, checker, options);
     const type = parentDefinition?.type;
     debugger;
@@ -172,7 +172,7 @@ const nodeHandlers: Record<ts.SyntaxKind, DefinitionOperation> = {
   [ts.SyntaxKind.FunctionType]: directTypeAndSymbol,
   [ts.SyntaxKind.ConstructorType]: directTypeAndSymbol,
   [ts.SyntaxKind.TypeQuery](node, checker, options) {
-    invariantNode(node, ts.isTypeQueryNode);
+    invariantNode(node, checker, ts.isTypeQueryNode);
     return defineSymbol(node.exprName, checker, options);
   },
   [ts.SyntaxKind.TypeLiteral]: directTypeAndSymbol,
@@ -195,7 +195,7 @@ const nodeHandlers: Record<ts.SyntaxKind, DefinitionOperation> = {
   [ts.SyntaxKind.TemplateLiteralTypeSpan]: directTypeAndSymbol,
   [ts.SyntaxKind.InterfaceDeclaration]: directTypeAndSymbol,
   [ts.SyntaxKind.TypeAliasDeclaration](node, checker) {
-    invariantNode(node, ts.isTypeAliasDeclaration);
+    invariantNode(node, checker, ts.isTypeAliasDeclaration);
     return directTypeAndSymbol(node.name, checker);
   },
   [ts.SyntaxKind.ModuleDeclaration]: directTypeAndSymbol,
@@ -250,16 +250,12 @@ export function defineSymbol(
     const nodeHandler = nodeHandlers[node.kind];
     if (nodeHandler) {
       return nodeHandler(node, checker, options);
+    } else {
+      throw new NodeError("Failed to infer type", node, checker);
     }
   } catch (err) {
-    if ((err as NodeError).isNodeError) {
-      throw err;
-    }
     throw new NodeError(`Error in defineSymbol`, node, checker, err as Error);
   }
-
-  console.warn("failed to infer type", dumpNode(node, checker));
-  invariantNode(node);
 }
 
 function defineIdentifier(
@@ -309,7 +305,7 @@ function defineIdentifier(
 }
 
 function defineVariableDeclaration(node: ts.Node, checker: ts.TypeChecker) {
-  invariantNode(node, ts.isVariableDeclaration);
+  invariantNode(node, checker, ts.isVariableDeclaration);
   return directTypeAndSymbol(node.name, checker);
 }
 
@@ -445,7 +441,7 @@ function defineBindingElement(
       );
     }
 
-    invariantNode(node.parent);
+    invariantNode(node.parent, checker);
   }
 }
 

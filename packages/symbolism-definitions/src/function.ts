@@ -16,7 +16,7 @@ export const functionOperators = nodeOperators({
   },
   [ts.SyntaxKind.FunctionDeclaration]: directTypeAndSymbol,
   [ts.SyntaxKind.ArrowFunction](node, checker) {
-    invariantNode(node, ts.isArrowFunction);
+    invariantNode(node, checker, ts.isArrowFunction);
 
     if (isNamedDeclaration(node.parent) && node.parent.name) {
       return directTypeAndSymbol(node.parent.name, checker);
@@ -25,7 +25,7 @@ export const functionOperators = nodeOperators({
     return directTypeAndSymbol(node, checker);
   },
   [ts.SyntaxKind.Parameter](node, checker) {
-    invariantNode(node, ts.isParameter);
+    invariantNode(node, checker, ts.isParameter);
 
     const parameterDefinition = directTypeAndSymbol(node, checker);
 

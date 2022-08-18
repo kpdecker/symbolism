@@ -1,11 +1,17 @@
+import { NodeError } from "@symbolism/utils";
 import ts from "typescript";
 
 export function invariantNode<T extends ts.Node>(
   node: ts.Node,
+  checker: ts.TypeChecker,
   matcher?: (node: ts.Node) => node is T
 ): asserts node is T {
   if (!matcher || !matcher(node)) {
-    throw new Error(`Unexpected node type: ${ts.SyntaxKind[node.kind]}`);
+    throw new NodeError(
+      `Unexpected node type: ${ts.SyntaxKind[node.kind]}`,
+      node,
+      checker
+    );
   }
 }
 

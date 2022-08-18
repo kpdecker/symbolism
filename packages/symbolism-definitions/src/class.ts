@@ -16,7 +16,7 @@ export const classOperators = nodeOperators({
   [ts.SyntaxKind.ThisKeyword](node, checker, options) {
     // Internal API: Couldn't find any other way to resolve proper type
     // consistently.
-    const thisType = (checker as any).tryGetThisTypeAt(node);
+    const thisType = (checker as any).tryGetThisTypeAt(node) as ts.Type;
     if (thisType) {
       return {
         symbol: thisType.symbol,
@@ -46,7 +46,7 @@ export const classOperators = nodeOperators({
   },
   [ts.SyntaxKind.ClassDeclaration]: directTypeAndSymbol,
   [ts.SyntaxKind.Constructor](node, checker) {
-    invariantNode(node, ts.isConstructorDeclaration);
+    invariantNode(node, checker, ts.isConstructorDeclaration);
     return directTypeAndSymbol(node.parent, checker);
   },
   [ts.SyntaxKind.MethodDeclaration]: handleClassFieldDeclaration,
@@ -54,11 +54,11 @@ export const classOperators = nodeOperators({
   [ts.SyntaxKind.ClassStaticBlockDeclaration]: () => undefined,
 
   [ts.SyntaxKind.GetAccessor](node, checker) {
-    invariantNode(node, ts.isGetAccessor);
+    invariantNode(node, checker, ts.isGetAccessor);
     return directTypeAndSymbol(node.name, checker);
   },
   [ts.SyntaxKind.SetAccessor](node, checker) {
-    invariantNode(node, ts.isSetAccessor);
+    invariantNode(node, checker, ts.isSetAccessor);
     return directTypeAndSymbol(node.name, checker);
   },
 
@@ -66,13 +66,13 @@ export const classOperators = nodeOperators({
 
   // Type
   [ts.SyntaxKind.PropertySignature](node, checker) {
-    invariantNode(node, ts.isPropertySignature);
+    invariantNode(node, checker, ts.isPropertySignature);
     return directTypeAndSymbol(node.name, checker);
   },
 });
 
 function handleClassFieldDeclaration(node: ts.Node, checker: ts.TypeChecker) {
-  invariantNode(node, ts.isClassElement);
+  invariantNode(node, checker, ts.isClassElement);
 
   const nameNode = node.name;
   if (!nameNode) {

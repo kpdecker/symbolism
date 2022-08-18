@@ -16,9 +16,14 @@ import { NodeError } from "@symbolism/utils";
 import { invariantNode, isNamedDeclaration } from "@symbolism/ts-utils";
 import { dumpNode } from "@symbolism/ts-debug";
 
-const handlePropertyAccess: PathHandler = ({ node, getParentPath }) => {
+const handlePropertyAccess: PathHandler = ({
+  node,
+  checker,
+  getParentPath,
+}) => {
   invariantNode(
     node,
+    checker,
     (node): node is ts.PropertyAccessExpression | ts.ElementAccessExpression =>
       ts.isPropertyAccessExpression(node) || ts.isElementAccessExpression(node)
   );
@@ -274,10 +279,6 @@ export function getNodePath(
       getParentPath,
     }).replace(/^\./, "");
   } catch (err) {
-    if ((err as NodeError).isNodeError) {
-      throw err;
-    }
-    console.error(dumpNode(node, checker, true));
     throw new NodeError("Error in path", node, checker, err as Error);
   }
 }

@@ -13,18 +13,18 @@ import { dumpNode } from "@symbolism/ts-debug";
 
 export const jsxSymbolHandlers = nodeOperators({
   [ts.SyntaxKind.JsxElement](node, checker, options) {
-    invariantNode(node, ts.isJsxElement);
+    invariantNode(node, checker, ts.isJsxElement);
     return defineSymbol(node.openingElement, checker, options);
   },
   [ts.SyntaxKind.JsxOpeningElement]: handleElementDeclaration,
   [ts.SyntaxKind.JsxSelfClosingElement]: handleElementDeclaration,
   [ts.SyntaxKind.JsxClosingElement](node, checker, options) {
-    invariantNode(node, ts.isJsxClosingElement);
+    invariantNode(node, checker, ts.isJsxClosingElement);
     return defineSymbol(node.parent, checker, options);
   },
 
   [ts.SyntaxKind.JsxFragment](node, checker, options) {
-    invariantNode(node, ts.isJsxFragment);
+    invariantNode(node, checker, ts.isJsxFragment);
     return defineSymbol(node.openingFragment, checker, options);
   },
   [ts.SyntaxKind.JsxOpeningFragment]: directTypeAndSymbol,
@@ -33,14 +33,14 @@ export const jsxSymbolHandlers = nodeOperators({
   [ts.SyntaxKind.JsxText]: directTypeAndSymbol,
   [ts.SyntaxKind.JsxTextAllWhiteSpaces]: directTypeAndSymbol,
   [ts.SyntaxKind.JsxExpression](node, checker) {
-    invariantNode(node, ts.isJsxExpression);
+    invariantNode(node, checker, ts.isJsxExpression);
     invariant(node.expression);
     return directTypeAndSymbol(node.expression, checker);
   },
 
   [ts.SyntaxKind.JsxAttributes]: contextualTypeAndSymbol,
   [ts.SyntaxKind.JsxAttribute](node, checker, options) {
-    invariantNode(node, ts.isJsxAttribute);
+    invariantNode(node, checker, ts.isJsxAttribute);
     const properties = defineSymbol(node.parent, checker, options);
     if (!properties) {
       logDebug(`No properties for ${dumpNode(node.parent, checker)}`);
@@ -84,7 +84,7 @@ export const jsxSymbolHandlers = nodeOperators({
     return propertyDefinition;
   },
   [ts.SyntaxKind.JsxSpreadAttribute](node, checker, options) {
-    invariantNode(node, ts.isJsxSpreadAttribute);
+    invariantNode(node, checker, ts.isJsxSpreadAttribute);
     return defineSymbol(node.expression, checker, options);
   },
 });
@@ -92,6 +92,7 @@ export const jsxSymbolHandlers = nodeOperators({
 function handleElementDeclaration(node: ts.Node, checker: ts.TypeChecker) {
   invariantNode(
     node,
+    checker,
     (node): node is JsxOpeningLikeElement =>
       ts.isJsxOpeningElement(node) || ts.isJsxSelfClosingElement(node)
   );

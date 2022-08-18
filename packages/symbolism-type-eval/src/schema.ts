@@ -237,7 +237,7 @@ export function convertTSTypeToSchema(
       if (objectFlags & ts.ObjectFlags.ObjectLiteral) {
         const declaration = getSymbolDeclaration(type.symbol);
         if (declaration) {
-          invariantNode(declaration, ts.isObjectLiteralExpression);
+          invariantNode(declaration, checker, ts.isObjectLiteralExpression);
           const valueSchema = convertValueExpression(
             ...context.cloneNode(declaration, { allowMissing: true })
           );

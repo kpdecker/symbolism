@@ -211,9 +211,6 @@ export function parseSymbolTable(program: ts.Program, config: Config) {
             symbols.set(definitionSymbol, symbolMap);
             symbolMap.add(node);
           } catch (e) {
-            if ((e as NodeError).isNodeError) {
-              throw e;
-            }
             throw new NodeError(`Failed parsing`, node, checker, e as Error);
           }
         }

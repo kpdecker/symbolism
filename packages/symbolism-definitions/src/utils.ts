@@ -33,7 +33,7 @@ export function contextualTypeAndSymbol(
   node: ts.Node,
   checker: ts.TypeChecker
 ): DefinitionSymbol {
-  invariantNode(node, isExpression);
+  invariantNode(node, checker, isExpression);
   const contextType = checker.getContextualType(node);
   if (contextType) {
     return getArrayType({
@@ -137,7 +137,7 @@ export function collectAllAncestorTypes(
     return [];
   }
 
-  invariantNode(node, isInheritingDeclaration);
+  invariantNode(node, checker, isInheritingDeclaration);
   if (!node.heritageClauses) {
     return [];
   }
