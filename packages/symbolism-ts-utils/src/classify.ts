@@ -111,8 +111,8 @@ const intrinsicTypes =
   ts.TypeFlags.UniqueESSymbol |
   ts.TypeFlags.NonPrimitive;
 
-export function isIntrinsicType(type: ts.Type) {
-  return (type.flags & intrinsicTypes) !== 0;
+export function isIntrinsicType(type: ts.Type | undefined): boolean {
+  return (type?.flags! & intrinsicTypes) !== 0;
 }
 
 export function isTypeReference(
