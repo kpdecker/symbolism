@@ -1,7 +1,7 @@
 import { mockProgram } from "@symbolism/test";
 import { findIdentifiers } from "@symbolism/ts-utils";
 import { printSchema } from "../print/typescript";
-import { convertTSTypeToSchema } from "../schema";
+import { evaluateSchema } from "../schema";
 import { SchemaContext } from "../context";
 
 function testType(source: string, name = "Type") {
@@ -169,9 +169,7 @@ describe("type schema converter", () => {
       function testNode(name: string) {
         const nodes = findIdentifiers(sourceFile, name);
         const type = checker.getTypeAtLocation(nodes[0]);
-        return printSchema(
-          convertTSTypeToSchema(type, new SchemaContext(nodes[0], checker, {}))
-        );
+        return printSchema(evaluateSchema(nodes[0], checker));
       }
     });
 
@@ -315,10 +313,7 @@ describe("type schema converter", () => {
 
       function testNode(name: string) {
         const nodes = findIdentifiers(sourceFile, name);
-        const type = checker.getTypeAtLocation(nodes[0]);
-        return printSchema(
-          convertTSTypeToSchema(type, new SchemaContext(nodes[0], checker, {}))
-        );
+        return printSchema(evaluateSchema(nodes[0], checker));
       }
     });
     it("should narrow boolean operators", () => {
@@ -410,10 +405,7 @@ describe("type schema converter", () => {
 
       function testNode(name: string) {
         const nodes = findIdentifiers(sourceFile, name);
-        const type = checker.getTypeAtLocation(nodes[0]);
-        return printSchema(
-          convertTSTypeToSchema(type, new SchemaContext(nodes[0], checker, {}))
-        );
+        return printSchema(evaluateSchema(nodes[0], checker)!);
       }
     });
     it("should narrow comma operators", () => {
@@ -433,10 +425,7 @@ describe("type schema converter", () => {
 
       function testNode(name: string) {
         const nodes = findIdentifiers(sourceFile, name);
-        const type = checker.getTypeAtLocation(nodes[0]);
-        return printSchema(
-          convertTSTypeToSchema(type, new SchemaContext(nodes[0], checker, {}))
-        );
+        return printSchema(evaluateSchema(nodes[0], checker));
       }
     });
   });

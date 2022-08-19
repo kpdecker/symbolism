@@ -1,15 +1,58 @@
 import { logDebug, NodeError } from "@symbolism/utils";
 import invariant from "tiny-invariant";
 import ts from "typescript";
-import { convertNode, convertValueExpression, TypeEvalOptions } from ".";
 import { isConcreteSchema } from "../classify";
 import { printSchema } from "../print/typescript";
-import { AnySchemaNode, convertTSTypeToSchema, ObjectSchema } from "../schema";
+import { AnySchemaNode, ObjectSchema } from "../schema";
 import { SchemaContext } from "../context";
-import { expandSchemaList, unionProperties } from "./union";
+import { createUnionKind, expandSchemaList, unionProperties } from "./union";
 import { dumpNode } from "@symbolism/ts-debug";
+import { getNodeSchema } from ".";
+import { nodeEvalHandler, variableLike } from "./handlers";
+import { getSymbolDeclaration, invariantNode } from "@symbolism/ts-utils";
+import { getLocalSymbol } from "./symbol";
+import { getTypeSchema } from "../type-eval";
+import { undefinedSchema } from "../well-known-schemas";
+import { defineSymbol } from "@symbolism/definitions";
 
-export function convertObjectLiteralValue(
+export const objectOperators = nodeEvalHandler({
+  [ts.SyntaxKind.ObjectLiteralExpression](node, context) {
+    invariantNode(node, context.checker, ts.isObjectLiteralExpression);
+    return convertObjectLiteralValue(node, context);
+  },
+  [ts.SyntaxKind.PropertyAssignment]: variableLike,
+  [ts.SyntaxKind.ShorthandPropertyAssignment](node, context) {
+    invariantNode(node, context.checker, ts.isShorthandPropertyAssignment);
+
+    const { checker } = context;
+    const symbol = getLocalSymbol(node, checker);
+    const declaration = getSymbolDeclaration(symbol);
+    if (declaration) {
+      return getNodeSchema(...context.cloneNode(declaration));
+    }
+  },
+  [ts.SyntaxKind.SpreadAssignment](node, context) {
+    invariantNode(node, context.checker, ts.isSpreadAssignment);
+    return getNodeSchema(...context.cloneNode(node.expression));
+  },
+  [ts.SyntaxKind.ComputedPropertyName](node, context) {
+    invariantNode(node, context.checker, ts.isComputedPropertyName);
+    return getNodeSchema(...context.cloneNode(node.expression));
+  },
+
+  [ts.SyntaxKind.PropertyAccessExpression](node, context) {
+    invariantNode(node, context.checker, ts.isPropertyAccessExpression);
+    return getNodeSchema(
+      ...context.cloneNode(node.name, { allowMissing: false })
+    );
+  },
+  [ts.SyntaxKind.ElementAccessExpression](node, context) {
+    invariantNode(node, context.checker, ts.isElementAccessExpression);
+    return convertElementAccessExpression(node, context);
+  },
+});
+
+function convertObjectLiteralValue(
   node: ts.Node,
   context: SchemaContext
 ): AnySchemaNode | undefined {
@@ -24,7 +67,7 @@ export function convertObjectLiteralValue(
     name: ts.PropertyName
   ): string[] | AnySchemaNode {
     const propertyName = ts.isComputedPropertyName(name)
-      ? convertValueExpression(
+      ? getNodeSchema(
           ...context.cloneNode(name.expression, {
             allowMissing: false,
           })
@@ -90,11 +133,20 @@ export function convertObjectLiteralValue(
 
   node.properties.forEach((property) => {
     if (ts.isSpreadAssignment(property)) {
-      const spreadSchema = convertNode(property.expression, context);
+      const spreadSchema = getNodeSchema(
+        ...context.cloneNode(property.expression, {
+          allowMissing: false,
+        })
+      )!;
       spreadProperties(spreadSchema, property);
-    } else if (ts.isPropertyAssignment(property)) {
-      let schema = convertValueExpression(
-        ...context.cloneNode(property.initializer, {
+    } else if (
+      ts.isPropertyAssignment(property) ||
+      ts.isMethodDeclaration(property) ||
+      ts.isGetAccessorDeclaration(property) ||
+      ts.isSetAccessorDeclaration(property)
+    ) {
+      let schema = getNodeSchema(
+        ...context.cloneNode(property, {
           allowMissing: false,
         })
       )!;
@@ -102,35 +154,14 @@ export function convertObjectLiteralValue(
       setProperties(property.name, schema);
     } else if (ts.isShorthandPropertyAssignment(property)) {
       const propertyName = property.name.text;
-      const schema = convertValueExpression(
-        ...context.cloneNode(property.name, {
+      const schema = getNodeSchema(
+        ...context.cloneNode(property, {
+          ...context.options,
           allowMissing: false,
         })
       )!;
 
       properties[propertyName] = schema;
-    } else if (
-      ts.isMethodDeclaration(property) ||
-      ts.isGetAccessorDeclaration(property) ||
-      ts.isSetAccessorDeclaration(property)
-    ) {
-      let schema: AnySchemaNode | undefined;
-      if (ts.isGetAccessorDeclaration(property)) {
-        const signature = checker.getSignatureFromDeclaration(property);
-        invariant(signature, "Expected get accessor signature");
-
-        schema = convertTSTypeToSchema(
-          ...context.clone(signature.getReturnType(), property)
-        );
-      } else {
-        schema = convertValueExpression(
-          ...context.cloneNode(property, {
-            allowMissing: false,
-          })
-        )!;
-      }
-
-      setProperties(property.name, schema);
     } else {
       throw new NodeError("Unsupported property", property, checker);
     }
@@ -160,21 +191,22 @@ export function convertObjectLiteralValue(
   };
 }
 
-export function convertElementAccessExpression(
+function convertElementAccessExpression(
   node: ts.ElementAccessExpression,
   context: SchemaContext
 ): AnySchemaNode | undefined {
-  const parentSchema = convertValueExpression(
+  const { checker } = context;
+
+  const parentSchema = getNodeSchema(
     ...context.cloneNode(node.expression, {
       allowMissing: true,
-      includeTypeNodes: true,
     })
   ) || {
     kind: "primitive",
     name: "any",
     node: node.expression,
   };
-  const argumentSchema = convertValueExpression(
+  const argumentSchema = getNodeSchema(
     ...context.cloneNode(node.argumentExpression, { allowMissing: true })
   ) || {
     kind: "primitive",
@@ -195,18 +227,18 @@ export function convertElementAccessExpression(
 
   if (parentSchema.kind === "object") {
     if (argumentSchema.kind === "primitive") {
-      return {
-        kind: "union",
-        items: [
-          Object.values(parentSchema.properties).concat(
-            parentSchema.abstractIndexKeys.map(({ value }) => value)
-          ),
-        ].flat(),
-      };
+      return createUnionKind(
+        Object.values(parentSchema.properties)
+          .concat(parentSchema.abstractIndexKeys.map(({ value }) => value))
+          .flat()
+      );
     } else if (argumentSchema.kind === "literal") {
-      const argValue = argumentSchema.value as string | number;
-      if (argValue in parentSchema.properties) {
-        return parentSchema.properties[argValue];
+      const argValue = argumentSchema.value + "";
+      const parentType = checker.getTypeAtLocation(node.expression);
+      const property = parentType.getProperty(argValue);
+      const propertyDeclaration = getSymbolDeclaration(property);
+      if (propertyDeclaration) {
+        return getNodeSchema(propertyDeclaration, context);
       }
     }
 
@@ -224,14 +256,52 @@ export function convertElementAccessExpression(
     // Resolve via TS
     return argumentSchema;
   } else if (parentSchema.kind === "literal") {
+    if (argumentSchema.kind === "primitive") {
+      const baseType = checker.getBaseTypeOfLiteralType(
+        checker.getTypeAtLocation(node.expression)
+      );
+      const properties = baseType.getProperties();
+      return createUnionKind(
+        properties.map((property) => {
+          const propertyDeclaration = getSymbolDeclaration(property);
+          if (propertyDeclaration) {
+            const schema = getNodeSchema(propertyDeclaration, context);
+            if (schema) {
+              return schema;
+            }
+          }
+          return {
+            kind: "error",
+            message: `Could not resolve property ${property.getName()}`,
+            node,
+          };
+        })
+      );
+    } else if (argumentSchema.kind === "literal") {
+      // We have concrete literals on both sides, evaluate the result in js space
+      const argValue = argumentSchema.value + "";
+      if (parentSchema.value != null) {
+        const value = (parentSchema.value as any)[argValue];
+        if (
+          value === null ||
+          typeof value === "string" ||
+          typeof value === "number" ||
+          typeof value === "boolean"
+        ) {
+          return {
+            kind: "literal",
+            value,
+          };
+        }
+      }
+
+      return undefinedSchema;
+    }
     return argumentSchema;
   } else if (parentSchema.kind === "union") {
     if (argumentSchema.kind === "primitive") {
       const properties = unionProperties(parentSchema);
-      return {
-        kind: "union",
-        items: Object.values(properties),
-      };
+      return createUnionKind(Object.values(properties));
     }
 
     return argumentSchema;

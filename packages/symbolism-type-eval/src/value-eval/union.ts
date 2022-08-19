@@ -2,6 +2,23 @@ import invariant from "tiny-invariant";
 import { removeDuplicateSchemas } from "../classify";
 import { AnySchemaNode, UnionSchema } from "../schema";
 
+export function createUnionKind(items: AnySchemaNode[]): AnySchemaNode {
+  const flattenedUnions = items.flatMap((item) => {
+    if (item.kind === "union") {
+      return item.items;
+    }
+    return [item];
+  });
+  const dedupedItems = removeDuplicateSchemas(flattenedUnions);
+  if (dedupedItems.length === 1) {
+    return dedupedItems[0];
+  }
+  return {
+    kind: "union",
+    items: dedupedItems,
+  };
+}
+
 export function expandSchemaList({
   items,
   merger,

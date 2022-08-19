@@ -5,9 +5,12 @@ import type { AnySchemaNode } from "../schema";
 import { binaryExpressionOperatorToken } from "../value-eval/binary-expression";
 
 export function printSchema(
-  schema: AnySchemaNode,
+  schema: AnySchemaNode | undefined,
   target: "ts" | "js" = "ts"
-): string {
+): string | undefined {
+  if (!schema) {
+    return undefined;
+  }
   return safeTypeFormat(printSchemaNode(schema, target), schema);
 }
 

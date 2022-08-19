@@ -2,13 +2,13 @@ import { Command, OptionValues } from "commander";
 import { resolve } from "path";
 import ts from "typescript";
 import {
-  convertTSTypeToSchema,
   createJsonSchema,
+  evaluateSchema,
   printSchema,
-  SchemaContext,
 } from "@symbolism/type-eval";
 import { getSymbolDeclaration } from "@symbolism/ts-utils";
 import { getCliConfig, initTypescript } from "@symbolism/utils";
+import invariant from "tiny-invariant";
 
 export function initDumpSchema(program: Command) {
   program
@@ -48,12 +48,9 @@ function dumpSchema(
 
   const exportSymbol = checker.getExportSymbolOfSymbol(symbol);
   const exportDeclaration = getSymbolDeclaration(exportSymbol)!;
-  const type = checker.getTypeAtLocation(exportDeclaration);
 
-  const schema = convertTSTypeToSchema(
-    type,
-    new SchemaContext(exportDeclaration, checker, {})
-  );
+  const schema = evaluateSchema(exportDeclaration, checker);
+  invariant(schema, "Expected schema");
 
   console.log(
     options.json

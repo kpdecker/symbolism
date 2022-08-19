@@ -1,14 +1,14 @@
 import ts, { findAncestor } from "typescript";
 
-import { AnySchemaNode, convertTSTypeToSchema } from "../schema";
+import { AnySchemaNode } from "../schema";
 import { CallContext } from "../context";
 import { dumpNode, dumpSymbol } from "@symbolism/ts-debug";
 import { areSchemasEqual, nonConcreteInputs } from "../classify";
-import { resolveSymbolsInSchema } from "../value-eval/symbol";
-import { defineSymbol } from "@symbolism/definitions";
+import { getLocalSymbol, resolveSymbolsInSchema } from "../value-eval/symbol";
 import { logVerbose, NodeError, removeDuplicates } from "@symbolism/utils";
 import { expandUnions } from "../value-eval/union";
-import { isNamedDeclaration } from "@symbolism/ts-utils";
+import { getSymbolDeclaration, isNamedDeclaration } from "@symbolism/ts-utils";
+import { getNodeSchema } from "../value-eval";
 
 export type FunctionCallInfo = {
   callExpression: ts.CallExpression;
@@ -92,14 +92,24 @@ function convertCall(
   const parameterSymbols = signature.getParameters();
 
   const argSchemas = callExpression.arguments.map((argument, i) => {
-    const schema = convertTSTypeToSchema(...context.clone(undefined, argument));
+    const schema = getNodeSchema(
+      ...context.cloneNode(argument, {
+        allowMissing: false,
+        limitToValues: true,
+      })
+    )!;
 
     const inputs = nonConcreteInputs(schema);
-    const inputSymbols = inputs.map((input) =>
-      defineSymbol(input, context.checker, {
-        chooseLocal: true,
-      })
-    );
+    const inputSymbols = inputs.map((input) => {
+      const symbol = getLocalSymbol(input, checker);
+      if (symbol) {
+        return {
+          symbol,
+          declaration: getSymbolDeclaration(symbol),
+        };
+      }
+      throw new NodeError("Could not find symbol for input", input, checker);
+    });
 
     return {
       schema,
@@ -108,17 +118,7 @@ function convertCall(
     };
   });
 
-  const identitySchema = {
-    callExpression,
-    arguments: argSchemas.map((arg) => arg.schema),
-    symbols: parameterSymbols,
-  };
-
-  // Everything is concrete. No need to expand.
-  if (argSchemas.every((arg) => !arg.inputs.length)) {
-    collectedCalls.push(identitySchema);
-    return;
-  }
+  const baseSymbolMap = new Map<ts.Symbol, AnySchemaNode>();
 
   // Find the inputs that are parameter calls
   const parameterInputs = new Set(
@@ -129,6 +129,27 @@ function convertCall(
       return parameterNodes;
     })
   );
+
+  argSchemas.forEach((arg) => {
+    arg.inputSymbols.forEach((inputSymbol) => {
+      baseSymbolMap.set(
+        inputSymbol.symbol,
+        getNodeSchema(...context.cloneNode(inputSymbol.declaration!))!
+      );
+    });
+  });
+
+  // Everything is concrete. No need to expand.
+  if (argSchemas.every((arg) => !arg.inputs.length)) {
+    collectedCalls.push({
+      callExpression,
+      arguments: argSchemas.map((arg) =>
+        resolveSymbolsInSchema(arg.schema, baseSymbolMap, checker)
+      ),
+      symbols: parameterSymbols,
+    });
+    return;
+  }
 
   const functionDeclarations = Array.from(
     new Set(Array.from(parameterInputs.values()).map((node) => node.parent))
@@ -215,13 +236,16 @@ function convertCall(
     } else {
       upstreamCall.forEach((call) => {
         // Inject the arguments into the call
-        const symbolMap = new Map<ts.Symbol, AnySchemaNode>();
+        const symbolMap = new Map<ts.Symbol, AnySchemaNode>(baseSymbolMap);
         parameterInputs.forEach((node) => {
           if (node.parent === firstDeclaration) {
             const symbol = checker.getSymbolAtLocation(node.name)!;
             const parameterIndex = node.parent.parameters.indexOf(node);
 
-            symbolMap.set(symbol, call.arguments[parameterIndex]);
+            const argument = call.arguments[parameterIndex];
+            if (argument) {
+              symbolMap.set(symbol, argument);
+            }
           }
         });
         partiallyResolvedArgSchemas.push(
@@ -233,7 +257,11 @@ function convertCall(
     }
   } else {
     // No calls, so everything is resolved.
-    partiallyResolvedArgSchemas.push(argSchemas.map((arg) => arg.schema));
+    partiallyResolvedArgSchemas.push(
+      argSchemas.map((arg) =>
+        resolveSymbolsInSchema(arg.schema, baseSymbolMap, checker)
+      )
+    );
   }
 
   if (functionDeclarations.length) {

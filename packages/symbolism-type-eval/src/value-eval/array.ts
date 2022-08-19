@@ -1,8 +1,23 @@
 import ts from "typescript";
-import { convertValueExpression, TypeEvalOptions } from ".";
 import { removeDuplicateSchemas } from "../classify";
 import { SchemaContext } from "../context";
 import { AnySchemaNode } from "../schema";
+import { getNodeSchema } from ".";
+import { createUnionKind } from "./union";
+import { nodeEvalHandler } from "./handlers";
+import { invariantNode } from "@symbolism/ts-utils";
+import { dumpNode } from "@symbolism/ts-debug";
+
+export const arrayOperators = nodeEvalHandler({
+  [ts.SyntaxKind.ArrayLiteralExpression](node, context) {
+    invariantNode(node, context.checker, ts.isArrayLiteralExpression);
+    return convertArrayLiteralValue(node, context);
+  },
+  [ts.SyntaxKind.ArrayBindingPattern](node, context) {
+    invariantNode(node, context.checker, ts.isArrayBindingPattern);
+    return getNodeSchema(...context.cloneNode(node.parent));
+  },
+});
 
 export function convertArrayLiteralValue(
   node: ts.ArrayLiteralExpression,
@@ -11,21 +26,11 @@ export function convertArrayLiteralValue(
   const elements = removeDuplicateSchemas<AnySchemaNode>(
     node.elements.map(
       (element) =>
-        convertValueExpression(
-          ...context.cloneNode(element, { allowMissing: false })
-        )!
+        getNodeSchema(...context.cloneNode(element, { allowMissing: false }))!
     )
   );
 
-  let items: AnySchemaNode;
-  if (elements.length === 1) {
-    items = elements[0];
-  } else {
-    items = {
-      kind: "union",
-      items: elements,
-    };
-  }
+  const items = createUnionKind(elements);
 
   return {
     kind: "array",

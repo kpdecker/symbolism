@@ -1,11 +1,14 @@
 import ts from "typescript";
-import { convertNode, convertValueExpression } from ".";
+import invariant from "tiny-invariant";
+
 import { isConcreteSchema } from "../classify";
-import { AnySchemaNode, BinaryExpressionSchema } from "../schema";
+import { AnySchemaNode } from "../schema";
 import { SchemaContext } from "../context";
 import { booleanPrimitiveSchema } from "../well-known-schemas";
+
+import { getNodeSchema } from ".";
 import { normalizeTemplateLiteralSchema } from "./string-template";
-import { expandUnions } from "./union";
+import { createUnionKind, expandUnions } from "./union";
 
 export function convertBinaryExpression(
   node: ts.Node,
@@ -15,8 +18,11 @@ export function convertBinaryExpression(
     return undefined;
   }
 
-  const leftSchema = convertNode(node.left, context);
-  const rightSchema = convertNode(node.right, context);
+  const leftSchema = getNodeSchema(...context.cloneNode(node.left))!;
+  invariant(leftSchema, "Expected left schema");
+
+  const rightSchema = getNodeSchema(...context.cloneNode(node.right))!;
+  invariant(rightSchema, "Expected right schema");
 
   const operator = node.operatorToken.kind as ts.BinaryOperator;
   switch (operator) {
@@ -62,15 +68,12 @@ export function convertBinaryExpression(
 
     case ts.SyntaxKind.QuestionQuestionToken:
       if (isConcreteSchema(leftSchema)) {
-        if (leftSchema.kind === "literal" && leftSchema.value === undefined) {
+        if (leftSchema.kind === "literal" && leftSchema.value == null) {
           return rightSchema;
         }
         return leftSchema;
       }
-      return {
-        kind: "union",
-        items: [leftSchema, rightSchema],
-      };
+      return createUnionKind([leftSchema, rightSchema]);
     case ts.SyntaxKind.AmpersandAmpersandToken:
     case ts.SyntaxKind.BarBarToken:
     case ts.SyntaxKind.AmpersandAmpersandEqualsToken:
@@ -80,7 +83,7 @@ export function convertBinaryExpression(
 
     case ts.SyntaxKind.EqualsToken:
     case ts.SyntaxKind.CommaToken:
-      return convertValueExpression(
+      return getNodeSchema(
         ...context.cloneNode(node.right, {
           allowMissing: false,
         })
@@ -228,14 +231,7 @@ export function evaluateBinaryExpressionSchema(
     };
   });
 
-  if (expandedSchema.length === 1) {
-    return expandedSchema[0];
-  }
-
-  return {
-    kind: "union",
-    items: expandedSchema,
-  };
+  return createUnionKind(expandedSchema);
 }
 
 export function binaryExpressionOperatorToken(operatorKind: ts.BinaryOperator) {

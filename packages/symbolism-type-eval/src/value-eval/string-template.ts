@@ -1,11 +1,28 @@
 import { defineSymbol } from "@symbolism/definitions";
 import invariant from "tiny-invariant";
 import ts from "typescript";
-import { convertValueDeclaration } from ".";
 import { isLiteralUnion } from "../classify";
-import { AnySchemaNode, convertTSTypeToSchema } from "../schema";
+import { AnySchemaNode } from "../schema";
 import { SchemaContext } from "../context";
-import { expandSchemaList } from "./union";
+import { createUnionKind, expandSchemaList } from "./union";
+import { getNodeSchema } from ".";
+import { checkerEval, nodeEvalHandler } from "./handlers";
+import { invariantNode } from "@symbolism/ts-utils";
+
+export const templateOperators = nodeEvalHandler({
+  [ts.SyntaxKind.NoSubstitutionTemplateLiteral]: checkerEval,
+  [ts.SyntaxKind.TemplateExpression](node, context) {
+    invariantNode(node, context.checker, ts.isTemplateExpression);
+    return convertTemplateLiteralValue(node, context);
+  },
+  [ts.SyntaxKind.TemplateHead]: checkerEval,
+  [ts.SyntaxKind.TemplateMiddle]: checkerEval,
+  [ts.SyntaxKind.TemplateTail]: checkerEval,
+  [ts.SyntaxKind.TemplateSpan]: checkerEval,
+
+  [ts.SyntaxKind.TemplateLiteralType]: checkerEval,
+  [ts.SyntaxKind.TemplateLiteralTypeSpan]: checkerEval,
+});
 
 export function convertTemplateLiteralValue(
   node: ts.TemplateExpression,
@@ -30,13 +47,13 @@ export function convertTemplateLiteralValue(
 
     let expressionSchema: AnySchemaNode | undefined;
     if (expressionDefinition?.declaration) {
-      expressionSchema = convertValueDeclaration(
+      expressionSchema = getNodeSchema(
         ...context.cloneNode(expressionDefinition.declaration)
       );
     }
     if (!expressionSchema) {
-      expressionSchema = convertTSTypeToSchema(
-        ...context.clone(undefined, templateSpan.expression)
+      expressionSchema = getNodeSchema(
+        ...context.cloneNode(templateSpan.expression)
       );
     }
     if (expressionSchema) {
@@ -117,11 +134,5 @@ export function normalizeTemplateLiteralSchema(
     },
   });
 
-  if (expandedSchemas.length === 1) {
-    return expandedSchemas[0];
-  }
-  return {
-    kind: "union",
-    items: expandedSchemas,
-  };
+  return createUnionKind(expandedSchemas);
 }

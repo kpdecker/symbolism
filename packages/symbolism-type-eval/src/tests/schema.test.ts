@@ -1,8 +1,10 @@
 import { mockProgram } from "@symbolism/test";
 import { findIdentifiers } from "@symbolism/ts-utils";
 import { printSchema } from "../print/typescript";
-import { convertTSTypeToSchema } from "../schema";
 import { SchemaContext } from "../context";
+import { getNodeSchema } from "../value-eval";
+import { evaluateSchema } from "../schema";
+import { LogLevel, setLogLevel } from "@symbolism/utils";
 
 function testType(source: string, name = "Type") {
   const program = mockProgram({
@@ -66,9 +68,8 @@ describe("type schema converter", () => {
       };
     `);
 
-    expect(
-      printSchema(convertTSTypeToSchema(...context.clone(type, declaration)))
-    ).toMatchInlineSnapshot(`
+    expect(printSchema(evaluateSchema(declaration, context.checker)))
+      .toMatchInlineSnapshot(`
       "{
         any: any;
         array: string[];
@@ -115,9 +116,8 @@ describe("type schema converter", () => {
         emptyIntersection: {} & 1;
       };
     `);
-    expect(
-      printSchema(convertTSTypeToSchema(...context.clone(type, declaration)))
-    ).toMatchInlineSnapshot(`
+    expect(printSchema(evaluateSchema(declaration, context.checker)))
+      .toMatchInlineSnapshot(`
       "{
         emptyIntersection: {} & 1;
         extendingIntersection: {
@@ -171,9 +171,8 @@ describe("type schema converter", () => {
         emptyUnion: {} | 1;
       };
     `);
-    expect(
-      printSchema(convertTSTypeToSchema(...context.clone(type, declaration)))
-    ).toMatchInlineSnapshot(`
+    expect(printSchema(evaluateSchema(declaration, context.checker)))
+      .toMatchInlineSnapshot(`
       "{
         directUnion: 1 | 2 | 3;
         disjointUnion:
@@ -227,9 +226,8 @@ describe("type schema converter", () => {
           nested?: NestedSelector
         }
       `);
-      expect(
-        printSchema(convertTSTypeToSchema(...context.clone(type, declaration)))
-      ).toMatchInlineSnapshot(`
+      expect(printSchema(evaluateSchema(declaration, context.checker)))
+        .toMatchInlineSnapshot(`
         "{
           nested: {
             classFunction: () => undefined;
@@ -254,9 +252,8 @@ describe("type schema converter", () => {
           other: keyof Source;
         }
       `);
-      expect(
-        printSchema(convertTSTypeToSchema(...context.clone(type, declaration)))
-      ).toMatchInlineSnapshot(`
+      expect(printSchema(evaluateSchema(declaration, context.checker)))
+        .toMatchInlineSnapshot(`
         "{
           other: \\"directUnion\\" | \\"wideningUnion\\";
           [k: string]: \\"bar\\" | \\"foo\\";
@@ -278,9 +275,8 @@ describe("type schema converter", () => {
           [key in keyof Source]: "foo" | "bar";
         }
       `);
-      expect(
-        printSchema(convertTSTypeToSchema(...context.clone(type, declaration)))
-      ).toMatchInlineSnapshot(`
+      expect(printSchema(evaluateSchema(declaration, context.checker)))
+        .toMatchInlineSnapshot(`
         "{
           directUnion: \\"bar\\" | \\"foo\\";
           disjointUnion: \\"bar\\" | \\"foo\\";
@@ -306,9 +302,8 @@ describe("type schema converter", () => {
 
         type Type = InferFromMapped<MappedLiteralType>;
       `);
-      expect(
-        printSchema(convertTSTypeToSchema(...context.clone(type, declaration)))
-      ).toMatchInlineSnapshot(`
+      expect(printSchema(evaluateSchema(declaration, context.checker)))
+        .toMatchInlineSnapshot(`
         "{
           first: \\"first\\";
           second: \\"second\\";
@@ -323,9 +318,8 @@ describe("type schema converter", () => {
         };
       `);
 
-      expect(
-        printSchema(convertTSTypeToSchema(...context.clone(type, declaration)))
-      ).toMatchInlineSnapshot(`
+      expect(printSchema(evaluateSchema(declaration, context.checker)))
+        .toMatchInlineSnapshot(`
         "{ date: \\"Date\\" };
         "
       `);
@@ -339,9 +333,8 @@ describe("type schema converter", () => {
         };
       `);
 
-      expect(
-        printSchema(convertTSTypeToSchema(...context.clone(type, declaration)))
-      ).toMatchInlineSnapshot(`
+      expect(printSchema(evaluateSchema(declaration, context.checker)))
+        .toMatchInlineSnapshot(`
         "{
           date: \\"Date\\";
           foo: \\"error! Circular type Type\\";
@@ -350,85 +343,10 @@ describe("type schema converter", () => {
       `);
     });
   });
-  describe("arrays", () => {
-    it("should pull type from array literals", () => {
-      const { checker, context, sourceFile } = testType(`
-        const x = [1, 2, 3];
-      `);
-
-      const xNodes = findIdentifiers(sourceFile, "x");
-
-      let xType = checker.getTypeAtLocation(xNodes[0]);
-      expect(
-        printSchema(
-          convertTSTypeToSchema(...context.clone(undefined, xNodes[0]))
-        )
-      ).toMatchInlineSnapshot(`
-        "(1 | 2 | 3)[];
-        "
-      `);
-    });
-
-    it("should pull type from const array literals", () => {
-      const { checker, context, sourceFile } = testType(`
-        const x = [1, 2, 3] as const;
-      `);
-
-      const xNodes = findIdentifiers(sourceFile, "x");
-
-      expect(
-        printSchema(
-          convertTSTypeToSchema(...context.clone(undefined, xNodes[0]))
-        )
-      ).toMatchInlineSnapshot(`
-        "[1, 2, 3];
-        "
-      `);
-    });
-  });
-  describe("tuples", () => {
-    // (Tuple = 1 << 3), // Synthesized generic tuple type
-    it("should pull type from tuples", () => {
-      const { type, declaration, context } = testType(`
-        type Type = [1, 2, 3];
-      `);
-
-      expect(
-        printSchema(convertTSTypeToSchema(...context.clone(type, declaration)))
-      ).toMatchInlineSnapshot(`
-        "[1, 2, 3];
-        "
-      `);
-    });
-    it("should handle tuples with rest and optional", () => {
-      const { type, declaration, context } = testType(`
-        type Type = [1, 2, 3, ...string[], number?];
-      `);
-
-      expect(
-        printSchema(convertTSTypeToSchema(...context.clone(type, declaration)))
-      ).toMatchInlineSnapshot(`
-        "[1, 2, 3, ...string[], number?];
-        "
-      `);
-    });
-    it("should handle variadic tuples", () => {
-      const { type, declaration, context } = testType(`
-        type GenericType<T> = [1, ...T];
-        type Type = GenericType<[string, "bar"]>;
-      `);
-
-      expect(
-        printSchema(convertTSTypeToSchema(...context.clone(type, declaration)))
-      ).toMatchInlineSnapshot(`
-        "[1, string, \\"bar\\"];
-        "
-      `);
-    });
-  });
 
   describe("generics", () => {
     it("should handle resolved generics", () => {
+      // setLogLevel(LogLevel.debug);
       const { type, declaration, context } = testType(`
           interface CSSProps  {
             color?: string;
@@ -442,10 +360,11 @@ describe("type schema converter", () => {
           }
 
           type Type = GenericType<{ color: "red" }>;
+
+          // TODO: Non concrete generics
         `);
-      expect(
-        printSchema(convertTSTypeToSchema(...context.clone(type, declaration)))
-      ).toMatchInlineSnapshot(`
+      expect(printSchema(evaluateSchema(declaration, context.checker)))
+        .toMatchInlineSnapshot(`
         "{ nested: { prop: { color: \\"red\\" } } };
         "
       `);
@@ -463,9 +382,8 @@ describe("type schema converter", () => {
             nested?: NestedSelector<T>
           }
         `);
-      expect(
-        printSchema(convertTSTypeToSchema(...context.clone(type, declaration)))
-      ).toMatchInlineSnapshot(`
+      expect(printSchema(evaluateSchema(declaration, context.checker)))
+        .toMatchInlineSnapshot(`
         "{
           nested: {
             prop: {
@@ -486,9 +404,8 @@ describe("type schema converter", () => {
             nested?: NestedSelector<T>
           }
         `);
-      expect(
-        printSchema(convertTSTypeToSchema(...context.clone(type, declaration)))
-      ).toMatchInlineSnapshot(`
+      expect(printSchema(evaluateSchema(declaration, context.checker)))
+        .toMatchInlineSnapshot(`
         "{ nested: { prop: any } };
         "
       `);
@@ -502,9 +419,8 @@ describe("type schema converter", () => {
         type Type = \`foo \${Bar}\`;
       `);
 
-      expect(
-        printSchema(convertTSTypeToSchema(...context.clone(type, declaration)))
-      ).toMatchInlineSnapshot(`
+      expect(printSchema(evaluateSchema(declaration, context.checker)))
+        .toMatchInlineSnapshot(`
         "\`foo \${string}\`;
         "
       `);
@@ -515,9 +431,8 @@ describe("type schema converter", () => {
         type Type = \`foo \${Bar}\`;
       `);
 
-      expect(
-        printSchema(convertTSTypeToSchema(...context.clone(type, declaration)))
-      ).toMatchInlineSnapshot(`
+      expect(printSchema(evaluateSchema(declaration, context.checker)))
+        .toMatchInlineSnapshot(`
         "\\"foo bar\\" | \\"foo foo\\";
         "
       `);
@@ -530,9 +445,8 @@ describe("type schema converter", () => {
         type Type = typeof type;
       `);
 
-      expect(
-        printSchema(convertTSTypeToSchema(...context.clone(type, declaration)))
-      ).toMatchInlineSnapshot(`
+      expect(printSchema(getNodeSchema(...context.cloneNode(declaration))!))
+        .toMatchInlineSnapshot(`
         "\\"foo bard\\" | \\"foo food\\";
         "
       `);
@@ -547,9 +461,8 @@ describe("type schema converter", () => {
         type Type = typeof type;
       `);
 
-      expect(
-        printSchema(convertTSTypeToSchema(...context.clone(type, declaration)))
-      ).toMatchInlineSnapshot(`
+      expect(printSchema(evaluateSchema(declaration, context.checker)))
+        .toMatchInlineSnapshot(`
         "{ foo: \\"foo bard\\" | \\"foo food\\" };
         "
       `);
@@ -568,9 +481,8 @@ describe("type schema converter", () => {
         type Type<T> = Pairs<T>[keyof T];
       `);
 
-    expect(
-      printSchema(convertTSTypeToSchema(...context.clone(type, declaration)))
-    ).toMatchInlineSnapshot(`
+    expect(printSchema(evaluateSchema(declaration, context.checker)))
+      .toMatchInlineSnapshot(`
       "{}[keyof {}];
       "
     `);

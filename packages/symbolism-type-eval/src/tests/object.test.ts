@@ -1,10 +1,12 @@
 import { mockProgram } from "@symbolism/test";
 import { findIdentifiers } from "@symbolism/ts-utils";
 import { printSchema } from "../print/typescript";
-import { convertTSTypeToSchema } from "../schema";
 import { SchemaContext } from "../context";
 import ts from "typescript";
 import { createJsonSchema } from "../print/json";
+import { getNodeSchema } from "../value-eval";
+import { evaluateSchema } from "../schema";
+import { getTypeSchema } from "../type-eval";
 
 function testType(source: string, name = "Type") {
   const program = mockProgram({
@@ -62,7 +64,7 @@ describe("type schema converter", () => {
         }
         type Type = typeof literal;
       `);
-      expect(printSchema(convertTSTypeToSchema(...context.clone(type))))
+      expect(printSchema(getTypeSchema(...context.clone(type))))
         .toMatchInlineSnapshot(`
         "{
           bothor: string;
@@ -85,7 +87,7 @@ describe("type schema converter", () => {
       expect(
         createJsonSchema({
           $id: "test.ts",
-          schema: convertTSTypeToSchema(...context.clone(type)),
+          schema: getTypeSchema(...context.clone(type)),
         })
       ).toMatchInlineSnapshot(`
         Object {
@@ -188,11 +190,7 @@ describe("type schema converter", () => {
       const literalNode = findIdentifiers(sourceFile, "literal")[0];
       const assignNode = literalNode.parent as ts.VariableDeclaration;
       expect(
-        printSchema(
-          convertTSTypeToSchema(
-            ...context.clone(undefined, assignNode.initializer!)
-          )
-        )
+        printSchema(evaluateSchema(assignNode.initializer!, context.checker))
       ).toMatchInlineSnapshot(`
         "{
           bothor: string;
@@ -232,11 +230,7 @@ describe("type schema converter", () => {
       const literalNode = findIdentifiers(sourceFile, "literal")[0];
       const assignNode = literalNode.parent as ts.VariableDeclaration;
       expect(
-        printSchema(
-          convertTSTypeToSchema(
-            ...context.clone(undefined, assignNode.initializer!)
-          )
-        )
+        printSchema(evaluateSchema(assignNode.initializer!, context.checker))
       ).toMatchInlineSnapshot(`
         "{
           \\"1bar\\": 0;
@@ -252,27 +246,23 @@ describe("type schema converter", () => {
         "
       `);
 
-      expect(
-        printSchema(
-          convertTSTypeToSchema(...context.clone(undefined, literalNode!))
-        )
-      ).toMatchInlineSnapshot(`
-        "{
-          \\"1bar\\": 0;
-          \\"1foo\\": 0;
-          \\"2bar\\": 0;
-          \\"2foo\\": 0;
-          \\"3bar\\": 0;
-          \\"3foo\\": 0;
-          \\"4bar\\": 0;
-          \\"4foo\\": 0;
-          blat: \\"yes\\";
-        };
-        "
-      `);
-
-      expect(printSchema(convertTSTypeToSchema(type, context)))
+      expect(printSchema(evaluateSchema(literalNode!, context.checker)))
         .toMatchInlineSnapshot(`
+        "{
+          \\"1bar\\": 0;
+          \\"1foo\\": 0;
+          \\"2bar\\": 0;
+          \\"2foo\\": 0;
+          \\"3bar\\": 0;
+          \\"3foo\\": 0;
+          \\"4bar\\": 0;
+          \\"4foo\\": 0;
+          blat: \\"yes\\";
+        };
+        "
+      `);
+
+      expect(printSchema(getTypeSchema(type, context))).toMatchInlineSnapshot(`
         "{
           \\"1bar\\": 0;
           \\"1foo\\": 0;
@@ -326,11 +316,7 @@ describe("type schema converter", () => {
     const literalNode = findIdentifiers(sourceFile, "literal")[0];
     const assignNode = literalNode.parent as ts.VariableDeclaration;
     expect(
-      printSchema(
-        convertTSTypeToSchema(
-          ...context.clone(undefined, assignNode.initializer!)
-        )
-      )
+      printSchema(evaluateSchema(assignNode.initializer!, context.checker))
     ).toMatchInlineSnapshot(`
       "{
         blat: \\"yes\\";
@@ -393,9 +379,7 @@ describe("type schema converter", () => {
         const literalNode = findIdentifiers(sourceFile, name)[0];
         const assignNode = literalNode.parent as ts.VariableDeclaration;
         return printSchema(
-          convertTSTypeToSchema(
-            ...context.clone(undefined, assignNode.initializer!)
-          )
+          getNodeSchema(...context.cloneNode(assignNode.initializer!))!
         );
       }
 
@@ -415,7 +399,6 @@ describe("type schema converter", () => {
               deOther: true;
               foo: \\"bar\\";
             }
-          | 0
           | 0;
         "
       `);
@@ -442,12 +425,99 @@ describe("type schema converter", () => {
       `);
 
       expect(testVar("stringLookup")).toMatchInlineSnapshot(`
-        "number;
+        "12;
         "
       `);
 
       expect(testVar("stringAbstractLookup")).toMatchInlineSnapshot(`
-        "any;
+        " (() => {
+              \\"[Symbol.iterator]\\": () => \\"error! Circular type IterableIterator<string>\\";
+              next: (args: [{}] | []) =>
+                | {
+                    done: false;
+                    value: string;
+                  }
+                | {
+                    done: true;
+                    value: any;
+                  };
+              return: (value: {}) =>
+                | {
+                    done: false;
+                    value: string;
+                  }
+                | {
+                    done: true;
+                    value: any;
+                  };
+              throw: (e: any) =>
+                | {
+                    done: false;
+                    value: string;
+                  }
+                | {
+                    done: true;
+                    value: any;
+                  };
+            })
+          | (() => string)
+          | ((form: \\"NFC\\" | \\"NFD\\" | \\"NFKC\\" | \\"NFKD\\") => string)
+          | ((from: number, length: number) => string)
+          | ((locales: string[] | string) => string)
+          | ((matcher: {
+              \\"[Symbol.match]\\": (string: string) => \\"RegExpMatchArray\\";
+            }) => \\"RegExpMatchArray\\")
+          | ((maxLength: number, fillString: string) => string)
+          | ((pos: number) => number)
+          | ((regexp: \\"RegExp\\" | string) => \\"RegExpMatchArray\\")
+          | ((regexp: \\"RegExp\\" | string) => number)
+          | ((searchString: string, position: number) => false | true)
+          | ((searchString: string, position: number) => number)
+          | ((searchValue: \\"RegExp\\" | string, replaceValue: string) => string)
+          | ((
+              searchValue: \\"RegExp\\" | string,
+              replacer: (substring: string, args: any[]) => string
+            ) => string)
+          | ((
+              searchValue: {
+                \\"[Symbol.replace]\\": (string: string, replaceValue: string) => string;
+              },
+              replaceValue: string
+            ) => string)
+          | ((
+              searchValue: {
+                \\"[Symbol.replace]\\": (
+                  string: string,
+                  replacer: (substring: string, args: any[]) => string
+                ) => string;
+              },
+              replacer: (substring: string, args: any[]) => string
+            ) => string)
+          | ((searcher: { \\"[Symbol.search]\\": (string: string) => number }) => number)
+          | ((separator: \\"RegExp\\" | string, limit: number) => string[])
+          | ((size: number) => string)
+          | ((
+              splitter: {
+                \\"[Symbol.split]\\": (string: string, limit: number) => string[];
+              },
+              limit: number
+            ) => string[])
+          | ((strings: string[]) => string)
+          | ((that: string) => number)
+          | ((
+              that: string,
+              locales: string[] | string,
+              options: {
+                caseFirst: string;
+                ignorePunctuation: false | true;
+                localeMatcher: string;
+                numeric: false | true;
+                sensitivity: string;
+                usage: string;
+              }
+            ) => number)
+          | ((url: string) => string)
+          | number;
         "
       `);
     });

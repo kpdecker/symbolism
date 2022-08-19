@@ -1,4 +1,5 @@
-import ts from "typescript";
+import { isNamedDeclaration } from "@symbolism/ts-utils";
+import ts, { NamedDeclaration } from "typescript";
 import { AnySchemaNode } from "../schema";
 import { evaluateBinaryExpressionSchema } from "./binary-expression";
 
@@ -101,14 +102,19 @@ export function getLocalSymbol(
   node: ts.Node | undefined,
   checker: ts.TypeChecker
 ): ts.Symbol | undefined {
-  if (node && ts.isShorthandPropertyAssignment(node)) {
+  if (!node) {
+    return undefined;
+  }
+
+  if (isNamedDeclaration(node)) {
     return getLocalSymbol(node.name, checker);
   }
 
-  return (
-    node &&
-    (ts.isShorthandPropertyAssignment(node.parent)
-      ? checker.getShorthandAssignmentValueSymbol(node.parent)
-      : checker.getSymbolAtLocation(node))
-  );
+  if (ts.isShorthandPropertyAssignment(node)) {
+    return getLocalSymbol(node.name, checker);
+  }
+
+  return ts.isShorthandPropertyAssignment(node.parent)
+    ? checker.getShorthandAssignmentValueSymbol(node.parent)
+    : checker.getSymbolAtLocation(node);
 }
