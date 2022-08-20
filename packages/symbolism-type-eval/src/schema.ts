@@ -120,9 +120,18 @@ export type AnySchemaNode =
   | ReferenceSchema
   | ErrorSchema;
 
-export function evaluateSchema(node: ts.Node, checker: ts.TypeChecker) {
+export type Schema = {
+  defs?: Map<ts.Symbol, AnySchemaNode>;
+  root: AnySchemaNode | undefined;
+};
+
+export function evaluateSchema(node: ts.Node, checker: ts.TypeChecker): Schema {
   const context = new SchemaContext(node, checker, {});
-  return getNodeSchema(node, context);
+  const root = getNodeSchema(node, context);
+  return {
+    defs: context.symbolDefinitions,
+    root,
+  };
 }
 
 export function createReferenceSchema(

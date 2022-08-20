@@ -50,7 +50,6 @@ function dumpSchema(
   const exportDeclaration = getSymbolDeclaration(exportSymbol)!;
 
   const schema = evaluateSchema(exportDeclaration, checker);
-  invariant(schema, "Expected schema");
 
   console.log(
     options.json

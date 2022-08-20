@@ -32,7 +32,7 @@ describe("type schema converter", () => {
 
       const xNodes = findIdentifiers(sourceFile, "x");
 
-      expect(printSchema(getNodeSchema(...context.cloneNode(xNodes[0]))!))
+      expect(printSchema(evaluateSchema(xNodes[0], checker)))
         .toMatchInlineSnapshot(`
         "(1 | 2 | 3)[];
         "

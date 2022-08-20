@@ -1,20 +1,24 @@
 import { dumpSchema } from "@symbolism/ts-debug";
 import { format } from "prettier";
 import ts from "typescript";
-import type { AnySchemaNode } from "../schema";
+import type { AnySchemaNode, Schema } from "../schema";
 import { binaryExpressionOperatorToken } from "../value-eval/binary-expression";
 
 export function printSchema(
-  schema: AnySchemaNode | undefined,
+  schema: Schema | undefined,
   target: "ts" | "js" = "ts"
 ): string | undefined {
   if (!schema) {
     return undefined;
   }
-  return safeTypeFormat(printSchemaNode(schema, target), schema);
+  const schemaRoot = "root" in schema ? schema.root : schema;
+  return safeTypeFormat(printSchemaNode(schemaRoot, target), schemaRoot);
 }
 
-function safeTypeFormat(unformattedText: string, schema: AnySchemaNode) {
+function safeTypeFormat(
+  unformattedText: string,
+  schema: AnySchemaNode | undefined
+) {
   try {
     return format("type foo = " + unformattedText, {
       parser: "typescript",
@@ -28,7 +32,7 @@ function safeTypeFormat(unformattedText: string, schema: AnySchemaNode) {
 }
 
 export function printSchemaNode(
-  schema: AnySchemaNode,
+  schema: AnySchemaNode | undefined,
   target: "ts" | "js" = "ts"
 ): string {
   function wrapTsType(type: string): string {
@@ -39,6 +43,10 @@ export function printSchemaNode(
       return trimmedType;
     }
     return type;
+  }
+
+  if (!schema) {
+    return "undefined";
   }
 
   switch (schema.kind) {

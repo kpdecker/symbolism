@@ -4,9 +4,12 @@ import { FunctionCallInfo } from "./calls";
 import { SymbolTable } from "@symbolism/symbol-table";
 import invariant from "tiny-invariant";
 import { TypeEvalOptions } from "./value-eval";
+import { AnySchemaNode } from "./schema";
 
 export class SchemaContext {
   typesHandled: Set<ts.Type> = new Set<ts.Type>();
+  symbolDefinitions = new Map<ts.Symbol, AnySchemaNode>();
+
   narrowingNode?: ts.Node;
 
   constructor(
@@ -61,6 +64,7 @@ export class SchemaContext {
   protected cloneProps(newInstance: SchemaContext) {
     newInstance.typesHandled = new Set(this.typesHandled);
     newInstance.narrowingNode = this.narrowingNode;
+    newInstance.symbolDefinitions = this.symbolDefinitions;
   }
 }
 

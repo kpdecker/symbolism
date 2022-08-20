@@ -1,12 +1,12 @@
 import { JsonObject } from "type-fest";
 import ts from "typescript";
 import { isNumericSchema } from "../classify";
-import type { AnySchemaNode } from "../schema";
+import type { AnySchemaNode, Schema } from "../schema";
 import { schemaToRegEx } from "../string";
 import { printSchemaNode } from "./typescript";
 
 export function createJsonSchema(params: {
-  schema: AnySchemaNode;
+  schema: Schema;
   $id: string;
   $comment?: string;
 }): JsonObject {
@@ -16,11 +16,17 @@ export function createJsonSchema(params: {
     $schema: "https://json-schema.org/draft/2020-12/schema",
     $id,
     $comment,
-    ...schemaToJson(schema),
+    ...schemaToJson(schema.root),
   };
 }
 
-export function schemaToJson(schema: AnySchemaNode): JsonObject {
+export function schemaToJson(
+  schema: AnySchemaNode | undefined
+): JsonObject | null {
+  if (!schema) {
+    return null;
+  }
+
   switch (schema.kind) {
     case "primitive":
       return { type: schema.name };
@@ -56,12 +62,12 @@ export function schemaToJson(schema: AnySchemaNode): JsonObject {
           .reduce((acc, name) => {
             acc[name] = schemaToJson(schema.properties[name]);
             return acc;
-          }, {} as Record<string, JsonObject>),
+          }, {} as Record<string, JsonObject | null>),
         patternProperties: schema.abstractIndexKeys.length
           ? schema.abstractIndexKeys.reduce((acc, { key, value }) => {
               acc[schemaToRegEx(key) + ""] = schemaToJson(value);
               return acc;
-            }, {} as Record<string, JsonObject>)
+            }, {} as Record<string, JsonObject | null>)
           : undefined,
       };
     case "function":
@@ -98,11 +104,11 @@ export function schemaToJson(schema: AnySchemaNode): JsonObject {
       };
     case "union":
       const anyOf = schema.items.map(schemaToJson);
-      const literals = anyOf.filter((item) => item.const);
+      const literals = anyOf.filter((item) => item?.const);
       if (literals.length === schema.items.length) {
         return {
           type: "string",
-          enum: literals.map((item) => item.const!),
+          enum: literals.map((item) => item?.const!),
         };
       }
       return {

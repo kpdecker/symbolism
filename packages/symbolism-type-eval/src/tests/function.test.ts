@@ -50,45 +50,45 @@ describe("type schema converter", () => {
       `);
 
       const returnNodes = findNodesInTree(sourceFile, ts.isReturnStatement);
-      expect(printSchema(getNodeSchema(...context.cloneNode(returnNodes[0]))))
+      expect(printSchema(evaluateSchema(returnNodes[0], context.checker)))
         .toMatchInlineSnapshot(`
         "\\"foo\\";
         "
       `);
 
-      expect(printSchema(getNodeSchema(...context.cloneNode(returnNodes[1]))))
+      expect(printSchema(evaluateSchema(returnNodes[1], context.checker)))
         .toMatchInlineSnapshot(`
         "\\"bat\\";
         "
       `);
 
-      expect(printSchema(getNodeSchema(...context.cloneNode(returnNodes[2]))))
+      expect(printSchema(evaluateSchema(returnNodes[2], context.checker)))
         .toMatchInlineSnapshot(`
         "\\"bar\\";
         "
       `);
-      expect(printSchema(getNodeSchema(...context.cloneNode(returnNodes[3]))))
+      expect(printSchema(evaluateSchema(returnNodes[3], context.checker)))
         .toMatchInlineSnapshot(`
         "undefined;
         "
       `);
 
       const arrowNodes = findIdentifiers(sourceFile, "arrow");
-      expect(printSchema(getNodeSchema(...context.cloneNode(arrowNodes[0]))))
+      expect(printSchema(evaluateSchema(arrowNodes[0], context.checker)))
         .toMatchInlineSnapshot(`
         "() => \\"foo\\";
         "
       `);
 
       const fooNodes = findIdentifiers(sourceFile, "foo");
-      expect(printSchema(getNodeSchema(...context.cloneNode(fooNodes[0]))))
+      expect(printSchema(evaluateSchema(fooNodes[0], context.checker)))
         .toMatchInlineSnapshot(`
         "() => \\"foo\\";
         "
       `);
 
       const barNodes = findIdentifiers(sourceFile, "bar");
-      expect(printSchema(getNodeSchema(...context.cloneNode(barNodes[0]))))
+      expect(printSchema(evaluateSchema(barNodes[0], context.checker)))
         .toMatchInlineSnapshot(`
         "() => \\"bar\\" | \\"bat\\";
         "
@@ -108,14 +108,14 @@ describe("type schema converter", () => {
       `);
 
       const yieldNodes = findNodesInTree(sourceFile, ts.isYieldExpression);
-      expect(printSchema(getNodeSchema(...context.cloneNode(yieldNodes[0]))))
+      expect(printSchema(evaluateSchema(yieldNodes[0], context.checker)))
         .toMatchInlineSnapshot(`
         "\\"foo\\";
         "
       `);
       expect(
         printSchema(
-          getNodeSchema(...context.cloneNode(yieldNodes[yieldNodes.length - 1]))
+          evaluateSchema(yieldNodes[yieldNodes.length - 1], context.checker)
         )
       ).toMatchInlineSnapshot(`
         "{
@@ -152,7 +152,7 @@ describe("type schema converter", () => {
       `);
 
       const fooNodes = findIdentifiers(sourceFile, "foo");
-      expect(printSchema(getNodeSchema(...context.cloneNode(fooNodes[0]))))
+      expect(printSchema(evaluateSchema(fooNodes[0], context.checker)))
         .toMatchInlineSnapshot(`
         "() => {
           \\"[Symbol.iterator]\\": () => 'error! Circular type Generator<\\"foo\\" | \\"bar\\", void, unknown>';
@@ -186,7 +186,7 @@ describe("type schema converter", () => {
         };
         "
       `);
-      expect(printSchema(getNodeSchema(...context.cloneNode(fooNodes[1]))))
+      expect(printSchema(evaluateSchema(fooNodes[1], context.checker)))
         .toMatchInlineSnapshot(`
         "() => {
           \\"[Symbol.iterator]\\": () => 'error! Circular type Generator<\\"foo\\" | \\"bar\\", void, unknown>';
@@ -222,7 +222,7 @@ describe("type schema converter", () => {
       `);
 
       const barNodes = findIdentifiers(sourceFile, "bar");
-      expect(printSchema(getNodeSchema(...context.cloneNode(barNodes[0]))))
+      expect(printSchema(evaluateSchema(barNodes[0], context.checker)))
         .toMatchInlineSnapshot(`
         "() => {
           \\"[Symbol.iterator]\\": () => 'error! Circular type Generator<\\"foo\\" | \\"bar\\" | \\"food\\", void, unknown>';
@@ -278,7 +278,7 @@ describe("type schema converter", () => {
         sourceFile,
         ts.isReturnStatement
       );
-      expect(printSchema(getNodeSchema(...context.cloneNode(awaitReturnNode))))
+      expect(printSchema(evaluateSchema(awaitReturnNode, context.checker)))
         .toMatchInlineSnapshot(`
         "\\"foo\\";
         "
@@ -295,30 +295,29 @@ describe("type schema converter", () => {
           "path": "foo",
         }
       `);
-      expect(printSchema(getNodeSchema(...context.cloneNode(fooDeclaration))))
+      expect(printSchema(evaluateSchema(fooDeclaration, context.checker)))
         .toMatchInlineSnapshot(`
         "() => Promise<\\"foo\\">;
         "
       `);
 
       const [awaitedDeclaration] = findIdentifiers(sourceFile, "awaited");
-      expect(
-        printSchema(getNodeSchema(...context.cloneNode(awaitedDeclaration)))
-      ).toMatchInlineSnapshot(`
+      expect(printSchema(evaluateSchema(awaitedDeclaration, context.checker)))
+        .toMatchInlineSnapshot(`
         "\\"foo\\";
         "
       `);
 
       const [notAwaitedDeclaration] = findIdentifiers(sourceFile, "notAwaited");
       expect(
-        printSchema(getNodeSchema(...context.cloneNode(notAwaitedDeclaration)))
+        printSchema(evaluateSchema(notAwaitedDeclaration, context.checker))
       ).toMatchInlineSnapshot(`
         "Promise<\\"foo\\">;
         "
       `);
 
       const [barDeclaration] = findIdentifiers(sourceFile, "bar");
-      expect(printSchema(getNodeSchema(...context.cloneNode(barDeclaration))))
+      expect(printSchema(evaluateSchema(barDeclaration, context.checker)))
         .toMatchInlineSnapshot(`
         "() => Promise<\\"bar\\" | \\"foo\\">;
         "

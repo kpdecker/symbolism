@@ -7,7 +7,7 @@ import {
   isTupleTypeReference,
   isTypeReference,
 } from "@symbolism/ts-utils";
-import { logDebug, logFile, NodeError } from "@symbolism/utils";
+import { logDebug, NodeError } from "@symbolism/utils";
 import invariant from "tiny-invariant";
 import ts from "typescript";
 import { SchemaContext } from "../context";
@@ -29,12 +29,35 @@ export function getTypeSchema(
 ): AnySchemaNode {
   const { contextNode, checker, typesHandled } = context;
 
+  const symbol = isTypeReference(type) ? type.target.symbol : type.symbol;
+  const canEmitDef =
+    symbol?.name &&
+    !Object.values(ts.InternalSymbolName).includes(symbol?.name as any);
   logDebug(
     "getTypeSchema",
     checker.typeToString(type),
     dumpNode(contextNode, checker)
   );
 
+  const ret = getTypeSchemaWorker(type, context);
+  if (canEmitDef) {
+    if (context.symbolDefinitions.has(symbol)) {
+      throw new NodeError(
+        "Duplicate definition for symbol " +
+          JSON.stringify(dumpSymbol(symbol, checker)),
+        contextNode,
+        checker
+      );
+    }
+    context.symbolDefinitions.set(symbol, ret);
+  }
+  return ret;
+}
+function getTypeSchemaWorker(
+  type: ts.Type,
+  context: SchemaContext
+): AnySchemaNode {
+  const { contextNode, checker, typesHandled } = context;
   try {
     if (type.flags & ts.TypeFlags.TypeParameter) {
       type = checker.getApparentType(type);

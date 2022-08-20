@@ -11,9 +11,7 @@ import { getNodeSchema } from ".";
 import { nodeEvalHandler, variableLike } from "./handlers";
 import { getSymbolDeclaration, invariantNode } from "@symbolism/ts-utils";
 import { getLocalSymbol } from "./symbol";
-import { getTypeSchema } from "../type-eval";
 import { undefinedSchema } from "../well-known-schemas";
-import { defineSymbol } from "@symbolism/definitions";
 
 export const objectOperators = nodeEvalHandler({
   [ts.SyntaxKind.ObjectLiteralExpression](node, context) {
@@ -124,7 +122,9 @@ function convertObjectLiteralValue(
       });
     } else {
       throw new NodeError(
-        `Spread not impl ${spreadSchema.kind} ${printSchema(spreadSchema)}`,
+        `Spread not impl ${spreadSchema.kind} ${printSchema({
+          root: spreadSchema,
+        })}`,
         node,
         context.checker
       );

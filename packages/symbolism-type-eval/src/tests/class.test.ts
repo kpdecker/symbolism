@@ -4,6 +4,7 @@ import { printSchema } from "../print/typescript";
 import { SchemaContext } from "../context";
 import ts from "typescript";
 import { getNodeSchema } from "../value-eval";
+import { evaluateSchema } from "../schema";
 
 function testType(source: string, name = "Type") {
   const program = mockProgram({
@@ -84,7 +85,7 @@ describe("type schema converter", () => {
       `);
 
       const newNodes = findNodesInTree(sourceFile, ts.isNewExpression);
-      expect(printSchema(getNodeSchema(...context.cloneNode(newNodes[0]))))
+      expect(printSchema(evaluateSchema(newNodes[0], context.checker)))
         .toMatchInlineSnapshot(`
         "{
           \\"#_length\\": number;
@@ -96,7 +97,7 @@ describe("type schema converter", () => {
         "
       `);
 
-      expect(printSchema(getNodeSchema(...context.cloneNode(newNodes[1]))))
+      expect(printSchema(evaluateSchema(newNodes[1], context.checker)))
         .toMatchInlineSnapshot(`
         "{
           \\"#_length\\": number;
@@ -115,7 +116,7 @@ describe("type schema converter", () => {
         sourceFile,
         (node): node is ts.Node => node.kind === ts.SyntaxKind.ThisKeyword
       );
-      expect(printSchema(getNodeSchema(...context.cloneNode(thisNodes[0]))))
+      expect(printSchema(evaluateSchema(thisNodes[0], context.checker)))
         .toMatchInlineSnapshot(`
         "{
           \\"#_length\\": number;
@@ -126,7 +127,7 @@ describe("type schema converter", () => {
         };
         "
       `);
-      expect(printSchema(getNodeSchema(...context.cloneNode(thisNodes[2]))))
+      expect(printSchema(evaluateSchema(thisNodes[2], context.checker)))
         .toMatchInlineSnapshot(`
         "{
           \\"#_length\\": number;
@@ -142,7 +143,7 @@ describe("type schema converter", () => {
       `);
       expect(
         printSchema(
-          getNodeSchema(...context.cloneNode(thisNodes[thisNodes.length - 1]))
+          evaluateSchema(thisNodes[thisNodes.length - 1], context.checker)
         )
       ).toMatchInlineSnapshot(`
         "{
@@ -159,7 +160,7 @@ describe("type schema converter", () => {
         sourceFile,
         (node): node is ts.Node => node.kind === ts.SyntaxKind.SuperKeyword
       );
-      expect(printSchema(getNodeSchema(...context.cloneNode(superNodes[0]))))
+      expect(printSchema(evaluateSchema(superNodes[0], context.checker)))
         .toMatchInlineSnapshot(`
         "{
           prototype: {
@@ -182,14 +183,14 @@ describe("type schema converter", () => {
       `);
 
       const fooNodes = findIdentifiers(sourceFile, "Foo");
-      expect(printSchema(getNodeSchema(...context.cloneNode(fooNodes[0]))))
+      expect(printSchema(evaluateSchema(fooNodes[0], context.checker)))
         .toMatchInlineSnapshot(`
         "1 | 3;
         "
       `);
 
       const aNodes = findIdentifiers(sourceFile, "a");
-      expect(printSchema(getNodeSchema(...context.cloneNode(aNodes[0]))))
+      expect(printSchema(evaluateSchema(aNodes[0], context.checker)))
         .toMatchInlineSnapshot(`
         "1;
         "

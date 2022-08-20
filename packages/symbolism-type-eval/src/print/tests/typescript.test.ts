@@ -123,7 +123,7 @@ const arrayTest: ArraySchema = {
 
 describe("typescript formatter", () => {
   it("should output a valid ts file", () => {
-    expect(printSchema(objectTest)).toMatchInlineSnapshot(`
+    expect(printSchema({ root: objectTest })).toMatchInlineSnapshot(`
       "{
         func: () => boolean;
         literal: \\"literal\\";
@@ -135,7 +135,7 @@ describe("typescript formatter", () => {
       };
       "
     `);
-    expect(printSchema(arrayTest)).toMatchInlineSnapshot(`
+    expect(printSchema({ root: arrayTest })).toMatchInlineSnapshot(`
       "\`string!\\\\\`\${number & string}\`[];
       "
     `);

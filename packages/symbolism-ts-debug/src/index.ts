@@ -147,7 +147,9 @@ export function dumpNode(
   return ret;
 }
 
-export function dumpSchema(schema: AnySchemaNode | AnySchemaNode[]) {
+export function dumpSchema(
+  schema: AnySchemaNode | AnySchemaNode[] | undefined
+) {
   return JSON.stringify(
     schema,
     (key, value) => {

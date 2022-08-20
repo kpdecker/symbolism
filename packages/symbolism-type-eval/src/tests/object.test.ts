@@ -29,7 +29,7 @@ function testType(source: string, name = "Type") {
 describe("type schema converter", () => {
   describe("object literals", () => {
     it("should convert static property types", () => {
-      const { type, context, sourceFile } = testType(`
+      const { declaration, context, sourceFile } = testType(`
         type Source = {
           directUnion: 1 | 2 | 3;
         };
@@ -64,7 +64,7 @@ describe("type schema converter", () => {
         }
         type Type = typeof literal;
       `);
-      expect(printSchema(getTypeSchema(...context.clone(type))))
+      expect(printSchema(evaluateSchema(declaration, context.checker)))
         .toMatchInlineSnapshot(`
         "{
           bothor: string;
@@ -87,7 +87,7 @@ describe("type schema converter", () => {
       expect(
         createJsonSchema({
           $id: "test.ts",
-          schema: getTypeSchema(...context.clone(type)),
+          schema: evaluateSchema(declaration, context.checker),
         })
       ).toMatchInlineSnapshot(`
         Object {
@@ -262,7 +262,8 @@ describe("type schema converter", () => {
         "
       `);
 
-      expect(printSchema(getTypeSchema(type, context))).toMatchInlineSnapshot(`
+      expect(printSchema({ root: getTypeSchema(type, context) }))
+        .toMatchInlineSnapshot(`
         "{
           \\"1bar\\": 0;
           \\"1foo\\": 0;
@@ -379,8 +380,8 @@ describe("type schema converter", () => {
         const literalNode = findIdentifiers(sourceFile, name)[0];
         const assignNode = literalNode.parent as ts.VariableDeclaration;
         return printSchema(
-          getNodeSchema(...context.cloneNode(assignNode.initializer!))!
-        );
+          evaluateSchema(assignNode.initializer!, context.checker)
+        )!;
       }
 
       expect(testVar("unionLookup")).toMatchInlineSnapshot(`

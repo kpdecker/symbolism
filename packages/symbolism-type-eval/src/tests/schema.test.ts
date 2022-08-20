@@ -445,7 +445,7 @@ describe("type schema converter", () => {
         type Type = typeof type;
       `);
 
-      expect(printSchema(getNodeSchema(...context.cloneNode(declaration))!))
+      expect(printSchema(evaluateSchema(declaration, context.checker))!)
         .toMatchInlineSnapshot(`
         "\\"foo bard\\" | \\"foo food\\";
         "
