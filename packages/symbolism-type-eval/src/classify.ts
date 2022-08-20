@@ -191,7 +191,11 @@ export function areSchemasEqual(
   }
 
   if (a.kind === "literal") {
-    return b.kind === "literal" && a.value === b.value;
+    return (
+      b.kind === "literal" &&
+      (a.value === b.value ||
+        (Number.isNaN(a.value as any) && Number.isNaN(b.value as any)))
+    );
   }
 
   if (

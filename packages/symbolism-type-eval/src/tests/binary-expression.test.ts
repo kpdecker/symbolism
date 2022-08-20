@@ -66,7 +66,7 @@ describe("type schema converter", () => {
         "
       `);
       expect(testNode("subtract")).toMatchInlineSnapshot(`
-        "NaN | NaN | NaN;
+        "NaN;
         "
       `);
       expect(testNode("subtractNumber")).toMatchInlineSnapshot(`

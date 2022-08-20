@@ -27,6 +27,7 @@ import { getTypeSchema } from "../type-eval";
 import { booleanPrimitiveSchema } from "../well-known-schemas";
 import { createUnionKind } from "./union";
 import invariant from "tiny-invariant";
+import { unaryExpressionOperators } from "./unary-expression";
 
 export type TypeEvalOptions = {
   allowMissing?: boolean;
@@ -303,6 +304,7 @@ const nodePathHandlers: Record<ts.SyntaxKind, NodeEvalHandler> = {
   [ts.SyntaxKind.MergeDeclarationMarker]: noType,
   [ts.SyntaxKind.EndOfDeclarationMarker]: noType,
 
+  ...unaryExpressionOperators,
   ...templateOperators,
   ...objectOperators,
   ...arrayOperators,
