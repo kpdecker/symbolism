@@ -153,6 +153,8 @@ export function dumpSchema(schema: AnySchemaNode | AnySchemaNode[]) {
     (key, value) => {
       if (key === "node") {
         return (value as ts.Node)?.getText();
+      } else if (key === "symbol") {
+        return (value as ts.Symbol)?.getName();
       }
       return value;
     },
