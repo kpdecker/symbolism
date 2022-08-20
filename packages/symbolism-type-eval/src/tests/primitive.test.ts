@@ -2,9 +2,7 @@ import { mockProgram } from "@symbolism/test";
 import { findIdentifiers, invariantNode } from "@symbolism/ts-utils";
 import { printSchema } from "../print/typescript";
 import { SchemaContext } from "../context";
-import { getNodeSchema } from "../value-eval";
 import { evaluateSchema } from "../schema";
-import { LogLevel, setLogLevel } from "@symbolism/utils";
 import ts from "typescript";
 
 function testType(source: string, name = "Type") {

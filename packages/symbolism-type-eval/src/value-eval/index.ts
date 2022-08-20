@@ -355,11 +355,10 @@ function dontNarrow(node: ts.Node): boolean {
   return (
     ts.isCallExpression(node) ||
     ts.isVariableDeclaration(node) ||
-    ts.isFunctionDeclaration(node) ||
-    ts.isFunctionExpression(node) ||
-    ts.isArrowFunction(node) ||
+    ts.isFunctionLike(node) ||
     ts.isInterfaceDeclaration(node) ||
     ts.isClassDeclaration(node) ||
+    ts.isJsxAttributes(node) ||
     ts.isParameter(node) ||
     ts.isMethodSignature(node) ||
     ts.isPropertySignature(node) ||

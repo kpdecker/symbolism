@@ -7,6 +7,7 @@ import { createJsonSchema } from "../print/json";
 import { getNodeSchema } from "../value-eval";
 import { evaluateSchema } from "../schema";
 import { getTypeSchema } from "../type-eval";
+import { dumpNode } from "@symbolism/ts-debug";
 
 function testType(source: string, name = "Type") {
   const program = mockProgram({
@@ -253,6 +254,73 @@ describe("type schema converter", () => {
                 value: undefined;
               };
         };
+        "
+      `);
+    });
+    it("should evaluate await", () => {
+      const { type, context, sourceFile } = testType(`
+        const foo = async function() {
+          return 'foo';
+        };
+
+        async function bar() {
+          if (await foo()) {
+            return await foo();
+          }
+
+          const awaited = await foo();
+          const notAwaited = foo();
+          return 'bar';
+        }
+      `);
+
+      const [, awaitReturnNode] = findNodesInTree(
+        sourceFile,
+        ts.isReturnStatement
+      );
+      expect(printSchema(getNodeSchema(...context.cloneNode(awaitReturnNode))))
+        .toMatchInlineSnapshot(`
+        "\\"foo\\";
+        "
+      `);
+
+      const [fooDeclaration] = findIdentifiers(sourceFile, "foo");
+      expect(dumpNode(fooDeclaration, context.checker)).toMatchInlineSnapshot(`
+        Object {
+          "column": 15,
+          "fileName": "test.ts",
+          "kind": "Identifier",
+          "line": 2,
+          "name": "foo",
+          "path": "foo",
+        }
+      `);
+      expect(printSchema(getNodeSchema(...context.cloneNode(fooDeclaration))))
+        .toMatchInlineSnapshot(`
+        "() => Promise<\\"foo\\">;
+        "
+      `);
+
+      const [awaitedDeclaration] = findIdentifiers(sourceFile, "awaited");
+      expect(
+        printSchema(getNodeSchema(...context.cloneNode(awaitedDeclaration)))
+      ).toMatchInlineSnapshot(`
+        "\\"foo\\";
+        "
+      `);
+
+      const [notAwaitedDeclaration] = findIdentifiers(sourceFile, "notAwaited");
+      expect(
+        printSchema(getNodeSchema(...context.cloneNode(notAwaitedDeclaration)))
+      ).toMatchInlineSnapshot(`
+        "Promise<\\"foo\\">;
+        "
+      `);
+
+      const [barDeclaration] = findIdentifiers(sourceFile, "bar");
+      expect(printSchema(getNodeSchema(...context.cloneNode(barDeclaration))))
+        .toMatchInlineSnapshot(`
+        "() => Promise<\\"bar\\" | \\"foo\\">;
         "
       `);
     });

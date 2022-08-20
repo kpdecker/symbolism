@@ -2,14 +2,20 @@ import { dumpFlags, dumpNode, dumpSymbol } from "@symbolism/ts-debug";
 import {
   getSymbolDeclaration,
   invariantNode,
+  isAliasSymbol,
   isIntrinsicType,
   isTupleTypeReference,
+  isTypeReference,
 } from "@symbolism/ts-utils";
-import { logDebug, NodeError } from "@symbolism/utils";
+import { logDebug, logFile, NodeError } from "@symbolism/utils";
 import invariant from "tiny-invariant";
 import ts from "typescript";
 import { SchemaContext } from "../context";
-import { AnySchemaNode, FunctionSchema } from "../schema";
+import {
+  AnySchemaNode,
+  createReferenceSchema,
+  FunctionSchema,
+} from "../schema";
 import { getNodeSchema } from "../value-eval";
 import { createUnionKind } from "../value-eval/union";
 import { wellKnownReferences } from "../well-known-schemas";
@@ -137,6 +143,13 @@ export function getTypeSchema(
         }
       }
 
+      if (context.options.referenceCode && type.symbol.name) {
+        const referenceSchema = createReferenceFromType(type, context);
+        if (referenceSchema) {
+          return referenceSchema;
+        }
+      }
+
       const callSignatures = type.getCallSignatures();
       if (callSignatures.length > 0) {
         function convertSignature(signature: ts.Signature): FunctionSchema {
@@ -173,14 +186,11 @@ export function getTypeSchema(
         if (declaration.getSourceFile().fileName.includes("typescript/lib")) {
           const name = type.symbol.getName();
 
-          if (
-            wellKnownReferences.includes(name) &&
-            !Object.values(ts.InternalSymbolName).includes(name as any)
-          ) {
-            return {
-              kind: "reference",
-              name,
-            };
+          if (wellKnownReferences.includes(name)) {
+            const refSchema = createReferenceFromType(type, context);
+            if (refSchema) {
+              return refSchema;
+            }
           }
         }
       }
@@ -225,4 +235,18 @@ export function getTypeSchema(
       err
     );
   }
+}
+
+export function createReferenceFromType(type: ts.Type, context: SchemaContext) {
+  const aliasSymbol = type.aliasSymbol;
+  const typeArguments: readonly ts.Type[] =
+    type.aliasTypeArguments || (type as any).resolvedTypeArguments || [];
+  const parameters = typeArguments.map((type) => {
+    return getTypeSchema(
+      ...context.clone(type, undefined, {
+        referenceCode: true,
+      })
+    );
+  });
+  return createReferenceSchema(type.symbol.name, parameters);
 }

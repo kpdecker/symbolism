@@ -150,6 +150,13 @@ export function printSchemaNode(
       );
 
     case "reference":
+      if (schema.parameters.length) {
+        return wrapTsType(
+          `${schema.name}<${schema.parameters
+            .map((param) => printSchemaNode(param, "ts"))
+            .join(", ")}>`
+        );
+      }
       return schema.name;
 
     default:

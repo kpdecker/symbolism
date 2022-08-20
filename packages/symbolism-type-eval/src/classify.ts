@@ -257,7 +257,14 @@ export function areSchemasEqual(
   }
 
   if (a.kind === "reference") {
-    return b.kind === "reference" && a.name === b.name;
+    return (
+      b.kind === "reference" &&
+      a.name === b.name &&
+      a.parameters.length === b.parameters.length &&
+      a.parameters.every((parameter, i) =>
+        areSchemasEqual(parameter, b.parameters[i])
+      )
+    );
   }
 
   const gottaCatchEmAll: never = a;

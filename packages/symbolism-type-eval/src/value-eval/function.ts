@@ -7,7 +7,7 @@ import { SchemaContext } from "../context";
 import { getTypeSchema } from "../type-eval";
 import { createUnionKind } from "./union";
 import invariant from "tiny-invariant";
-import { dumpNode } from "@symbolism/ts-debug";
+import { AnySchemaNode, createReferenceSchema } from "../schema";
 
 export const functionOperators = nodeEvalHandler({
   [ts.SyntaxKind.CallExpression]: convertCallLikeNode,
@@ -46,6 +46,25 @@ export const functionOperators = nodeEvalHandler({
       return undefinedSchema;
     }
   },
+  [ts.SyntaxKind.AwaitExpression](node, context): AnySchemaNode | undefined {
+    invariantNode(node, context.checker, ts.isAwaitExpression);
+
+    const expressionSchema = getNodeSchema(
+      ...context.cloneNode(node.expression)
+    );
+
+    // Unwrap promises
+    if (expressionSchema?.kind === "reference") {
+      if (
+        expressionSchema.name === "Promise" &&
+        expressionSchema.parameters.length === 1
+      ) {
+        return expressionSchema.parameters[0];
+      }
+    }
+
+    return expressionSchema;
+  },
 });
 
 function convertFunctionLikeNode(node: ts.Node, context: SchemaContext) {
@@ -67,32 +86,53 @@ function convertFunctionLikeNode(node: ts.Node, context: SchemaContext) {
     returnNodes = [node.body];
   }
 
+  const asyncFunction = node.modifiers?.find(
+    (modifier) => modifier.kind === ts.SyntaxKind.AsyncKeyword
+  );
+
   if (returnNodes.length === 0) {
     return evaledType;
   } else {
+    let returnType: AnySchemaNode = createUnionKind(
+      returnNodes.map((returnNode) => {
+        return getNodeSchema(
+          ...context.cloneNode(returnNode, {
+            ...context.options,
+            allowMissing: false,
+          })
+        )!;
+      })
+    );
+
+    if (asyncFunction) {
+      returnType = createReferenceSchema("Promise", [returnType])!;
+    }
+
     return {
       ...evaledType,
-      returnType: createUnionKind(
-        returnNodes.map((returnNode) => {
-          return getNodeSchema(
-            ...context.cloneNode(returnNode, {
-              ...context.options,
-              allowMissing: false,
-            })
-          )!;
-        })
-      ),
+      returnType,
     };
   }
 }
 
 function convertCallLikeNode(node: ts.Node, context: SchemaContext) {
   invariantNode(node, context.checker, ts.isCallLikeExpression);
+
   const signature = context.checker.getResolvedSignature(node);
+
+  // Evaluate the function at node level
+  if (!ts.isNewExpression(node) && signature?.declaration) {
+    const functionSchema = getNodeSchema(
+      ...context.cloneNode(signature?.declaration)
+    );
+    invariant(functionSchema?.kind === "function", "Expected function schema");
+    return functionSchema.returnType;
+  }
+
   const returnType = signature?.getReturnType();
   if (returnType) {
     return getTypeSchema(...context.clone(returnType, node));
-  } else {
-    return undefinedSchema;
   }
+
+  return undefinedSchema;
 }

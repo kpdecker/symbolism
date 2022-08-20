@@ -96,6 +96,7 @@ export interface IndexAccessSchema extends SchemaNode {
 export interface ReferenceSchema extends SchemaNode {
   kind: "reference";
   name: string;
+  parameters: AnySchemaNode[];
 }
 
 export interface ErrorSchema extends SchemaNode {
@@ -122,4 +123,17 @@ export type AnySchemaNode =
 export function evaluateSchema(node: ts.Node, checker: ts.TypeChecker) {
   const context = new SchemaContext(node, checker, {});
   return getNodeSchema(node, context);
+}
+
+export function createReferenceSchema(
+  name: string,
+  parameters: ReferenceSchema["parameters"]
+): AnySchemaNode | undefined {
+  if (!Object.values(ts.InternalSymbolName).includes(name as any)) {
+    return {
+      kind: "reference",
+      name,
+      parameters,
+    };
+  }
 }

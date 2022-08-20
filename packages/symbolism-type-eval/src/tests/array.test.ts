@@ -4,7 +4,6 @@ import { printSchema } from "../print/typescript";
 import { SchemaContext } from "../context";
 import { getNodeSchema } from "../value-eval";
 import { evaluateSchema } from "../schema";
-import { LogLevel, setLogLevel } from "@symbolism/utils";
 
 function testType(source: string, name = "Type") {
   const program = mockProgram({
