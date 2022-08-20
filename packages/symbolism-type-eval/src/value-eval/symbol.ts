@@ -94,6 +94,10 @@ export function resolveSymbolsInSchema(
     };
   }
 
+  if (schema.kind === "reference") {
+    return schema;
+  }
+
   const gottaCatchEmAll: never = schema;
   throw new Error("Not implemented");
 }

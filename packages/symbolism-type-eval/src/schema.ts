@@ -93,6 +93,11 @@ export interface IndexAccessSchema extends SchemaNode {
   node: ts.Node;
 }
 
+export interface ReferenceSchema extends SchemaNode {
+  kind: "reference";
+  name: string;
+}
+
 export interface ErrorSchema extends SchemaNode {
   kind: "error";
   node: ts.Node;
@@ -111,6 +116,7 @@ export type AnySchemaNode =
   | IndexAccessSchema
   | FunctionSchema
   | BinaryExpressionSchema
+  | ReferenceSchema
   | ErrorSchema;
 
 export function evaluateSchema(node: ts.Node, checker: ts.TypeChecker) {

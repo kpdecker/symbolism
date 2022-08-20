@@ -54,6 +54,10 @@ export function isConcreteSchema(type: AnySchemaNode | undefined): boolean {
     );
   }
 
+  if (type.kind === "reference") {
+    return true;
+  }
+
   const gottaCatchEmAll: never = type;
   throw new Error("Not implemented");
 }
@@ -110,6 +114,10 @@ export function nonConcreteInputs(
     return nonConcreteInputs(schema.returnType).concat(
       ...schema.parameters.flatMap(({ schema }) => nonConcreteInputs(schema))
     );
+  }
+
+  if (schema.kind === "reference") {
+    return [];
   }
 
   const gottaCatchEmAll: never = schema;
@@ -246,6 +254,10 @@ export function areSchemasEqual(
         areSchemasEqual(parameter.schema, b.parameters[i].schema)
       )
     );
+  }
+
+  if (a.kind === "reference") {
+    return b.kind === "reference" && a.name === b.name;
   }
 
   const gottaCatchEmAll: never = a;

@@ -117,6 +117,10 @@ export function schemaToJson(schema: AnySchemaNode): JsonObject {
         type: "string",
         pattern: schemaToRegEx(schema) + "",
       };
+    case "reference":
+      return {
+        $ref: `#/$defs/${schema.name}`,
+      };
 
     default:
       const gottaCatchEmAll: never = schema;

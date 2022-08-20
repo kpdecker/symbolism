@@ -178,8 +178,8 @@ export function getTypeSchema(
             !Object.values(ts.InternalSymbolName).includes(name as any)
           ) {
             return {
-              kind: "literal",
-              value: name,
+              kind: "reference",
+              name,
             };
           }
         }

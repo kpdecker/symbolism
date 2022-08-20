@@ -465,17 +465,17 @@ describe("type schema converter", () => {
           | ((from: number, length: number) => string)
           | ((locales: string[] | string) => string)
           | ((matcher: {
-              \\"[Symbol.match]\\": (string: string) => \\"RegExpMatchArray\\";
-            }) => \\"RegExpMatchArray\\")
+              \\"[Symbol.match]\\": (string: string) => RegExpMatchArray;
+            }) => RegExpMatchArray)
           | ((maxLength: number, fillString: string) => string)
           | ((pos: number) => number)
-          | ((regexp: \\"RegExp\\" | string) => \\"RegExpMatchArray\\")
-          | ((regexp: \\"RegExp\\" | string) => number)
+          | ((regexp: RegExp | string) => RegExpMatchArray)
+          | ((regexp: RegExp | string) => number)
           | ((searchString: string, position: number) => false | true)
           | ((searchString: string, position: number) => number)
-          | ((searchValue: \\"RegExp\\" | string, replaceValue: string) => string)
+          | ((searchValue: RegExp | string, replaceValue: string) => string)
           | ((
-              searchValue: \\"RegExp\\" | string,
+              searchValue: RegExp | string,
               replacer: (substring: string, args: any[]) => string
             ) => string)
           | ((
@@ -494,7 +494,7 @@ describe("type schema converter", () => {
               replacer: (substring: string, args: any[]) => string
             ) => string)
           | ((searcher: { \\"[Symbol.search]\\": (string: string) => number }) => number)
-          | ((separator: \\"RegExp\\" | string, limit: number) => string[])
+          | ((separator: RegExp | string, limit: number) => string[])
           | ((size: number) => string)
           | ((
               splitter: {

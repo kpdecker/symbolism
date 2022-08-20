@@ -320,7 +320,7 @@ describe("type schema converter", () => {
 
       expect(printSchema(evaluateSchema(declaration, context.checker)))
         .toMatchInlineSnapshot(`
-        "{ date: \\"Date\\" };
+        "{ date: Date };
         "
       `);
     });
@@ -336,7 +336,7 @@ describe("type schema converter", () => {
       expect(printSchema(evaluateSchema(declaration, context.checker)))
         .toMatchInlineSnapshot(`
         "{
-          date: \\"Date\\";
+          date: Date;
           foo: \\"error! Circular type Type\\";
         };
         "

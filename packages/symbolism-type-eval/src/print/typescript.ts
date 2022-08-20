@@ -149,6 +149,9 @@ export function printSchemaNode(
           .join("")}\``
       );
 
+    case "reference":
+      return schema.name;
+
     default:
       const gottaCatchEmAll: never = schema;
       throw new Error(`Unsupported schema kind ${(schema as any).kind}`);
