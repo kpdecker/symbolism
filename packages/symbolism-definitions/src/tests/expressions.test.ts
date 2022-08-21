@@ -8,7 +8,7 @@ describe("infer expressions", () => {
   it("should handle var statements", () => {
     expect(testStatement("delete foo.bar")).toMatchInlineSnapshot(`
       Object {
-        "symbol": Array [],
+        "symbol": undefined,
         "type": "boolean",
       }
     `);
@@ -85,7 +85,7 @@ describe("infer expressions", () => {
   it("should handle template expressions", () => {
     expect(testExpression("`foo${true}`")).toMatchInlineSnapshot(`
       Object {
-        "symbol": Array [],
+        "symbol": undefined,
         "type": "string",
       }
     `);
@@ -128,17 +128,17 @@ describe("infer expressions", () => {
 
   it("should handle logical binary expressions", () => {
     expect(testExpression("(Error < console)")).toMatchInlineSnapshot(`
-          Object {
-            "symbol": Array [],
-            "type": "boolean",
-          }
-      `);
+      Object {
+        "symbol": undefined,
+        "type": "boolean",
+      }
+    `);
   });
 
   it("should handle postfix expression", () => {
     expect(testExpression("console++")).toMatchInlineSnapshot(`
       Object {
-        "symbol": Array [],
+        "symbol": undefined,
         "type": "number",
       }
     `);
@@ -190,7 +190,7 @@ describe("infer expressions", () => {
     expect(dumpDefinition(defineSymbol(node?.initializer!, checker)!, checker))
       .toMatchInlineSnapshot(`
       Object {
-        "symbol": Array [],
+        "symbol": undefined,
         "type": "ErrorConstructor | PromiseConstructor",
       }
     `);

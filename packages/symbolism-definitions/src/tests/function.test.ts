@@ -69,7 +69,7 @@ describe("infer functions", () => {
     expect(dumpDefinition(defineSymbol(node, checker), checker))
       .toMatchInlineSnapshot(`
       Object {
-        "symbol": Array [],
+        "symbol": undefined,
         "type": "any",
       }
     `);

@@ -4,7 +4,7 @@ import type { AnySchemaNode } from "@symbolism/type-eval";
 import { getNodePath } from "@symbolism/paths";
 import { isIntrinsicType, lineAndColumn } from "@symbolism/ts-utils";
 import invariant from "tiny-invariant";
-import ts from "typescript";
+import ts, { ObjectType } from "typescript";
 
 export function dumpFlags(
   flags: number | undefined,
@@ -39,7 +39,7 @@ export function dumpDefinition(
     return inferred;
   }
   const symbol = dumpSymbol(inferred!.symbol, checker);
-  const declarations = symbol.declaration.map((x) => {
+  const declarations = symbol?.declaration.map((x) => {
     return {
       ...x,
       fileName: x?.fileName.includes("node_modules")
@@ -57,6 +57,10 @@ export function dumpSymbol(
   symbol: ts.Symbol | undefined,
   checker: ts.TypeChecker
 ) {
+  if (!symbol) {
+    return symbol;
+  }
+
   const declarations = symbol?.declarations || [];
   const declarationDump: NonNullable<ReturnType<typeof dumpNode>>[] =
     declarations.map((node) => dumpNode(node, checker)!).filter(Boolean);
@@ -145,6 +149,42 @@ export function dumpNode(
   ret.name = name;
 
   return ret;
+}
+
+export function dumpType(
+  type: ts.Type | undefined,
+  checker: ts.TypeChecker,
+  recurse = true
+):
+  | {
+      type: string;
+      flags?: string[];
+      objectFlags?: string[];
+      symbol?: NonNullable<ReturnType<typeof dumpSymbol>>;
+      aliasSymbol?: NonNullable<ReturnType<typeof dumpSymbol>>;
+      aliasTypeArguments?: ReturnType<typeof dumpType>[] | undefined;
+      resolvedTypeArguments?: ReturnType<typeof dumpType>[] | undefined;
+    }
+  | undefined {
+  if (!type) {
+    return undefined;
+  }
+  return {
+    type: checker.typeToString(type),
+    flags: dumpFlags(type.getFlags(), ts.TypeFlags),
+    objectFlags: dumpFlags((type as ObjectType).objectFlags, ts.ObjectFlags),
+    symbol: dumpSymbol(type.getSymbol(), checker),
+    aliasSymbol: dumpSymbol(type.aliasSymbol, checker),
+    aliasTypeArguments: recurse
+      ? type.aliasTypeArguments?.map((x) => dumpType(x, checker, false))
+      : undefined,
+
+    resolvedTypeArguments: recurse
+      ? (type as any).resolvedTypeArguments?.map((x: ts.Type) =>
+          dumpType(x, checker, false)
+        )
+      : undefined,
+  };
 }
 
 export function dumpSchema(

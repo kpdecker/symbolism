@@ -21,13 +21,13 @@ describe("infer intrinsic types", () => {
   it("should pull void", () => {
     expect(testStatement("void")).toMatchInlineSnapshot(`
       Object {
-        "symbol": Array [],
+        "symbol": undefined,
         "type": "undefined",
       }
     `);
     expect(testStatement("void 0")).toMatchInlineSnapshot(`
       Object {
-        "symbol": Array [],
+        "symbol": undefined,
         "type": "undefined",
       }
     `);
@@ -35,7 +35,7 @@ describe("infer intrinsic types", () => {
   it("should pull null", () => {
     expect(testStatement("null")).toMatchInlineSnapshot(`
       Object {
-        "symbol": Array [],
+        "symbol": undefined,
         "type": "null",
       }
     `);
@@ -43,13 +43,13 @@ describe("infer intrinsic types", () => {
   it("should pull booleans", () => {
     expect(testStatement("true")).toMatchInlineSnapshot(`
       Object {
-        "symbol": Array [],
+        "symbol": undefined,
         "type": "true",
       }
     `);
     expect(testStatement("false")).toMatchInlineSnapshot(`
       Object {
-        "symbol": Array [],
+        "symbol": undefined,
         "type": "false",
       }
     `);
@@ -57,7 +57,7 @@ describe("infer intrinsic types", () => {
   it("should pull strings", () => {
     expect(testStatement('"string"')).toMatchInlineSnapshot(`
       Object {
-        "symbol": Array [],
+        "symbol": undefined,
         "type": "\\"string\\"",
       }
     `);
@@ -65,13 +65,13 @@ describe("infer intrinsic types", () => {
   it("should pull numbers", () => {
     expect(testStatement("1")).toMatchInlineSnapshot(`
       Object {
-        "symbol": Array [],
+        "symbol": undefined,
         "type": "1",
       }
     `);
     expect(testStatement("1.1")).toMatchInlineSnapshot(`
       Object {
-        "symbol": Array [],
+        "symbol": undefined,
         "type": "1.1",
       }
     `);
@@ -107,7 +107,7 @@ describe("infer intrinsic types", () => {
     `);
     expect(testStatement("-Infinity")).toMatchInlineSnapshot(`
       Object {
-        "symbol": Array [],
+        "symbol": undefined,
         "type": "number",
       }
     `);
@@ -163,7 +163,7 @@ describe("infer intrinsic types", () => {
   it("should pull template literal", () => {
     expect(testStatement("`bar`")).toMatchInlineSnapshot(`
       Object {
-        "symbol": Array [],
+        "symbol": undefined,
         "type": "\\"bar\\"",
       }
     `);

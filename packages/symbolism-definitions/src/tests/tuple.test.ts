@@ -40,7 +40,7 @@ describe("infer tuple types", () => {
     expect(dumpDefinition(defineSymbol(destructureANodes[0], checker), checker))
       .toMatchInlineSnapshot(`
       Object {
-        "symbol": Array [],
+        "symbol": undefined,
         "type": "string",
       }
     `);
@@ -97,7 +97,7 @@ describe("infer tuple types", () => {
     expect(dumpDefinition(defineSymbol(destructureCNodes[0], checker), checker))
       .toMatchInlineSnapshot(`
       Object {
-        "symbol": Array [],
+        "symbol": undefined,
         "type": "string",
       }
     `);
@@ -130,7 +130,7 @@ describe("infer tuple types", () => {
     expect(dumpDefinition(defineSymbol(paramANodes[0], checker), checker))
       .toMatchInlineSnapshot(`
       Object {
-        "symbol": Array [],
+        "symbol": undefined,
         "type": "string",
       }
     `);
@@ -187,7 +187,7 @@ describe("infer tuple types", () => {
     expect(dumpDefinition(defineSymbol(paramCNodes[0], checker), checker))
       .toMatchInlineSnapshot(`
       Object {
-        "symbol": Array [],
+        "symbol": undefined,
         "type": "string",
       }
     `);

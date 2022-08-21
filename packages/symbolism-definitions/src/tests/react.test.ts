@@ -296,7 +296,7 @@ describe("react", () => {
     expect(dumpDefinition(defineSymbol(fragmentNode, checker), checker))
       .toMatchInlineSnapshot(`
       Object {
-        "symbol": Array [],
+        "symbol": undefined,
         "type": "any",
       }
     `);
@@ -307,7 +307,7 @@ describe("react", () => {
       )
     ).toMatchInlineSnapshot(`
       Object {
-        "symbol": Array [],
+        "symbol": undefined,
         "type": "any",
       }
     `);
