@@ -5,7 +5,12 @@ import { CallContext } from "../context";
 import { dumpNode, dumpSymbol } from "@symbolism/ts-debug";
 import { areSchemasEqual, nonConcreteInputs } from "../classify";
 import { getLocalSymbol, resolveSymbolsInSchema } from "../value-eval/symbol";
-import { logVerbose, NodeError, removeDuplicates } from "@symbolism/utils";
+import {
+  logVerbose,
+  logWarn,
+  NodeError,
+  removeDuplicates,
+} from "@symbolism/utils";
 import { expandUnions } from "../value-eval/union";
 import { getSymbolDeclaration, isNamedDeclaration } from "@symbolism/ts-utils";
 import { getNodeSchema } from "../value-eval";
@@ -100,16 +105,19 @@ function convertCall(
     )!;
 
     const inputs = nonConcreteInputs(schema);
-    const inputSymbols = inputs.map((input) => {
-      const symbol = getLocalSymbol(input, checker);
-      if (symbol) {
-        return {
-          symbol,
-          declaration: getSymbolDeclaration(symbol),
-        };
-      }
-      throw new NodeError("Could not find symbol for input", input, checker);
-    });
+    const inputSymbols = inputs
+      .map((input) => {
+        const symbol = getLocalSymbol(input, checker);
+        if (symbol) {
+          return {
+            symbol,
+            declaration: getSymbolDeclaration(symbol),
+          };
+        }
+        logWarn("Could not find symbol for input", dumpNode(input, checker));
+        return undefined!;
+      })
+      .filter(Boolean);
 
     return {
       schema,
