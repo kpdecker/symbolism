@@ -101,7 +101,7 @@ export interface ReferenceSchema extends SchemaNode {
 
 export interface ErrorSchema extends SchemaNode {
   kind: "error";
-  node: ts.Node;
+  node?: ts.Node;
 }
 
 export type AnySchemaNode =

@@ -38,6 +38,12 @@ export class NodeError extends Error {
 
     if (cause) {
       (this as any).cause = cause;
+      try {
+        // Reading here ensures that line numbers are correctly source mapped
+        cause.stack;
+      } catch (err) {
+        /* NOP */
+      }
     }
   }
 }

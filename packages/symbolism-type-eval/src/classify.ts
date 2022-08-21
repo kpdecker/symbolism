@@ -1,7 +1,17 @@
+import { dumpSchema } from "@symbolism/ts-debug";
 import { removeDuplicates } from "@symbolism/utils";
 import invariant from "tiny-invariant";
 import ts from "typescript";
 import { AnySchemaNode, PrimitiveSchema, UnionSchema } from "./schema";
+
+export class SchemaError extends Error {
+  constructor(message: string, schema: AnySchemaNode | undefined) {
+    super(`${message} ${schema?.kind}
+
+GOT: ${dumpSchema(schema).slice(0, 1000)}
+`);
+  }
+}
 
 /**
  * Determines if the schema is fully resolved without
@@ -80,7 +90,7 @@ export function nonConcreteInputs(
     schema.kind === "index" ||
     schema.kind === "index-access"
   ) {
-    return [schema.node];
+    return [schema.node!].filter(Boolean);
   }
 
   if (
