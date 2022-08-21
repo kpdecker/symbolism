@@ -18,17 +18,6 @@ export class SchemaContext {
     public options: TypeEvalOptions
   ) {}
 
-  findContextNode(type: ts.Type, contextNode: ts.Node): ts.Node {
-    if (type.symbol) {
-      const declaration = getSymbolDeclaration(type.symbol);
-      if (declaration) {
-        return declaration;
-      }
-    }
-
-    return contextNode;
-  }
-
   clone(
     type: ts.Type,
     node?: ts.Node,
@@ -41,7 +30,7 @@ export class SchemaContext {
   ): [ts.Type, SchemaContext];
   clone(
     type?: ts.Type,
-    node: ts.Node = this.findContextNode(type!, this.contextNode),
+    node: ts.Node = findContextNode(type!, this.contextNode),
     options = this.options
   ) {
     if (!type) {
@@ -108,4 +97,15 @@ export class CallContext extends SchemaContext {
     newInstance.symbols = this.symbols;
     newInstance.symbolsHandled = this.symbolsHandled.slice();
   }
+}
+
+function findContextNode(type: ts.Type, contextNode: ts.Node): ts.Node {
+  if (type.symbol) {
+    const declaration = getSymbolDeclaration(type.symbol);
+    if (declaration) {
+      return declaration;
+    }
+  }
+
+  return contextNode;
 }
