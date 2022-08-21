@@ -431,36 +431,7 @@ describe("type schema converter", () => {
       `);
 
       expect(testVar("stringAbstractLookup")).toMatchInlineSnapshot(`
-        " (() => {
-              \\"[Symbol.iterator]\\": () => \\"error! Circular type IterableIterator<string>\\";
-              next: (args: [{}] | []) =>
-                | {
-                    done: false;
-                    value: string;
-                  }
-                | {
-                    done: true;
-                    value: any;
-                  };
-              return: (value: {}) =>
-                | {
-                    done: false;
-                    value: string;
-                  }
-                | {
-                    done: true;
-                    value: any;
-                  };
-              throw: (e: any) =>
-                | {
-                    done: false;
-                    value: string;
-                  }
-                | {
-                    done: true;
-                    value: any;
-                  };
-            })
+        " (() => IterableIterator<string>)
           | (() => string)
           | ((form: \\"NFC\\" | \\"NFD\\" | \\"NFKC\\" | \\"NFKD\\") => string)
           | ((from: number, length: number) => string)

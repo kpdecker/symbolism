@@ -228,15 +228,7 @@ describe("type schema converter", () => {
       `);
       expect(printSchema(evaluateSchema(declaration, context.checker)))
         .toMatchInlineSnapshot(`
-        "{
-          nested: {
-            classFunction: () => undefined;
-            prop: {
-              color: string;
-              interfaceFunction: (foo: \\"bar\\") => string;
-            };
-          };
-        };
+        "{ nested: NestedSelector };
         "
       `);
     });
@@ -365,7 +357,7 @@ describe("type schema converter", () => {
         `);
       expect(printSchema(evaluateSchema(declaration, context.checker)))
         .toMatchInlineSnapshot(`
-        "{ nested: { prop: { color: \\"red\\" } } };
+        "GenericType<{ color: \\"red\\" }>;
         "
       `);
     });
@@ -384,14 +376,10 @@ describe("type schema converter", () => {
         `);
       expect(printSchema(evaluateSchema(declaration, context.checker)))
         .toMatchInlineSnapshot(`
-        "{
-          nested: {
-            prop: {
-              backgroundColor: string;
-              color: string;
-            };
-          };
-        };
+        "Type<{
+          backgroundColor: string;
+          color: string;
+        }>;
         "
       `);
     });
@@ -406,7 +394,7 @@ describe("type schema converter", () => {
         `);
       expect(printSchema(evaluateSchema(declaration, context.checker)))
         .toMatchInlineSnapshot(`
-        "{ nested: { prop: any } };
+        "Type<any>;
         "
       `);
     });

@@ -87,13 +87,7 @@ describe("type schema converter", () => {
       const newNodes = findNodesInTree(sourceFile, ts.isNewExpression);
       expect(printSchema(evaluateSchema(newNodes[0], context.checker)))
         .toMatchInlineSnapshot(`
-        "{
-          \\"#_length\\": number;
-          foo: string;
-          length: number;
-          methodDeclare: () => string;
-          propParent: string;
-        };
+        "DeclaredClass;
         "
       `);
 
@@ -118,13 +112,7 @@ describe("type schema converter", () => {
       );
       expect(printSchema(evaluateSchema(thisNodes[0], context.checker)))
         .toMatchInlineSnapshot(`
-        "{
-          \\"#_length\\": number;
-          foo: string;
-          length: number;
-          methodDeclare: () => string;
-          propParent: string;
-        };
+        "DeclaredClass<DeclaredClass>;
         "
       `);
       expect(printSchema(evaluateSchema(thisNodes[2], context.checker)))
@@ -146,13 +134,7 @@ describe("type schema converter", () => {
           evaluateSchema(thisNodes[thisNodes.length - 1], context.checker)
         )
       ).toMatchInlineSnapshot(`
-        "{
-          \\"#_length\\": number;
-          foo: string;
-          length: number;
-          methodDeclare: () => string;
-          propParent: string;
-        };
+        "DeclaredClass;
         "
       `);
 

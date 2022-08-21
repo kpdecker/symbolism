@@ -3,10 +3,7 @@ import { findIdentifiers, findNodesInTree } from "@symbolism/ts-utils";
 import { printSchema } from "../print/typescript";
 import { SchemaContext } from "../context";
 import ts from "typescript";
-import { createJsonSchema } from "../print/json";
-import { getNodeSchema } from "../value-eval";
 import { evaluateSchema } from "../schema";
-import { getTypeSchema } from "../type-eval";
 import { dumpNode } from "@symbolism/ts-debug";
 
 function testType(source: string, name = "Type") {
@@ -118,142 +115,56 @@ describe("type schema converter", () => {
           evaluateSchema(yieldNodes[yieldNodes.length - 1], context.checker)
         )
       ).toMatchInlineSnapshot(`
-        "{
-          \\"[Symbol.iterator]\\": () => 'error! Circular type Generator<\\"foo\\" | \\"bar\\", void, unknown>';
-          next: (args: [{}] | []) =>
-            | {
-                done: false;
-                value: \\"bar\\" | \\"foo\\";
-              }
-            | {
-                done: true;
-                value: undefined;
-              };
-          return: (value: {}) =>
-            | {
-                done: false;
-                value: \\"bar\\" | \\"foo\\";
-              }
-            | {
-                done: true;
-                value: undefined;
-              };
-          throw: (e: any) =>
-            | {
-                done: false;
-                value: \\"bar\\" | \\"foo\\";
-              }
-            | {
-                done: true;
-                value: undefined;
-              };
-        };
+        "Generator<\\"bar\\" | \\"foo\\", undefined, unknown>;
         "
       `);
 
       const fooNodes = findIdentifiers(sourceFile, "foo");
       expect(printSchema(evaluateSchema(fooNodes[0], context.checker)))
         .toMatchInlineSnapshot(`
-        "() => {
-          \\"[Symbol.iterator]\\": () => 'error! Circular type Generator<\\"foo\\" | \\"bar\\", void, unknown>';
-          next: (args: [{}] | []) =>
-            | {
-                done: false;
-                value: \\"bar\\" | \\"foo\\";
-              }
-            | {
-                done: true;
-                value: undefined;
-              };
-          return: (value: {}) =>
-            | {
-                done: false;
-                value: \\"bar\\" | \\"foo\\";
-              }
-            | {
-                done: true;
-                value: undefined;
-              };
-          throw: (e: any) =>
-            | {
-                done: false;
-                value: \\"bar\\" | \\"foo\\";
-              }
-            | {
-                done: true;
-                value: undefined;
-              };
-        };
+        "() => Generator<\\"bar\\" | \\"foo\\", undefined, unknown>;
         "
       `);
       expect(printSchema(evaluateSchema(fooNodes[1], context.checker)))
         .toMatchInlineSnapshot(`
-        "() => {
-          \\"[Symbol.iterator]\\": () => 'error! Circular type Generator<\\"foo\\" | \\"bar\\", void, unknown>';
-          next: (args: [{}] | []) =>
-            | {
-                done: false;
-                value: \\"bar\\" | \\"foo\\";
-              }
-            | {
-                done: true;
-                value: undefined;
-              };
-          return: (value: {}) =>
-            | {
-                done: false;
-                value: \\"bar\\" | \\"foo\\";
-              }
-            | {
-                done: true;
-                value: undefined;
-              };
-          throw: (e: any) =>
-            | {
-                done: false;
-                value: \\"bar\\" | \\"foo\\";
-              }
-            | {
-                done: true;
-                value: undefined;
-              };
-        };
+        "() => Generator<\\"bar\\" | \\"foo\\", undefined, unknown>;
+        "
+      `);
+    });
+    it("should infer return from iterators", () => {
+      const { type, context, sourceFile } = testType(`
+        function* generator() {
+          yield "foo";
+          yield "bar";
+          return "bat" as const;
+        }
+
+        function foo() {
+          const iterator = generator();
+          const iteratorResult = iterator.next();
+          const values = iteratorResult.value;
+          return iterator.next().value;
+        }
+      `);
+
+      const iteratorNodes = findIdentifiers(sourceFile, "iterator");
+      expect(printSchema(evaluateSchema(iteratorNodes[0], context.checker)))
+        .toMatchInlineSnapshot(`
+        "Generator<\\"bar\\" | \\"foo\\", \\"bat\\", unknown>;
         "
       `);
 
-      const barNodes = findIdentifiers(sourceFile, "bar");
-      expect(printSchema(evaluateSchema(barNodes[0], context.checker)))
+      const fooNodes = findIdentifiers(sourceFile, "foo");
+      expect(printSchema(evaluateSchema(fooNodes[0], context.checker)))
         .toMatchInlineSnapshot(`
-        "() => {
-          \\"[Symbol.iterator]\\": () => 'error! Circular type Generator<\\"foo\\" | \\"bar\\" | \\"food\\", void, unknown>';
-          next: (args: [{}] | []) =>
-            | {
-                done: false;
-                value: \\"bar\\" | \\"foo\\" | \\"food\\";
-              }
-            | {
-                done: true;
-                value: undefined;
-              };
-          return: (value: {}) =>
-            | {
-                done: false;
-                value: \\"bar\\" | \\"foo\\" | \\"food\\";
-              }
-            | {
-                done: true;
-                value: undefined;
-              };
-          throw: (e: any) =>
-            | {
-                done: false;
-                value: \\"bar\\" | \\"foo\\" | \\"food\\";
-              }
-            | {
-                done: true;
-                value: undefined;
-              };
-        };
+        "() => \\"bar\\" | \\"bat\\" | \\"foo\\";
+        "
+      `);
+
+      const valuesNodes = findIdentifiers(sourceFile, "values");
+      expect(printSchema(evaluateSchema(valuesNodes[0], context.checker)))
+        .toMatchInlineSnapshot(`
+        "\\"bar\\" | \\"bat\\" | \\"foo\\";
         "
       `);
     });
