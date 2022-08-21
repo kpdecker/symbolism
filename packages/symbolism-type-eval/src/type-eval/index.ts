@@ -1,8 +1,13 @@
-import { dumpFlags, dumpNode, dumpSymbol } from "@symbolism/ts-debug";
+import {
+  dumpFlags,
+  dumpNode,
+  dumpSchema,
+  dumpSymbol,
+  dumpType,
+} from "@symbolism/ts-debug";
 import {
   getSymbolDeclaration,
   invariantNode,
-  isAliasSymbol,
   isIntrinsicType,
   isTupleTypeReference,
   isTypeReference,
@@ -14,6 +19,7 @@ import { SchemaContext } from "../context";
 import {
   AnySchemaNode,
   createReferenceSchema,
+  ErrorSchema,
   FunctionSchema,
 } from "../schema";
 import { getNodeSchema } from "../value-eval";
@@ -23,33 +29,77 @@ import { convertLiteralOrPrimitive } from "./literal";
 import { convertObjectType } from "./object";
 import { convertTemplateLiteralType } from "./template-literal";
 
+const buildingSchema: ErrorSchema = {
+  kind: "error",
+  extra: "building",
+};
+
 export function getTypeSchema(
   type: ts.Type,
   context: SchemaContext
 ): AnySchemaNode {
   const { contextNode, checker, typesHandled } = context;
 
-  const symbol = isTypeReference(type) ? type.target.symbol : type.symbol;
+  // const symbol = isTypeReference(type) ? type.target.symbol : type.symbol;
+  const symbol = type.symbol;
+  const existingDef = context.symbolDefinitions.get(symbol);
+
+  if (wellKnownReferences.includes(symbol?.name)) {
+    const refSchema = createReferenceFromType(type, context);
+    if (refSchema) {
+      return refSchema;
+    }
+  }
+
   const canEmitDef =
     symbol?.name &&
     !Object.values(ts.InternalSymbolName).includes(symbol?.name as any);
+
+  // Use type reference if we've processed this already.
+  if (canEmitDef) {
+    if (existingDef) {
+      const referenceSchema = createReferenceFromType(type, context);
+      if (referenceSchema) {
+        // if (referenceSchema.kind !== "array") {
+        //   console.log(
+        //     "referenceSchema",
+        //     dumpSymbol(symbol, checker),
+        //     dumpType(type, checker),
+        //     symbol
+        //   );
+        // }
+        return referenceSchema;
+      }
+    }
+  }
+
   logDebug(
     "getTypeSchema",
     checker.typeToString(type),
     dumpNode(contextNode, checker)
   );
 
-  const ret = getTypeSchemaWorker(type, context);
   if (canEmitDef) {
-    if (context.symbolDefinitions.has(symbol)) {
+    // context.symbolDefinitions.set(symbol, buildingSchema);
+  }
+
+  const ret = getTypeSchemaWorker(type, context);
+  if (canEmitDef && ret.kind !== "reference") {
+    if (existingDef && existingDef !== buildingSchema) {
       throw new NodeError(
-        "Duplicate definition for symbol " +
-          JSON.stringify(dumpSymbol(symbol, checker)),
+        `Duplicate definition for symbol ${JSON.stringify(
+          dumpSymbol(symbol, checker),
+          undefined,
+          2
+        )}
+
+New: ${dumpSchema(ret)}
+Existing: ${dumpSchema(existingDef)}`,
         contextNode,
         checker
       );
     }
-    context.symbolDefinitions.set(symbol, ret);
+    // context.symbolDefinitions.set(symbol, ret);
   }
   return ret;
 }
@@ -166,13 +216,6 @@ function getTypeSchemaWorker(
         }
       }
 
-      if (context.options.referenceCode && type.symbol.name) {
-        const referenceSchema = createReferenceFromType(type, context);
-        if (referenceSchema) {
-          return referenceSchema;
-        }
-      }
-
       const callSignatures = type.getCallSignatures();
       if (callSignatures.length > 0) {
         function convertSignature(signature: ts.Signature): FunctionSchema {
@@ -199,26 +242,34 @@ function getTypeSchemaWorker(
           };
         }
 
-        return createUnionKind(callSignatures.map(convertSignature));
+        const functionSchema = createUnionKind(
+          callSignatures.map(convertSignature)
+        );
+        //
+        if (isTypeReference(type)) {
+          context.symbolDefinitions.set(type.symbol, functionSchema);
+          const referenceNode = createReferenceFromType(type, context);
+          if (referenceNode) {
+            return referenceNode;
+          }
+        }
+
+        return functionSchema;
       }
 
-      const declaration = getSymbolDeclaration(type.symbol);
-      if (declaration) {
-        // Simplify library types to references
-        // TODO: Create a proper reference schema type
-        if (declaration.getSourceFile().fileName.includes("typescript/lib")) {
-          const name = type.symbol.getName();
-
-          if (wellKnownReferences.includes(name)) {
-            const refSchema = createReferenceFromType(type, context);
-            if (refSchema) {
-              return refSchema;
-            }
-          }
+      const objectSchema = convertObjectType(...context.clone(type));
+      if (isTypeReference(type)) {
+        // TODO: Figure out the proper referencing scheme . type2String might do it?
+        // symbol will point to the referenced type definition, which is shared between
+        // the references
+        context.symbolDefinitions.set(type.symbol, objectSchema);
+        const referenceNode = createReferenceFromType(type, context);
+        if (referenceNode) {
+          return referenceNode;
         }
       }
 
-      return convertObjectType(...context.clone(type));
+      return objectSchema;
     } else if (type.flags & ts.TypeFlags.Index) {
       const index = type as ts.IndexType;
       const clone = context.clone(index.type);
@@ -260,16 +311,23 @@ function getTypeSchemaWorker(
   }
 }
 
-export function createReferenceFromType(type: ts.Type, context: SchemaContext) {
+export function createReferenceFromType(
+  type: ts.Type,
+  context: SchemaContext
+): AnySchemaNode | undefined {
   const aliasSymbol = type.aliasSymbol;
   const typeArguments: readonly ts.Type[] =
     type.aliasTypeArguments || (type as any).resolvedTypeArguments || [];
   const parameters = typeArguments.map((type) => {
-    return getTypeSchema(
-      ...context.clone(type, undefined, {
-        referenceCode: true,
-      })
-    );
+    return getTypeSchema(...context.clone(type));
   });
+
+  if (type.symbol.name === "Array") {
+    return {
+      kind: "array",
+      items: parameters[0],
+    };
+  }
+
   return createReferenceSchema(type.symbol.name, parameters);
 }

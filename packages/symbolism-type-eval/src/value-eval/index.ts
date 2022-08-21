@@ -368,6 +368,7 @@ function dontNarrow(node: ts.Node): boolean {
     ts.isSetAccessorDeclaration(node) ||
     ts.isIndexSignatureDeclaration(node) ||
     ts.isTypeAliasDeclaration(node) ||
+    ts.isTypeParameterDeclaration(node) ||
     ts.isTypeNode(node)
   );
 }
