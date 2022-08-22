@@ -354,7 +354,11 @@ describe("type schema converter", () => {
       const jsxNodes = findNodesInTree(sourceFile, ts.isJsxFragment);
       const jsxSchema = evaluateSchema(jsxNodes[0], context.checker);
       expect(printSchema(jsxSchema)).toMatchInlineSnapshot(`
-        "Element;
+        "{
+          key: number | string;
+          props: any;
+          type: any;
+        };
         "
       `);
     });
@@ -673,7 +677,11 @@ describe("type schema converter", () => {
       jsxSchema = evaluateSchema(jsxNodes[3], context.checker);
       expect(printSchema(jsxSchema)).toMatchInlineSnapshot(`
         "{
-          Bar: () => Element;
+          Bar: () => {
+            key: number | string;
+            props: any;
+            type: any;
+          };
           \\"ignore-prop\\": true;
           myProp: 1;
         };
