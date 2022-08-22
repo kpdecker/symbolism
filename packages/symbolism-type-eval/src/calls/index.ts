@@ -98,7 +98,9 @@ function convertCall(
 
   const argSchemas = callExpression.arguments.map((argument, i) => {
     const schema = getNodeSchema(
-      ...context.cloneNode(argument, {
+      ...context.cloneNode({
+        node: argument,
+        decrementDepth: false,
         allowMissing: false,
         limitToValues: true,
       })
@@ -142,7 +144,12 @@ function convertCall(
     arg.inputSymbols.forEach((inputSymbol) => {
       baseSymbolMap.set(
         inputSymbol.symbol,
-        getNodeSchema(...context.cloneNode(inputSymbol.declaration!))!
+        getNodeSchema(
+          ...context.cloneNode({
+            node: inputSymbol.declaration!,
+            decrementDepth: false,
+          })
+        )!
       );
     });
   });

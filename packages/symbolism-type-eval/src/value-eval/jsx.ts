@@ -8,7 +8,12 @@ import { SchemaError } from "../classify";
 export const jsxPathHandlers = nodeEvalHandler({
   [ts.SyntaxKind.JsxElement](node, context) {
     invariantNode(node, context.checker, ts.isJsxElement);
-    return getNodeSchema(...context.cloneNode(node.openingElement));
+    return getNodeSchema(
+      ...context.cloneNode({
+        node: node.openingElement,
+        decrementDepth: false,
+      })
+    );
   },
   [ts.SyntaxKind.JsxOpeningElement](node, context) {
     invariantNode(node, context.checker, ts.isJsxOpeningElement);
@@ -74,7 +79,9 @@ export const jsxPathHandlers = nodeEvalHandler({
   [ts.SyntaxKind.JsxAttribute](node, context) {
     invariantNode(node, context.checker, ts.isJsxAttribute);
     if (node.initializer) {
-      return getNodeSchema(...context.cloneNode(node.initializer));
+      return getNodeSchema(
+        ...context.cloneNode({ node: node.initializer, decrementDepth: false })
+      );
     }
     return checkerEval(node, context);
   },

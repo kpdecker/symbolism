@@ -8,6 +8,9 @@ import { AnySchemaNode } from "./schema";
 
 export class SchemaContext {
   typesHandled = new Set<ts.Type>();
+  maxDepth = 10;
+
+  history = "";
 
   typeDefinitions = new Map<string, AnySchemaNode>();
 
@@ -20,33 +23,68 @@ export class SchemaContext {
   ) {}
 
   clone(
-    type: ts.Type,
-    node?: ts.Node,
-    options?: TypeEvalOptions
+    params: {
+      type: ts.Type;
+      node?: ts.Node;
+      decrementDepth: boolean;
+    } & TypeEvalOptions
   ): [ts.Type, SchemaContext];
   clone(
-    type: undefined,
-    node: ts.Node,
-    options?: TypeEvalOptions
+    params: {
+      type?: undefined;
+      node: ts.Node;
+      decrementDepth: boolean;
+    } & TypeEvalOptions
   ): [ts.Type, SchemaContext];
   clone(
-    type?: ts.Type,
-    node: ts.Node = findContextNode(type!, this.contextNode),
-    options = this.options
+    params: {
+      type?: ts.Type;
+      node?: ts.Node;
+      decrementDepth: boolean;
+    } & TypeEvalOptions
   ) {
+    let { node, type, decrementDepth, ...rest } = params;
+
+    invariant(node || type, "Either node or type must be provided");
+
+    if (!node) {
+      node = findContextNode(type!, this.contextNode);
+    }
     if (!type) {
       type = this.checker.getTypeAtLocation(node);
     }
 
-    const ret = new SchemaContext(node, this.checker, options);
+    const ret = new SchemaContext(node, this.checker, {
+      ...this.options,
+      ...rest,
+    });
     this.cloneProps(ret);
+    ret.history += ` -> ${this.checker.typeToString(type)}`;
+
+    if (decrementDepth) {
+      ret.maxDepth--;
+    }
 
     return [type, ret] as const;
   }
 
-  cloneNode<T extends ts.Node>(node: T, options = this.options) {
-    const ret = new SchemaContext(node, this.checker, options);
+  cloneNode<T extends ts.Node>(
+    params: {
+      node: T;
+      decrementDepth: boolean;
+    } & TypeEvalOptions
+  ) {
+    const { node, decrementDepth, ...rest } = params;
+    const ret = new SchemaContext(node, this.checker, {
+      ...this.options,
+      ...rest,
+    });
     this.cloneProps(ret);
+    ret.history += ` -> node ${node.getText()}`;
+
+    if (decrementDepth) {
+      ret.maxDepth--;
+    }
 
     return [node, ret] as const;
   }
@@ -55,6 +93,8 @@ export class SchemaContext {
     newInstance.typesHandled = new Set(this.typesHandled);
     newInstance.narrowingNode = this.narrowingNode;
     newInstance.typeDefinitions = this.typeDefinitions;
+    newInstance.history = this.history;
+    newInstance.maxDepth = this.maxDepth;
   }
 }
 

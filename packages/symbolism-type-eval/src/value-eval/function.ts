@@ -42,7 +42,12 @@ export const functionOperators = nodeEvalHandler({
   [ts.SyntaxKind.ReturnStatement](node, context) {
     invariantNode(node, context.checker, ts.isReturnStatement);
     if (node.expression) {
-      return getNodeSchema(node.expression, context);
+      return getNodeSchema(
+        ...context.cloneNode({
+          node: node.expression,
+          decrementDepth: false,
+        })
+      );
     } else {
       return undefinedSchema;
     }
@@ -51,7 +56,10 @@ export const functionOperators = nodeEvalHandler({
     invariantNode(node, context.checker, ts.isAwaitExpression);
 
     const expressionSchema = getNodeSchema(
-      ...context.cloneNode(node.expression)
+      ...context.cloneNode({
+        node: node.expression,
+        decrementDepth: false,
+      })
     );
 
     // Unwrap promises
@@ -106,8 +114,9 @@ function convertFunctionLikeNode(node: ts.Node, context: SchemaContext) {
     let returnType: AnySchemaNode = createUnionKind(
       returnNodes.map((returnNode) => {
         return getNodeSchema(
-          ...context.cloneNode(returnNode, {
-            ...context.options,
+          ...context.cloneNode({
+            node: returnNode,
+            decrementDepth: true,
             allowMissing: false,
           })
         )!;
@@ -139,7 +148,10 @@ function convertCallLikeNode(node: ts.Node, context: SchemaContext) {
   // Evaluate the function at node level
   if (!ts.isNewExpression(node) && signature?.declaration) {
     const functionSchema = getNodeSchema(
-      ...context.cloneNode(signature?.declaration)
+      ...context.cloneNode({
+        node: signature?.declaration,
+        decrementDepth: false,
+      })
     );
     let returnType: AnySchemaNode | undefined = undefined;
     if (functionSchema?.kind === "function") {
@@ -160,7 +172,13 @@ function convertCallLikeNode(node: ts.Node, context: SchemaContext) {
   }
 
   if (returnType) {
-    return getTypeSchema(...context.clone(returnType, node));
+    return getTypeSchema(
+      ...context.clone({
+        type: returnType,
+        node,
+        decrementDepth: false,
+      })
+    );
   }
 
   return undefinedSchema;

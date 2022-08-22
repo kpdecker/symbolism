@@ -48,12 +48,18 @@ export function convertTemplateLiteralValue(
     let expressionSchema: AnySchemaNode | undefined;
     if (expressionDefinition?.declaration) {
       expressionSchema = getNodeSchema(
-        ...context.cloneNode(expressionDefinition.declaration)
+        ...context.cloneNode({
+          node: expressionDefinition.declaration,
+          decrementDepth: false,
+        })
       );
     }
     if (!expressionSchema) {
       expressionSchema = getNodeSchema(
-        ...context.cloneNode(templateSpan.expression)
+        ...context.cloneNode({
+          node: templateSpan.expression,
+          decrementDepth: false,
+        })
       );
     }
     if (expressionSchema) {

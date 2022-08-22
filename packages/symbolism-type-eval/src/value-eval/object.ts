@@ -26,22 +26,32 @@ export const objectOperators = nodeEvalHandler({
     const symbol = getLocalSymbol(node, checker);
     const declaration = getSymbolDeclaration(symbol);
     if (declaration) {
-      return getNodeSchema(...context.cloneNode(declaration));
+      return getNodeSchema(
+        ...context.cloneNode({ node: declaration, decrementDepth: false })
+      );
     }
   },
   [ts.SyntaxKind.SpreadAssignment](node, context) {
     invariantNode(node, context.checker, ts.isSpreadAssignment);
-    return getNodeSchema(...context.cloneNode(node.expression));
+    return getNodeSchema(
+      ...context.cloneNode({ node: node.expression, decrementDepth: false })
+    );
   },
   [ts.SyntaxKind.ComputedPropertyName](node, context) {
     invariantNode(node, context.checker, ts.isComputedPropertyName);
-    return getNodeSchema(...context.cloneNode(node.expression));
+    return getNodeSchema(
+      ...context.cloneNode({ node: node.expression, decrementDepth: false })
+    );
   },
 
   [ts.SyntaxKind.PropertyAccessExpression](node, context) {
     invariantNode(node, context.checker, ts.isPropertyAccessExpression);
     return getNodeSchema(
-      ...context.cloneNode(node.name, { allowMissing: false })
+      ...context.cloneNode({
+        node: node.name,
+        decrementDepth: false,
+        allowMissing: false,
+      })
     );
   },
   [ts.SyntaxKind.ElementAccessExpression](node, context) {
@@ -66,7 +76,9 @@ function convertObjectLiteralValue(
   ): string[] | AnySchemaNode {
     const propertyName = ts.isComputedPropertyName(name)
       ? getNodeSchema(
-          ...context.cloneNode(name.expression, {
+          ...context.cloneNode({
+            node: name.expression,
+            decrementDepth: true,
             allowMissing: false,
           })
         )
@@ -134,7 +146,9 @@ function convertObjectLiteralValue(
   node.properties.forEach((property) => {
     if (ts.isSpreadAssignment(property)) {
       const spreadSchema = getNodeSchema(
-        ...context.cloneNode(property.expression, {
+        ...context.cloneNode({
+          node: property.expression,
+          decrementDepth: true,
           allowMissing: false,
         })
       )!;
@@ -146,7 +160,9 @@ function convertObjectLiteralValue(
       ts.isSetAccessorDeclaration(property)
     ) {
       let schema = getNodeSchema(
-        ...context.cloneNode(property, {
+        ...context.cloneNode({
+          node: property,
+          decrementDepth: true,
           allowMissing: false,
         })
       )!;
@@ -155,8 +171,9 @@ function convertObjectLiteralValue(
     } else if (ts.isShorthandPropertyAssignment(property)) {
       const propertyName = property.name.text;
       const schema = getNodeSchema(
-        ...context.cloneNode(property, {
-          ...context.options,
+        ...context.cloneNode({
+          node: property,
+          decrementDepth: true,
           allowMissing: false,
         })
       )!;
@@ -198,7 +215,9 @@ function convertElementAccessExpression(
   const { checker } = context;
 
   const parentSchema = getNodeSchema(
-    ...context.cloneNode(node.expression, {
+    ...context.cloneNode({
+      node: node.expression,
+      decrementDepth: false,
       allowMissing: true,
     })
   ) || {
@@ -207,7 +226,11 @@ function convertElementAccessExpression(
     node: node.expression,
   };
   const argumentSchema = getNodeSchema(
-    ...context.cloneNode(node.argumentExpression, { allowMissing: true })
+    ...context.cloneNode({
+      node: node.argumentExpression,
+      decrementDepth: false,
+      allowMissing: true,
+    })
   ) || {
     kind: "primitive",
     name: "any",
@@ -238,7 +261,12 @@ function convertElementAccessExpression(
       const property = parentType.getProperty(argValue);
       const propertyDeclaration = getSymbolDeclaration(property);
       if (propertyDeclaration) {
-        return getNodeSchema(propertyDeclaration, context);
+        return getNodeSchema(
+          ...context.cloneNode({
+            node: propertyDeclaration,
+            decrementDepth: true,
+          })
+        );
       }
     }
 
@@ -265,7 +293,12 @@ function convertElementAccessExpression(
         properties.map((property) => {
           const propertyDeclaration = getSymbolDeclaration(property);
           if (propertyDeclaration) {
-            const schema = getNodeSchema(propertyDeclaration, context);
+            const schema = getNodeSchema(
+              ...context.cloneNode({
+                node: propertyDeclaration,
+                decrementDepth: true,
+              })
+            );
             if (schema) {
               return schema;
             }

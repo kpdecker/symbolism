@@ -18,10 +18,14 @@ export function convertBinaryExpression(
     return undefined;
   }
 
-  const leftSchema = getNodeSchema(...context.cloneNode(node.left))!;
+  const leftSchema = getNodeSchema(
+    ...context.cloneNode({ node: node.left, decrementDepth: true })
+  )!;
   invariant(leftSchema, "Expected left schema");
 
-  const rightSchema = getNodeSchema(...context.cloneNode(node.right))!;
+  const rightSchema = getNodeSchema(
+    ...context.cloneNode({ node: node.right, decrementDepth: true })
+  )!;
   invariant(rightSchema, "Expected right schema");
 
   const operator = node.operatorToken.kind as ts.BinaryOperator;
@@ -84,7 +88,9 @@ export function convertBinaryExpression(
     case ts.SyntaxKind.EqualsToken:
     case ts.SyntaxKind.CommaToken:
       return getNodeSchema(
-        ...context.cloneNode(node.right, {
+        ...context.cloneNode({
+          node: node.right,
+          decrementDepth: true,
           allowMissing: false,
         })
       );

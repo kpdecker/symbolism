@@ -42,6 +42,15 @@ export function getTypeSchema(
 ): AnySchemaNode {
   const { contextNode, checker, typesHandled } = context;
 
+  if (context.maxDepth <= 0) {
+    return {
+      kind: "reference",
+      name: "tooMuchRecursion",
+      parameters: [],
+      typeName: "tooMuchRecursion",
+    };
+  }
+
   if (isThisTypeParameter(type)) {
     // Resolve the class rather than this type
     type = type.getConstraint() || type;
@@ -60,7 +69,7 @@ export function getTypeSchema(
   }
 
   const canEmitDef =
-    isNamedType(type) &&
+    isNamedType(type, context.checker) &&
     !Object.values(ts.InternalSymbolName).includes(symbol?.name as any);
 
   // Use type reference if we've processed this already.
@@ -118,10 +127,19 @@ function getTypeSchemaWorker(
   const { contextNode, checker, typesHandled } = context;
   try {
     if (type.flags & ts.TypeFlags.TypeParameter) {
-      type = checker.getApparentType(type);
+      return getTypeSchema(
+        ...context.clone({
+          type: checker.getApparentType(type),
+          decrementDepth: false,
+        })
+      );
     }
 
     if (!isIntrinsicType(type) && typesHandled.has(type)) {
+      const ret = createReferenceFromType(type, context);
+      if (ret) {
+        return ret;
+      }
       return {
         kind: "error",
         extra: "Circular type " + checker.typeToString(type),
@@ -140,14 +158,26 @@ function getTypeSchemaWorker(
     }
 
     if (type.isUnion()) {
-      const items = type.types.map((t) => getTypeSchema(...context.clone(t)));
+      const items = type.types.map((t) =>
+        getTypeSchema(
+          ...context.clone({
+            type: t,
+            decrementDepth: true,
+          })
+        )
+      );
       return createUnionKind(items);
     } else if (type.isIntersection()) {
       let allObjects = true;
       const items = type.types.map((t) => {
         if (t.isLiteral()) {
           allObjects = false;
-          return getTypeSchema(...context.clone(t));
+          return getTypeSchema(
+            ...context.clone({
+              type: t,
+              decrementDepth: true,
+            })
+          );
         }
 
         const apparentType = checker.getApparentType(t);
@@ -157,12 +187,24 @@ function getTypeSchemaWorker(
         ) {
           allObjects = false;
         }
-        return getTypeSchema(...context.clone(apparentType));
+        const ret = getTypeSchema(
+          ...context.clone({
+            type: apparentType,
+            decrementDepth: true,
+          })
+        );
+        if (ret.kind !== "object" && ret.kind !== "reference") {
+          allObjects = false;
+        }
+
+        return ret;
       });
 
       // If we consist of objects only, then merge we can merge them
       if (allObjects) {
-        return convertObjectType(...context.clone(type));
+        return convertObjectType(
+          ...context.clone({ type, decrementDepth: false })
+        );
       }
 
       return {
@@ -177,7 +219,12 @@ function getTypeSchemaWorker(
 
       const typeArguments = checker.getTypeArguments(type);
       const items: AnySchemaNode[] = typeArguments.map((elementType) =>
-        getTypeSchema(...context.clone(elementType))
+        getTypeSchema(
+          ...context.clone({
+            type: elementType,
+            decrementDepth: false,
+          })
+        )
       );
 
       return {
@@ -188,7 +235,9 @@ function getTypeSchemaWorker(
     } else if ((checker as any).isArrayType(type)) {
       if (ts.isArrayLiteralExpression(contextNode)) {
         return getNodeSchema(
-          ...context.cloneNode(contextNode, {
+          ...context.cloneNode({
+            node: contextNode,
+            decrementDepth: false,
             allowMissing: false,
           })
         )!;
@@ -201,7 +250,12 @@ function getTypeSchemaWorker(
 
       return {
         kind: "array",
-        items: getTypeSchema(...context.clone(arrayValueType)),
+        items: getTypeSchema(
+          ...context.clone({
+            type: arrayValueType,
+            decrementDepth: false,
+          })
+        ),
         flags: dumpFlags(type.flags, ts.TypeFlags).concat(
           dumpFlags(objectFlags, ts.ObjectFlags)
         ),
@@ -216,7 +270,11 @@ function getTypeSchemaWorker(
         if (declaration) {
           invariantNode(declaration, checker, ts.isObjectLiteralExpression);
           const valueSchema = getNodeSchema(
-            ...context.cloneNode(declaration, { allowMissing: true })
+            ...context.cloneNode({
+              node: declaration,
+              decrementDepth: false,
+              allowMissing: true,
+            })
           );
           if (valueSchema) {
             return valueSchema;
@@ -239,14 +297,21 @@ function getTypeSchemaWorker(
               return {
                 name: parameter.name,
                 schema: getNodeSchema(
-                  ...context.cloneNode(declaration, {
+                  ...context.cloneNode({
+                    node: declaration,
+                    decrementDepth: true,
                     allowMissing: false,
                   })
                 )!,
                 symbol: parameter,
               };
             }),
-            returnType: getTypeSchema(...context.clone(returnType)),
+            returnType: getTypeSchema(
+              ...context.clone({
+                type: returnType,
+                decrementDepth: true,
+              })
+            ),
           };
         }
 
@@ -254,7 +319,7 @@ function getTypeSchemaWorker(
           callSignatures.map(convertSignature)
         );
 
-        if (isNamedType(type)) {
+        if (isNamedType(type, context.checker)) {
           const referenceNode = createReferenceFromType(
             type,
             context,
@@ -268,8 +333,10 @@ function getTypeSchemaWorker(
         return functionSchema;
       }
 
-      const objectSchema = convertObjectType(...context.clone(type));
-      if (isNamedType(type)) {
+      const objectSchema = convertObjectType(
+        ...context.clone({ type, decrementDepth: false })
+      );
+      if (isNamedType(type, context.checker)) {
         const referenceNode = createReferenceFromType(
           type,
           context,
@@ -283,7 +350,10 @@ function getTypeSchemaWorker(
       return objectSchema;
     } else if (type.flags & ts.TypeFlags.Index) {
       const index = type as ts.IndexType;
-      const clone = context.clone(index.type);
+      const clone = context.clone({
+        type: index.type,
+        decrementDepth: true,
+      });
 
       return {
         kind: "index",
@@ -294,21 +364,21 @@ function getTypeSchemaWorker(
       const indexAccess = type as ts.IndexedAccessType;
       return {
         kind: "index-access",
-        object: getTypeSchema(...context.clone(indexAccess.objectType)),
-        index: getTypeSchema(...context.clone(indexAccess.indexType)),
+        object: getTypeSchema(
+          ...context.clone({
+            type: indexAccess.objectType,
+            decrementDepth: false,
+          })
+        ),
+        index: getTypeSchema(
+          ...context.clone({
+            type: indexAccess.indexType,
+            decrementDepth: false,
+          })
+        ),
         node: contextNode,
       };
     } else {
-      /* istanbul ignore next Sanity */
-      console.log(
-        type,
-        Object.keys(type),
-        type.isLiteral(),
-        type.isNumberLiteral(),
-        dumpFlags(type.flags, ts.TypeFlags),
-        type.symbol && dumpSymbol(type.symbol, checker)
-      );
-
       /* istanbul ignore next Sanity */
       throw new Error(
         `Unsupported type ${JSON.stringify(dumpType(type, checker))}`
@@ -316,7 +386,7 @@ function getTypeSchemaWorker(
     }
   } catch (err: any) {
     throw new NodeError(
-      `Error converting type ${checker.typeToString(type)}`,
+      `Error converting type ${checker.typeToString(type)} ${context.history}`,
       contextNode,
       checker,
       err
@@ -336,7 +406,7 @@ export function createReferenceFromType(
   const parameters = typeArguments
     .map((type) => {
       if (!isThisTypeParameter(type)) {
-        return getTypeSchema(...context.clone(type));
+        return getTypeSchema(...context.clone({ type, decrementDepth: true }));
       }
       return undefined!;
     })

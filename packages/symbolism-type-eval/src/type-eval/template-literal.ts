@@ -32,7 +32,13 @@ export function convertTemplateLiteralType(
         const itemType = templateType.types[i];
         return [
           textSchema!,
-          itemType && getTypeSchema(...context.clone(itemType)),
+          itemType &&
+            getTypeSchema(
+              ...context.clone({
+                type: itemType,
+                decrementDepth: true,
+              })
+            ),
         ];
       })
       .filter(Boolean);

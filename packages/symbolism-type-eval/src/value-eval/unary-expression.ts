@@ -11,14 +11,24 @@ export const unaryExpressionOperators = nodeEvalHandler({
   [ts.SyntaxKind.PrefixUnaryExpression](node, context): AnySchemaNode {
     invariantNode(node, context.checker, ts.isPrefixUnaryExpression);
 
-    const operandSchema = getNodeSchema(...context.cloneNode(node.operand));
+    const operandSchema = getNodeSchema(
+      ...context.cloneNode({
+        node: node.operand,
+        decrementDepth: true,
+      })
+    );
     invariant(operandSchema, "Expected operand to have a schema");
     return evalUnaryOperator(node.operator, operandSchema, node);
   },
   [ts.SyntaxKind.PostfixUnaryExpression](node, context): AnySchemaNode {
     invariantNode(node, context.checker, ts.isPostfixUnaryExpression);
 
-    return getNodeSchema(...context.cloneNode(node.operand))!;
+    return getNodeSchema(
+      ...context.cloneNode({
+        node: node.operand,
+        decrementDepth: true,
+      })
+    )!;
   },
 });
 

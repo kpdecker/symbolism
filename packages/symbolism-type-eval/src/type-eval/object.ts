@@ -14,7 +14,11 @@ export function convertObjectType(
 
   if (ts.isObjectLiteralExpression(contextNode)) {
     const sourceType = getNodeSchema(
-      ...context.cloneNode(contextNode, { allowMissing: true })
+      ...context.cloneNode({
+        node: contextNode,
+        decrementDepth: false,
+        allowMissing: true,
+      })
     );
     if (sourceType) {
       return sourceType;
@@ -48,10 +52,18 @@ export function convertObjectType(
   checker.getIndexInfosOfType(type).forEach((indexInfo) => {
     abstractIndexKeys.push({
       key: getTypeSchema(
-        ...context.clone(indexInfo.keyType, indexInfo.declaration)
+        ...context.clone({
+          type: indexInfo.keyType,
+          node: indexInfo.declaration,
+          decrementDepth: true,
+        })
       ),
       value: getTypeSchema(
-        ...context.clone(indexInfo.type, indexInfo.declaration)
+        ...context.clone({
+          type: indexInfo.type,
+          node: indexInfo.declaration,
+          decrementDepth: true,
+        })
       ),
     });
   });
@@ -70,7 +82,13 @@ function convertSymbol(
   const declaration = getSymbolDeclaration(symbol);
   if (declaration) {
     const type = context.checker.getTypeOfSymbolAtLocation(symbol, declaration);
-    return getTypeSchema(...context.clone(type, declaration));
+    return getTypeSchema(
+      ...context.clone({
+        type,
+        node: declaration,
+        decrementDepth: true,
+      })
+    );
   }
 
   const properties: Record<string, AnySchemaNode> = {};

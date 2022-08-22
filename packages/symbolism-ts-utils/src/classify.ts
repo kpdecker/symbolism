@@ -121,7 +121,7 @@ export function isIntrinsicType(type: ts.Type | undefined): boolean {
   return (type?.flags! & intrinsicTypes) !== 0;
 }
 
-export function isNamedType(type: ts.Type): boolean {
+export function isNamedType(type: ts.Type, checker: ts.TypeChecker): boolean {
   if (isTupleTypeReference(type)) {
     return false;
   }

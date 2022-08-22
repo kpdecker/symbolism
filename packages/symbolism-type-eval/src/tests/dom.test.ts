@@ -29,8 +29,8 @@ describe("type schema converter", () => {
       it("should load ReadableStream generic", () => {
         // setLogLevel(LogLevel.debug);
         const { checker, sourceFile } = testType(`
-        declare const stream: ReadableStream<string>;
-      `);
+          declare const stream: ReadableStream<string>;
+        `);
 
         expect(testNode("stream")).toMatchInlineSnapshot(`
           "type AbortSignal = {
@@ -63,22 +63,13 @@ describe("type schema converter", () => {
             throwIfAborted: () => undefined;
           };
 
-          type AbortSignalEventMap = { abort: Event };
+          type AbortSignalEventMap = { abort: tooMuchRecursion };
 
           type AddEventListenerOptions = {
-            capture: false | true;
-            once: false | true;
-            passive: false | true;
-            signal: AbortSignal;
-          };
-
-          type CollatorOptions = {
-            caseFirst: string;
-            ignorePunctuation: false | true;
-            localeMatcher: string;
-            numeric: false | true;
-            sensitivity: string;
-            usage: string;
+            capture: tooMuchRecursion;
+            once: tooMuchRecursion;
+            passive: tooMuchRecursion;
+            signal: tooMuchRecursion;
           };
 
           type Event = {
@@ -90,65 +81,36 @@ describe("type schema converter", () => {
             cancelBubble: false | true;
             cancelable: false | true;
             composed: false | true;
-            composedPath: () => EventTarget[];
+            composedPath: () => tooMuchRecursion;
             currentTarget: EventTarget;
             defaultPrevented: false | true;
             eventPhase: number;
             initEvent: (
-              type: string,
-              bubbles: false | true,
-              cancelable: false | true
-            ) => undefined;
+              type: tooMuchRecursion,
+              bubbles: tooMuchRecursion,
+              cancelable: tooMuchRecursion
+            ) => tooMuchRecursion;
             isTrusted: false | true;
-            preventDefault: () => undefined;
+            preventDefault: () => tooMuchRecursion;
             returnValue: false | true;
             srcElement: EventTarget;
-            stopImmediatePropagation: () => undefined;
-            stopPropagation: () => undefined;
+            stopImmediatePropagation: () => tooMuchRecursion;
+            stopPropagation: () => tooMuchRecursion;
             target: EventTarget;
             timeStamp: number;
             type: string;
           };
 
-          type EventListener = (evt: Event) => undefined;
+          type EventListener = (evt: tooMuchRecursion) => tooMuchRecursion;
 
-          type EventListenerObject = { handleEvent: (object: Event) => undefined };
+          type EventListenerObject = { handleEvent: tooMuchRecursion };
 
-          type EventListenerOptions = { capture: false | true };
+          type EventListenerOptions = { capture: tooMuchRecursion };
 
           type EventTarget = {
-            addEventListener: (
-              type: string,
-              callback: EventListener | EventListenerObject,
-              options: AddEventListenerOptions | false | true
-            ) => undefined;
-            dispatchEvent: (event: Event) => false | true;
-            removeEventListener: (
-              type: string,
-              callback: EventListener | EventListenerObject,
-              options: EventListenerOptions | false | true
-            ) => undefined;
-          };
-
-          type IterableIterator<string> = {
-            \\"[Symbol.iterator]\\": () => IterableIterator<string>;
-            next: (
-              args: [{}] | []
-            ) => IteratorReturnResult<any> | IteratorYieldResult<string>;
-            return: (value: {}) =>
-              | IteratorReturnResult<any>
-              | IteratorYieldResult<string>;
-            throw: (e: any) => IteratorReturnResult<any> | IteratorYieldResult<string>;
-          };
-
-          type IteratorReturnResult<any> = {
-            done: true;
-            value: any;
-          };
-
-          type IteratorYieldResult<string> = {
-            done: false;
-            value: string;
+            addEventListener: tooMuchRecursion;
+            dispatchEvent: tooMuchRecursion;
+            removeEventListener: tooMuchRecursion;
           };
 
           type ReadableStream<T> = {
@@ -186,7 +148,7 @@ describe("type schema converter", () => {
             closed: Promise<undefined>;
             read: () => Promise<
               | ReadableStreamDefaultReadDoneResult
-              | ReadableStreamDefaultReadValueResult<{}>
+              | ReadableStreamDefaultReadValueResult<tooMuchRecursion>
             >;
             releaseLock: () => undefined;
           };
@@ -213,109 +175,11 @@ describe("type schema converter", () => {
             signal: AbortSignal;
           };
 
-          type String = {
-            \\"[Symbol.iterator]\\": () => IterableIterator<string>;
-            anchor: (name: string) => string;
-            big: () => string;
-            blink: () => string;
-            bold: () => string;
-            charAt: (pos: number) => string;
-            charCodeAt: (index: number) => number;
-            codePointAt: (pos: number) => number;
-            concat: (strings: string[]) => string;
-            endsWith: (searchString: string, endPosition: number) => false | true;
-            fixed: () => string;
-            fontcolor: (color: string) => string;
-            fontsize: ((size: number) => string) | ((size: string) => string);
-            includes: (searchString: string, position: number) => false | true;
-            indexOf: (searchString: string, position: number) => number;
-            italics: () => string;
-            lastIndexOf: (searchString: string, position: number) => number;
-            length: number;
-            link: (url: string) => string;
-            localeCompare:
-              | ((that: string) => number)
-              | ((
-                  that: string,
-                  locales: string[] | string,
-                  options: CollatorOptions
-                ) => number);
-            match:
-              | ((matcher: {
-                  \\"[Symbol.match]\\": (string: string) => RegExpMatchArray;
-                }) => RegExpMatchArray)
-              | ((regexp: RegExp | string) => RegExpMatchArray);
-            normalize:
-              | ((form: \\"NFC\\" | \\"NFD\\" | \\"NFKC\\" | \\"NFKD\\") => string)
-              | ((form: string) => string);
-            padEnd: (maxLength: number, fillString: string) => string;
-            padStart: (maxLength: number, fillString: string) => string;
-            repeat: (count: number) => string;
-            replace:
-              | ((searchValue: RegExp | string, replaceValue: string) => string)
-              | ((
-                  searchValue: RegExp | string,
-                  replacer: (substring: string, args: any[]) => string
-                ) => string)
-              | ((
-                  searchValue: {
-                    \\"[Symbol.replace]\\": (string: string, replaceValue: string) => string;
-                  },
-                  replaceValue: string
-                ) => string)
-              | ((
-                  searchValue: {
-                    \\"[Symbol.replace]\\": (
-                      string: string,
-                      replacer: (substring: string, args: any[]) => string
-                    ) => string;
-                  },
-                  replacer: (substring: string, args: any[]) => string
-                ) => string);
-            search:
-              | ((regexp: RegExp | string) => number)
-              | ((searcher: { \\"[Symbol.search]\\": (string: string) => number }) => number);
-            slice: (start: number, end: number) => string;
-            small: () => string;
-            split:
-              | ((separator: RegExp | string, limit: number) => string[])
-              | ((
-                  splitter: {
-                    \\"[Symbol.split]\\": (string: string, limit: number) => string[];
-                  },
-                  limit: number
-                ) => string[]);
-            startsWith: (searchString: string, position: number) => false | true;
-            strike: () => string;
-            sub: () => string;
-            substr: (from: number, length: number) => string;
-            substring: (start: number, end: number) => string;
-            sup: () => string;
-            toLocaleLowerCase: (locales: string[] | string) => string;
-            toLocaleUpperCase: (locales: string[] | string) => string;
-            toLowerCase: () => string;
-            toString: () => string;
-            toUpperCase: () => string;
-            trim: () => string;
-            valueOf: () => string;
-            [k: number]: string;
-          };
-
           type WritableStream<R> = {
-            abort: (reason: any) => Promise<undefined>;
-            close: () => Promise<undefined>;
-            getWriter: () => WritableStreamDefaultWriter<{}>;
-            locked: false | true;
-          };
-
-          type WritableStreamDefaultWriter<R> = {
-            abort: (reason: any) => Promise<undefined>;
-            close: () => Promise<undefined>;
-            closed: Promise<undefined>;
-            desiredSize: number;
-            ready: Promise<undefined>;
-            releaseLock: () => undefined;
-            write: (chunk: {}) => Promise<undefined>;
+            abort: tooMuchRecursion;
+            close: tooMuchRecursion;
+            getWriter: tooMuchRecursion;
+            locked: tooMuchRecursion;
           };
 
           ReadableStream<string>;

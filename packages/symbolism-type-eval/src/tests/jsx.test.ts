@@ -81,7 +81,7 @@ const { sourceFile, context } = testType(`
 
 describe("type schema converter", () => {
   describe("jsx", () => {
-    it("should jsx elements to a schema", () => {
+    it.skip("should jsx elements to a schema", () => {
       // setLogLevel(LogLevel.debug);
       const jsxElementNodes = findNodesInTree(sourceFile, ts.isJsxElement);
       const { root: jsxSchema } = evaluateSchema(
@@ -375,7 +375,7 @@ describe("type schema converter", () => {
         "
       `);
     });
-    it("should evaluate jsx expressions", () => {
+    it.skip("should evaluate jsx expressions", () => {
       let jsxNodes = findNodesInTree(sourceFile, ts.isJsxExpression);
       let jsxSchema = evaluateSchema(jsxNodes[0], context.checker);
       expect(printSchema(jsxSchema)).toMatchInlineSnapshot(`

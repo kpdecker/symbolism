@@ -111,7 +111,29 @@ const nodePathHandlers: Record<ts.SyntaxKind, NodeEvalHandler> = {
       );
 
       if (identifierDeclaration) {
-        return getNodeSchema(...context.cloneNode(identifierDeclaration));
+        const type = context.checker.getTypeAtLocation(node);
+        const declarationType = context.checker.getTypeAtLocation(
+          identifierDeclaration
+        );
+
+        // Use the checker definition when we have type parameters involved.
+        // TODO: Figure out what happens if this reference has a nested type param
+        if (declarationType.isTypeParameter()) {
+          return getTypeSchema(
+            ...context.clone({
+              type,
+              node,
+              decrementDepth: false,
+            })
+          );
+        }
+
+        return getNodeSchema(
+          ...context.cloneNode({
+            node: identifierDeclaration,
+            decrementDepth: false,
+          })
+        );
       }
     }
 
@@ -126,7 +148,12 @@ const nodePathHandlers: Record<ts.SyntaxKind, NodeEvalHandler> = {
   // Expressions
   [ts.SyntaxKind.ParenthesizedExpression](node, context) {
     invariantNode(node, context.checker, ts.isParenthesizedExpression);
-    return getNodeSchema(...context.cloneNode(node.expression));
+    return getNodeSchema(
+      ...context.cloneNode({
+        node: node.expression,
+        decrementDepth: false,
+      })
+    );
   },
   [ts.SyntaxKind.DeleteExpression]() {
     return booleanPrimitiveSchema;
@@ -137,14 +164,23 @@ const nodePathHandlers: Record<ts.SyntaxKind, NodeEvalHandler> = {
     context
   ): AnySchemaNode | undefined {
     invariantNode(node, context.checker, ts.isConditionalExpression);
-    const conditionSchema = getNodeSchema(...context.cloneNode(node.condition));
+    const conditionSchema = getNodeSchema(
+      ...context.cloneNode({
+        node: node.condition,
+        decrementDepth: false,
+      })
+    );
     const trueSchema = getNodeSchema(
-      ...context.cloneNode(node.whenTrue, {
+      ...context.cloneNode({
+        node: node.whenTrue,
+        decrementDepth: false,
         allowMissing: false,
       })
     )!;
     const falseSchema = getNodeSchema(
-      ...context.cloneNode(node.whenFalse, {
+      ...context.cloneNode({
+        node: node.whenFalse,
+        decrementDepth: false,
         allowMissing: false,
       })
     )!;
@@ -167,7 +203,10 @@ const nodePathHandlers: Record<ts.SyntaxKind, NodeEvalHandler> = {
   [ts.SyntaxKind.CommaListExpression](node, context) {
     invariantNode(node, context.checker, ts.isCommaListExpression);
     return getNodeSchema(
-      ...context.cloneNode(node.elements[node.elements.length - 1])
+      ...context.cloneNode({
+        node: node.elements[node.elements.length - 1],
+        decrementDepth: false,
+      })
     );
   },
 
@@ -199,7 +238,12 @@ const nodePathHandlers: Record<ts.SyntaxKind, NodeEvalHandler> = {
 
   [ts.SyntaxKind.ObjectBindingPattern](node, context) {
     invariantNode(node, context.checker, ts.isObjectBindingPattern);
-    return getNodeSchema(...context.cloneNode(node.parent));
+    return getNodeSchema(
+      ...context.cloneNode({
+        node: node.parent,
+        decrementDepth: false,
+      })
+    );
   },
   [ts.SyntaxKind.BindingElement]: variableLike,
 
@@ -245,12 +289,21 @@ const nodePathHandlers: Record<ts.SyntaxKind, NodeEvalHandler> = {
     // parameters evaluated.
     if (typeDefinition?.type?.aliasSymbol) {
       return getTypeSchema(
-        ...context.clone(typeDefinition.type, typeDeclaration)
+        ...context.clone({
+          type: typeDefinition.type,
+          node: typeDeclaration,
+          decrementDepth: false,
+        })
       );
     }
 
     if (typeDeclaration) {
-      return getNodeSchema(...context.cloneNode(typeDeclaration));
+      return getNodeSchema(
+        ...context.cloneNode({
+          node: typeDeclaration,
+          decrementDepth: false,
+        })
+      );
     }
 
     return checkerEval(node, context);
@@ -314,7 +367,19 @@ const nodePathHandlers: Record<ts.SyntaxKind, NodeEvalHandler> = {
   ...jsxPathHandlers,
 };
 
-export function getNodeSchema(node: ts.Node, context: SchemaContext) {
+export function getNodeSchema(
+  node: ts.Node,
+  context: SchemaContext
+): AnySchemaNode | undefined {
+  if (context.maxDepth <= 0) {
+    return {
+      kind: "reference",
+      name: "tooMuchRecursion",
+      parameters: [],
+      typeName: "tooMuchRecursion",
+    };
+  }
+
   logDebug("getNodeSchema", dumpNode(node, context.checker));
   try {
     const handler = nodePathHandlers[node.kind];
@@ -411,7 +476,11 @@ export function narrowTypeFromValues(
 
   if (symbolDeclaration) {
     const symbolSchema = getNodeSchema(
-      ...newContext.cloneNode(symbolDeclaration, { allowMissing: true })
+      ...newContext.cloneNode({
+        node: symbolDeclaration,
+        decrementDepth: false,
+        allowMissing: true,
+      })
     );
     if (symbolSchema) {
       return symbolSchema;
@@ -428,7 +497,9 @@ export function narrowTypeFromValues(
       contextDefinition.declaration !== symbolDeclaration
     ) {
       const contextSchema = getNodeSchema(
-        ...newContext.cloneNode(contextDefinition.declaration, {
+        ...newContext.cloneNode({
+          node: contextDefinition.declaration,
+          decrementDepth: false,
           allowMissing: true,
         })
       );
@@ -438,7 +509,9 @@ export function narrowTypeFromValues(
     }
 
     const contextSchema = getNodeSchema(
-      ...newContext.cloneNode(contextNode as ts.Expression, {
+      ...newContext.cloneNode({
+        node: contextNode as ts.Expression,
+        decrementDepth: false,
         allowMissing: true,
       })
     );
