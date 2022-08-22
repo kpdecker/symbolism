@@ -11,8 +11,19 @@ export function printSchema(
   if (!schema) {
     return undefined;
   }
+  const defs = Array.from(schema.defs ? schema.defs.entries() : [])
+    .map(([typeName, node]) => {
+      return `type ${typeName} = ${safeTypeFormat(
+        printSchemaNode(node, target),
+        node
+      )}
+`;
+    })
+    .sort()
+    .join("");
+
   const schemaRoot = "root" in schema ? schema.root : schema;
-  return safeTypeFormat(printSchemaNode(schemaRoot, target), schemaRoot);
+  return defs + safeTypeFormat(printSchemaNode(schemaRoot, target), schemaRoot);
 }
 
 function safeTypeFormat(

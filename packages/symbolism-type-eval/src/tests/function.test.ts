@@ -115,19 +115,88 @@ describe("type schema converter", () => {
           evaluateSchema(yieldNodes[yieldNodes.length - 1], context.checker)
         )
       ).toMatchInlineSnapshot(`
-        "Generator<\\"bar\\" | \\"foo\\", undefined, unknown>;
+        "type Generator<\\"foo\\" | \\"bar\\", void, unknown> = {
+          \\"[Symbol.iterator]\\": () => Generator<\\"bar\\" | \\"foo\\", undefined, unknown>;
+          next: (
+            args: [{}] | []
+          ) => IteratorReturnResult<undefined> | IteratorYieldResult<\\"bar\\" | \\"foo\\">;
+          return: (value: {}) =>
+            | IteratorReturnResult<undefined>
+            | IteratorYieldResult<\\"bar\\" | \\"foo\\">;
+          throw: (
+            e: any
+          ) => IteratorReturnResult<undefined> | IteratorYieldResult<\\"bar\\" | \\"foo\\">;
+        };
+
+        type IteratorReturnResult<void> = {
+          done: true;
+          value: undefined;
+        };
+
+        type IteratorYieldResult<\\"foo\\" | \\"bar\\"> = {
+          done: false;
+          value: \\"bar\\" | \\"foo\\";
+        };
+
+        Generator<\\"bar\\" | \\"foo\\", undefined, unknown>;
         "
       `);
 
       const fooNodes = findIdentifiers(sourceFile, "foo");
       expect(printSchema(evaluateSchema(fooNodes[0], context.checker)))
         .toMatchInlineSnapshot(`
-        "() => Generator<\\"bar\\" | \\"foo\\", undefined, unknown>;
+        "type Generator<\\"foo\\" | \\"bar\\", void, unknown> = {
+          \\"[Symbol.iterator]\\": () => Generator<\\"bar\\" | \\"foo\\", undefined, unknown>;
+          next: (
+            args: [{}] | []
+          ) => IteratorReturnResult<undefined> | IteratorYieldResult<\\"bar\\" | \\"foo\\">;
+          return: (value: {}) =>
+            | IteratorReturnResult<undefined>
+            | IteratorYieldResult<\\"bar\\" | \\"foo\\">;
+          throw: (
+            e: any
+          ) => IteratorReturnResult<undefined> | IteratorYieldResult<\\"bar\\" | \\"foo\\">;
+        };
+
+        type IteratorReturnResult<void> = {
+          done: true;
+          value: undefined;
+        };
+
+        type IteratorYieldResult<\\"foo\\" | \\"bar\\"> = {
+          done: false;
+          value: \\"bar\\" | \\"foo\\";
+        };
+
+        () => Generator<\\"bar\\" | \\"foo\\", undefined, unknown>;
         "
       `);
       expect(printSchema(evaluateSchema(fooNodes[1], context.checker)))
         .toMatchInlineSnapshot(`
-        "() => Generator<\\"bar\\" | \\"foo\\", undefined, unknown>;
+        "type Generator<\\"foo\\" | \\"bar\\", void, unknown> = {
+          \\"[Symbol.iterator]\\": () => Generator<\\"bar\\" | \\"foo\\", undefined, unknown>;
+          next: (
+            args: [{}] | []
+          ) => IteratorReturnResult<undefined> | IteratorYieldResult<\\"bar\\" | \\"foo\\">;
+          return: (value: {}) =>
+            | IteratorReturnResult<undefined>
+            | IteratorYieldResult<\\"bar\\" | \\"foo\\">;
+          throw: (
+            e: any
+          ) => IteratorReturnResult<undefined> | IteratorYieldResult<\\"bar\\" | \\"foo\\">;
+        };
+
+        type IteratorReturnResult<void> = {
+          done: true;
+          value: undefined;
+        };
+
+        type IteratorYieldResult<\\"foo\\" | \\"bar\\"> = {
+          done: false;
+          value: \\"bar\\" | \\"foo\\";
+        };
+
+        () => Generator<\\"bar\\" | \\"foo\\", undefined, unknown>;
         "
       `);
     });
@@ -150,7 +219,30 @@ describe("type schema converter", () => {
       const iteratorNodes = findIdentifiers(sourceFile, "iterator");
       expect(printSchema(evaluateSchema(iteratorNodes[0], context.checker)))
         .toMatchInlineSnapshot(`
-        "Generator<\\"bar\\" | \\"foo\\", \\"bat\\", unknown>;
+        "type Generator<\\"foo\\" | \\"bar\\", \\"bat\\", unknown> = {
+          \\"[Symbol.iterator]\\": () => Generator<\\"bar\\" | \\"foo\\", \\"bat\\", unknown>;
+          next: (
+            args: [{}] | []
+          ) => IteratorReturnResult<\\"bat\\"> | IteratorYieldResult<\\"bar\\" | \\"foo\\">;
+          return: (value: {}) =>
+            | IteratorReturnResult<\\"bat\\">
+            | IteratorYieldResult<\\"bar\\" | \\"foo\\">;
+          throw: (
+            e: any
+          ) => IteratorReturnResult<\\"bat\\"> | IteratorYieldResult<\\"bar\\" | \\"foo\\">;
+        };
+
+        type IteratorReturnResult<\\"bat\\"> = {
+          done: true;
+          value: \\"bat\\";
+        };
+
+        type IteratorYieldResult<\\"foo\\" | \\"bar\\"> = {
+          done: false;
+          value: \\"bar\\" | \\"foo\\";
+        };
+
+        Generator<\\"bar\\" | \\"foo\\", \\"bat\\", unknown>;
         "
       `);
 

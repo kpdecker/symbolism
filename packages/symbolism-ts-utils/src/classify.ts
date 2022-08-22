@@ -121,6 +121,25 @@ export function isIntrinsicType(type: ts.Type | undefined): boolean {
   return (type?.flags! & intrinsicTypes) !== 0;
 }
 
+export function isNamedType(type: ts.Type): boolean {
+  if (isTupleTypeReference(type)) {
+    return false;
+  }
+
+  if (isTypeReference(type)) {
+    return true;
+  }
+
+  if (
+    type.flags & ts.TypeFlags.Object &&
+    !((type as ts.ObjectType).objectFlags & ts.ObjectFlags.Anonymous)
+  ) {
+    return true;
+  }
+
+  return false;
+}
+
 export function isThisTypeParameter(
   type: ts.Type | undefined
 ): type is ts.TypeParameter {

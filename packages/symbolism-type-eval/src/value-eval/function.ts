@@ -6,8 +6,9 @@ import { undefinedSchema } from "../well-known-schemas";
 import { SchemaContext } from "../context";
 import { getTypeSchema } from "../type-eval";
 import { createUnionKind } from "./union";
-import invariant from "tiny-invariant";
 import { AnySchemaNode, createReferenceSchema } from "../schema";
+import { SchemaError } from "../classify";
+import { printSchemaNode } from "../print/typescript";
 
 export const functionOperators = nodeEvalHandler({
   [ts.SyntaxKind.CallExpression]: convertCallLikeNode,
@@ -70,7 +71,16 @@ export const functionOperators = nodeEvalHandler({
 function convertFunctionLikeNode(node: ts.Node, context: SchemaContext) {
   invariantNode(node, context.checker, ts.isFunctionLike);
   const evaledType = checkerEval(node, context);
-  invariant(evaledType?.kind === "function", "Expected function schema");
+
+  if (evaledType?.kind !== "function") {
+    return evaledType;
+  }
+
+  // Use the checker for generators until/if we can support the type parameters
+  // directly.
+  if ("asteriskToken" in node && node.asteriskToken) {
+    return checkerEval(node, context);
+  }
 
   let returnNodes: ts.Node[] = findNodesInTree(
     node,
@@ -105,7 +115,11 @@ function convertFunctionLikeNode(node: ts.Node, context: SchemaContext) {
     );
 
     if (asyncFunction) {
-      returnType = createReferenceSchema("Promise", [returnType])!;
+      returnType = createReferenceSchema(
+        "Promise",
+        [returnType],
+        `Promise<${printSchemaNode(returnType)}>`
+      )!;
     }
 
     return {
@@ -120,16 +134,31 @@ function convertCallLikeNode(node: ts.Node, context: SchemaContext) {
 
   const signature = context.checker.getResolvedSignature(node);
 
+  const returnType = signature?.getReturnType();
+
   // Evaluate the function at node level
   if (!ts.isNewExpression(node) && signature?.declaration) {
     const functionSchema = getNodeSchema(
       ...context.cloneNode(signature?.declaration)
     );
-    invariant(functionSchema?.kind === "function", "Expected function schema");
-    return functionSchema.returnType;
+    let returnType: AnySchemaNode | undefined = undefined;
+    if (functionSchema?.kind === "function") {
+      returnType = functionSchema.returnType;
+    } else if (functionSchema?.kind === "union") {
+      returnType = createUnionKind(
+        functionSchema.items
+          .map((type) =>
+            type.kind === "function" ? type.returnType : undefined!
+          )
+          .filter(Boolean)
+      );
+    }
+    if (!returnType) {
+      throw new SchemaError("Expected function schema", functionSchema);
+    }
+    return returnType;
   }
 
-  const returnType = signature?.getReturnType();
   if (returnType) {
     return getTypeSchema(...context.clone(returnType, node));
   }

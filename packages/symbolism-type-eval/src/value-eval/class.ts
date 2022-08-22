@@ -1,4 +1,7 @@
+import { dumpType } from "@symbolism/ts-debug";
+import { isThisTypeParameter } from "@symbolism/ts-utils";
 import ts from "typescript";
+import { getTypeSchema } from "../type-eval";
 import { checkerEval, nodeEvalHandler, noType } from "./handlers";
 
 export const classOperators = nodeEvalHandler({

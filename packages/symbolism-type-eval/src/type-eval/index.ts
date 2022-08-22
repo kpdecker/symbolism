@@ -9,6 +9,7 @@ import {
   getSymbolDeclaration,
   invariantNode,
   isIntrinsicType,
+  isNamedType,
   isTupleTypeReference,
   isTypeReference,
 } from "@symbolism/ts-utils";
@@ -41,8 +42,9 @@ export function getTypeSchema(
   const { contextNode, checker, typesHandled } = context;
 
   // const symbol = isTypeReference(type) ? type.target.symbol : type.symbol;
+  const typeName = checker.typeToString(type);
   const symbol = type.symbol;
-  const existingDef = context.symbolDefinitions.get(symbol);
+  const existingDef = context.typeDefinitions.get(typeName);
 
   if (wellKnownReferences.includes(symbol?.name)) {
     const refSchema = createReferenceFromType(type, context);
@@ -52,7 +54,7 @@ export function getTypeSchema(
   }
 
   const canEmitDef =
-    symbol?.name &&
+    isNamedType(type) &&
     !Object.values(ts.InternalSymbolName).includes(symbol?.name as any);
 
   // Use type reference if we've processed this already.
@@ -245,10 +247,13 @@ function getTypeSchemaWorker(
         const functionSchema = createUnionKind(
           callSignatures.map(convertSignature)
         );
-        //
-        if (isTypeReference(type)) {
-          context.symbolDefinitions.set(type.symbol, functionSchema);
-          const referenceNode = createReferenceFromType(type, context);
+
+        if (isNamedType(type)) {
+          const referenceNode = createReferenceFromType(
+            type,
+            context,
+            functionSchema
+          );
           if (referenceNode) {
             return referenceNode;
           }
@@ -258,12 +263,12 @@ function getTypeSchemaWorker(
       }
 
       const objectSchema = convertObjectType(...context.clone(type));
-      if (isTypeReference(type)) {
-        // TODO: Figure out the proper referencing scheme . type2String might do it?
-        // symbol will point to the referenced type definition, which is shared between
-        // the references
-        context.symbolDefinitions.set(type.symbol, objectSchema);
-        const referenceNode = createReferenceFromType(type, context);
+      if (isNamedType(type)) {
+        const referenceNode = createReferenceFromType(
+          type,
+          context,
+          objectSchema
+        );
         if (referenceNode) {
           return referenceNode;
         }
@@ -299,7 +304,9 @@ function getTypeSchemaWorker(
       );
 
       /* istanbul ignore next Sanity */
-      throw new Error(`Unsupported type ${checker.typeToString(type)}`);
+      throw new Error(
+        `Unsupported type ${JSON.stringify(dumpType(type, checker))}`
+      );
     }
   } catch (err: any) {
     throw new NodeError(
@@ -313,7 +320,8 @@ function getTypeSchemaWorker(
 
 export function createReferenceFromType(
   type: ts.Type,
-  context: SchemaContext
+  context: SchemaContext,
+  definitionSchema?: AnySchemaNode
 ): AnySchemaNode | undefined {
   const typeName = context.checker.typeToString(type);
   const aliasSymbol = type.aliasSymbol;
@@ -335,5 +343,9 @@ export function createReferenceFromType(
     };
   }
 
-  return createReferenceSchema(type.symbol.name, parameters);
+  if (definitionSchema) {
+    context.typeDefinitions.set(typeName, definitionSchema);
+  }
+
+  return createReferenceSchema(type.symbol.name, parameters, typeName);
 }

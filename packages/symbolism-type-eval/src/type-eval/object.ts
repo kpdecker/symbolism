@@ -1,7 +1,7 @@
-import { dumpNode, dumpSymbol } from "@symbolism/ts-debug";
-import { getSymbolDeclaration } from "@symbolism/ts-utils";
+import { dumpFlags, dumpNode, dumpSymbol } from "@symbolism/ts-debug";
+import { getSymbolDeclaration, isTypeReference } from "@symbolism/ts-utils";
 import ts from "typescript";
-import { getTypeSchema } from ".";
+import { createReferenceFromType, getTypeSchema } from ".";
 import { SchemaContext } from "../context";
 import { AnySchemaNode, ObjectSchema } from "../schema";
 import { getNodeSchema } from "../value-eval";

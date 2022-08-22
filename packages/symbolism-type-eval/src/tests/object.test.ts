@@ -92,6 +92,7 @@ describe("type schema converter", () => {
       ).toMatchInlineSnapshot(`
         Object {
           "$comment": undefined,
+          "$defs": Object {},
           "$id": "test.ts",
           "$schema": "https://json-schema.org/draft/2020-12/schema",
           "patternProperties": Object {
@@ -431,7 +432,28 @@ describe("type schema converter", () => {
       `);
 
       expect(testVar("stringAbstractLookup")).toMatchInlineSnapshot(`
-        " (() => IterableIterator<string>)
+        "type IterableIterator<string> = {
+          \\"[Symbol.iterator]\\": () => IterableIterator<string>;
+          next: (
+            args: [{}] | []
+          ) => IteratorReturnResult<any> | IteratorYieldResult<string>;
+          return: (value: {}) =>
+            | IteratorReturnResult<any>
+            | IteratorYieldResult<string>;
+          throw: (e: any) => IteratorReturnResult<any> | IteratorYieldResult<string>;
+        };
+
+        type IteratorReturnResult<any> = {
+          done: true;
+          value: any;
+        };
+
+        type IteratorYieldResult<string> = {
+          done: false;
+          value: string;
+        };
+
+         (() => IterableIterator<string>)
           | (() => string)
           | ((form: \\"NFC\\" | \\"NFD\\" | \\"NFKC\\" | \\"NFKD\\") => string)
           | ((from: number, length: number) => string)

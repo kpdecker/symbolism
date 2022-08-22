@@ -7,8 +7,9 @@ import { TypeEvalOptions } from "./value-eval";
 import { AnySchemaNode } from "./schema";
 
 export class SchemaContext {
-  typesHandled: Set<ts.Type> = new Set<ts.Type>();
-  symbolDefinitions = new Map<ts.Symbol, AnySchemaNode>();
+  typesHandled = new Set<ts.Type>();
+
+  typeDefinitions = new Map<string, AnySchemaNode>();
 
   narrowingNode?: ts.Node;
 
@@ -53,7 +54,7 @@ export class SchemaContext {
   protected cloneProps(newInstance: SchemaContext) {
     newInstance.typesHandled = new Set(this.typesHandled);
     newInstance.narrowingNode = this.narrowingNode;
-    newInstance.symbolDefinitions = this.symbolDefinitions;
+    newInstance.typeDefinitions = this.typeDefinitions;
   }
 }
 
