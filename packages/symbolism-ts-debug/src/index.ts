@@ -2,7 +2,11 @@ import type { defineSymbol } from "@symbolism/definitions";
 import type { AnySchemaNode } from "@symbolism/type-eval";
 
 import { getNodePath } from "@symbolism/paths";
-import { isIntrinsicType, lineAndColumn } from "@symbolism/ts-utils";
+import {
+  isIntrinsicType,
+  isTypeReference,
+  lineAndColumn,
+} from "@symbolism/ts-utils";
 import invariant from "tiny-invariant";
 import ts, { ObjectType } from "typescript";
 
@@ -155,36 +159,39 @@ export function dumpType(
   type: ts.Type | undefined,
   checker: ts.TypeChecker,
   recurse = true
-):
-  | {
-      type: string;
-      flags?: string[];
-      objectFlags?: string[];
-      symbol?: NonNullable<ReturnType<typeof dumpSymbol>>;
-      aliasSymbol?: NonNullable<ReturnType<typeof dumpSymbol>>;
-      aliasTypeArguments?: ReturnType<typeof dumpType>[] | undefined;
-      resolvedTypeArguments?: ReturnType<typeof dumpType>[] | undefined;
-    }
-  | undefined {
+) {
   if (!type) {
     return undefined;
   }
-  return {
+  const { declaration: symbolDeclaration, ...symbol } =
+    dumpSymbol(type.getSymbol(), checker) || {};
+
+  const isReference = isTypeReference(type);
+
+  function recurseDump(type: ts.Type | undefined) {
+    if (recurse) {
+      return (dumpType as any)(type, checker, false);
+    }
+  }
+
+  const response = {
     type: checker.typeToString(type),
     flags: dumpFlags(type.getFlags(), ts.TypeFlags),
     objectFlags: dumpFlags((type as ObjectType).objectFlags, ts.ObjectFlags),
-    symbol: dumpSymbol(type.getSymbol(), checker),
+    symbol,
+    symbolDeclaration,
+    constraint: recurseDump(type.getConstraint()),
     aliasSymbol: dumpSymbol(type.aliasSymbol, checker),
     aliasTypeArguments: recurse
-      ? type.aliasTypeArguments?.map((x) => dumpType(x, checker, false))
+      ? type.aliasTypeArguments?.map(recurseDump)
       : undefined,
 
-    resolvedTypeArguments: recurse
-      ? (type as any).resolvedTypeArguments?.map((x: ts.Type) =>
-          dumpType(x, checker, false)
-        )
-      : undefined,
+    referenceTarget: isReference && recurseDump(type.target),
+    referenceTypeArguments:
+      isReference && recurse ? type.typeArguments?.map(recurseDump) : undefined,
   };
+
+  return JSON.parse(JSON.stringify(response)) as Partial<typeof response>;
 }
 
 export function dumpSchema(

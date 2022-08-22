@@ -267,12 +267,15 @@ export function extractSymbolSummary(
 
 export function dumpSymbolTable(symbols: SymbolTable, checker: ts.TypeChecker) {
   const ret: Map<
-    ReturnType<typeof dumpSymbol>["declaration"][0],
-    ReturnType<typeof dumpSymbol>["declaration"]
+    NonNullable<ReturnType<typeof dumpSymbol>>["declaration"][0],
+    NonNullable<ReturnType<typeof dumpSymbol>>["declaration"]
   > = new Map();
 
   symbols.forEach((symbolMap, symbol) => {
     const source = dumpSymbol(symbol, checker)?.declaration[0];
+    if (!source) {
+      return;
+    }
 
     symbolMap.forEach((node) => {
       ret.set(source, ret.get(source) || []);

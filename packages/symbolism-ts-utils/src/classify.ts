@@ -121,6 +121,12 @@ export function isIntrinsicType(type: ts.Type | undefined): boolean {
   return (type?.flags! & intrinsicTypes) !== 0;
 }
 
+export function isThisTypeParameter(
+  type: ts.Type | undefined
+): type is ts.TypeParameter {
+  return type?.isTypeParameter() && (type as any).isThisType;
+}
+
 export function isTypeReference(
   type: ts.Type | undefined
 ): type is ts.TypeReference {
