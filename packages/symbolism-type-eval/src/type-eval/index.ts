@@ -315,12 +315,18 @@ export function createReferenceFromType(
   type: ts.Type,
   context: SchemaContext
 ): AnySchemaNode | undefined {
+  const typeName = context.checker.typeToString(type);
   const aliasSymbol = type.aliasSymbol;
   const typeArguments: readonly ts.Type[] =
     type.aliasTypeArguments || (type as any).resolvedTypeArguments || [];
-  const parameters = typeArguments.map((type) => {
-    return getTypeSchema(...context.clone(type));
-  });
+  const parameters = typeArguments
+    .map((type) => {
+      if (!isThisTypeParameter(type)) {
+        return getTypeSchema(...context.clone(type));
+      }
+      return undefined!;
+    })
+    .filter(Boolean);
 
   if (type.symbol.name === "Array") {
     return {
