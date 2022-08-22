@@ -1,3 +1,6 @@
+import { createWriteStream } from "fs";
+import fs from "fs";
+
 export enum LogLevel {
   debug,
   verbose,
@@ -36,4 +39,17 @@ export function logDebug(...message: unknown[]) {
   if (loggerLevel <= LogLevel.debug) {
     console.debug(...message);
   }
+}
+
+let fileLogStream: fs.WriteStream | undefined;
+function getFileLogStream() {
+  if (!fileLogStream) {
+    fileLogStream = createWriteStream("./symbolism.log");
+  }
+  return fileLogStream;
+}
+
+export function logFile(...message: unknown[]) {
+  const stream = getFileLogStream();
+  stream.write(message.join(" ") + "\n");
 }
