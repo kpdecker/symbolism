@@ -10,6 +10,7 @@ import {
   invariantNode,
   isIntrinsicType,
   isNamedType,
+  isThisTypeParameter,
   isTupleTypeReference,
   isTypeReference,
 } from "@symbolism/ts-utils";
@@ -40,6 +41,11 @@ export function getTypeSchema(
   context: SchemaContext
 ): AnySchemaNode {
   const { contextNode, checker, typesHandled } = context;
+
+  if (isThisTypeParameter(type)) {
+    // Resolve the class rather than this type
+    type = type.getConstraint() || type;
+  }
 
   // const symbol = isTypeReference(type) ? type.target.symbol : type.symbol;
   const typeName = checker.typeToString(type);
