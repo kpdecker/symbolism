@@ -1,3 +1,4 @@
+import { TypeId } from "@symbolism/ts-utils";
 import ts from "typescript";
 import { areSchemasEqual } from "./classify";
 import { SchemaContext } from "./context";
@@ -101,7 +102,7 @@ export interface ReferenceSchema extends SchemaNode {
 
   // Fully resolved type name, per typescript. This is used to
   // track resolves types for generics.
-  typeName: string;
+  typeId: TypeId;
 }
 
 export interface ErrorSchema extends SchemaNode {
@@ -151,6 +152,9 @@ function filterDefs(schema: Schema) {
   findReferences(schema.root);
 
   Array.from(defs?.entries() || []).forEach(([name, def]) => {
+    if (def.kind === "error") {
+      defs?.delete(name);
+    }
     if (referenceCount[name] <= 1 && areSchemasEqual(def, root)) {
       // If we have a direct reference to the root, remove it
       defs?.delete(name);
@@ -160,10 +164,10 @@ function filterDefs(schema: Schema) {
   });
 
   if (root?.kind === "reference") {
-    if (referenceCount[root.typeName] === 1) {
-      const { typeName } = root;
-      root = defs?.get(typeName) || root;
-      defs?.delete(typeName);
+    if (referenceCount[root.typeId] === 1) {
+      const { typeId } = root;
+      root = defs?.get(typeId) || root;
+      defs?.delete(typeId);
     }
   }
 
@@ -214,8 +218,8 @@ function filterDefs(schema: Schema) {
         schema.items.map(findReferences);
         return;
       case "reference":
-        referenceCount[schema.typeName] ||= 0;
-        referenceCount[schema.typeName]++;
+        referenceCount[schema.typeId] ||= 0;
+        referenceCount[schema.typeId]++;
         return;
 
       default:
@@ -280,10 +284,10 @@ function filterDefs(schema: Schema) {
           items: schema.items.map(inlineReferences),
         };
       case "reference":
-        if (referenceCount[schema.typeName] < 2) {
-          const ret = defs?.get(schema.typeName);
+        if (referenceCount[schema.typeId] < 2) {
+          const ret = defs?.get(schema.typeId);
           if (ret) {
-            defs?.delete(schema.typeName);
+            defs?.delete(schema.typeId);
 
             return ret;
           }
@@ -300,14 +304,12 @@ function filterDefs(schema: Schema) {
 export function createReferenceSchema(
   name: string,
   parameters: ReferenceSchema["parameters"],
-  typeName: string
-): AnySchemaNode | undefined {
-  if (!Object.values(ts.InternalSymbolName).includes(name as any)) {
-    return {
-      kind: "reference",
-      name,
-      parameters,
-      typeName,
-    };
-  }
+  typeId: TypeId
+): AnySchemaNode {
+  return {
+    kind: "reference",
+    name,
+    parameters,
+    typeId,
+  };
 }

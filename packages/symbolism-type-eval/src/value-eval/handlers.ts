@@ -49,11 +49,13 @@ export function variableLike(
   );
 
   if (ts.isBindingElement(node)) {
-    const schema = getNodeSchema(
-      ...context.cloneNode({
-        node: node.parent,
-        decrementDepth: false,
-      })
+    const schema = context.resolveSchema(
+      getNodeSchema(
+        ...context.cloneNode({
+          node: node.parent,
+          decrementDepth: false,
+        })
+      )
     );
 
     const propertyName = ts.isArrayBindingPattern(node.parent)

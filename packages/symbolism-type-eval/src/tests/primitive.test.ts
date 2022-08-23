@@ -136,9 +136,11 @@ describe("type schema converter", () => {
 
       expect(printSchema(evaluateSchema(declaration, context.checker)))
         .toMatchInlineSnapshot(`
-              "{}[keyof {}];
-              "
-          `);
+        "type Pairs<T> = {};
+
+        Pairs<{}>[keyof {}];
+        "
+      `);
     });
   });
 });

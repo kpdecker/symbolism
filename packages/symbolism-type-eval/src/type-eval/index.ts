@@ -7,6 +7,8 @@ import {
 } from "@symbolism/ts-debug";
 import {
   getSymbolDeclaration,
+  getTypeId,
+  getTypeName,
   invariantNode,
   isIntrinsicType,
   isNamedType,
@@ -26,7 +28,10 @@ import {
 } from "../schema";
 import { getNodeSchema } from "../value-eval";
 import { createUnionKind } from "../value-eval/union";
-import { wellKnownReferences } from "../well-known-schemas";
+import {
+  tooMuchRecursionSchema,
+  wellKnownReferences,
+} from "../well-known-schemas";
 import { convertLiteralOrPrimitive } from "./literal";
 import { convertObjectType } from "./object";
 import { convertTemplateLiteralType } from "./template-literal";
@@ -43,12 +48,7 @@ export function getTypeSchema(
   const { contextNode, checker, typesHandled } = context;
 
   if (context.maxDepth <= 0) {
-    return {
-      kind: "reference",
-      name: "tooMuchRecursion",
-      parameters: [],
-      typeName: "tooMuchRecursion",
-    };
+    return tooMuchRecursionSchema;
   }
 
   if (isThisTypeParameter(type)) {
@@ -56,48 +56,37 @@ export function getTypeSchema(
     type = type.getConstraint() || type;
   }
 
-  // const symbol = isTypeReference(type) ? type.target.symbol : type.symbol;
-  const typeName = checker.typeToString(type);
-  const symbol = type.symbol;
-  const existingDef = context.typeDefinitions.get(typeName);
+  const canEmitDef = isNamedType(type, checker);
 
-  if (wellKnownReferences.includes(symbol?.name)) {
+  const typeId = getTypeId(type, checker);
+  const typeName = getTypeName(type, checker);
+  const existingDef = typeId && context.typeDefinitions.get(typeId);
+
+  // Use type reference if we've processed this already.
+  if (wellKnownReferences.includes(typeName!) || (canEmitDef && existingDef)) {
     const refSchema = createReferenceFromType(type, context);
     if (refSchema) {
       return refSchema;
     }
   }
 
-  const canEmitDef =
-    isNamedType(type, context.checker) &&
-    !Object.values(ts.InternalSymbolName).includes(symbol?.name as any);
+  if (!canEmitDef && context.typeCache.has(type)) {
+    return context.typeCache.get(type)!;
+  }
 
-  // Use type reference if we've processed this already.
-  if (canEmitDef) {
-    if (existingDef) {
-      const referenceSchema = createReferenceFromType(type, context);
-      if (referenceSchema) {
-        // if (referenceSchema.kind !== "array") {
-        //   console.log(
-        //     "referenceSchema",
-        //     dumpSymbol(symbol, checker),
-        //     dumpType(type, checker),
-        //     symbol
-        //   );
-        // }
-        return referenceSchema;
-      }
-    }
+  if (!isIntrinsicType(type)) {
+    typesHandled.add(type);
   }
 
   logDebug(
     "getTypeSchema",
     checker.typeToString(type),
-    dumpNode(contextNode, checker)
+    dumpNode(contextNode, checker),
+    { canEmitDef, typeId, typeName }
   );
 
   if (canEmitDef) {
-    // context.symbolDefinitions.set(symbol, buildingSchema);
+    context.typeDefinitions.set(typeId, buildingSchema);
   }
 
   const ret = getTypeSchemaWorker(type, context);
@@ -105,7 +94,7 @@ export function getTypeSchema(
     if (existingDef && existingDef !== buildingSchema) {
       throw new NodeError(
         `Duplicate definition for symbol ${JSON.stringify(
-          dumpSymbol(symbol, checker),
+          dumpSymbol(type.symbol, checker),
           undefined,
           2
         )}
@@ -116,8 +105,11 @@ Existing: ${dumpSchema(existingDef)}`,
         checker
       );
     }
-    // context.symbolDefinitions.set(symbol, ret);
+    context.typeDefinitions.set(typeId, ret);
   }
+
+  context.typeCache.set(type, ret);
+
   return ret;
 }
 function getTypeSchemaWorker(
@@ -135,18 +127,6 @@ function getTypeSchemaWorker(
       );
     }
 
-    if (!isIntrinsicType(type) && typesHandled.has(type)) {
-      const ret = createReferenceFromType(type, context);
-      if (ret) {
-        return ret;
-      }
-      return {
-        kind: "error",
-        extra: "Circular type " + checker.typeToString(type),
-        node: contextNode,
-      };
-    }
-    typesHandled.add(type);
 
     const objectFlags = (type as ts.ObjectType).objectFlags;
 
@@ -378,6 +358,11 @@ function getTypeSchemaWorker(
         ),
         node: contextNode,
       };
+    } else if (type.flags & ts.TypeFlags.Conditional) {
+      return {
+        kind: "error",
+        extra: "Conditional type not supported in schemas",
+      };
     } else {
       /* istanbul ignore next Sanity */
       throw new Error(
@@ -399,8 +384,12 @@ export function createReferenceFromType(
   context: SchemaContext,
   definitionSchema?: AnySchemaNode
 ): AnySchemaNode | undefined {
-  const typeName = context.checker.typeToString(type);
+  const typeId = getTypeId(type, context.checker);
+  const typeName = getTypeName(type, context.checker);
+
   const aliasSymbol = type.aliasSymbol;
+  const symbol = type.symbol?.name ? type.symbol : aliasSymbol;
+
   const typeArguments: readonly ts.Type[] =
     type.aliasTypeArguments || (type as any).resolvedTypeArguments || [];
   const parameters = typeArguments
@@ -412,7 +401,7 @@ export function createReferenceFromType(
     })
     .filter(Boolean);
 
-  if (type.symbol.name === "Array") {
+  if (symbol?.name === "Array") {
     return {
       kind: "array",
       items: parameters[0],
@@ -420,8 +409,11 @@ export function createReferenceFromType(
   }
 
   if (definitionSchema) {
-    context.typeDefinitions.set(typeName, definitionSchema);
+    context.typeDefinitions.set(typeId, definitionSchema);
   }
 
-  return createReferenceSchema(type.symbol.name, parameters, typeName);
+  if (!typeName) {
+    return undefined;
+  }
+  return createReferenceSchema(typeName, parameters, typeId);
 }

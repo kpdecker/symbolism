@@ -114,6 +114,8 @@ function convertObjectLiteralValue(
   }
 
   function spreadProperties(spreadSchema: AnySchemaNode, node: ts.Node) {
+    spreadSchema = context.resolveSchema(spreadSchema);
+
     if (spreadSchema.kind === "object") {
       Object.assign(properties, spreadSchema.properties);
       abstractIndexKeys.push(...spreadSchema.abstractIndexKeys);
@@ -214,23 +216,27 @@ function convertElementAccessExpression(
 ): AnySchemaNode | undefined {
   const { checker } = context;
 
-  const parentSchema = getNodeSchema(
-    ...context.cloneNode({
-      node: node.expression,
-      decrementDepth: false,
-      allowMissing: true,
-    })
+  const parentSchema = context.resolveSchema(
+    getNodeSchema(
+      ...context.cloneNode({
+        node: node.expression,
+        decrementDepth: false,
+        allowMissing: true,
+      })
+    )
   ) || {
     kind: "primitive",
     name: "any",
     node: node.expression,
   };
-  const argumentSchema = getNodeSchema(
-    ...context.cloneNode({
-      node: node.argumentExpression,
-      decrementDepth: false,
-      allowMissing: true,
-    })
+  const argumentSchema = context.resolveSchema(
+    getNodeSchema(
+      ...context.cloneNode({
+        node: node.argumentExpression,
+        decrementDepth: false,
+        allowMissing: true,
+      })
+    )
   ) || {
     kind: "primitive",
     name: "any",

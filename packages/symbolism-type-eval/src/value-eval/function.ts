@@ -1,5 +1,5 @@
 import ts, { findAncestor } from "typescript";
-import { findNodesInTree, invariantNode } from "@symbolism/ts-utils";
+import { findNodesInTree, invariantNode, TypeId } from "@symbolism/ts-utils";
 import { checkerEval, nodeEvalHandler, noType } from "./handlers";
 import { getNodeSchema } from ".";
 import { undefinedSchema } from "../well-known-schemas";
@@ -22,7 +22,7 @@ export const functionOperators = nodeEvalHandler({
   [ts.SyntaxKind.Parameter](node, context) {
     invariantNode(node, context.checker, ts.isParameter);
     if (context.options.limitToValues) {
-      // Don't evaluate the type to allow for parameter replacemetn
+      // Don't evaluate the type to allow for parameter replacement
       return {
         kind: "primitive",
         name: "any",
@@ -72,13 +72,13 @@ export const functionOperators = nodeEvalHandler({
       }
     }
 
-    return expressionSchema;
+    return context.resolveSchema(expressionSchema);
   },
 });
 
 function convertFunctionLikeNode(node: ts.Node, context: SchemaContext) {
   invariantNode(node, context.checker, ts.isFunctionLike);
-  const evaledType = checkerEval(node, context);
+  const evaledType = context.resolveSchema(checkerEval(node, context));
 
   if (evaledType?.kind !== "function") {
     return evaledType;
@@ -127,8 +127,8 @@ function convertFunctionLikeNode(node: ts.Node, context: SchemaContext) {
       returnType = createReferenceSchema(
         "Promise",
         [returnType],
-        `Promise<${printSchemaNode(returnType)}>`
-      )!;
+        `Promise<${printSchemaNode(returnType)}>` as TypeId
+      );
     }
 
     return {
@@ -147,12 +147,15 @@ function convertCallLikeNode(node: ts.Node, context: SchemaContext) {
 
   // Evaluate the function at node level
   if (!ts.isNewExpression(node) && signature?.declaration) {
-    const functionSchema = getNodeSchema(
-      ...context.cloneNode({
-        node: signature?.declaration,
-        decrementDepth: false,
-      })
+    const functionSchema = context.resolveSchema(
+      getNodeSchema(
+        ...context.cloneNode({
+          node: signature?.declaration,
+          decrementDepth: false,
+        })
+      )
     );
+
     let returnType: AnySchemaNode | undefined = undefined;
     if (functionSchema?.kind === "function") {
       returnType = functionSchema.returnType;

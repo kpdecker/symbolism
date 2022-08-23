@@ -337,10 +337,12 @@ describe("type schema converter", () => {
 
       expect(printSchema(evaluateSchema(declaration, context.checker)))
         .toMatchInlineSnapshot(`
-        "{
+        "type Type = {
           date: Date;
-          foo: \\"error! Circular type Type\\";
+          foo: Type;
         };
+
+        Type;
         "
       `);
     });
@@ -483,7 +485,9 @@ describe("type schema converter", () => {
 
     expect(printSchema(evaluateSchema(declaration, context.checker)))
       .toMatchInlineSnapshot(`
-      "{}[keyof {}];
+      "type Pairs<T> = {};
+
+      Pairs<{}>[keyof {}];
       "
     `);
   });

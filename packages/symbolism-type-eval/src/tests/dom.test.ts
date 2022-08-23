@@ -43,7 +43,7 @@ describe("type schema converter", () => {
                 ) => undefined)
               | ((
                   type: string,
-                  listener: EventListener | EventListenerObject,
+                  listener: EventListenerOrEventListenerObject,
                   options: AddEventListenerOptions | false | true
                 ) => undefined);
             dispatchEvent: (event: Event) => false | true;
@@ -57,7 +57,7 @@ describe("type schema converter", () => {
                 ) => undefined)
               | ((
                   type: string,
-                  listener: EventListener | EventListenerObject,
+                  listener: EventListenerOrEventListenerObject,
                   options: EventListenerOptions | false | true
                 ) => undefined);
             throwIfAborted: () => undefined;
@@ -107,6 +107,8 @@ describe("type schema converter", () => {
 
           type EventListenerOptions = { capture: false | true };
 
+          type EventListenerOrEventListenerObject = EventListener | EventListenerObject;
+
           type EventTarget = {
             addEventListener: (
               type: string,
@@ -116,7 +118,7 @@ describe("type schema converter", () => {
             dispatchEvent: (event: Event) => false | true;
             removeEventListener: (
               type: string,
-              callback: EventListener | EventListenerObject,
+              callback: EventListenerOrEventListenerObject,
               options: EventListenerOptions | false | true
             ) => undefined;
           };

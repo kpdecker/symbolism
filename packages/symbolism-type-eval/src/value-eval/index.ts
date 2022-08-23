@@ -24,7 +24,10 @@ import { jsxPathHandlers } from "./jsx";
 import { tokenOperators } from "./tokens";
 import { getLocalSymbol } from "./symbol";
 import { getTypeSchema } from "../type-eval";
-import { booleanPrimitiveSchema } from "../well-known-schemas";
+import {
+  booleanPrimitiveSchema,
+  tooMuchRecursionSchema,
+} from "../well-known-schemas";
 import { createUnionKind } from "./union";
 import invariant from "tiny-invariant";
 import { unaryExpressionOperators } from "./unary-expression";
@@ -164,11 +167,13 @@ const nodePathHandlers: Record<ts.SyntaxKind, NodeEvalHandler> = {
     context
   ): AnySchemaNode | undefined {
     invariantNode(node, context.checker, ts.isConditionalExpression);
-    const conditionSchema = getNodeSchema(
-      ...context.cloneNode({
-        node: node.condition,
-        decrementDepth: false,
-      })
+    const conditionSchema = context.resolveSchema(
+      getNodeSchema(
+        ...context.cloneNode({
+          node: node.condition,
+          decrementDepth: false,
+        })
+      )
     );
     const trueSchema = getNodeSchema(
       ...context.cloneNode({
@@ -372,12 +377,7 @@ export function getNodeSchema(
   context: SchemaContext
 ): AnySchemaNode | undefined {
   if (context.maxDepth <= 0) {
-    return {
-      kind: "reference",
-      name: "tooMuchRecursion",
-      parameters: [],
-      typeName: "tooMuchRecursion",
-    };
+    return tooMuchRecursionSchema;
   }
 
   logDebug("getNodeSchema", dumpNode(node, context.checker));

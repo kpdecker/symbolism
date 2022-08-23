@@ -18,14 +18,18 @@ export function convertBinaryExpression(
     return undefined;
   }
 
-  const leftSchema = getNodeSchema(
-    ...context.cloneNode({ node: node.left, decrementDepth: true })
-  )!;
+  const leftSchema = context.resolveSchema(
+    getNodeSchema(
+      ...context.cloneNode({ node: node.left, decrementDepth: true })
+    )!
+  );
   invariant(leftSchema, "Expected left schema");
 
-  const rightSchema = getNodeSchema(
-    ...context.cloneNode({ node: node.right, decrementDepth: true })
-  )!;
+  const rightSchema = context.resolveSchema(
+    getNodeSchema(
+      ...context.cloneNode({ node: node.right, decrementDepth: true })
+    )!
+  );
   invariant(rightSchema, "Expected right schema");
 
   const operator = node.operatorToken.kind as ts.BinaryOperator;

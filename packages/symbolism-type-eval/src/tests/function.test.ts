@@ -120,13 +120,11 @@ describe("type schema converter", () => {
           next: (
             args: [{}] | []
           ) => IteratorReturnResult<undefined> | IteratorYieldResult<\\"bar\\" | \\"foo\\">;
-          return: (value: {}) =>
-            | IteratorReturnResult<undefined>
-            | IteratorYieldResult<\\"bar\\" | \\"foo\\">;
-          throw: (
-            e: any
-          ) => IteratorReturnResult<undefined> | IteratorYieldResult<\\"bar\\" | \\"foo\\">;
+          return: (value: {}) => IteratorResult<\\"bar\\" | \\"foo\\", undefined>;
+          throw: (e: any) => IteratorResult<\\"bar\\" | \\"foo\\", undefined>;
         };
+
+        type IteratorResult<\\"foo\\" | \\"bar\\", void> = IteratorReturnResult<undefined> | IteratorYieldResult<\\"bar\\" | \\"foo\\">;
 
         type IteratorReturnResult<void> = {
           done: true;
@@ -150,13 +148,11 @@ describe("type schema converter", () => {
           next: (
             args: [{}] | []
           ) => IteratorReturnResult<undefined> | IteratorYieldResult<\\"bar\\" | \\"foo\\">;
-          return: (value: {}) =>
-            | IteratorReturnResult<undefined>
-            | IteratorYieldResult<\\"bar\\" | \\"foo\\">;
-          throw: (
-            e: any
-          ) => IteratorReturnResult<undefined> | IteratorYieldResult<\\"bar\\" | \\"foo\\">;
+          return: (value: {}) => IteratorResult<\\"bar\\" | \\"foo\\", undefined>;
+          throw: (e: any) => IteratorResult<\\"bar\\" | \\"foo\\", undefined>;
         };
+
+        type IteratorResult<\\"foo\\" | \\"bar\\", void> = IteratorReturnResult<undefined> | IteratorYieldResult<\\"bar\\" | \\"foo\\">;
 
         type IteratorReturnResult<void> = {
           done: true;
@@ -178,13 +174,11 @@ describe("type schema converter", () => {
           next: (
             args: [{}] | []
           ) => IteratorReturnResult<undefined> | IteratorYieldResult<\\"bar\\" | \\"foo\\">;
-          return: (value: {}) =>
-            | IteratorReturnResult<undefined>
-            | IteratorYieldResult<\\"bar\\" | \\"foo\\">;
-          throw: (
-            e: any
-          ) => IteratorReturnResult<undefined> | IteratorYieldResult<\\"bar\\" | \\"foo\\">;
+          return: (value: {}) => IteratorResult<\\"bar\\" | \\"foo\\", undefined>;
+          throw: (e: any) => IteratorResult<\\"bar\\" | \\"foo\\", undefined>;
         };
+
+        type IteratorResult<\\"foo\\" | \\"bar\\", void> = IteratorReturnResult<undefined> | IteratorYieldResult<\\"bar\\" | \\"foo\\">;
 
         type IteratorReturnResult<void> = {
           done: true;
@@ -224,13 +218,11 @@ describe("type schema converter", () => {
           next: (
             args: [{}] | []
           ) => IteratorReturnResult<\\"bat\\"> | IteratorYieldResult<\\"bar\\" | \\"foo\\">;
-          return: (value: {}) =>
-            | IteratorReturnResult<\\"bat\\">
-            | IteratorYieldResult<\\"bar\\" | \\"foo\\">;
-          throw: (
-            e: any
-          ) => IteratorReturnResult<\\"bat\\"> | IteratorYieldResult<\\"bar\\" | \\"foo\\">;
+          return: (value: {}) => IteratorResult<\\"bar\\" | \\"foo\\", \\"bat\\">;
+          throw: (e: any) => IteratorResult<\\"bar\\" | \\"foo\\", \\"bat\\">;
         };
+
+        type IteratorResult<\\"foo\\" | \\"bar\\", \\"bat\\"> = IteratorReturnResult<\\"bat\\"> | IteratorYieldResult<\\"bar\\" | \\"foo\\">;
 
         type IteratorReturnResult<\\"bat\\"> = {
           done: true;

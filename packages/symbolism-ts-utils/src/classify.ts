@@ -1,5 +1,8 @@
 import { NodeError } from "@symbolism/utils";
 import ts from "typescript";
+import type { Opaque } from "type-fest";
+
+import { getSymbolDeclaration } from "./lookup";
 
 export function invariantNode<T extends ts.Node>(
   node: ts.Node,
@@ -121,23 +124,45 @@ export function isIntrinsicType(type: ts.Type | undefined): boolean {
   return (type?.flags! & intrinsicTypes) !== 0;
 }
 
+export type TypeId = Opaque<string, "TypeId">;
 export function isNamedType(type: ts.Type, checker: ts.TypeChecker): boolean {
+  return !!getTypeName(type, checker);
+}
+export function getTypeName(
+  type: ts.Type,
+  checker: ts.TypeChecker
+): string | undefined {
   if (isTupleTypeReference(type)) {
-    return false;
+    return undefined;
   }
 
-  if (isTypeReference(type)) {
-    return true;
+  let name = type.aliasSymbol?.name;
+
+  if (!name && type.symbol?.name) {
+    const symbolDeclaration = getSymbolDeclaration(type.symbol);
+    if (symbolDeclaration) {
+      // Don't independently name object properties.
+      if (
+        ts.isObjectLiteralElementLike(symbolDeclaration) ||
+        ts.isClassOrTypeElement(symbolDeclaration) ||
+        ts.isTypeParameterDeclaration(symbolDeclaration)
+      ) {
+        return undefined;
+      }
+    }
+    name = type.symbol.name;
   }
 
-  if (
-    type.flags & ts.TypeFlags.Object &&
-    !((type as ts.ObjectType).objectFlags & ts.ObjectFlags.Anonymous)
-  ) {
-    return true;
+  if (Object.values(ts.InternalSymbolName).includes(name as any)) {
+    return undefined;
   }
 
-  return false;
+  return name;
+}
+export function getTypeId(type: ts.Type, checker: ts.TypeChecker): TypeId {
+  // Note we are not using no truncation mode here on the assumption that
+  // keys won't conflict due to truncation.
+  return checker.typeToString(type) as TypeId;
 }
 
 export function isThisTypeParameter(

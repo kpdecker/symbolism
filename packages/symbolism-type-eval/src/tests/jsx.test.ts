@@ -81,8 +81,7 @@ const { sourceFile, context } = testType(`
 
 describe("type schema converter", () => {
   describe("jsx", () => {
-    it.skip("should jsx elements to a schema", () => {
-      // setLogLevel(LogLevel.debug);
+    it("should jsx elements to a schema", () => {
       const jsxElementNodes = findNodesInTree(sourceFile, ts.isJsxElement);
       const { root: jsxSchema } = evaluateSchema(
         jsxElementNodes[0],
@@ -676,12 +675,14 @@ describe("type schema converter", () => {
 
       jsxSchema = evaluateSchema(jsxNodes[3], context.checker);
       expect(printSchema(jsxSchema)).toMatchInlineSnapshot(`
-        "{
-          Bar: () => {
-            key: number | string;
-            props: any;
-            type: any;
-          };
+        "type Element = {
+          key: number | string;
+          props: any;
+          type: any;
+        };
+
+        {
+          Bar: () => Element;
           \\"ignore-prop\\": true;
           myProp: 1;
         };

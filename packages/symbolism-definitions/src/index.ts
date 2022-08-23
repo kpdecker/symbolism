@@ -153,7 +153,6 @@ const nodeHandlers: Record<ts.SyntaxKind, DefinitionOperation> = {
     invariantNode(node, checker, ts.isEnumMember);
     const parentDefinition = defineSymbol(node.parent, checker, options);
     const type = parentDefinition?.type;
-    debugger;
     if (!type) {
       return directTypeAndSymbol(node.name, checker);
     }

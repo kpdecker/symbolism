@@ -66,16 +66,18 @@ describe("type schema converter", () => {
       `);
       expect(printSchema(evaluateSchema(declaration, context.checker)))
         .toMatchInlineSnapshot(`
-        "{
+        "type Source = { directUnion: 1 | 2 | 3 };
+
+        {
           bothor: string;
           directUnion: 1 | 2 | 3;
           extra: string;
-          gettor: { directUnion: 1 | 2 | 3 };
+          gettor: Source;
           methodor: (a: number) => string;
           \\"real!bar\\": 42;
           settor: false | true;
-          source: { directUnion: 1 | 2 | 3 };
-          \\"source!\\": { directUnion: 1 | 2 | 3 };
+          source: Source;
+          \\"source!\\": Source;
           string: string;
           [k: \`\${string}fooreal!\`]: \\"literal!\\";
           [k: string]: number;
@@ -92,7 +94,22 @@ describe("type schema converter", () => {
       ).toMatchInlineSnapshot(`
         Object {
           "$comment": undefined,
-          "$defs": Object {},
+          "$defs": Object {
+            "Source": Object {
+              "patternProperties": undefined,
+              "properties": Object {
+                "directUnion": Object {
+                  "enum": Array [
+                    1,
+                    2,
+                    3,
+                  ],
+                  "type": "string",
+                },
+              },
+              "type": "object",
+            },
+          },
           "$id": "test.ts",
           "$schema": "https://json-schema.org/draft/2020-12/schema",
           "patternProperties": Object {
@@ -122,18 +139,7 @@ describe("type schema converter", () => {
               "type": "string",
             },
             "gettor": Object {
-              "patternProperties": undefined,
-              "properties": Object {
-                "directUnion": Object {
-                  "enum": Array [
-                    1,
-                    2,
-                    3,
-                  ],
-                  "type": "string",
-                },
-              },
-              "type": "object",
+              "$ref": "#/$defs/Source",
             },
             "methodor": Object {
               "message": "((a: number) => string) is not supported in JSON schema",
@@ -153,32 +159,10 @@ describe("type schema converter", () => {
               ],
             },
             "source": Object {
-              "patternProperties": undefined,
-              "properties": Object {
-                "directUnion": Object {
-                  "enum": Array [
-                    1,
-                    2,
-                    3,
-                  ],
-                  "type": "string",
-                },
-              },
-              "type": "object",
+              "$ref": "#/$defs/Source",
             },
             "source!": Object {
-              "patternProperties": undefined,
-              "properties": Object {
-                "directUnion": Object {
-                  "enum": Array [
-                    1,
-                    2,
-                    3,
-                  ],
-                  "type": "string",
-                },
-              },
-              "type": "object",
+              "$ref": "#/$defs/Source",
             },
             "string": Object {
               "type": "string",
@@ -193,16 +177,18 @@ describe("type schema converter", () => {
       expect(
         printSchema(evaluateSchema(assignNode.initializer!, context.checker))
       ).toMatchInlineSnapshot(`
-        "{
+        "type Source = { directUnion: 1 | 2 | 3 };
+
+        {
           bothor: string;
           directUnion: 1 | 2 | 3;
           extra: string;
-          gettor: { directUnion: 1 | 2 | 3 };
+          gettor: Source;
           methodor: (a: number) => string;
           \\"real!bar\\": 42;
           settor: false | true;
-          source: { directUnion: 1 | 2 | 3 };
-          \\"source!\\": { directUnion: 1 | 2 | 3 };
+          source: Source;
+          \\"source!\\": Source;
           string: string;
           [k: \`\${string}fooreal!\`]: \\"literal!\\";
           [k: string]: number;
@@ -437,11 +423,11 @@ describe("type schema converter", () => {
           next: (
             args: [{}] | []
           ) => IteratorReturnResult<any> | IteratorYieldResult<string>;
-          return: (value: {}) =>
-            | IteratorReturnResult<any>
-            | IteratorYieldResult<string>;
-          throw: (e: any) => IteratorReturnResult<any> | IteratorYieldResult<string>;
+          return: (value: {}) => IteratorResult<string, any>;
+          throw: (e: any) => IteratorResult<string, any>;
         };
+
+        type IteratorResult<string, any> = IteratorReturnResult<any> | IteratorYieldResult<string>;
 
         type IteratorReturnResult<any> = {
           done: true;

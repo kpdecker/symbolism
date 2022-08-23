@@ -55,7 +55,9 @@ export const jsxPathHandlers = nodeEvalHandler({
 
     node.properties.forEach((property) => {
       if (ts.isJsxSpreadAttribute(property)) {
-        const spreadSchema = getNodeSchema(property, context);
+        const spreadSchema = context.resolveSchema(
+          getNodeSchema(property, context)
+        );
         if (spreadSchema?.kind === "object") {
           Object.assign(properties, spreadSchema.properties);
           abstractIndexKeys.push(...spreadSchema.abstractIndexKeys);

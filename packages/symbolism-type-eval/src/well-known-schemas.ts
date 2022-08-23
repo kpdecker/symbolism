@@ -1,4 +1,11 @@
-import { LiteralSchema, PrimitiveSchema, UnionSchema } from "./schema";
+import { TypeId } from "@symbolism/ts-utils";
+import {
+  AnySchemaNode,
+  LiteralSchema,
+  PrimitiveSchema,
+  ReferenceSchema,
+  UnionSchema,
+} from "./schema";
 
 export const undefinedSchema: LiteralSchema = {
   kind: "literal",
@@ -27,6 +34,13 @@ export const numberPrimitiveSchema: Readonly<PrimitiveSchema> = {
   node: undefined,
 };
 
+export const tooMuchRecursionSchema: Readonly<ReferenceSchema> = {
+  kind: "reference",
+  name: "tooMuchRecursion",
+  parameters: [],
+  typeId: "tooMuchRecursion" as TypeId,
+};
+
 export const wellKnownReferences = [
   "Array",
   "Boolean",
@@ -42,4 +56,8 @@ export const wellKnownReferences = [
   "Promise",
   "WeakMap",
   "WeakSet",
+];
+
+export const baseDefs: [TypeId, AnySchemaNode][] = [
+  ["Date" as TypeId, { kind: "error", extra: "Well Known" }],
 ];

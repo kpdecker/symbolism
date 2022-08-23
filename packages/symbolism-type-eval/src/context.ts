@@ -1,20 +1,27 @@
 import ts from "typescript";
-import { getSymbolDeclaration } from "@symbolism/ts-utils";
+import { getSymbolDeclaration, TypeId } from "@symbolism/ts-utils";
 import { FunctionCallInfo } from "./calls";
 import { SymbolTable } from "@symbolism/symbol-table";
 import invariant from "tiny-invariant";
 import { TypeEvalOptions } from "./value-eval";
 import { AnySchemaNode } from "./schema";
+import { baseDefs } from "./well-known-schemas";
 
 export class SchemaContext {
   typesHandled = new Set<ts.Type>();
+  typeDefinitions = new Map<TypeId, AnySchemaNode>(baseDefs);
+
+  /**
+   * Cache of computed internal schemas. These types are generally
+   * unnamed and not intended to be inlined vs. typeDefinitions that
+   * are intended to be extracted to separate definitions.
+   */
+  typeCache = new Map<ts.Type, AnySchemaNode>();
 
   // Arbitrary limit to prevent infinite loops
   maxDepth = 50;
 
   history = "";
-
-  typeDefinitions = new Map<string, AnySchemaNode>();
 
   narrowingNode?: ts.Node;
 
@@ -23,6 +30,16 @@ export class SchemaContext {
     public checker: ts.TypeChecker,
     public options: TypeEvalOptions
   ) {}
+
+  resolveSchema(schema: AnySchemaNode): AnySchemaNode;
+  resolveSchema(schema: AnySchemaNode | undefined): AnySchemaNode | undefined;
+  resolveSchema(schema: AnySchemaNode | undefined): AnySchemaNode | undefined {
+    if (schema?.kind === "reference") {
+      const definition = this.typeDefinitions.get(schema.typeId);
+      return definition ? this.resolveSchema(definition) : schema;
+    }
+    return schema;
+  }
 
   clone(
     params: {
@@ -95,6 +112,7 @@ export class SchemaContext {
     newInstance.typesHandled = new Set(this.typesHandled);
     newInstance.narrowingNode = this.narrowingNode;
     newInstance.typeDefinitions = this.typeDefinitions;
+    newInstance.typeCache = this.typeCache;
     newInstance.history = this.history;
     newInstance.maxDepth = this.maxDepth;
   }
