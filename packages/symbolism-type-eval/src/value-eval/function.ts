@@ -36,8 +36,22 @@ export const functionOperators = nodeEvalHandler({
   [ts.SyntaxKind.YieldExpression](node, context) {
     invariantNode(node, context.checker, ts.isYieldExpression);
     if (node.expression) {
-      return getNodeSchema(node.expression, context);
+      return getNodeSchema(
+        ...context.cloneNode({
+          node: node.expression,
+          decrementDepth: false,
+        })
+      );
     }
+  },
+  [ts.SyntaxKind.ThrowStatement](node, context) {
+    invariantNode(node, context.checker, ts.isThrowStatement);
+    return getNodeSchema(
+      ...context.cloneNode({
+        node: node.expression,
+        decrementDepth: false,
+      })
+    );
   },
   [ts.SyntaxKind.ReturnStatement](node, context) {
     invariantNode(node, context.checker, ts.isReturnStatement);

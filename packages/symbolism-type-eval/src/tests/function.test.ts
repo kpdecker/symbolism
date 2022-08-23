@@ -93,6 +93,20 @@ describe("type schema converter", () => {
     });
     it("should evaluate yield in generators", () => {
       const { type, context, sourceFile } = testType(`
+        function foo() {
+          throw 'bar';
+        }
+      `);
+
+      const throwNodes = findNodesInTree(sourceFile, ts.isThrowStatement);
+      expect(printSchema(evaluateSchema(throwNodes[0], context.checker)))
+        .toMatchInlineSnapshot(`
+        "\\"bar\\";
+        "
+      `);
+    });
+    it("should evaluate yield in generators", () => {
+      const { type, context, sourceFile } = testType(`
         function* foo() {
           yield 'foo';
           yield 'bar';
