@@ -8,7 +8,9 @@ import { AnySchemaNode } from "./schema";
 
 export class SchemaContext {
   typesHandled = new Set<ts.Type>();
-  maxDepth = 10;
+
+  // Arbitrary limit to prevent infinite loops
+  maxDepth = 50;
 
   history = "";
 

@@ -63,13 +63,13 @@ describe("type schema converter", () => {
             throwIfAborted: () => undefined;
           };
 
-          type AbortSignalEventMap = { abort: tooMuchRecursion };
+          type AbortSignalEventMap = { abort: Event };
 
           type AddEventListenerOptions = {
-            capture: tooMuchRecursion;
-            once: tooMuchRecursion;
-            passive: tooMuchRecursion;
-            signal: tooMuchRecursion;
+            capture: false | true;
+            once: false | true;
+            passive: false | true;
+            signal: AbortSignal;
           };
 
           type Event = {
@@ -81,36 +81,44 @@ describe("type schema converter", () => {
             cancelBubble: false | true;
             cancelable: false | true;
             composed: false | true;
-            composedPath: () => tooMuchRecursion;
+            composedPath: () => EventTarget[];
             currentTarget: EventTarget;
             defaultPrevented: false | true;
             eventPhase: number;
             initEvent: (
-              type: tooMuchRecursion,
-              bubbles: tooMuchRecursion,
-              cancelable: tooMuchRecursion
-            ) => tooMuchRecursion;
+              type: string,
+              bubbles: false | true,
+              cancelable: false | true
+            ) => undefined;
             isTrusted: false | true;
-            preventDefault: () => tooMuchRecursion;
+            preventDefault: () => undefined;
             returnValue: false | true;
             srcElement: EventTarget;
-            stopImmediatePropagation: () => tooMuchRecursion;
-            stopPropagation: () => tooMuchRecursion;
+            stopImmediatePropagation: () => undefined;
+            stopPropagation: () => undefined;
             target: EventTarget;
             timeStamp: number;
             type: string;
           };
 
-          type EventListener = (evt: tooMuchRecursion) => tooMuchRecursion;
+          type EventListener = (evt: Event) => undefined;
 
-          type EventListenerObject = { handleEvent: tooMuchRecursion };
+          type EventListenerObject = { handleEvent: (object: Event) => undefined };
 
-          type EventListenerOptions = { capture: tooMuchRecursion };
+          type EventListenerOptions = { capture: false | true };
 
           type EventTarget = {
-            addEventListener: tooMuchRecursion;
-            dispatchEvent: tooMuchRecursion;
-            removeEventListener: tooMuchRecursion;
+            addEventListener: (
+              type: string,
+              callback: EventListener | EventListenerObject,
+              options: AddEventListenerOptions | false | true
+            ) => undefined;
+            dispatchEvent: (event: Event) => false | true;
+            removeEventListener: (
+              type: string,
+              callback: EventListener | EventListenerObject,
+              options: EventListenerOptions | false | true
+            ) => undefined;
           };
 
           type ReadableStream<T> = {
@@ -143,12 +151,27 @@ describe("type schema converter", () => {
             tee: () => [ReadableStream<string>, ReadableStream<string>];
           };
 
+          type ReadableStreamDefaultReadDoneResult = {
+            done: true;
+            value: undefined;
+          };
+
+          type ReadableStreamDefaultReadValueResult<T> = {
+            done: false;
+            value: {};
+          };
+
+          type ReadableStreamDefaultReadValueResult<string> = {
+            done: false;
+            value: string;
+          };
+
           type ReadableStreamDefaultReader<T> = {
             cancel: (reason: any) => Promise<undefined>;
             closed: Promise<undefined>;
             read: () => Promise<
               | ReadableStreamDefaultReadDoneResult
-              | ReadableStreamDefaultReadValueResult<tooMuchRecursion>
+              | ReadableStreamDefaultReadValueResult<{}>
             >;
             releaseLock: () => undefined;
           };
@@ -176,10 +199,20 @@ describe("type schema converter", () => {
           };
 
           type WritableStream<R> = {
-            abort: tooMuchRecursion;
-            close: tooMuchRecursion;
-            getWriter: tooMuchRecursion;
-            locked: tooMuchRecursion;
+            abort: (reason: any) => Promise<undefined>;
+            close: () => Promise<undefined>;
+            getWriter: () => WritableStreamDefaultWriter<{}>;
+            locked: false | true;
+          };
+
+          type WritableStreamDefaultWriter<R> = {
+            abort: (reason: any) => Promise<undefined>;
+            close: () => Promise<undefined>;
+            closed: Promise<undefined>;
+            desiredSize: number;
+            ready: Promise<undefined>;
+            releaseLock: () => undefined;
+            write: (chunk: {}) => Promise<undefined>;
           };
 
           ReadableStream<string>;
