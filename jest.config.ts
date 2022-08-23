@@ -10,6 +10,7 @@ export default {
   coverageDirectory: "coverage",
   coverageProvider: "babel",
   // coverageProvider: "v8",
+  coverageReporters: process.env.CI ? ["text"] : ["text-summary", "lcov"],
 
   // An array of regexp pattern strings used to skip coverage collection
   coveragePathIgnorePatterns: [

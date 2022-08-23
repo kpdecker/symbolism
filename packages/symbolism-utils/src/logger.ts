@@ -53,3 +53,7 @@ export function logFile(...message: unknown[]) {
   const stream = getFileLogStream();
   stream.write(message.join(" ") + "\n");
 }
+
+export function testDebugLogLevel() {
+  setLogLevel(LogLevel.debug);
+}
