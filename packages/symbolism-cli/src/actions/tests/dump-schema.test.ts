@@ -15,6 +15,7 @@ describe("dumpSchema", () => {
       "foo",
       "foo",
       "dumpSchema",
+      "--file",
       require.resolve("../../../../symbolism-test/src/dump-symbol.ts"),
       "Schema",
     ]);
@@ -38,6 +39,7 @@ describe("dumpSchema", () => {
       "dumpSchema",
       "--json",
       "foo",
+      "--file",
       require.resolve("../../../../symbolism-test/src/dump-symbol.ts"),
       "Schema",
     ]);

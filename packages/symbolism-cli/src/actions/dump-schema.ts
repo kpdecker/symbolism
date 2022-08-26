@@ -1,30 +1,33 @@
 import { Command, OptionValues } from "commander";
-import { resolve } from "path";
 import ts from "typescript";
 import {
   createJsonSchema,
   evaluateSchema,
   printSchema,
 } from "@symbolism/type-eval";
-import { getSymbolDeclaration } from "@symbolism/ts-utils";
-import { getCliConfig, initTypescript } from "@symbolism/utils";
-import invariant from "tiny-invariant";
+import { getCliConfig, initTypescript, logVerbose } from "@symbolism/utils";
+import { nodeFromCLI } from "../arg-parser";
+import { dumpNode } from "@symbolism/ts-debug";
 
 export function initDumpSchema(program: Command) {
   program
-    .command("dumpSchema <filePath> <symbolName>")
+    .command("dumpSchema")
+    .argument(
+      "<symbolPath>",
+      "Name of the symbol to analyze. " +
+        "These can be found via the dump-symbols command. " +
+        "When the file option is passed, this value may also " +
+        "be a string in the form of ':line:column' "
+    )
+    .option("-f, --file <file>", "Filter to symbols defined in file")
     .option("--json <namespace>", "Output json schema to std out")
     .option("--comment <namespace>", "Comment to include in json schema")
     .action(dumpSchema);
 }
 
-function dumpSchema(
-  filePath: string,
-  symbolName: string,
-  options: OptionValues
-) {
+function dumpSchema(symbolPath: string, options: OptionValues) {
   const config = getCliConfig();
-  const services = initTypescript(config, filePath);
+  const services = initTypescript(config, options.file);
   const program = services.getProgram();
   if (!program) {
     throw new Error("Failed to create program");
@@ -32,24 +35,22 @@ function dumpSchema(
 
   const checker = program.getTypeChecker();
 
-  const sourceFile = program.getSourceFile(resolve(filePath));
-  if (!sourceFile) {
-    throw new Error(`Unable to find file ${filePath}`);
+  let node = nodeFromCLI(program, symbolPath, options);
+  if (!node) {
+    throw new Error(`Unable to find symbol ${symbolPath}`);
   }
 
-  const allSymbols = checker.getSymbolsInScope(
-    sourceFile,
-    ts.SymbolFlags.Type | ts.SymbolFlags.Interface | ts.SymbolFlags.Value
-  );
-  const symbol = allSymbols.find((needle) => needle.getName() === symbolName);
-  if (!symbol) {
-    throw new Error(`Unable to find symbol ${symbolName}`);
+  if (
+    ts.isTemplateHead(node) ||
+    ts.isTemplateSpan(node) ||
+    ts.isTemplateSpan(node.parent)
+  ) {
+    node = node.parent;
   }
 
-  const exportSymbol = checker.getExportSymbolOfSymbol(symbol);
-  const exportDeclaration = getSymbolDeclaration(exportSymbol)!;
+  logVerbose(`Scanning node`, dumpNode(node, checker));
 
-  const schema = evaluateSchema(exportDeclaration, checker);
+  const schema = evaluateSchema(node, checker);
 
   console.log(
     options.json

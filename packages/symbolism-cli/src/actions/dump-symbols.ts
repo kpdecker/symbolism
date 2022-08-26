@@ -1,5 +1,4 @@
 import { Command, OptionValues } from "commander";
-import { resolve } from "path";
 import invariant from "tiny-invariant";
 import {
   extractSymbolSummary,
@@ -7,8 +6,7 @@ import {
   parseSymbolTable,
 } from "@symbolism/symbol-table";
 import { getCliConfig, initTypescript } from "@symbolism/utils";
-import { getNodePath, pathMatchesTokenFilter } from "@symbolism/paths";
-import { getSymbolDeclaration } from "@symbolism/ts-utils";
+import { pathMatchesTokenFilter } from "@symbolism/paths";
 
 export function initDumpSymbols(program: Command) {
   program
