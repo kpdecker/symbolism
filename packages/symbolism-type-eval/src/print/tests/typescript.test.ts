@@ -5,7 +5,7 @@ import {
   ObjectSchema,
   TemplateLiteralSchema,
 } from "../../schema";
-import { printSchema } from "../typescript";
+import { printSchema, printSchemaNode } from "../typescript";
 
 const simpleObject: ObjectSchema = {
   kind: "object",
@@ -138,6 +138,40 @@ describe("typescript formatter", () => {
     expect(printSchema({ root: arrayTest })).toMatchInlineSnapshot(`
       "\`string!\\\\\`\${number & string}\`[];
       "
+    `);
+  });
+
+  it("should handle object literals in template", () => {
+    // Likely invalid code, but we want to make sure that the printer doesn't crash.
+    const templateLiteral: AnySchemaNode = {
+      kind: "template-literal",
+      items: [
+        {
+          kind: "literal",
+          value: "start!:",
+        },
+        {
+          kind: "object",
+          properties: {
+            foo: {
+              kind: "literal",
+              value: "food",
+            },
+            bar: {
+              kind: "literal",
+              value: "bard",
+            },
+          },
+          abstractIndexKeys: [],
+        },
+      ],
+    };
+
+    expect(printSchemaNode(templateLiteral, "js")).toMatchInlineSnapshot(`
+      "\`start!:\${{
+        bar: \\"bard\\",
+        foo: \\"food\\",
+      }}\`"
     `);
   });
 });

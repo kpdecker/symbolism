@@ -1,6 +1,7 @@
 import { dumpSchema } from "@symbolism/ts-debug";
 import { format } from "prettier";
 import ts from "typescript";
+import { canPrintInJs } from "../classify";
 import type { AnySchemaNode, Schema } from "../schema";
 import { binaryExpressionOperatorToken } from "../value-eval/binary-expression";
 
@@ -15,7 +16,8 @@ export function printSchema(
     .map(([typeName, node]) => {
       return `type ${typeName} = ${safeTypeFormat(
         printSchemaNode(node, target),
-        node
+        node,
+        target === "js"
       )}
 `;
     })
@@ -23,17 +25,30 @@ export function printSchema(
     .join("");
 
   const schemaRoot = "root" in schema ? schema.root : schema;
-  return defs + safeTypeFormat(printSchemaNode(schemaRoot, target), schemaRoot);
+  return (
+    defs +
+    safeTypeFormat(
+      printSchemaNode(schemaRoot, target),
+      schemaRoot,
+      target === "js"
+    )
+  );
 }
 
 function safeTypeFormat(
   unformattedText: string,
-  schema: AnySchemaNode | undefined
+  schema: AnySchemaNode | undefined,
+  isJsNode: boolean
 ) {
   try {
-    return format("type foo = " + unformattedText, {
+    if (!isJsNode) {
+      return format("type foo = " + unformattedText, {
+        parser: "typescript",
+      }).replace(/^type foo =\s*\|?/m, "");
+    }
+    return format("const foo = " + unformattedText, {
       parser: "typescript",
-    }).replace(/^type foo =\s*\|?/m, "");
+    }).replace(/^const foo =\s*\|?/m, "");
   } catch (err) {
     console.log(dumpSchema(schema));
     console.log(err);
@@ -48,8 +63,16 @@ export function printSchemaNode(
 ): string {
   function wrapTsType(type: string): string {
     if (target === "js") {
-      const formattedType = safeTypeFormat(convertToTemplate(type), schema);
-      const trimmedType = formattedType.trim().replace(/;\$/m, "");
+      const isJsNode = canPrintInJs(schema);
+      const formattedType = safeTypeFormat(
+        convertToTemplate(type),
+        schema,
+        isJsNode
+      );
+      const trimmedType = formattedType
+        .trim()
+        .replace(/^\|/, "")
+        .replace(/;$/, "");
 
       return trimmedType;
     }

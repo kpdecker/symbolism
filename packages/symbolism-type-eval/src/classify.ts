@@ -138,6 +138,64 @@ export function nonConcreteInputs(
   throw new Error("Not implemented");
 }
 
+/**
+ * Determines if the schema is fully resolved without
+ * any non-finite values.
+ */
+export function canPrintInJs(type: AnySchemaNode | undefined): boolean {
+  if (!type) {
+    return true;
+  }
+
+  if (type.kind === "literal") {
+    return true;
+  }
+
+  if (
+    type.kind === "primitive" ||
+    type.kind === "error" ||
+    // Type checker would have resolved this if it was concrete.
+    type.kind === "index" ||
+    type.kind === "index-access"
+  ) {
+    return false;
+  }
+
+  if (
+    type.kind === "union" ||
+    type.kind === "intersection" ||
+    type.kind === "binary-expression"
+  ) {
+    return false;
+  }
+  if (type.kind === "tuple" || type.kind === "template-literal") {
+    return type.items.every(canPrintInJs);
+  }
+
+  if (type.kind === "array") {
+    return false;
+  }
+
+  if (type.kind === "object") {
+    return (
+      Object.values(type.properties).every(canPrintInJs) &&
+      !type.abstractIndexKeys.length
+    );
+  }
+
+  if (type.kind === "function") {
+    return false;
+  }
+
+  if (type.kind === "reference") {
+    // TODO: Maybe, maybe not...
+    return false;
+  }
+
+  const gottaCatchEmAll: never = type;
+  throw new Error("Not implemented");
+}
+
 export function isLiteralUnion(type: AnySchemaNode): type is UnionSchema {
   return (
     type.kind === "union" && type.items.every((item) => item.kind === "literal")
