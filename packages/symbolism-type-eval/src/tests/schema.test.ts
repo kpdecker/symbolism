@@ -485,9 +485,7 @@ describe("type schema converter", () => {
 
     expect(printSchema(evaluateSchema(declaration, context.checker)))
       .toMatchInlineSnapshot(`
-      "type Pairs<T> = {};
-
-      Pairs<{}>[keyof {}];
+      "{}[keyof {}];
       "
     `);
   });

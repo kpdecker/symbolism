@@ -145,11 +145,19 @@ function filterDefs(schema: Schema) {
 
   let { defs, root } = schema;
 
-  defs?.forEach((def) => {
-    findReferences(def);
-  });
+  const referencesToCount = new Set(findReferences(schema.root));
 
-  findReferences(schema.root);
+  for (const name of referencesToCount) {
+    const def = defs?.get(name);
+
+    const foundReferences = findReferences(def);
+    for (const reference of foundReferences) {
+      // If a new value is added, it will be appended to our iterator
+      // if one exists already, then this is a NOP operation for both the
+      // set and the iterator.
+      referencesToCount.add(reference);
+    }
+  }
 
   Array.from(defs?.entries() || []).forEach(([name, def]) => {
     if (def.kind === "error") {
@@ -176,51 +184,54 @@ function filterDefs(schema: Schema) {
     root: root && inlineReferences(root),
   };
 
-  function findReferences(schema: AnySchemaNode | undefined) {
+  function findReferences(schema: AnySchemaNode | undefined): string[] {
     if (!schema) {
-      return;
+      return [];
     }
 
     switch (schema.kind) {
       case "error":
       case "primitive":
       case "literal":
-        return;
+        return [];
       case "array":
-        findReferences(schema.items);
-        return;
-      case "object":
-        Object.values(schema.properties).forEach(findReferences);
-        schema.abstractIndexKeys.forEach(({ key, value }) => {
-          findReferences(key);
-          findReferences(value);
-        });
-        return;
-      case "function":
-        schema.parameters.forEach(({ schema }) => {
-          findReferences(schema);
-        });
-        findReferences(schema.returnType);
-        return;
+        return findReferences(schema.items);
+      case "object": {
+        const propertyReferences = Object.values(schema.properties).flatMap(
+          findReferences
+        );
+        const indexReferences = schema.abstractIndexKeys.flatMap(
+          ({ key, value }) => {
+            return findReferences(key).concat(findReferences(value));
+          }
+        );
+        return propertyReferences.concat(indexReferences);
+      }
+      case "function": {
+        const parameterReferences = schema.parameters.flatMap(({ schema }) =>
+          findReferences(schema)
+        );
+        const returnReferences = findReferences(schema.returnType);
+        return parameterReferences.concat(returnReferences);
+      }
       case "index":
-        findReferences(schema.type);
-        return;
-      case "index-access":
-        findReferences(schema.object);
-        findReferences(schema.index);
-        return;
+        return findReferences(schema.type);
+      case "index-access": {
+        const objectReferences = findReferences(schema.object);
+        const indexReferences = findReferences(schema.index);
+        return objectReferences.concat(indexReferences);
+      }
 
       case "binary-expression":
       case "template-literal":
       case "tuple":
       case "union":
       case "intersection":
-        schema.items.map(findReferences);
-        return;
+        return schema.items.flatMap(findReferences);
       case "reference":
         referenceCount[schema.typeId] ||= 0;
         referenceCount[schema.typeId]++;
-        return;
+        return [schema.typeId];
 
       default:
         const gottaCatchEmAll: never = schema;

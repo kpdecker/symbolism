@@ -675,14 +675,12 @@ describe("type schema converter", () => {
 
       jsxSchema = evaluateSchema(jsxNodes[3], context.checker);
       expect(printSchema(jsxSchema)).toMatchInlineSnapshot(`
-        "type Element = {
-          key: number | string;
-          props: any;
-          type: any;
-        };
-
-        {
-          Bar: () => Element;
+        "{
+          Bar: () => {
+            key: number | string;
+            props: any;
+            type: any;
+          };
           \\"ignore-prop\\": true;
           myProp: 1;
         };

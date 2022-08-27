@@ -153,21 +153,6 @@ describe("type schema converter", () => {
             tee: () => [ReadableStream<string>, ReadableStream<string>];
           };
 
-          type ReadableStreamDefaultReadDoneResult = {
-            done: true;
-            value: undefined;
-          };
-
-          type ReadableStreamDefaultReadValueResult<T> = {
-            done: false;
-            value: {};
-          };
-
-          type ReadableStreamDefaultReadValueResult<string> = {
-            done: false;
-            value: string;
-          };
-
           type ReadableStreamDefaultReader<T> = {
             cancel: (reason: any) => Promise<undefined>;
             closed: Promise<undefined>;
