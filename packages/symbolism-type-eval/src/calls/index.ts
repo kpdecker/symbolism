@@ -159,7 +159,7 @@ function convertCall(
     collectedCalls.push({
       callExpression,
       arguments: argSchemas.map((arg) =>
-        resolveSymbolsInSchema(arg.schema, baseSymbolMap, checker)
+        resolveSymbolsInSchema(arg.schema, baseSymbolMap, context)
       ),
       symbols: parameterSymbols,
     });
@@ -265,7 +265,7 @@ function convertCall(
         });
         partiallyResolvedArgSchemas.push(
           argSchemas.map((arg) =>
-            resolveSymbolsInSchema(arg.schema, symbolMap, checker)
+            resolveSymbolsInSchema(arg.schema, symbolMap, context)
           )
         );
       });
@@ -274,7 +274,7 @@ function convertCall(
     // No calls, so everything is resolved.
     partiallyResolvedArgSchemas.push(
       argSchemas.map((arg) =>
-        resolveSymbolsInSchema(arg.schema, baseSymbolMap, checker)
+        resolveSymbolsInSchema(arg.schema, baseSymbolMap, context)
       )
     );
   }

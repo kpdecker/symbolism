@@ -1,13 +1,16 @@
 import { isNamedDeclaration } from "@symbolism/ts-utils";
 import ts, { NamedDeclaration } from "typescript";
+import { SchemaContext } from "../context";
 import { AnySchemaNode } from "../schema";
 import { evaluateBinaryExpressionSchema } from "./binary-expression";
 
 export function resolveSymbolsInSchema(
   schema: AnySchemaNode,
   symbolSchemas: Map<ts.Symbol, AnySchemaNode>,
-  checker: ts.TypeChecker
+  context: SchemaContext
 ): AnySchemaNode {
+  const { checker } = context;
+
   if (!schema || schema.kind === "literal") {
     return schema;
   }
@@ -29,13 +32,14 @@ export function resolveSymbolsInSchema(
 
   if (schema.kind === "binary-expression") {
     const resolved = schema.items.map((item) =>
-      resolveSymbolsInSchema(item, symbolSchemas, checker)
+      resolveSymbolsInSchema(item, symbolSchemas, context)
     );
 
     return evaluateBinaryExpressionSchema(
       resolved[0],
       resolved[1],
-      schema.operator
+      schema.operator,
+      context
     );
   }
 
@@ -49,7 +53,7 @@ export function resolveSymbolsInSchema(
     return {
       ...schema,
       items: schema.items.map((item) =>
-        resolveSymbolsInSchema(item, symbolSchemas, checker)
+        resolveSymbolsInSchema(item, symbolSchemas, context)
       ),
     };
   }
@@ -57,7 +61,7 @@ export function resolveSymbolsInSchema(
   if (schema.kind === "array") {
     return {
       ...schema,
-      items: resolveSymbolsInSchema(schema.items, symbolSchemas, checker),
+      items: resolveSymbolsInSchema(schema.items, symbolSchemas, context),
     };
   }
 
@@ -66,7 +70,7 @@ export function resolveSymbolsInSchema(
       ...schema,
       properties: Object.entries(schema.properties).reduce(
         (acc, [key, value]) => {
-          acc[key] = resolveSymbolsInSchema(value, symbolSchemas, checker);
+          acc[key] = resolveSymbolsInSchema(value, symbolSchemas, context);
           return acc;
         },
         {} as Record<string, AnySchemaNode>
@@ -83,13 +87,13 @@ export function resolveSymbolsInSchema(
         schema: resolveSymbolsInSchema(
           parameter.schema,
           symbolSchemas,
-          checker
+          context
         ),
       })),
       returnType: resolveSymbolsInSchema(
         schema.returnType,
         symbolSchemas,
-        checker
+        context
       ),
     };
   }

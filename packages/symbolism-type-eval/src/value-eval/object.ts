@@ -75,12 +75,14 @@ function convertObjectLiteralValue(
     name: ts.PropertyName
   ): string[] | AnySchemaNode {
     const propertyName = ts.isComputedPropertyName(name)
-      ? getNodeSchema(
-          ...context.cloneNode({
-            node: name.expression,
-            decrementDepth: true,
-            allowMissing: false,
-          })
+      ? context.resolveSchema(
+          getNodeSchema(
+            ...context.cloneNode({
+              node: name.expression,
+              decrementDepth: true,
+              allowMissing: false,
+            })
+          )
         )
       : name.text;
     invariant(propertyName, "Expected property name");

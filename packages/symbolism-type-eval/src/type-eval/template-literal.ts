@@ -43,6 +43,6 @@ export function convertTemplateLiteralType(
       })
       .filter(Boolean);
 
-    return normalizeTemplateLiteralSchema(itemTypes);
+    return normalizeTemplateLiteralSchema(itemTypes, context);
   }
 }

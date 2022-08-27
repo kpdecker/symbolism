@@ -74,19 +74,20 @@ export function convertTemplateLiteralValue(
     }
   }
 
-  return normalizeTemplateLiteralSchema(itemTypes);
+  return normalizeTemplateLiteralSchema(itemTypes, context);
 }
 
 // Normalizes template literal schemas. This will flatten
 // the schema as well as pull any unions up.
 export function normalizeTemplateLiteralSchema(
-  itemTypes: AnySchemaNode[]
+  itemTypes: AnySchemaNode[],
+  context: SchemaContext
 ): AnySchemaNode {
   // Flatten anything that we can.
   const unionIndexes: number[] = [];
   const flattenedItems: AnySchemaNode[] = [];
   for (let i = 0; i < itemTypes.length; i++) {
-    const item = itemTypes[i];
+    const item = context.resolveSchema(itemTypes[i]);
     const priorItem = flattenedItems[flattenedItems.length - 1];
 
     if (item.kind === "literal" && priorItem?.kind === "literal") {

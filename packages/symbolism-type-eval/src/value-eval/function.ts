@@ -82,7 +82,7 @@ export const functionOperators = nodeEvalHandler({
         expressionSchema.name === "Promise" &&
         expressionSchema.parameters.length === 1
       ) {
-        return expressionSchema.parameters[0];
+        return context.resolveSchema(expressionSchema.parameters[0]);
       }
     }
 

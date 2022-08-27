@@ -106,14 +106,20 @@ export function convertBinaryExpression(
   }
 
   function convertArithmeticOperation() {
-    return evaluateBinaryExpressionSchema(leftSchema, rightSchema, operator);
+    return evaluateBinaryExpressionSchema(
+      leftSchema,
+      rightSchema,
+      operator,
+      context
+    );
   }
 }
 
 export function evaluateBinaryExpressionSchema(
   leftSchema: AnySchemaNode,
   rightSchema: AnySchemaNode,
-  operatorKind: ts.BinaryOperator
+  operatorKind: ts.BinaryOperator,
+  context: SchemaContext
 ): AnySchemaNode {
   let operator: (a: any, b: any) => any;
   switch (operatorKind) {
@@ -215,6 +221,9 @@ export function evaluateBinaryExpressionSchema(
   const expandedSchema = expandUnions({
     items: [leftSchema, rightSchema],
     merger(right, left) {
+      right = context.resolveSchema(right);
+      left = context.resolveSchema(left);
+
       if (left.kind === "literal" && right.kind === "literal") {
         return {
           kind: "literal",
@@ -227,7 +236,7 @@ export function evaluateBinaryExpressionSchema(
       ) {
         // Convert to template type. Note that we do this only for strings
         // because template literals can fully describe abstract strings.
-        return normalizeTemplateLiteralSchema([left, right]);
+        return normalizeTemplateLiteralSchema([left, right], context);
       }
     },
   }).map((itemSet): AnySchemaNode => {
