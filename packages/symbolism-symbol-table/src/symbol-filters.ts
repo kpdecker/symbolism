@@ -26,7 +26,7 @@ export function filterSymbolsToFile(symbols: SymbolTable, fileName: string) {
 export function findSymbol(
   symbols: SymbolTable,
   symbolPath: string,
-  fileName: string,
+  fileName: string | undefined,
   checker: ts.TypeChecker
 ) {
   const resolvedFileName = fileName && resolve(fileName);

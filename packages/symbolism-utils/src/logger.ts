@@ -29,6 +29,12 @@ export function logInfo(...message: unknown[]) {
   }
 }
 
+export function logInteractive(...message: unknown[]) {
+  if (process.stdout.isTTY) {
+    logInfo(...message);
+  }
+}
+
 export function logVerbose(...message: unknown[]) {
   if (loggerLevel <= LogLevel.verbose) {
     console.info(...message);

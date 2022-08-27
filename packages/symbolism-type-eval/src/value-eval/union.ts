@@ -10,6 +10,8 @@ export function createUnionKind(items: AnySchemaNode[]): AnySchemaNode {
     return [item];
   });
   const dedupedItems = removeDuplicateSchemas(flattenedUnions);
+  invariant(dedupedItems.length, "Expected at least one items");
+
   if (dedupedItems.length === 1) {
     return dedupedItems[0];
   }

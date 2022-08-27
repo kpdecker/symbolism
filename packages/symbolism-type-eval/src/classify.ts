@@ -5,10 +5,14 @@ import ts from "typescript";
 import { AnySchemaNode, PrimitiveSchema, UnionSchema } from "./schema";
 
 export class SchemaError extends Error {
-  constructor(message: string, schema: AnySchemaNode | undefined) {
-    super(`${message} ${schema?.kind}
+  constructor(
+    message: string,
+    schema: AnySchemaNode | AnySchemaNode[] | undefined
+  ) {
+    let kind = Array.isArray(schema) ? "array" : schema?.kind;
+    super(`${message} ${kind}
 
-GOT: ${dumpSchema(schema).slice(0, 1000)}
+GOT: ${dumpSchema(schema)}
 `);
   }
 }

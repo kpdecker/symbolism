@@ -347,10 +347,13 @@ function convertElementAccessExpression(
   }
 
   if (!context.options.allowMissing) {
-    throw new Error(`Unsupported expression: ${ts.SyntaxKind[node.kind]}`);
+    throw new SchemaError(
+      `Unable to resolve expression: ${ts.SyntaxKind[node.kind]}`,
+      parentSchema
+    );
   } else {
     logDebug(
-      `Unsupported expression: ${
+      `Unable to resolve expression: ${
         ts.SyntaxKind[node.kind]
       }\n\nNode: ${JSON.stringify(dumpNode(node, context.checker))}`
     );

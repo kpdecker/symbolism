@@ -395,7 +395,9 @@ export function getNodeSchema(
 
     if (!context.options.allowMissing) {
       throw new NodeError(
-        `Unsupported expression: ${ts.SyntaxKind[node.kind]}`,
+        `Unsupported expression: ${ts.SyntaxKind[node.kind]} ${
+          context.history
+        }`,
         node,
         context.checker
       );

@@ -127,7 +127,6 @@ function getTypeSchemaWorker(
       );
     }
 
-
     const objectFlags = (type as ts.ObjectType).objectFlags;
 
     const literalOrPrimitive =
