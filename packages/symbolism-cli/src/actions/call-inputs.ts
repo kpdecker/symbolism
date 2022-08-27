@@ -3,13 +3,26 @@ import { getCliConfig, initTypescript } from "@symbolism/utils";
 import { findSymbol, parseSymbolTable } from "@symbolism/symbol-table";
 import {
   CallContext,
+  loadFunctionCall,
   loadFunctionCalls,
   printCalls,
 } from "@symbolism/type-eval";
+import { nodeFromCLI } from "../arg-parser";
+import ts, { findAncestor } from "typescript";
+import { defineSymbol } from "@symbolism/definitions";
+import invariant from "tiny-invariant";
 
 export function initCallInputs(program: Command) {
   program
-    .command("callInputs <symbolPath>")
+    .command("callInputs")
+    .argument(
+      "<symbolPath>",
+      "Name of the symbol to analyze. " +
+        "These can be found via the dump-symbols command. " +
+        "When the file option is passed, this value may also " +
+        "be a string in the form of ':line:column' "
+    )
+    .option("-f, --file <file>", "Filter to symbols defined in file")
     .action(callInputs)
     .option("-f, --file <file>", "Filter to symbols defined in file");
 }
@@ -26,12 +39,32 @@ export function callInputs(symbolPath: string, options: OptionValues) {
   const checker = program.getTypeChecker();
   const symbols = parseSymbolTable(program, config);
 
-  const symbol = findSymbol(symbols, symbolPath, options.file, checker);
+  const node = nodeFromCLI(program, symbolPath, options);
+  if (!node) {
+    throw new Error(`Unable to find symbol ${symbolPath}`);
+  }
 
-  const argumentTypes = loadFunctionCalls(
-    symbol,
-    new CallContext(symbol, symbols, checker, {})
-  );
+  const callExpression = findAncestor(node, ts.isCallExpression);
 
-  console.log(printCalls(argumentTypes));
+  if (callExpression) {
+    const definition = defineSymbol(callExpression.expression, checker);
+    const symbol = definition?.symbol;
+    invariant(symbol, "Definition must have a symbol");
+
+    const argumentTypes = loadFunctionCall(
+      callExpression,
+      new CallContext(symbol, symbols, checker, {})
+    );
+
+    console.log(printCalls(argumentTypes));
+  } else {
+    const symbol = findSymbol(symbols, symbolPath, options.file, checker);
+
+    const argumentTypes = loadFunctionCalls(
+      symbol,
+      new CallContext(symbol, symbols, checker, {})
+    );
+
+    console.log(printCalls(argumentTypes));
+  }
 }

@@ -2,7 +2,7 @@ import ts, { findAncestor } from "typescript";
 
 import { AnySchemaNode } from "../schema";
 import { CallContext } from "../context";
-import { dumpNode, dumpSymbol } from "@symbolism/ts-debug";
+import { dumpNode, dumpSchema, dumpSymbol } from "@symbolism/ts-debug";
 import { areSchemasEqual, nonConcreteInputs } from "../classify";
 import { getLocalSymbol, resolveSymbolsInSchema } from "../value-eval/symbol";
 import {
@@ -14,6 +14,8 @@ import {
 import { expandUnions } from "../value-eval/union";
 import { getSymbolDeclaration, isNamedDeclaration } from "@symbolism/ts-utils";
 import { getNodeSchema } from "../value-eval";
+import invariant from "tiny-invariant";
+import { defineSymbol } from "@symbolism/definitions";
 
 export type FunctionCallInfo = {
   callExpression: ts.CallExpression;
@@ -30,6 +32,26 @@ export function loadFunctionCalls(
   // TODO: Flatten binary expressions, etc
   return functionCalls;
 }
+
+export function loadFunctionCall(
+  node: ts.Node,
+  context: CallContext
+): FunctionCallInfo[] {
+  const callExpression = findAncestor(node, ts.isCallExpression);
+  invariant(callExpression, "Node must be in a call expression");
+
+  const definition = defineSymbol(callExpression.expression, context.checker);
+  const symbol = definition?.symbol;
+  invariant(symbol, "Definition must have a symbol");
+
+  const collectedCalls: FunctionCallInfo[] = [];
+  convertCall(symbol, callExpression, context, collectedCalls);
+
+  return removeDuplicates(collectedCalls, (a, b) => {
+    return areSchemasEqual(a.arguments, b.arguments);
+  });
+}
+
 function convertFunctionCallsForSymbol(
   symbol: ts.Symbol,
   context: CallContext
