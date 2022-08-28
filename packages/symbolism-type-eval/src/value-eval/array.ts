@@ -17,6 +17,14 @@ export const arrayOperators = nodeEvalHandler({
     invariantNode(node, context.checker, ts.isArrayBindingPattern);
     return getNodeSchema({ context, node: node.parent, decrementDepth: false });
   },
+  [ts.SyntaxKind.SpreadElement](node, context) {
+    invariantNode(node, context.checker, ts.isSpreadElement);
+    return getNodeSchema({
+      context,
+      node: node.expression,
+      decrementDepth: false,
+    });
+  },
 });
 
 export function convertArrayLiteralValue(
@@ -24,15 +32,21 @@ export function convertArrayLiteralValue(
   context: SchemaContext
 ): AnySchemaNode {
   const elements = removeDuplicateSchemas<AnySchemaNode>(
-    node.elements.map(
-      (element) =>
-        getNodeSchema({
-          context,
-          node: element,
-          decrementDepth: true,
-          allowMissing: false,
-        })!
-    )
+    node.elements.flatMap((element) => {
+      const elementSchema = getNodeSchema({
+        context,
+        node: element,
+        decrementDepth: true,
+        allowMissing: false,
+      })!;
+
+      const dereferencedSchema = context.resolveSchema(elementSchema);
+      if (ts.isSpreadElement(element) && dereferencedSchema.kind === "array") {
+        return dereferencedSchema.items;
+      }
+
+      return elementSchema;
+    })
   );
 
   const items = createUnionKind(elements);

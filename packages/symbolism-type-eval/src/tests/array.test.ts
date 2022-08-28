@@ -38,6 +38,20 @@ describe("type schema converter", () => {
         "
       `);
     });
+    it("should pull type from spread elements", () => {
+      const { checker, context, sourceFile } = testType(`
+        const x = [1, 2, 3];
+        const y = [4, ...x];
+      `);
+
+      const xNodes = findIdentifiers(sourceFile, "y");
+
+      expect(printSchema(evaluateSchema(xNodes[0], checker)))
+        .toMatchInlineSnapshot(`
+        "(1 | 2 | 3 | 4)[];
+        "
+      `);
+    });
 
     it("should pull type from const array literals", () => {
       const { checker, context, sourceFile } = testType(`
