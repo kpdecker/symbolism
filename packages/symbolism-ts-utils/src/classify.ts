@@ -160,9 +160,20 @@ export function getTypeName(
   return name;
 }
 export function getTypeId(type: ts.Type, checker: ts.TypeChecker): TypeId {
-  // Note we are not using no truncation mode here on the assumption that
-  // keys won't conflict due to truncation.
-  return checker.typeToString(type) as TypeId;
+  const symbolDeclaration = getSymbolDeclaration(type.symbol);
+
+  // Always scope to the local file.
+  const fileNameSpace =
+    symbolDeclaration?.getSourceFile().fileName ?? "no declaration";
+
+  return (fileNameSpace +
+    ":" +
+    checker.typeToString(
+      type,
+      symbolDeclaration,
+      ts.TypeFormatFlags.UseFullyQualifiedType |
+        ts.TypeFormatFlags.UseAliasDefinedOutsideCurrentScope
+    )) as TypeId;
 }
 
 export function isThisTypeParameter(
