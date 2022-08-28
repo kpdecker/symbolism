@@ -61,6 +61,13 @@ export function variableLike(
     } else if (schema?.kind === "tuple") {
       return schema.items[propertyName as any];
     } else if (schema?.kind === "object") {
+      if (!(propertyName in schema.properties)) {
+        throw new SchemaError(
+          'Unknown property "' + propertyName + '"',
+          schema
+        );
+      }
+
       return schema.properties[propertyName];
     } else {
       return neverSchema;

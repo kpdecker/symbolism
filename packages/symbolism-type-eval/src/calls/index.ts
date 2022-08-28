@@ -279,6 +279,7 @@ function convertCall(
 
             const argument = call.arguments[parameterIndex];
             if (argument) {
+              invariant(argument.kind !== "reference", "argument is reference");
               symbolMap.set(symbol, argument);
             }
           }
