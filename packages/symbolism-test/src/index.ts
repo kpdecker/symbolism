@@ -8,7 +8,10 @@ declare module "./dump-symbol" {
   }
 }
 
-export function mockProgram(sourceFiles: Record<string, string>) {
+export function mockProgram(
+  sourceFiles: Record<string, string>,
+  options?: ts.CompilerOptions
+): ts.Program {
   const host: ts.CompilerHost = {
     fileExists(fileName) {
       return sourceFiles[fileName] !== undefined || ts.sys.fileExists(fileName);
@@ -88,6 +91,7 @@ export function mockProgram(sourceFiles: Record<string, string>) {
     options: {
       target: ts.ScriptTarget.ES2017,
       moduleResolution: ts.ModuleResolutionKind.NodeJs,
+      ...options,
     },
     host,
   });

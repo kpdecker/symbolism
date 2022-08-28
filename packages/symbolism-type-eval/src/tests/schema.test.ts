@@ -5,14 +5,18 @@ import { SchemaContext } from "../context";
 import { getNodeSchema } from "../value-eval";
 import { evaluateSchema } from "../schema";
 import { LogLevel, setLogLevel } from "@symbolism/utils";
+import ts from "typescript";
 
-function testType(source: string, name = "Type") {
-  const program = mockProgram({
-    "test.ts": source,
-  });
+function testType(source: string, options?: ts.CompilerOptions) {
+  const program = mockProgram(
+    {
+      "test.ts": source,
+    },
+    options
+  );
   const checker = program.getTypeChecker();
   const sourceFile = program.getSourceFile("test.ts")!;
-  const node = findIdentifiers(sourceFile, name)[0];
+  const node = findIdentifiers(sourceFile, "Type")[0];
   return {
     type: checker.getTypeAtLocation(node),
     declaration: node,
@@ -486,6 +490,35 @@ describe("type schema converter", () => {
     expect(printSchema(evaluateSchema(declaration, context.checker)))
       .toMatchInlineSnapshot(`
       "{}[keyof {}];
+      "
+    `);
+  });
+
+  it("should handle not null types", () => {
+    const { sourceFile, context } = testType(
+      `
+        declare const bar: "foo" | "bar" | undefined;
+        const foo = bar!;
+      `,
+      {
+        strict: true,
+      }
+    );
+
+    expect(
+      printSchema(
+        evaluateSchema(findIdentifiers(sourceFile, "bar")[0], context.checker)
+      )
+    ).toMatchInlineSnapshot(`
+      "\\"bar\\" | \\"foo\\" | undefined;
+      "
+    `);
+    expect(
+      printSchema(
+        evaluateSchema(findIdentifiers(sourceFile, "foo")[0], context.checker)
+      )
+    ).toMatchInlineSnapshot(`
+      "\\"bar\\" | \\"foo\\";
       "
     `);
   });

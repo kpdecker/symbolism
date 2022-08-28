@@ -207,6 +207,23 @@ const nodePathHandlers: Record<ts.SyntaxKind, NodeEvalHandler> = {
   [ts.SyntaxKind.OmittedExpression]: noType,
   [ts.SyntaxKind.AsExpression]: checkerEval,
   [ts.SyntaxKind.TypeAssertionExpression]: checkerEval,
+  [ts.SyntaxKind.NonNullExpression](node, context) {
+    invariantNode(node, context.checker, ts.isNonNullExpression);
+    const schema = getNodeSchema({
+      context,
+      node: node.expression,
+      decrementDepth: false,
+    });
+    const dereferencedSchema = context.resolveSchema(schema);
+    if (dereferencedSchema?.kind === "union") {
+      return createUnionKind(
+        dereferencedSchema.items.filter(
+          (item) => item.kind !== "literal" || item.value != null
+        )
+      );
+    }
+    return schema;
+  },
   [ts.SyntaxKind.CommaListExpression](node, context) {
     invariantNode(node, context.checker, ts.isCommaListExpression);
     return getNodeSchema({
