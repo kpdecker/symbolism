@@ -2,7 +2,6 @@ import invariant from "tiny-invariant";
 import ts from "typescript";
 import { SchemaContext } from "../context";
 import { AnySchemaNode } from "../schema";
-import { narrowTypeFromValues } from "../value-eval";
 import { booleanPrimitiveSchema } from "../well-known-schemas";
 
 export function convertLiteralOrPrimitive(
@@ -30,44 +29,36 @@ export function convertLiteralOrPrimitive(
       >,
     };
   } else if (type.flags & ts.TypeFlags.Boolean) {
-    return narrowTypeFromValues(context, type) || booleanPrimitiveSchema;
+    return booleanPrimitiveSchema;
   } else if (type.flags & ts.TypeFlags.BooleanLiteral) {
     return {
       kind: "literal",
       value: (type as any).intrinsicName === "true",
     };
   } else if (type.flags & ts.TypeFlags.Number) {
-    return (
-      narrowTypeFromValues(context, type) || {
-        kind: "primitive",
-        name: "number",
-        node: contextNode,
-      }
-    );
+    return {
+      kind: "primitive",
+      name: "number",
+      node: contextNode,
+    };
   } else if (type.flags & ts.TypeFlags.BigInt) {
-    return (
-      narrowTypeFromValues(context, type) || {
-        kind: "primitive",
-        name: "bigint",
-        node: contextNode,
-      }
-    );
+    return {
+      kind: "primitive",
+      name: "bigint",
+      node: contextNode,
+    };
   } else if (type.flags & ts.TypeFlags.String) {
-    return (
-      narrowTypeFromValues(context, type) || {
-        kind: "primitive",
-        name: "string",
-        node: contextNode,
-      }
-    );
+    return {
+      kind: "primitive",
+      name: "string",
+      node: contextNode,
+    };
   } else if (type.flags & ts.TypeFlags.Any) {
-    return (
-      narrowTypeFromValues(context, type) || {
-        kind: "primitive",
-        name: "any",
-        node: contextNode,
-      }
-    );
+    return {
+      kind: "primitive",
+      name: "any",
+      node: contextNode,
+    };
   } else if (type.flags & ts.TypeFlags.Never) {
     return {
       kind: "primitive",
@@ -75,13 +66,11 @@ export function convertLiteralOrPrimitive(
       node: contextNode,
     };
   } else if (type.flags & ts.TypeFlags.Unknown) {
-    return (
-      narrowTypeFromValues(context, type) || {
-        kind: "primitive",
-        name: "unknown",
-        node: contextNode,
-      }
-    );
+    return {
+      kind: "primitive",
+      name: "unknown",
+      node: contextNode,
+    };
   } else if (type.flags & ts.TypeFlags.Null) {
     return {
       kind: "literal",

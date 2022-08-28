@@ -23,8 +23,6 @@ export class SchemaContext {
 
   history = "";
 
-  narrowingNode?: ts.Node;
-
   constructor(
     public contextNode: ts.Node,
     public checker: ts.TypeChecker,
@@ -87,7 +85,6 @@ export class SchemaContext {
 
   protected cloneProps(newInstance: SchemaContext) {
     newInstance.typesHandled = new Set(this.typesHandled);
-    newInstance.narrowingNode = this.narrowingNode;
     newInstance.typeDefinitions = this.typeDefinitions;
     newInstance.typeCache = this.typeCache;
     newInstance.history = this.history;

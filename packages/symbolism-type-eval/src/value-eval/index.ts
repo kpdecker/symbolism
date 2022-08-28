@@ -395,7 +395,7 @@ export function getNodeSchema(
   } & TypeEvalOptions
 ): AnySchemaNode | undefined {
   const context = options.context.cloneNode(options);
-  const { node, decrementDepth } = options;
+  const { node } = options;
 
   if (context.maxDepth <= 0) {
     return tooMuchRecursionSchema;
@@ -436,103 +436,5 @@ export function getNodeSchema(
       context.checker,
       err as Error
     );
-  }
-}
-
-function dontNarrow(node: ts.Node): boolean {
-  return (
-    ts.isCallExpression(node) ||
-    ts.isVariableDeclaration(node) ||
-    ts.isFunctionLike(node) ||
-    ts.isInterfaceDeclaration(node) ||
-    ts.isClassDeclaration(node) ||
-    ts.isJsxAttributes(node) ||
-    ts.isParameter(node) ||
-    ts.isMethodSignature(node) ||
-    ts.isPropertySignature(node) ||
-    ts.isPropertyDeclaration(node) ||
-    ts.isMethodDeclaration(node) ||
-    ts.isGetAccessorDeclaration(node) ||
-    ts.isSetAccessorDeclaration(node) ||
-    ts.isIndexSignatureDeclaration(node) ||
-    ts.isTypeAliasDeclaration(node) ||
-    ts.isTypeParameterDeclaration(node) ||
-    ts.isTypeNode(node)
-  );
-}
-
-export function narrowTypeFromValues(
-  context: SchemaContext,
-  type: ts.Type
-): AnySchemaNode | undefined {
-  const { contextNode, checker } = context;
-
-  const symbol = type.getSymbol();
-  const symbolDeclaration = getSymbolDeclaration(symbol);
-
-  // No narrowing to be done on type nodes, just use the checker evaluation.
-  if (
-    (symbolDeclaration && dontNarrow(symbolDeclaration)) ||
-    dontNarrow(contextNode)
-  ) {
-    return undefined;
-  }
-
-  if (context.narrowingNode === contextNode) {
-    throw new NodeError(
-      "Circular narrowing node " + checker.typeToString(type),
-      contextNode,
-      checker
-    );
-    return undefined;
-  }
-
-  // Create a new context to create a new circular reference check scope.
-  // This allows for independent resolution of these distinct types. The
-  // narrowingNode check ensures that we don't infinitely recurse.
-  const newContext = new SchemaContext(contextNode, checker, context.options);
-  newContext.narrowingNode = contextNode;
-
-  if (symbolDeclaration) {
-    const symbolSchema = getNodeSchema({
-      context,
-      node: symbolDeclaration,
-      decrementDepth: false,
-      allowMissing: true,
-    });
-    if (symbolSchema) {
-      return symbolSchema;
-    }
-  }
-
-  if (contextNode) {
-    // If we are using the context node, we will need to resolve where it lives.
-    const contextDefinition = defineSymbol(contextNode, checker, {
-      chooseLocal: false,
-    });
-    if (
-      contextDefinition?.declaration &&
-      contextDefinition.declaration !== symbolDeclaration
-    ) {
-      const contextSchema = getNodeSchema({
-        context: newContext,
-        node: contextDefinition.declaration,
-        decrementDepth: false,
-        allowMissing: true,
-      });
-      if (contextSchema) {
-        return contextSchema;
-      }
-    }
-
-    const contextSchema = getNodeSchema({
-      context,
-      node: contextNode as ts.Expression,
-      decrementDepth: false,
-      allowMissing: true,
-    });
-    if (contextSchema) {
-      return contextSchema;
-    }
   }
 }
