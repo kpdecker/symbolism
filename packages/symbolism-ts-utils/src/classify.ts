@@ -136,7 +136,17 @@ export function getTypeName(
     return undefined;
   }
 
+  if (type.isLiteral()) {
+    return undefined;
+  }
+
   let name = type.aliasSymbol?.name;
+
+  if (isTypeReference(type) && name === "Array") {
+    if (type.typeArguments && isIntrinsicType(type.typeArguments[0])) {
+      return undefined;
+    }
+  }
 
   if (!name && type.symbol?.name) {
     const symbolDeclaration = getSymbolDeclaration(type.symbol);
