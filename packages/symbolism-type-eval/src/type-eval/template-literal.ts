@@ -17,7 +17,11 @@ export function convertTemplateLiteralType(
 
     if (ts.isTemplateExpression(contextNode)) {
       // Unable to map expressions from type to nodes, so we need our own eval
-      return getNodeSchema(contextNode, context);
+      return getNodeSchema({
+        context,
+        node: contextNode,
+        decrementDepth: false,
+      });
     }
 
     // But if we're (presumably) in a type declaration we can (only) use the TypeChecker
@@ -33,12 +37,11 @@ export function convertTemplateLiteralType(
         return [
           textSchema!,
           itemType &&
-            getTypeSchema(
-              ...context.clone({
-                type: itemType,
-                decrementDepth: true,
-              })
-            ),
+            getTypeSchema({
+              context,
+              type: itemType,
+              decrementDepth: true,
+            }),
         ];
       })
       .filter(Boolean);

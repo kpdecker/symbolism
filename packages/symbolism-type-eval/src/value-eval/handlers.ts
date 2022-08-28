@@ -19,19 +19,18 @@ export function nodeEvalHandler<T extends { [kind: number]: NodeEvalHandler }>(
 }
 
 export const checkerEval: NodeEvalHandler = (node, context) => {
-  return getTypeSchema(
-    ...context.clone({
-      node,
-      decrementDepth: false,
-    })
-  );
+  return getTypeSchema({ context, node, decrementDepth: false });
 };
 
 export const noType: NodeEvalHandler = () => undefined;
 
 export const expressionEval: NodeEvalHandler = (node, context) => {
   if ("expression" in node) {
-    return getNodeSchema((node as any).expression, context);
+    return getNodeSchema({
+      node: (node as any).expression,
+      context,
+      decrementDepth: false,
+    });
   }
   throw new NodeError("Expected expression", node, context.checker);
 };
@@ -50,12 +49,7 @@ export function variableLike(
 
   if (ts.isBindingElement(node)) {
     const schema = context.resolveSchema(
-      getNodeSchema(
-        ...context.cloneNode({
-          node: node.parent,
-          decrementDepth: false,
-        })
-      )
+      getNodeSchema({ context, node: node.parent, decrementDepth: false })
     );
 
     const propertyName = ts.isArrayBindingPattern(node.parent)
@@ -73,20 +67,14 @@ export function variableLike(
     }
   }
   if (node.initializer) {
-    return getNodeSchema(
-      ...context.cloneNode({
-        node: node.initializer,
-        decrementDepth: false,
-      })
-    );
+    return getNodeSchema({
+      context,
+      node: node.initializer,
+      decrementDepth: false,
+    });
   }
   if (!context.options.limitToValues && "type" in node && node.type) {
-    return getNodeSchema(
-      ...context.cloneNode({
-        node: node.type,
-        decrementDepth: false,
-      })
-    );
+    return getNodeSchema({ context, node: node.type, decrementDepth: false });
   }
 
   return {

@@ -249,8 +249,11 @@ describe("type schema converter", () => {
         "
       `);
 
-      expect(printSchema({ root: getTypeSchema(type, context) }))
-        .toMatchInlineSnapshot(`
+      expect(
+        printSchema({
+          root: getTypeSchema({ type, context, decrementDepth: false }),
+        })
+      ).toMatchInlineSnapshot(`
         "{
           \\"1bar\\": 0;
           \\"1foo\\": 0;

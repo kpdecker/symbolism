@@ -7,19 +7,18 @@ import { AnySchemaNode, ObjectSchema } from "../schema";
 import { getNodeSchema } from "../value-eval";
 
 export function convertObjectType(
-  type: ts.Type,
-  context: SchemaContext
+  context: SchemaContext,
+  type: ts.Type
 ): AnySchemaNode {
   const { contextNode, checker } = context;
 
   if (ts.isObjectLiteralExpression(contextNode)) {
-    const sourceType = getNodeSchema(
-      ...context.cloneNode({
-        node: contextNode,
-        decrementDepth: false,
-        allowMissing: true,
-      })
-    );
+    const sourceType = getNodeSchema({
+      context,
+      node: contextNode,
+      decrementDepth: false,
+      allowMissing: true,
+    });
     if (sourceType) {
       return sourceType;
     }
@@ -51,20 +50,18 @@ export function convertObjectType(
 
   checker.getIndexInfosOfType(type).forEach((indexInfo) => {
     abstractIndexKeys.push({
-      key: getTypeSchema(
-        ...context.clone({
-          type: indexInfo.keyType,
-          node: indexInfo.declaration,
-          decrementDepth: true,
-        })
-      ),
-      value: getTypeSchema(
-        ...context.clone({
-          type: indexInfo.type,
-          node: indexInfo.declaration,
-          decrementDepth: true,
-        })
-      ),
+      key: getTypeSchema({
+        context,
+        type: indexInfo.keyType,
+        node: indexInfo.declaration,
+        decrementDepth: true,
+      }),
+      value: getTypeSchema({
+        context,
+        type: indexInfo.type,
+        node: indexInfo.declaration,
+        decrementDepth: true,
+      }),
     });
   });
 
@@ -82,13 +79,12 @@ function convertSymbol(
   const declaration = getSymbolDeclaration(symbol);
   if (declaration) {
     const type = context.checker.getTypeOfSymbolAtLocation(symbol, declaration);
-    return getTypeSchema(
-      ...context.clone({
-        type,
-        node: declaration,
-        decrementDepth: true,
-      })
-    );
+    return getTypeSchema({
+      context,
+      type,
+      node: declaration,
+      decrementDepth: true,
+    });
   }
 
   const properties: Record<string, AnySchemaNode> = {};

@@ -26,7 +26,7 @@ import {
   ErrorSchema,
   FunctionSchema,
 } from "../schema";
-import { getNodeSchema } from "../value-eval";
+import { getNodeSchema, TypeEvalOptions } from "../value-eval";
 import { createUnionKind } from "../value-eval/union";
 import {
   tooMuchRecursionSchema,
@@ -42,9 +42,43 @@ const buildingSchema: ErrorSchema = {
 };
 
 export function getTypeSchema(
-  type: ts.Type,
-  context: SchemaContext
+  params: {
+    type?: ts.Type;
+    node: ts.Node;
+    context: SchemaContext;
+    decrementDepth: boolean;
+  } & TypeEvalOptions
+): AnySchemaNode;
+export function getTypeSchema(
+  params: {
+    type: ts.Type;
+    node?: ts.Node;
+    context: SchemaContext;
+    decrementDepth: boolean;
+  } & TypeEvalOptions
+): AnySchemaNode;
+export function getTypeSchema(
+  params: {
+    type?: ts.Type;
+    node?: ts.Node;
+    context: SchemaContext;
+    decrementDepth: boolean;
+  } & TypeEvalOptions
 ): AnySchemaNode {
+  let { type, node } = params;
+
+  if (!node) {
+    node = findContextNode(type!, params.context.contextNode);
+  }
+  if (!type) {
+    type = params.context.checker.getTypeAtLocation(node);
+  }
+
+  const context = params.context.clone({
+    ...params,
+    type,
+    node,
+  });
   const { contextNode, checker, typesHandled } = context;
 
   if (context.maxDepth <= 0) {
@@ -119,12 +153,11 @@ function getTypeSchemaWorker(
   const { contextNode, checker, typesHandled } = context;
   try {
     if (type.flags & ts.TypeFlags.TypeParameter) {
-      return getTypeSchema(
-        ...context.clone({
-          type: checker.getApparentType(type),
-          decrementDepth: false,
-        })
-      );
+      return getTypeSchema({
+        context,
+        type: checker.getApparentType(type),
+        decrementDepth: false,
+      });
     }
 
     const objectFlags = (type as ts.ObjectType).objectFlags;
@@ -138,12 +171,11 @@ function getTypeSchemaWorker(
 
     if (type.isUnion()) {
       const items = type.types.map((t) =>
-        getTypeSchema(
-          ...context.clone({
-            type: t,
-            decrementDepth: true,
-          })
-        )
+        getTypeSchema({
+          context,
+          type: t,
+          decrementDepth: true,
+        })
       );
       return createUnionKind(items);
     } else if (type.isIntersection()) {
@@ -151,12 +183,11 @@ function getTypeSchemaWorker(
       const items = type.types.map((t) => {
         if (t.isLiteral()) {
           allObjects = false;
-          return getTypeSchema(
-            ...context.clone({
-              type: t,
-              decrementDepth: true,
-            })
-          );
+          return getTypeSchema({
+            context,
+            type: t,
+            decrementDepth: true,
+          });
         }
 
         const apparentType = checker.getApparentType(t);
@@ -166,12 +197,11 @@ function getTypeSchemaWorker(
         ) {
           allObjects = false;
         }
-        const ret = getTypeSchema(
-          ...context.clone({
-            type: apparentType,
-            decrementDepth: true,
-          })
-        );
+        const ret = getTypeSchema({
+          context,
+          type: apparentType,
+          decrementDepth: true,
+        });
         if (ret.kind !== "object" && ret.kind !== "reference") {
           allObjects = false;
         }
@@ -181,9 +211,7 @@ function getTypeSchemaWorker(
 
       // If we consist of objects only, then merge we can merge them
       if (allObjects) {
-        return convertObjectType(
-          ...context.clone({ type, decrementDepth: false })
-        );
+        return convertObjectType(context, type);
       }
 
       return {
@@ -198,12 +226,11 @@ function getTypeSchemaWorker(
 
       const typeArguments = checker.getTypeArguments(type);
       const items: AnySchemaNode[] = typeArguments.map((elementType) =>
-        getTypeSchema(
-          ...context.clone({
-            type: elementType,
-            decrementDepth: false,
-          })
-        )
+        getTypeSchema({
+          context,
+          type: elementType,
+          decrementDepth: false,
+        })
       );
 
       return {
@@ -213,13 +240,12 @@ function getTypeSchemaWorker(
       };
     } else if ((checker as any).isArrayType(type)) {
       if (ts.isArrayLiteralExpression(contextNode)) {
-        return getNodeSchema(
-          ...context.cloneNode({
-            node: contextNode,
-            decrementDepth: false,
-            allowMissing: false,
-          })
-        )!;
+        return getNodeSchema({
+          context,
+          node: contextNode,
+          decrementDepth: false,
+          allowMissing: false,
+        })!;
       }
       const arrayValueType = checker.getIndexTypeOfType(
         type,
@@ -229,12 +255,11 @@ function getTypeSchemaWorker(
 
       return {
         kind: "array",
-        items: getTypeSchema(
-          ...context.clone({
-            type: arrayValueType,
-            decrementDepth: false,
-          })
-        ),
+        items: getTypeSchema({
+          context,
+          type: arrayValueType,
+          decrementDepth: false,
+        }),
         flags: dumpFlags(type.flags, ts.TypeFlags).concat(
           dumpFlags(objectFlags, ts.ObjectFlags)
         ),
@@ -248,13 +273,12 @@ function getTypeSchemaWorker(
         const declaration = getSymbolDeclaration(type.symbol);
         if (declaration) {
           invariantNode(declaration, checker, ts.isObjectLiteralExpression);
-          const valueSchema = getNodeSchema(
-            ...context.cloneNode({
-              node: declaration,
-              decrementDepth: false,
-              allowMissing: true,
-            })
-          );
+          const valueSchema = getNodeSchema({
+            context,
+            node: declaration,
+            decrementDepth: false,
+            allowMissing: true,
+          });
           if (valueSchema) {
             return valueSchema;
           }
@@ -275,22 +299,20 @@ function getTypeSchemaWorker(
 
               return {
                 name: parameter.name,
-                schema: getNodeSchema(
-                  ...context.cloneNode({
-                    node: declaration,
-                    decrementDepth: true,
-                    allowMissing: false,
-                  })
-                )!,
+                schema: getNodeSchema({
+                  context,
+                  node: declaration,
+                  decrementDepth: true,
+                  allowMissing: false,
+                })!,
                 symbol: parameter,
               };
             }),
-            returnType: getTypeSchema(
-              ...context.clone({
-                type: returnType,
-                decrementDepth: true,
-              })
-            ),
+            returnType: getTypeSchema({
+              context,
+              type: returnType,
+              decrementDepth: true,
+            }),
           };
         }
 
@@ -312,9 +334,7 @@ function getTypeSchemaWorker(
         return functionSchema;
       }
 
-      const objectSchema = convertObjectType(
-        ...context.clone({ type, decrementDepth: false })
-      );
+      const objectSchema = convertObjectType(context, type);
       if (isNamedType(type, context.checker)) {
         const referenceNode = createReferenceFromType(
           type,
@@ -329,32 +349,32 @@ function getTypeSchemaWorker(
       return objectSchema;
     } else if (type.flags & ts.TypeFlags.Index) {
       const index = type as ts.IndexType;
-      const clone = context.clone({
-        type: index.type,
-        decrementDepth: true,
-      });
+      const node = findContextNode(index.type, context.contextNode);
 
       return {
         kind: "index",
-        type: getTypeSchema(...clone),
-        node: clone[1].contextNode,
+        type: getTypeSchema({
+          context,
+          type: index.type,
+          node,
+          decrementDepth: true,
+        }),
+        node,
       };
     } else if (type.flags & ts.TypeFlags.IndexedAccess) {
       const indexAccess = type as ts.IndexedAccessType;
       return {
         kind: "index-access",
-        object: getTypeSchema(
-          ...context.clone({
-            type: indexAccess.objectType,
-            decrementDepth: false,
-          })
-        ),
-        index: getTypeSchema(
-          ...context.clone({
-            type: indexAccess.indexType,
-            decrementDepth: false,
-          })
-        ),
+        object: getTypeSchema({
+          context,
+          type: indexAccess.objectType,
+          decrementDepth: false,
+        }),
+        index: getTypeSchema({
+          context,
+          type: indexAccess.indexType,
+          decrementDepth: false,
+        }),
         node: contextNode,
       };
     } else if (type.flags & ts.TypeFlags.Conditional) {
@@ -394,7 +414,7 @@ export function createReferenceFromType(
   const parameters = typeArguments
     .map((type) => {
       if (!isThisTypeParameter(type)) {
-        return getTypeSchema(...context.clone({ type, decrementDepth: true }));
+        return getTypeSchema({ context, type, decrementDepth: true });
       }
       return undefined!;
     })
@@ -415,4 +435,15 @@ export function createReferenceFromType(
     return undefined;
   }
   return createReferenceSchema(typeName, parameters, typeId);
+}
+
+function findContextNode(type: ts.Type, contextNode: ts.Node): ts.Node {
+  if (type.symbol) {
+    const declaration = getSymbolDeclaration(type.symbol);
+    if (declaration) {
+      return declaration;
+    }
+  }
+
+  return contextNode;
 }

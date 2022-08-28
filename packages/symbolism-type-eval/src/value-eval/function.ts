@@ -36,32 +36,29 @@ export const functionOperators = nodeEvalHandler({
   [ts.SyntaxKind.YieldExpression](node, context) {
     invariantNode(node, context.checker, ts.isYieldExpression);
     if (node.expression) {
-      return getNodeSchema(
-        ...context.cloneNode({
-          node: node.expression,
-          decrementDepth: false,
-        })
-      );
+      return getNodeSchema({
+        context,
+        node: node.expression,
+        decrementDepth: false,
+      });
     }
   },
   [ts.SyntaxKind.ThrowStatement](node, context) {
     invariantNode(node, context.checker, ts.isThrowStatement);
-    return getNodeSchema(
-      ...context.cloneNode({
-        node: node.expression,
-        decrementDepth: false,
-      })
-    );
+    return getNodeSchema({
+      context,
+      node: node.expression,
+      decrementDepth: false,
+    });
   },
   [ts.SyntaxKind.ReturnStatement](node, context) {
     invariantNode(node, context.checker, ts.isReturnStatement);
     if (node.expression) {
-      return getNodeSchema(
-        ...context.cloneNode({
-          node: node.expression,
-          decrementDepth: false,
-        })
-      );
+      return getNodeSchema({
+        context,
+        node: node.expression,
+        decrementDepth: false,
+      });
     } else {
       return undefinedSchema;
     }
@@ -69,12 +66,11 @@ export const functionOperators = nodeEvalHandler({
   [ts.SyntaxKind.AwaitExpression](node, context): AnySchemaNode | undefined {
     invariantNode(node, context.checker, ts.isAwaitExpression);
 
-    const expressionSchema = getNodeSchema(
-      ...context.cloneNode({
-        node: node.expression,
-        decrementDepth: false,
-      })
-    );
+    const expressionSchema = getNodeSchema({
+      context,
+      node: node.expression,
+      decrementDepth: false,
+    });
 
     // Unwrap promises
     if (expressionSchema?.kind === "reference") {
@@ -127,13 +123,12 @@ function convertFunctionLikeNode(node: ts.Node, context: SchemaContext) {
   } else {
     let returnType: AnySchemaNode = createUnionKind(
       returnNodes.map((returnNode) => {
-        return getNodeSchema(
-          ...context.cloneNode({
-            node: returnNode,
-            decrementDepth: true,
-            allowMissing: false,
-          })
-        )!;
+        return getNodeSchema({
+          context,
+          node: returnNode,
+          decrementDepth: true,
+          allowMissing: false,
+        })!;
       })
     );
 
@@ -162,12 +157,11 @@ function convertCallLikeNode(node: ts.Node, context: SchemaContext) {
   // Evaluate the function at node level
   if (!ts.isNewExpression(node) && signature?.declaration) {
     const functionSchema = context.resolveSchema(
-      getNodeSchema(
-        ...context.cloneNode({
-          node: signature?.declaration,
-          decrementDepth: false,
-        })
-      )
+      getNodeSchema({
+        context,
+        node: signature?.declaration,
+        decrementDepth: false,
+      })
     );
 
     let returnType: AnySchemaNode | undefined = undefined;
@@ -189,13 +183,12 @@ function convertCallLikeNode(node: ts.Node, context: SchemaContext) {
   }
 
   if (returnType) {
-    return getTypeSchema(
-      ...context.clone({
-        type: returnType,
-        node,
-        decrementDepth: false,
-      })
-    );
+    return getTypeSchema({
+      context,
+      type: returnType,
+      node,
+      decrementDepth: false,
+    });
   }
 
   return undefinedSchema;

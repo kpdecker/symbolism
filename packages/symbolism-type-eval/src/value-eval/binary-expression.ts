@@ -19,16 +19,12 @@ export function convertBinaryExpression(
   }
 
   const leftSchema = context.resolveSchema(
-    getNodeSchema(
-      ...context.cloneNode({ node: node.left, decrementDepth: true })
-    )!
+    getNodeSchema({ context, node: node.left, decrementDepth: true })!
   );
   invariant(leftSchema, "Expected left schema");
 
   const rightSchema = context.resolveSchema(
-    getNodeSchema(
-      ...context.cloneNode({ node: node.right, decrementDepth: true })
-    )!
+    getNodeSchema({ context, node: node.right, decrementDepth: true })!
   );
   invariant(rightSchema, "Expected right schema");
 
@@ -91,13 +87,12 @@ export function convertBinaryExpression(
 
     case ts.SyntaxKind.EqualsToken:
     case ts.SyntaxKind.CommaToken:
-      return getNodeSchema(
-        ...context.cloneNode({
-          node: node.right,
-          decrementDepth: true,
-          allowMissing: false,
-        })
-      );
+      return getNodeSchema({
+        context,
+        node: node.right,
+        decrementDepth: true,
+        allowMissing: false,
+      });
 
     default:
       const defaultAssertion: never = operator;

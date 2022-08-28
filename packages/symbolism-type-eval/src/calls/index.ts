@@ -119,14 +119,13 @@ function convertCall(
   const parameterSymbols = signature.getParameters();
 
   const argSchemas = callExpression.arguments.map((argument, i) => {
-    const schema = getNodeSchema(
-      ...context.cloneNode({
-        node: argument,
-        decrementDepth: false,
-        allowMissing: false,
-        limitToValues: true,
-      })
-    )!;
+    const schema = getNodeSchema({
+      context,
+      node: argument,
+      decrementDepth: false,
+      allowMissing: false,
+      limitToValues: true,
+    })!;
 
     const inputs = nonConcreteInputs(schema);
     const inputSymbols = inputs
@@ -166,12 +165,11 @@ function convertCall(
     arg.inputSymbols.forEach((inputSymbol) => {
       baseSymbolMap.set(
         inputSymbol.symbol,
-        getNodeSchema(
-          ...context.cloneNode({
-            node: inputSymbol.declaration!,
-            decrementDepth: false,
-          })
-        )!
+        getNodeSchema({
+          context,
+          node: inputSymbol.declaration!,
+          decrementDepth: false,
+        })!
       );
     });
   });

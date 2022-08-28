@@ -15,12 +15,7 @@ export const arrayOperators = nodeEvalHandler({
   },
   [ts.SyntaxKind.ArrayBindingPattern](node, context) {
     invariantNode(node, context.checker, ts.isArrayBindingPattern);
-    return getNodeSchema(
-      ...context.cloneNode({
-        node: node.parent,
-        decrementDepth: false,
-      })
-    );
+    return getNodeSchema({ context, node: node.parent, decrementDepth: false });
   },
 });
 
@@ -31,13 +26,12 @@ export function convertArrayLiteralValue(
   const elements = removeDuplicateSchemas<AnySchemaNode>(
     node.elements.map(
       (element) =>
-        getNodeSchema(
-          ...context.cloneNode({
-            node: element,
-            decrementDepth: true,
-            allowMissing: false,
-          })
-        )!
+        getNodeSchema({
+          context,
+          node: element,
+          decrementDepth: true,
+          allowMissing: false,
+        })!
     )
   );
 

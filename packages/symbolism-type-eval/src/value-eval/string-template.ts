@@ -47,20 +47,18 @@ export function convertTemplateLiteralValue(
 
     let expressionSchema: AnySchemaNode | undefined;
     if (expressionDefinition?.declaration) {
-      expressionSchema = getNodeSchema(
-        ...context.cloneNode({
-          node: expressionDefinition.declaration,
-          decrementDepth: false,
-        })
-      );
+      expressionSchema = getNodeSchema({
+        context,
+        node: expressionDefinition.declaration,
+        decrementDepth: false,
+      });
     }
     if (!expressionSchema) {
-      expressionSchema = getNodeSchema(
-        ...context.cloneNode({
-          node: templateSpan.expression,
-          decrementDepth: false,
-        })
-      );
+      expressionSchema = getNodeSchema({
+        context,
+        node: templateSpan.expression,
+        decrementDepth: false,
+      });
     }
     if (expressionSchema) {
       itemTypes.push(expressionSchema);

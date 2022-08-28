@@ -30,10 +30,7 @@ export function convertLiteralOrPrimitive(
       >,
     };
   } else if (type.flags & ts.TypeFlags.Boolean) {
-    return (
-      narrowTypeFromValues(...context.clone({ type, decrementDepth: false })) ||
-      booleanPrimitiveSchema
-    );
+    return narrowTypeFromValues(context, type) || booleanPrimitiveSchema;
   } else if (type.flags & ts.TypeFlags.BooleanLiteral) {
     return {
       kind: "literal",
@@ -41,9 +38,7 @@ export function convertLiteralOrPrimitive(
     };
   } else if (type.flags & ts.TypeFlags.Number) {
     return (
-      narrowTypeFromValues(
-        ...context.clone({ type, decrementDepth: false })
-      ) || {
+      narrowTypeFromValues(context, type) || {
         kind: "primitive",
         name: "number",
         node: contextNode,
@@ -51,9 +46,7 @@ export function convertLiteralOrPrimitive(
     );
   } else if (type.flags & ts.TypeFlags.BigInt) {
     return (
-      narrowTypeFromValues(
-        ...context.clone({ type, decrementDepth: false })
-      ) || {
+      narrowTypeFromValues(context, type) || {
         kind: "primitive",
         name: "bigint",
         node: contextNode,
@@ -61,9 +54,7 @@ export function convertLiteralOrPrimitive(
     );
   } else if (type.flags & ts.TypeFlags.String) {
     return (
-      narrowTypeFromValues(
-        ...context.clone({ type, decrementDepth: false })
-      ) || {
+      narrowTypeFromValues(context, type) || {
         kind: "primitive",
         name: "string",
         node: contextNode,
@@ -71,9 +62,7 @@ export function convertLiteralOrPrimitive(
     );
   } else if (type.flags & ts.TypeFlags.Any) {
     return (
-      narrowTypeFromValues(
-        ...context.clone({ type, decrementDepth: false })
-      ) || {
+      narrowTypeFromValues(context, type) || {
         kind: "primitive",
         name: "any",
         node: contextNode,
@@ -87,9 +76,7 @@ export function convertLiteralOrPrimitive(
     };
   } else if (type.flags & ts.TypeFlags.Unknown) {
     return (
-      narrowTypeFromValues(
-        ...context.clone({ type, decrementDepth: false })
-      ) || {
+      narrowTypeFromValues(context, type) || {
         kind: "primitive",
         name: "unknown",
         node: contextNode,

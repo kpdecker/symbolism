@@ -8,24 +8,35 @@ import { SchemaError } from "../classify";
 export const jsxPathHandlers = nodeEvalHandler({
   [ts.SyntaxKind.JsxElement](node, context) {
     invariantNode(node, context.checker, ts.isJsxElement);
-    return getNodeSchema(
-      ...context.cloneNode({
-        node: node.openingElement,
-        decrementDepth: false,
-      })
-    );
+    return getNodeSchema({
+      context,
+      node: node.openingElement,
+      decrementDepth: false,
+    });
   },
   [ts.SyntaxKind.JsxOpeningElement](node, context) {
     invariantNode(node, context.checker, ts.isJsxOpeningElement);
-    return getNodeSchema(node.tagName, context);
+    return getNodeSchema({
+      context,
+      node: node.tagName,
+      decrementDepth: false,
+    });
   },
   [ts.SyntaxKind.JsxSelfClosingElement](node, context) {
     invariantNode(node, context.checker, ts.isJsxSelfClosingElement);
-    return getNodeSchema(node.tagName, context);
+    return getNodeSchema({
+      context,
+      node: node.tagName,
+      decrementDepth: false,
+    });
   },
   [ts.SyntaxKind.JsxClosingElement](node, context) {
     invariantNode(node, context.checker, ts.isJsxClosingElement);
-    return getNodeSchema(node.tagName, context);
+    return getNodeSchema({
+      context,
+      node: node.tagName,
+      decrementDepth: false,
+    });
   },
 
   [ts.SyntaxKind.JsxFragment]: checkerEval,
@@ -43,7 +54,11 @@ export const jsxPathHandlers = nodeEvalHandler({
   [ts.SyntaxKind.JsxExpression](node, context) {
     invariantNode(node, context.checker, ts.isJsxExpression);
     if (node.expression) {
-      return getNodeSchema(node.expression, context);
+      return getNodeSchema({
+        context,
+        node: node.expression,
+        decrementDepth: false,
+      });
     }
   },
 
@@ -56,7 +71,7 @@ export const jsxPathHandlers = nodeEvalHandler({
     node.properties.forEach((property) => {
       if (ts.isJsxSpreadAttribute(property)) {
         const spreadSchema = context.resolveSchema(
-          getNodeSchema(property, context)
+          getNodeSchema({ context, node: property, decrementDepth: false })
         );
         if (spreadSchema?.kind === "object") {
           Object.assign(properties, spreadSchema.properties);
@@ -68,7 +83,11 @@ export const jsxPathHandlers = nodeEvalHandler({
       } else {
         invariantNode(property, context.checker, ts.isJsxAttribute);
         properties[property.name.text] = property.initializer
-          ? getNodeSchema(property.initializer, context)!
+          ? getNodeSchema({
+              context,
+              node: property.initializer,
+              decrementDepth: false,
+            })!
           : { kind: "literal", value: true };
       }
     });
@@ -81,14 +100,20 @@ export const jsxPathHandlers = nodeEvalHandler({
   [ts.SyntaxKind.JsxAttribute](node, context) {
     invariantNode(node, context.checker, ts.isJsxAttribute);
     if (node.initializer) {
-      return getNodeSchema(
-        ...context.cloneNode({ node: node.initializer, decrementDepth: false })
-      );
+      return getNodeSchema({
+        context,
+        node: node.initializer,
+        decrementDepth: false,
+      });
     }
     return checkerEval(node, context);
   },
   [ts.SyntaxKind.JsxSpreadAttribute](node, context) {
     invariantNode(node, context.checker, ts.isJsxSpreadAttribute);
-    return getNodeSchema(node.expression, context);
+    return getNodeSchema({
+      context,
+      node: node.expression,
+      decrementDepth: false,
+    });
   },
 });

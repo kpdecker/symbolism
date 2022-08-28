@@ -44,34 +44,11 @@ export class SchemaContext {
   clone(
     params: {
       type: ts.Type;
-      node?: ts.Node;
-      decrementDepth: boolean;
-    } & TypeEvalOptions
-  ): [ts.Type, SchemaContext];
-  clone(
-    params: {
-      type?: undefined;
       node: ts.Node;
-      decrementDepth: boolean;
-    } & TypeEvalOptions
-  ): [ts.Type, SchemaContext];
-  clone(
-    params: {
-      type?: ts.Type;
-      node?: ts.Node;
       decrementDepth: boolean;
     } & TypeEvalOptions
   ) {
     let { node, type, decrementDepth, ...rest } = params;
-
-    invariant(node || type, "Either node or type must be provided");
-
-    if (!node) {
-      node = findContextNode(type!, this.contextNode);
-    }
-    if (!type) {
-      type = this.checker.getTypeAtLocation(node);
-    }
 
     const ret = new SchemaContext(node, this.checker, {
       ...this.options,
@@ -84,7 +61,7 @@ export class SchemaContext {
       ret.maxDepth--;
     }
 
-    return [type, ret] as const;
+    return ret;
   }
 
   cloneNode<T extends ts.Node>(
@@ -105,7 +82,7 @@ export class SchemaContext {
       ret.maxDepth--;
     }
 
-    return [node, ret] as const;
+    return ret;
   }
 
   protected cloneProps(newInstance: SchemaContext) {
@@ -158,15 +135,4 @@ export class CallContext extends SchemaContext {
     newInstance.symbols = this.symbols;
     newInstance.symbolsHandled = this.symbolsHandled.slice();
   }
-}
-
-function findContextNode(type: ts.Type, contextNode: ts.Node): ts.Node {
-  if (type.symbol) {
-    const declaration = getSymbolDeclaration(type.symbol);
-    if (declaration) {
-      return declaration;
-    }
-  }
-
-  return contextNode;
 }

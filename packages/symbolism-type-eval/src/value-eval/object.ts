@@ -1,7 +1,7 @@
 import { logDebug, NodeError } from "@symbolism/utils";
 import invariant from "tiny-invariant";
 import ts from "typescript";
-import { isConcreteSchema } from "../classify";
+import { isConcreteSchema, SchemaError } from "../classify";
 import { printSchema } from "../print/typescript";
 import { AnySchemaNode, ObjectSchema } from "../schema";
 import { SchemaContext } from "../context";
@@ -26,33 +26,38 @@ export const objectOperators = nodeEvalHandler({
     const symbol = getLocalSymbol(node, checker);
     const declaration = getSymbolDeclaration(symbol);
     if (declaration) {
-      return getNodeSchema(
-        ...context.cloneNode({ node: declaration, decrementDepth: false })
-      );
+      return getNodeSchema({
+        context,
+        node: declaration,
+        decrementDepth: false,
+      });
     }
   },
   [ts.SyntaxKind.SpreadAssignment](node, context) {
     invariantNode(node, context.checker, ts.isSpreadAssignment);
-    return getNodeSchema(
-      ...context.cloneNode({ node: node.expression, decrementDepth: false })
-    );
+    return getNodeSchema({
+      context,
+      node: node.expression,
+      decrementDepth: false,
+    });
   },
   [ts.SyntaxKind.ComputedPropertyName](node, context) {
     invariantNode(node, context.checker, ts.isComputedPropertyName);
-    return getNodeSchema(
-      ...context.cloneNode({ node: node.expression, decrementDepth: false })
-    );
+    return getNodeSchema({
+      context,
+      node: node.expression,
+      decrementDepth: false,
+    });
   },
 
   [ts.SyntaxKind.PropertyAccessExpression](node, context) {
     invariantNode(node, context.checker, ts.isPropertyAccessExpression);
-    return getNodeSchema(
-      ...context.cloneNode({
-        node: node.name,
-        decrementDepth: false,
-        allowMissing: false,
-      })
-    );
+    return getNodeSchema({
+      context,
+      node: node.name,
+      decrementDepth: false,
+      allowMissing: false,
+    });
   },
   [ts.SyntaxKind.ElementAccessExpression](node, context) {
     invariantNode(node, context.checker, ts.isElementAccessExpression);
@@ -76,13 +81,12 @@ function convertObjectLiteralValue(
   ): string[] | AnySchemaNode {
     const propertyName = ts.isComputedPropertyName(name)
       ? context.resolveSchema(
-          getNodeSchema(
-            ...context.cloneNode({
-              node: name.expression,
-              decrementDepth: true,
-              allowMissing: false,
-            })
-          )
+          getNodeSchema({
+            context,
+            node: name.expression,
+            decrementDepth: true,
+            allowMissing: false,
+          })
         )
       : name.text;
     invariant(propertyName, "Expected property name");
@@ -149,13 +153,12 @@ function convertObjectLiteralValue(
 
   node.properties.forEach((property) => {
     if (ts.isSpreadAssignment(property)) {
-      const spreadSchema = getNodeSchema(
-        ...context.cloneNode({
-          node: property.expression,
-          decrementDepth: true,
-          allowMissing: false,
-        })
-      )!;
+      const spreadSchema = getNodeSchema({
+        context,
+        node: property.expression,
+        decrementDepth: true,
+        allowMissing: false,
+      })!;
       spreadProperties(spreadSchema, property);
     } else if (
       ts.isPropertyAssignment(property) ||
@@ -163,24 +166,22 @@ function convertObjectLiteralValue(
       ts.isGetAccessorDeclaration(property) ||
       ts.isSetAccessorDeclaration(property)
     ) {
-      let schema = getNodeSchema(
-        ...context.cloneNode({
-          node: property,
-          decrementDepth: true,
-          allowMissing: false,
-        })
-      )!;
+      let schema = getNodeSchema({
+        context,
+        node: property,
+        decrementDepth: true,
+        allowMissing: false,
+      })!;
 
       setProperties(property.name, schema);
     } else if (ts.isShorthandPropertyAssignment(property)) {
       const propertyName = property.name.text;
-      const schema = getNodeSchema(
-        ...context.cloneNode({
-          node: property,
-          decrementDepth: true,
-          allowMissing: false,
-        })
-      )!;
+      const schema = getNodeSchema({
+        context,
+        node: property,
+        decrementDepth: true,
+        allowMissing: false,
+      })!;
 
       properties[propertyName] = schema;
     } else {
@@ -219,26 +220,24 @@ function convertElementAccessExpression(
   const { checker } = context;
 
   const parentSchema = context.resolveSchema(
-    getNodeSchema(
-      ...context.cloneNode({
-        node: node.expression,
-        decrementDepth: false,
-        allowMissing: true,
-      })
-    )
+    getNodeSchema({
+      context,
+      node: node.expression,
+      decrementDepth: false,
+      allowMissing: true,
+    })
   ) || {
     kind: "primitive",
     name: "any",
     node: node.expression,
   };
   const argumentSchema = context.resolveSchema(
-    getNodeSchema(
-      ...context.cloneNode({
-        node: node.argumentExpression,
-        decrementDepth: false,
-        allowMissing: true,
-      })
-    )
+    getNodeSchema({
+      context,
+      node: node.argumentExpression,
+      decrementDepth: false,
+      allowMissing: true,
+    })
   ) || {
     kind: "primitive",
     name: "any",
@@ -269,12 +268,11 @@ function convertElementAccessExpression(
       const property = parentType.getProperty(argValue);
       const propertyDeclaration = getSymbolDeclaration(property);
       if (propertyDeclaration) {
-        return getNodeSchema(
-          ...context.cloneNode({
-            node: propertyDeclaration,
-            decrementDepth: true,
-          })
-        );
+        return getNodeSchema({
+          context,
+          node: propertyDeclaration,
+          decrementDepth: true,
+        });
       }
     }
 
@@ -301,12 +299,11 @@ function convertElementAccessExpression(
         properties.map((property) => {
           const propertyDeclaration = getSymbolDeclaration(property);
           if (propertyDeclaration) {
-            const schema = getNodeSchema(
-              ...context.cloneNode({
-                node: propertyDeclaration,
-                decrementDepth: true,
-              })
-            );
+            const schema = getNodeSchema({
+              context,
+              node: propertyDeclaration,
+              decrementDepth: true,
+            });
             if (schema) {
               return schema;
             }
