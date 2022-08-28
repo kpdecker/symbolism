@@ -179,7 +179,11 @@ function convertCallLikeNode(node: ts.Node, context: SchemaContext) {
     if (!returnType) {
       throw new SchemaError("Expected function schema", functionSchema);
     }
-    return returnType;
+
+    return {
+      ...returnType,
+      node,
+    };
   }
 
   if (returnType) {

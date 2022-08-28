@@ -3,6 +3,7 @@ import { CallContext } from "../../context";
 import { parseSymbolTable } from "@symbolism/symbol-table";
 import { loadFunctionCalls } from "..";
 import { printCalls } from "../../print/calls";
+import { findIdentifiers } from "@symbolism/ts-utils";
 
 function testCall(source: string) {
   const program = mockProgram({
@@ -136,7 +137,7 @@ describe("call arguments lookup", () => {
   });
 
   it("should handle partially resolved calls in callbacks", () => {
-    const { checker, symbolTable, sourceFile } = testCall(`
+    const { checker, symbolTable } = testCall(`
       declare function foo(a: any): number;
 
       bar().then((bat) => {
@@ -155,7 +156,7 @@ describe("call arguments lookup", () => {
     `);
   });
   it("should handle being passed to a call", () => {
-    const { checker, symbolTable, sourceFile } = testCall(`
+    const { checker, symbolTable } = testCall(`
       declare function passed(a: any): number;
       declare function foo(a: any): number;
 
@@ -198,8 +199,47 @@ describe("call arguments lookup", () => {
     `);
   });
 
+  it("should resolve derived primitives", () => {
+    const { checker, symbolTable } = testCall(`
+      import i18n from "i18next";
+
+      declare const locale: string;
+
+      function callWithReturn(date: Date): string {
+        return date.toLocaleString(locale, { month: "long" });
+      }
+
+      const value = callWithReturn(notFound);
+      const property = locale.toLowerCase();
+      const noTrialCopy = i18n.t("t", {
+        month: value,
+        value,
+        prop: property,
+        property,
+      });
+    `);
+
+    const foo = symbolTable.lookup("TFunction", checker);
+    const calls = loadFunctionCalls(
+      foo[0],
+      new CallContext(foo[0], symbolTable, checker, {})
+    );
+    expect(printCalls(calls)).toMatchInlineSnapshot(`
+      "i18n.t(
+        \\"t\\",
+        arg as {
+          month: string;
+          prop: string;
+          property: string;
+          value: string;
+        }
+      );
+      "
+    `);
+  });
+
   it("should handle string templates", () => {
-    const { checker, symbolTable, sourceFile } = testCall(`
+    const { checker, symbolTable } = testCall(`
       declare const value: { bar: number };
       declare const obj: {foo: (a: any) => number};
 
@@ -230,7 +270,7 @@ describe("call arguments lookup", () => {
    * the call recursion.
    */
   it("should handle object literals with shorthand", () => {
-    const { checker, symbolTable, sourceFile } = testCall(`
+    const { checker, symbolTable } = testCall(`
       declare const foo: (value) => void;
 
       function bat(data: {
