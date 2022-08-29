@@ -286,11 +286,10 @@ function convertCall(
             const symbol = checker.getSymbolAtLocation(node.name)!;
             const parameterIndex = node.parent.parameters.indexOf(node);
 
-            const argument = call.arguments[parameterIndex];
+            const argument = context.resolveSchema(
+              call.arguments[parameterIndex]
+            );
             if (argument) {
-              if (argument.kind === "reference") {
-                throw new SchemaError("argument is reference", argument);
-              }
               symbolMap.set(symbol, argument);
             }
           }
