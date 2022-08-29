@@ -3,7 +3,7 @@ import ts, { findAncestor } from "typescript";
 import { AnySchemaNode } from "../schema";
 import { CallContext } from "../context";
 import { dumpNode, dumpSchema, dumpSymbol } from "@symbolism/ts-debug";
-import { areSchemasEqual, nonConcreteInputs } from "../classify";
+import { areSchemasEqual, nonConcreteInputs, SchemaError } from "../classify";
 import { getLocalSymbol, resolveSymbolsInSchema } from "../value-eval/symbol";
 import {
   logVerbose,
@@ -288,7 +288,9 @@ function convertCall(
 
             const argument = call.arguments[parameterIndex];
             if (argument) {
-              invariant(argument.kind !== "reference", "argument is reference");
+              if (argument.kind === "reference") {
+                throw new SchemaError("argument is reference", argument);
+              }
               symbolMap.set(symbol, argument);
             }
           }
