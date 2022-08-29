@@ -503,6 +503,61 @@ describe("type schema converter", () => {
         "
       `);
     });
+    it("should handle element lookup on primitive unions and intersections", () => {
+      const { context, sourceFile } = testType(`
+        declare const source: string;
+
+        let union: string & number;
+        const unionLookup = union[source];
+        const unionLookup2 = union["foo"];
+
+        let intersection: string & number;
+        const intersectionLookup = intersection[source];
+        const intersectionLookup2 = intersection["foo"];
+
+        enum Enum {
+          foo,
+          bar
+        }
+        const enumLookup = Enum[source];
+        const enumLookup2 = Enum["foo"];
+      `);
+
+      function testVar(name: string) {
+        const literalNode = findIdentifiers(sourceFile, name)[0];
+        const assignNode = literalNode.parent as ts.VariableDeclaration;
+        return printSchema(
+          evaluateSchema(assignNode.initializer!, context.checker)
+        )!;
+      }
+
+      expect(testVar("unionLookup")).toMatchInlineSnapshot(`
+        "never;
+        "
+      `);
+      expect(testVar("unionLookup2")).toMatchInlineSnapshot(`
+        "never;
+        "
+      `);
+
+      expect(testVar("intersectionLookup")).toMatchInlineSnapshot(`
+        "never;
+        "
+      `);
+      expect(testVar("intersectionLookup2")).toMatchInlineSnapshot(`
+        "never;
+        "
+      `);
+
+      expect(testVar("enumLookup")).toMatchInlineSnapshot(`
+        "never;
+        "
+      `);
+      expect(testVar("enumLookup2")).toMatchInlineSnapshot(`
+        "never;
+        "
+      `);
+    });
   });
 
   it("should handle any spreads in object literals", () => {

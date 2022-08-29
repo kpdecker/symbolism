@@ -11,7 +11,7 @@ import { getNodeSchema } from ".";
 import { nodeEvalHandler, variableLike } from "./handlers";
 import { getSymbolDeclaration, invariantNode } from "@symbolism/ts-utils";
 import { getLocalSymbol } from "./symbol";
-import { undefinedSchema } from "../well-known-schemas";
+import { neverSchema, undefinedSchema } from "../well-known-schemas";
 
 export const objectOperators = nodeEvalHandler({
   [ts.SyntaxKind.ObjectLiteralExpression](node, context) {
@@ -287,7 +287,7 @@ function convertElementAccessExpression(
   } else if (parentSchema.kind === "array") {
     return parentSchema.items;
   } else if (parentSchema.kind === "primitive") {
-    if (parentSchema.name === "any") {
+    if (parentSchema.name === "any" || parentSchema.name === "never") {
       return parentSchema;
     }
 
@@ -339,14 +339,33 @@ function convertElementAccessExpression(
 
       return undefinedSchema;
     }
-    return argumentSchema;
+
+    return neverSchema;
   } else if (parentSchema.kind === "union") {
-    if (argumentSchema.kind === "primitive") {
-      const properties = unionProperties(parentSchema);
-      return createUnionKind(Object.values(properties));
+    // If we are primitive types only, return the identity.
+    // This case can occur when working with enums as they eval to a union of primitives.
+    if (parentSchema.items.find((item) => item.kind === "literal")) {
+      return neverSchema;
     }
 
-    return argumentSchema;
+    if (
+      argumentSchema.kind === "primitive" ||
+      argumentSchema.kind === "literal"
+    ) {
+      const properties = unionProperties(parentSchema);
+
+      if (argumentSchema.kind === "primitive") {
+        return createUnionKind(Object.values(properties));
+      } else {
+        const argValue = argumentSchema.value + "";
+        const property = properties[argValue];
+        if (property) {
+          return property;
+        }
+      }
+    }
+
+    return neverSchema;
   }
 
   if (!context.options.allowMissing) {
