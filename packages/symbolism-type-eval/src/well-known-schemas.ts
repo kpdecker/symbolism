@@ -37,6 +37,7 @@ export const tooMuchRecursionSchema: Readonly<ReferenceSchema> = {
   name: "tooMuchRecursion",
   parameters: [],
   typeId: "tooMuchRecursion" as TypeId,
+  friendlyTypeId: "tooMuchRecursion" as TypeId,
 };
 
 export const wellKnownReferences = [

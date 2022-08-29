@@ -136,6 +136,7 @@ function convertFunctionLikeNode(node: ts.Node, context: SchemaContext) {
       returnType = createReferenceSchema(
         "Promise",
         [returnType],
+        `Promise<${printSchemaNode(returnType)}>` as TypeId,
         `Promise<${printSchemaNode(returnType)}>` as TypeId
       );
     }

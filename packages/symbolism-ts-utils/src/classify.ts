@@ -3,6 +3,7 @@ import ts from "typescript";
 import type { Opaque } from "type-fest";
 
 import { getSymbolDeclaration } from "./lookup";
+import { relative } from "path";
 
 export function invariantNode<T extends ts.Node>(
   node: ts.Node,
@@ -169,15 +170,19 @@ export function getTypeName(
 
   return name;
 }
-export function getTypeId(type: ts.Type, checker: ts.TypeChecker): TypeId {
+export function getTypeId(
+  type: ts.Type,
+  checker: ts.TypeChecker,
+  requireUnique: boolean
+): TypeId {
   const symbolDeclaration = getSymbolDeclaration(type.symbol);
 
   // Always scope to the local file.
+  const sourceFile = symbolDeclaration?.getSourceFile().fileName;
   const fileNameSpace =
-    symbolDeclaration?.getSourceFile().fileName ?? "no declaration";
+    requireUnique && sourceFile ? `/* ${relative(",", sourceFile)} */ ` : "";
 
   return (fileNameSpace +
-    ":" +
     checker.typeToString(
       type,
       symbolDeclaration,

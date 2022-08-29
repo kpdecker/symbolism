@@ -101,6 +101,7 @@ export interface ReferenceSchema extends SchemaNode {
   // Fully resolved type name, per typescript. This is used to
   // track resolves types for generics.
   typeId: TypeId;
+  friendlyTypeId: TypeId;
 }
 
 export interface ErrorSchema extends SchemaNode {
@@ -125,6 +126,7 @@ export type AnySchemaNode =
 
 export type Schema = {
   defs?: Map<string, AnySchemaNode>;
+  friendlyNames?: Record<string, string>;
   root: AnySchemaNode | undefined;
 };
 
@@ -132,13 +134,15 @@ export function evaluateSchema(node: ts.Node, checker: ts.TypeChecker): Schema {
   const context = new SchemaContext(node, checker, {});
   const root = getNodeSchema({ context, node, decrementDepth: false });
   return filterDefs({
-    defs: context.typeDefinitions,
+    defs: new Map(context.typeDefinitions),
+    friendlyNames: {},
     root,
   });
 }
 
 function filterDefs(schema: Schema) {
   const referenceCount: Record<string, number> = {};
+  const friendlyNames: Record<string, string> = {};
 
   let { defs, root } = schema;
 
@@ -176,8 +180,22 @@ function filterDefs(schema: Schema) {
     }
   }
 
+  // Use "fully qualified" names if there are conflicts
+  defs?.forEach((needleDef, needleId) => {
+    const nameConflicts = Array.from(defs?.entries() || []).filter(
+      ([hayId, hayDef]) =>
+        needleDef !== hayDef && friendlyNames[hayId] === friendlyNames[needleId]
+    );
+    if (nameConflicts.length) {
+      nameConflicts.forEach(([hayId, hay]) => {
+        friendlyNames[hayId] = hayId;
+      });
+    }
+  });
+
   return {
     defs,
+    friendlyNames,
     root: root && inlineReferences(root),
   };
 
@@ -228,6 +246,7 @@ function filterDefs(schema: Schema) {
       case "reference":
         referenceCount[schema.typeId] ||= 0;
         referenceCount[schema.typeId]++;
+        friendlyNames[schema.typeId] = schema.friendlyTypeId;
         return [schema.typeId];
 
       default:
@@ -312,12 +331,14 @@ function filterDefs(schema: Schema) {
 export function createReferenceSchema(
   name: string,
   parameters: ReferenceSchema["parameters"],
-  typeId: TypeId
+  typeId: TypeId,
+  friendlyTypeId: TypeId
 ): AnySchemaNode {
   return {
     kind: "reference",
     name,
     parameters,
     typeId,
+    friendlyTypeId,
   };
 }

@@ -14,7 +14,9 @@ export function printSchema(
   }
   const defs = Array.from(schema.defs ? schema.defs.entries() : [])
     .map(([typeName, node]) => {
-      return `type ${typeName} = ${safeTypeFormat(
+      return `type ${
+        schema.friendlyNames?.[typeName] ?? typeName
+      } = ${safeTypeFormat(
         printSchemaNode(node, target),
         node,
         target === "js"

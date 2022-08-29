@@ -14,7 +14,6 @@ import {
   isNamedType,
   isThisTypeParameter,
   isTupleTypeReference,
-  isTypeReference,
 } from "@symbolism/ts-utils";
 import { logDebug, NodeError } from "@symbolism/utils";
 import invariant from "tiny-invariant";
@@ -92,7 +91,7 @@ export function getTypeSchema(
 
   const canEmitDef = isNamedType(type, checker);
 
-  const typeId = getTypeId(type, checker);
+  const typeId = getTypeId(type, checker, true);
   const typeName = getTypeName(type, checker);
   const existingDef = typeId && context.typeDefinitions.get(typeId);
 
@@ -150,7 +149,7 @@ function getTypeSchemaWorker(
   type: ts.Type,
   context: SchemaContext
 ): AnySchemaNode {
-  const { contextNode, checker, typesHandled } = context;
+  const { contextNode, checker } = context;
   try {
     if (type.flags & ts.TypeFlags.TypeParameter) {
       return getTypeSchema({
@@ -405,7 +404,8 @@ export function createReferenceFromType(
   context: SchemaContext,
   definitionSchema?: AnySchemaNode
 ): AnySchemaNode | undefined {
-  const typeId = getTypeId(type, context.checker);
+  const typeId = getTypeId(type, context.checker, true);
+  const friendlyTypeId = getTypeId(type, context.checker, false);
   const typeName = getTypeName(type, context.checker);
 
   const aliasSymbol = type.aliasSymbol;
@@ -437,7 +437,7 @@ export function createReferenceFromType(
   if (!typeName) {
     return undefined;
   }
-  return createReferenceSchema(typeName, parameters, typeId);
+  return createReferenceSchema(typeName, parameters, typeId, friendlyTypeId);
 }
 
 function findContextNode(type: ts.Type, contextNode: ts.Node): ts.Node {
