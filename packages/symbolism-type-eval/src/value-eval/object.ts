@@ -133,13 +133,17 @@ function convertObjectLiteralValue(
         key: spreadSchema,
         value: spreadSchema,
       });
-    } else if (spreadSchema.kind === "literal") {
-      /* NOP */
     } else if (spreadSchema.kind === "union") {
       // TODO: Consider expanding the union vs. inlining all props?
       spreadSchema.items.forEach((item) => {
         spreadProperties(item, node);
       });
+    } else if (
+      spreadSchema.kind === "primitive" ||
+      spreadSchema.kind === "literal" ||
+      spreadSchema.kind === "template-literal"
+    ) {
+      /* NOP */
     } else {
       throw new NodeError(
         `Spread not impl ${spreadSchema.kind} ${printSchema({
