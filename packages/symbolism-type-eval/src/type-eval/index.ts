@@ -141,7 +141,12 @@ Existing: ${dumpSchema(existingDef)}`,
     context.typeDefinitions.set(typeId, ret);
   }
 
-  context.typeCache.set(type, ret);
+  // Cache if we are dealing with an instantiated type.
+  // Caching the results of primitives, etc can result in incorrect
+  // mappings due to contextNode varying for the intrinsic singletons.
+  if (!isIntrinsicType(type)) {
+    context.typeCache.set(type, ret);
+  }
 
   return ret;
 }
