@@ -48,6 +48,15 @@ export function variableLike(
   );
 
   if (ts.isBindingElement(node)) {
+    // Use checker to handle rest declarations
+    if (
+      node.dotDotDotToken &&
+      (ts.isArrayBindingPattern(node.parent) ||
+        ts.isObjectBindingPattern(node.parent))
+    ) {
+      return getTypeSchema({ context, node, decrementDepth: false });
+    }
+
     const schema = context.resolveSchema(
       getNodeSchema({ context, node: node.parent, decrementDepth: false })
     );
@@ -61,14 +70,7 @@ export function variableLike(
     } else if (schema?.kind === "tuple") {
       return schema.items[propertyName as any];
     } else if (schema?.kind === "object") {
-      if (!(propertyName in schema.properties)) {
-        throw new SchemaError(
-          'Unknown property "' + propertyName + '"',
-          schema
-        );
-      }
-
-      return schema.properties[propertyName];
+      return schema.properties[propertyName] || neverSchema;
     } else {
       return neverSchema;
     }

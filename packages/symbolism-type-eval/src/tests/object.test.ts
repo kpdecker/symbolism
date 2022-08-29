@@ -4,7 +4,6 @@ import { printSchema } from "../print/typescript";
 import { SchemaContext } from "../context";
 import ts from "typescript";
 import { createJsonSchema } from "../print/json";
-import { getNodeSchema } from "../value-eval";
 import { evaluateSchema } from "../schema";
 import { getTypeSchema } from "../type-eval";
 
@@ -504,5 +503,38 @@ describe("type schema converter", () => {
         "
       `);
     });
+  });
+
+  it("should handle any spreads in object literals", () => {
+    const { context, sourceFile } = testType(`
+        declare const source: any;
+        const literal = {
+            blat: "yes",
+            foo: "bar",
+        }
+
+        const { foo, baz, ...rest } = literal;
+      `);
+
+    const fooNode = findIdentifiers(sourceFile, "foo")[1];
+    expect(printSchema(evaluateSchema(fooNode, context.checker)))
+      .toMatchInlineSnapshot(`
+      "\\"bar\\";
+      "
+    `);
+
+    const bazNode = findIdentifiers(sourceFile, "baz")[0];
+    expect(printSchema(evaluateSchema(bazNode, context.checker)))
+      .toMatchInlineSnapshot(`
+      "never;
+      "
+    `);
+
+    const restNode = findIdentifiers(sourceFile, "rest")[0];
+    expect(printSchema(evaluateSchema(restNode, context.checker)))
+      .toMatchInlineSnapshot(`
+      "{ blat: string };
+      "
+    `);
   });
 });
