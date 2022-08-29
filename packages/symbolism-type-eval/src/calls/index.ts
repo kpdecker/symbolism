@@ -137,7 +137,16 @@ function convertCall(
             declaration: getSymbolDeclaration(symbol),
           };
         }
-        logWarn("Could not find symbol for input", dumpNode(input, checker));
+
+        const type = checker.getTypeAtLocation(input);
+        if (type.flags & ts.TypeFlags.Any) {
+          return undefined!;
+        }
+
+        if (!ts.isCallExpression(input)) {
+          logWarn("Could not find symbol for input", dumpNode(input, checker));
+        }
+
         return undefined!;
       })
       .filter(Boolean);
