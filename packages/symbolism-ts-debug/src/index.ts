@@ -2,13 +2,10 @@ import type { defineSymbol } from "@symbolism/definitions";
 import type { AnySchemaNode } from "@symbolism/type-eval";
 
 import { getNodePath } from "@symbolism/paths";
-import {
-  isIntrinsicType,
-  isTypeReference,
-  lineAndColumn,
-} from "@symbolism/ts-utils";
+import { isIntrinsicType, isTypeReference } from "@symbolism/ts-utils";
 import invariant from "tiny-invariant";
 import ts, { ObjectType } from "typescript";
+import { relative } from "path";
 
 export function dumpFlags(
   flags: number | undefined,
@@ -43,17 +40,9 @@ export function dumpDefinition(
     return inferred;
   }
   const symbol = dumpSymbol(inferred!.symbol, checker);
-  const declarations = symbol?.declaration.map((x) => {
-    return {
-      ...x,
-      fileName: x?.fileName.includes("node_modules")
-        ? x.fileName.replace(/.*\/node_modules\//, "")
-        : x?.fileName,
-    };
-  });
   return {
     type: checker.typeToString(inferred?.type!),
-    symbol: declarations,
+    symbol: symbol?.declaration,
   };
 }
 
@@ -78,19 +67,15 @@ export function dumpSymbol(
       declarationDump.push({
         kind: "transient",
         name: name,
-        fileName: "transient",
+        location: "transient",
         path: name,
-        line: 1,
-        column: 1,
       });
     } else if (isIntrinsicType(checker.getDeclaredTypeOfSymbol(symbol))) {
       declarationDump.push({
         kind: "keyword",
         name: name,
-        fileName: "intrinsic",
+        location: "intrinsic",
         path: name,
-        line: 1,
-        column: 1,
       });
     }
   }
@@ -124,8 +109,12 @@ export function dumpNode(
     kind: ts.SyntaxKind[node.kind],
     name: "",
     path: !omitPath ? getNodePath(node, checker) : "",
-    fileName,
-    ...lineAndColumn(lineAndChar),
+    location:
+      relative(".", fileName) +
+      ":" +
+      (lineAndChar.line + 1) +
+      ":" +
+      (lineAndChar.character + 1),
   };
 
   let name = node.getText().split(/\n/g)[0];

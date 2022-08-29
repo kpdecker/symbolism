@@ -18,19 +18,15 @@ describe("infer statements", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 1,
-            "fileName": "typescript/lib/lib.es5.d.ts",
             "kind": "InterfaceDeclaration",
-            "line": 1027,
+            "location": "node_modules/typescript/lib/lib.es5.d.ts:1027:1",
             "name": "interface Error {
       ",
             "path": "Error",
           },
           Object {
-            "column": 13,
-            "fileName": "typescript/lib/lib.es5.d.ts",
             "kind": "VariableDeclaration",
-            "line": 1039,
+            "location": "node_modules/typescript/lib/lib.es5.d.ts:1039:13",
             "name": "Error: ErrorConstructor",
             "path": "Error",
           },

@@ -28,10 +28,8 @@ describe("well known", () => {
     const definition = defineSymbol(nodes[0], checker);
     expect(dumpNode(nodes[0], checker)).toMatchInlineSnapshot(`
       Object {
-        "column": 8,
-        "fileName": "test.tsx",
         "kind": "Identifier",
-        "line": 4,
+        "location": "test.tsx:4:8",
         "name": "then",
         "path": "Promise.then",
       }
@@ -40,10 +38,8 @@ describe("well known", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 5,
-            "fileName": "typescript/lib/lib.es5.d.ts",
             "kind": "MethodSignature",
-            "line": 1508,
+            "location": "node_modules/typescript/lib/lib.es5.d.ts:1508:5",
             "name": "then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): Promise<TResult1 | TResult2>;",
             "path": "Promise.then",
           },
@@ -57,10 +53,8 @@ describe("well known", () => {
     const definition = defineSymbol(nodes[1], checker);
     expect(dumpNode(nodes[1], checker)).toMatchInlineSnapshot(`
       Object {
-        "column": 13,
-        "fileName": "test.tsx",
         "kind": "Identifier",
-        "line": 13,
+        "location": "test.tsx:13:13",
         "name": "then",
         "path": "then",
       }
@@ -69,10 +63,8 @@ describe("well known", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 5,
-            "fileName": "typescript/lib/lib.es5.d.ts",
             "kind": "MethodSignature",
-            "line": 1508,
+            "location": "node_modules/typescript/lib/lib.es5.d.ts:1508:5",
             "name": "then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): Promise<TResult1 | TResult2>;",
             "path": "Promise.then",
           },
@@ -87,10 +79,8 @@ describe("well known", () => {
 
     expect(dumpNode(nodes[0], checker)).toMatchInlineSnapshot(`
       Object {
-        "column": 10,
-        "fileName": "test.tsx",
         "kind": "Identifier",
-        "line": 8,
+        "location": "test.tsx:8:10",
         "name": "parse",
         "path": "JSON.parse",
       }
@@ -100,10 +90,8 @@ describe("well known", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 5,
-            "fileName": "typescript/lib/lib.es5.d.ts",
             "kind": "MethodSignature",
-            "line": 1114,
+            "location": "node_modules/typescript/lib/lib.es5.d.ts:1114:5",
             "name": "parse(text: string, reviver?: (this: any, key: string, value: any) => any): any;",
             "path": "JSON.parse",
           },
@@ -114,10 +102,8 @@ describe("well known", () => {
 
     expect(dumpNode(nodes[1], checker)).toMatchInlineSnapshot(`
       Object {
-        "column": 15,
-        "fileName": "test.tsx",
         "kind": "Identifier",
-        "line": 11,
+        "location": "test.tsx:11:15",
         "name": "parse",
         "path": "JSON.parse",
       }
@@ -127,10 +113,8 @@ describe("well known", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 5,
-            "fileName": "typescript/lib/lib.es5.d.ts",
             "kind": "MethodSignature",
-            "line": 1114,
+            "location": "node_modules/typescript/lib/lib.es5.d.ts:1114:5",
             "name": "parse(text: string, reviver?: (this: any, key: string, value: any) => any): any;",
             "path": "JSON.parse",
           },

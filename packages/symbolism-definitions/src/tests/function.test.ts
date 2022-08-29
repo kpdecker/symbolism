@@ -21,10 +21,8 @@ describe("infer functions", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 15,
-            "fileName": "test.ts",
             "kind": "VariableDeclaration",
-            "line": 2,
+            "location": "test.ts:2:15",
             "name": "foo = function() {}",
             "path": "foo",
           },
@@ -40,10 +38,8 @@ describe("infer functions", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 15,
-            "fileName": "test.ts",
             "kind": "VariableDeclaration",
-            "line": 2,
+            "location": "test.ts:2:15",
             "name": "foo = function() {}",
             "path": "foo",
           },
@@ -97,10 +93,8 @@ describe("infer functions", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 31,
-            "fileName": "test.ts",
             "kind": "PropertySignature",
-            "line": 2,
+            "location": "test.ts:2:31",
             "name": "foo: string",
             "path": "ExplicitType.foo",
           },
@@ -115,10 +109,8 @@ describe("infer functions", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 31,
-            "fileName": "test.ts",
             "kind": "PropertySignature",
-            "line": 2,
+            "location": "test.ts:2:31",
             "name": "foo: string",
             "path": "ExplicitType.foo",
           },
@@ -133,10 +125,8 @@ describe("infer functions", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 31,
-            "fileName": "test.ts",
             "kind": "PropertySignature",
-            "line": 2,
+            "location": "test.ts:2:31",
             "name": "foo: string",
             "path": "ExplicitType.foo",
           },
@@ -151,10 +141,8 @@ describe("infer functions", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 31,
-            "fileName": "test.ts",
             "kind": "PropertySignature",
-            "line": 2,
+            "location": "test.ts:2:31",
             "name": "foo: string",
             "path": "ExplicitType.foo",
           },

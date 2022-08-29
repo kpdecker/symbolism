@@ -41,10 +41,8 @@ describe("objects", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 7,
-            "fileName": "test.tsx",
             "kind": "MethodDeclaration",
-            "line": 3,
+            "location": "test.tsx:3:7",
             "name": "methodDeclare() {}",
             "path": "untypedObject.methodDeclare",
           },
@@ -59,10 +57,8 @@ describe("objects", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 7,
-            "fileName": "test.tsx",
             "kind": "MethodDeclaration",
-            "line": 3,
+            "location": "test.tsx:3:7",
             "name": "methodDeclare() {}",
             "path": "untypedObject.methodDeclare",
           },
@@ -80,18 +76,14 @@ describe("objects", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 7,
-            "fileName": "test.tsx",
             "kind": "GetAccessor",
-            "line": 5,
+            "location": "test.tsx:5:7",
             "name": "get getter() {}",
             "path": "untypedObject.getter",
           },
           Object {
-            "column": 7,
-            "fileName": "test.tsx",
             "kind": "SetAccessor",
-            "line": 6,
+            "location": "test.tsx:6:7",
             "name": "set getter() {}",
             "path": "untypedObject.getter",
           },
@@ -106,18 +98,14 @@ describe("objects", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 7,
-            "fileName": "test.tsx",
             "kind": "GetAccessor",
-            "line": 5,
+            "location": "test.tsx:5:7",
             "name": "get getter() {}",
             "path": "untypedObject.getter",
           },
           Object {
-            "column": 7,
-            "fileName": "test.tsx",
             "kind": "SetAccessor",
-            "line": 6,
+            "location": "test.tsx:6:7",
             "name": "set getter() {}",
             "path": "untypedObject.getter",
           },
@@ -132,18 +120,14 @@ describe("objects", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 7,
-            "fileName": "test.tsx",
             "kind": "GetAccessor",
-            "line": 5,
+            "location": "test.tsx:5:7",
             "name": "get getter() {}",
             "path": "untypedObject.getter",
           },
           Object {
-            "column": 7,
-            "fileName": "test.tsx",
             "kind": "SetAccessor",
-            "line": 6,
+            "location": "test.tsx:6:7",
             "name": "set getter() {}",
             "path": "untypedObject.getter",
           },
@@ -158,18 +142,14 @@ describe("objects", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 7,
-            "fileName": "test.tsx",
             "kind": "GetAccessor",
-            "line": 5,
+            "location": "test.tsx:5:7",
             "name": "get getter() {}",
             "path": "untypedObject.getter",
           },
           Object {
-            "column": 7,
-            "fileName": "test.tsx",
             "kind": "SetAccessor",
-            "line": 6,
+            "location": "test.tsx:6:7",
             "name": "set getter() {}",
             "path": "untypedObject.getter",
           },

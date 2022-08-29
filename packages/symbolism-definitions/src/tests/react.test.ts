@@ -63,10 +63,8 @@ describe("react", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 15,
-            "fileName": "@emotion/styled/types/index.d.ts",
             "kind": "VariableDeclaration",
-            "line": 31,
+            "location": "node_modules/@emotion/styled/types/index.d.ts:31:15",
             "name": "styled: CreateStyled",
             "path": "styled",
           },
@@ -86,10 +84,8 @@ describe("react", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 11,
-            "fileName": "test.tsx",
             "kind": "VariableDeclaration",
-            "line": 5,
+            "location": "test.tsx:5:11",
             "name": "SimpleTemplate = styled.div\`",
             "path": "SimpleTemplate",
           },
@@ -109,10 +105,8 @@ describe("react", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 11,
-            "fileName": "test.tsx",
             "kind": "VariableDeclaration",
-            "line": 9,
+            "location": "test.tsx:9:11",
             "name": "GenericTemplate = styled.div<{ myProp: number }>\`",
             "path": "GenericTemplate",
           },
@@ -128,10 +122,8 @@ describe("react", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 9,
-            "fileName": "test.tsx",
             "kind": "ArrowFunction",
-            "line": 11,
+            "location": "test.tsx:11:9",
             "name": "({ myProp }) => myProp",
             "path": "GenericTemplate.=>",
           },
@@ -144,10 +136,8 @@ describe("react", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 42,
-            "fileName": "test.tsx",
             "kind": "PropertySignature",
-            "line": 9,
+            "location": "test.tsx:9:42",
             "name": "myProp: number",
             "path": "GenericTemplate.myProp",
           },
@@ -163,10 +153,8 @@ describe("react", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 42,
-            "fileName": "test.tsx",
             "kind": "PropertySignature",
-            "line": 9,
+            "location": "test.tsx:9:42",
             "name": "myProp: number",
             "path": "GenericTemplate.myProp",
           },
@@ -182,10 +170,8 @@ describe("react", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 11,
-            "fileName": "test.tsx",
             "kind": "VariableDeclaration",
-            "line": 15,
+            "location": "test.tsx:15:11",
             "name": "foo = (",
             "path": "foo",
           },
@@ -198,10 +184,8 @@ describe("react", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 11,
-            "fileName": "test.tsx",
             "kind": "VariableDeclaration",
-            "line": 15,
+            "location": "test.tsx:15:11",
             "name": "foo = (",
             "path": "foo",
           },
@@ -218,10 +202,8 @@ describe("react", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 11,
-            "fileName": "test.tsx",
             "kind": "VariableDeclaration",
-            "line": 23,
+            "location": "test.tsx:23:11",
             "name": "bat = { Bar }",
             "path": "bat",
           },
@@ -238,10 +220,8 @@ describe("react", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 5,
-            "fileName": "test.tsx",
             "kind": "FunctionDeclaration",
-            "line": 25,
+            "location": "test.tsx:25:5",
             "name": "MyComponent",
             "path": "MyComponent",
           },
@@ -258,10 +238,8 @@ describe("react", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 19,
-            "fileName": "test.tsx",
             "kind": "ShorthandPropertyAssignment",
-            "line": 23,
+            "location": "test.tsx:23:19",
             "name": "Bar",
             "path": "bat.Bar",
           },
@@ -279,10 +257,8 @@ describe("react", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 13,
-            "fileName": "@types/react/index.d.ts",
             "kind": "PropertySignature",
-            "line": 3171,
+            "location": "node_modules/@types/react/index.d.ts:3171:13",
             "name": "div: React.DetailedHTMLProps<React.HTMLAttributes<HTMLDivElement>, HTMLDivElement>;",
             "path": "global.JSX.IntrinsicElements.div",
           },
@@ -322,10 +298,8 @@ describe("react", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 53,
-            "fileName": "test.tsx",
             "kind": "PropertySignature",
-            "line": 36,
+            "location": "test.tsx:36:53",
             "name": "children: ReactNode;",
             "path": "WithInlineProps.children",
           },
@@ -340,10 +314,8 @@ describe("react", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 53,
-            "fileName": "test.tsx",
             "kind": "PropertySignature",
-            "line": 36,
+            "location": "test.tsx:36:53",
             "name": "children: ReactNode;",
             "path": "WithInlineProps.children",
           },
@@ -358,10 +330,8 @@ describe("react", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 53,
-            "fileName": "test.tsx",
             "kind": "PropertySignature",
-            "line": 36,
+            "location": "test.tsx:36:53",
             "name": "children: ReactNode;",
             "path": "WithInlineProps.children",
           },
@@ -378,10 +348,8 @@ describe("react", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 48,
-            "fileName": "test.tsx",
             "kind": "JsxAttribute",
-            "line": 30,
+            "location": "test.tsx:30:48",
             "name": "ignore-prop",
             "path": "GenericTemplate.ignore-prop",
           },
@@ -400,10 +368,8 @@ describe("react", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 36,
-            "fileName": "test.tsx",
             "kind": "BindingElement",
-            "line": 43,
+            "location": "test.tsx:43:36",
             "name": "anyProp",
             "path": "WithAnyProps.anyProp",
           },
@@ -418,10 +384,8 @@ describe("react", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 36,
-            "fileName": "test.tsx",
             "kind": "BindingElement",
-            "line": 43,
+            "location": "test.tsx:43:36",
             "name": "anyProp",
             "path": "WithAnyProps.anyProp",
           },
@@ -436,10 +400,8 @@ describe("react", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 36,
-            "fileName": "test.tsx",
             "kind": "BindingElement",
-            "line": 43,
+            "location": "test.tsx:43:36",
             "name": "anyProp",
             "path": "WithAnyProps.anyProp",
           },

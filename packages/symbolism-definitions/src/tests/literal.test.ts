@@ -25,10 +25,8 @@ describe("infer object literal types", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 29,
-            "fileName": "test.ts",
             "kind": "TypeLiteral",
-            "line": 2,
+            "location": "test.ts:2:29",
             "name": "{ foo: string }",
             "path": "ExplicitType",
           },
@@ -62,10 +60,8 @@ describe("infer object literal types", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 29,
-            "fileName": "test.ts",
             "kind": "TypeLiteral",
-            "line": 2,
+            "location": "test.ts:2:29",
             "name": "{ foo: string }",
             "path": "ExplicitType",
           },
@@ -98,10 +94,8 @@ describe("infer object literal types", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 29,
-            "fileName": "test.ts",
             "kind": "TypeLiteral",
-            "line": 2,
+            "location": "test.ts:2:29",
             "name": "{ foo: string }",
             "path": "ExplicitType",
           },
@@ -115,10 +109,8 @@ describe("infer object literal types", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 29,
-            "fileName": "test.ts",
             "kind": "TypeLiteral",
-            "line": 2,
+            "location": "test.ts:2:29",
             "name": "{ foo: string }",
             "path": "ExplicitType",
           },
@@ -155,10 +147,8 @@ describe("infer object literal types", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 29,
-            "fileName": "test.ts",
             "kind": "TypeLiteral",
-            "line": 2,
+            "location": "test.ts:2:29",
             "name": "{ foo: {bar: string}[] }",
             "path": "ExplicitType",
           },
@@ -172,10 +162,8 @@ describe("infer object literal types", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 31,
-            "fileName": "test.ts",
             "kind": "PropertySignature",
-            "line": 2,
+            "location": "test.ts:2:31",
             "name": "foo: {bar: string}[]",
             "path": "ExplicitType.foo",
           },
@@ -212,10 +200,8 @@ describe("infer object literal types", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 29,
-            "fileName": "test.ts",
             "kind": "TypeLiteral",
-            "line": 2,
+            "location": "test.ts:2:29",
             "name": "{ foo: {bar: string[]} }",
             "path": "ExplicitType",
           },
@@ -229,10 +215,8 @@ describe("infer object literal types", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 31,
-            "fileName": "test.ts",
             "kind": "PropertySignature",
-            "line": 2,
+            "location": "test.ts:2:31",
             "name": "foo: {bar: string[]}",
             "path": "ExplicitType.foo",
           },
@@ -262,10 +246,8 @@ describe("infer object literal types", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 30,
-            "fileName": "test.ts",
             "kind": "TypeLiteral",
-            "line": 2,
+            "location": "test.ts:2:30",
             "name": "{ foo: string }",
             "path": "ExplicitType",
           },
@@ -292,10 +274,8 @@ describe("infer object literal types", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 13,
-            "fileName": "typescript/lib/lib.dom.d.ts",
             "kind": "VariableDeclaration",
-            "line": 17177,
+            "location": "node_modules/typescript/lib/lib.dom.d.ts:17177:13",
             "name": "console: Console",
             "path": "console",
           },
@@ -321,10 +301,8 @@ describe("infer object literal types", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 1,
-            "fileName": "transient",
             "kind": "transient",
-            "line": 1,
+            "location": "transient",
             "name": "length",
             "path": "length",
           },

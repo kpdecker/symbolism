@@ -25,10 +25,8 @@ describe("infer call parameter type", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 1,
-            "fileName": "intrinsic",
             "kind": "keyword",
-            "line": 1,
+            "location": "intrinsic",
             "name": "undefined",
             "path": "undefined",
           },
@@ -42,10 +40,8 @@ describe("infer call parameter type", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 29,
-            "fileName": "test.ts",
             "kind": "TypeLiteral",
-            "line": 2,
+            "location": "test.ts:2:29",
             "name": "{ foo: string }",
             "path": "ExplicitType",
           },
@@ -73,10 +69,8 @@ describe("infer call parameter type", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 1,
-            "fileName": "intrinsic",
             "kind": "keyword",
-            "line": 1,
+            "location": "intrinsic",
             "name": "undefined",
             "path": "undefined",
           },
@@ -90,10 +84,8 @@ describe("infer call parameter type", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 29,
-            "fileName": "test.ts",
             "kind": "TypeLiteral",
-            "line": 2,
+            "location": "test.ts:2:29",
             "name": "{ foo: string }",
             "path": "ExplicitType",
           },

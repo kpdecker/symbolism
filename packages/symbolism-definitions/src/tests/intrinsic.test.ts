@@ -6,10 +6,8 @@ describe("infer intrinsic types", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 1,
-            "fileName": "intrinsic",
             "kind": "keyword",
-            "line": 1,
+            "location": "intrinsic",
             "name": "undefined",
             "path": "undefined",
           },
@@ -79,10 +77,8 @@ describe("infer intrinsic types", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 13,
-            "fileName": "typescript/lib/lib.es5.d.ts",
             "kind": "VariableDeclaration",
-            "line": 25,
+            "location": "node_modules/typescript/lib/lib.es5.d.ts:25:13",
             "name": "NaN: number",
             "path": "NaN",
           },
@@ -94,10 +90,8 @@ describe("infer intrinsic types", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 13,
-            "fileName": "typescript/lib/lib.es5.d.ts",
             "kind": "VariableDeclaration",
-            "line": 26,
+            "location": "node_modules/typescript/lib/lib.es5.d.ts:26:13",
             "name": "Infinity: number",
             "path": "Infinity",
           },
@@ -121,36 +115,28 @@ describe("infer intrinsic types", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 1,
-            "fileName": "typescript/lib/lib.es5.d.ts",
             "kind": "InterfaceDeclaration",
-            "line": 945,
+            "location": "node_modules/typescript/lib/lib.es5.d.ts:945:1",
             "name": "interface RegExp {
       ",
             "path": "RegExp",
           },
           Object {
-            "column": 13,
-            "fileName": "typescript/lib/lib.es5.d.ts",
             "kind": "VariableDeclaration",
-            "line": 1025,
+            "location": "node_modules/typescript/lib/lib.es5.d.ts:1025:13",
             "name": "RegExp: RegExpConstructor",
             "path": "RegExp",
           },
           Object {
-            "column": 1,
-            "fileName": "typescript/lib/lib.es2015.core.d.ts",
             "kind": "InterfaceDeclaration",
-            "line": 367,
+            "location": "node_modules/typescript/lib/lib.es2015.core.d.ts:367:1",
             "name": "interface RegExp {
       ",
             "path": "RegExp",
           },
           Object {
-            "column": 1,
-            "fileName": "typescript/lib/lib.es2015.symbol.wellknown.d.ts",
             "kind": "InterfaceDeclaration",
-            "line": 181,
+            "location": "node_modules/typescript/lib/lib.es2015.symbol.wellknown.d.ts:181:1",
             "name": "interface RegExp {
       ",
             "path": "RegExp",

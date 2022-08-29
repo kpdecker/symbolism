@@ -23,10 +23,8 @@ describe("infer enum", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 9,
-            "fileName": "test.ts",
             "kind": "EnumDeclaration",
-            "line": 2,
+            "location": "test.ts:2:9",
             "name": "enum MyEnum { foo }",
             "path": "MyEnum",
           },
@@ -40,10 +38,8 @@ describe("infer enum", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 23,
-            "fileName": "test.ts",
             "kind": "EnumMember",
-            "line": 2,
+            "location": "test.ts:2:23",
             "name": "foo",
             "path": "MyEnum.foo",
           },
@@ -58,10 +54,8 @@ describe("infer enum", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 23,
-            "fileName": "test.ts",
             "kind": "EnumMember",
-            "line": 2,
+            "location": "test.ts:2:23",
             "name": "foo",
             "path": "MyEnum.foo",
           },
@@ -75,10 +69,8 @@ describe("infer enum", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 23,
-            "fileName": "test.ts",
             "kind": "EnumMember",
-            "line": 2,
+            "location": "test.ts:2:23",
             "name": "foo",
             "path": "MyEnum.foo",
           },
@@ -103,10 +95,8 @@ describe("infer enum", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 15,
-            "fileName": "test.ts",
             "kind": "VariableDeclaration",
-            "line": 3,
+            "location": "test.ts:3:15",
             "name": "x = MyEnum.foo",
             "path": "x",
           },
@@ -123,10 +113,8 @@ describe("infer enum", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 15,
-            "fileName": "test.ts",
             "kind": "VariableDeclaration",
-            "line": 4,
+            "location": "test.ts:4:15",
             "name": "y = MyEnum[MyEnum.foo]",
             "path": "y",
           },

@@ -296,10 +296,8 @@ describe("type schema converter", () => {
       const [fooDeclaration] = findIdentifiers(sourceFile, "foo");
       expect(dumpNode(fooDeclaration, context.checker)).toMatchInlineSnapshot(`
         Object {
-          "column": 15,
-          "fileName": "test.ts",
           "kind": "Identifier",
-          "line": 2,
+          "location": "test.ts:2:15",
           "name": "foo",
           "path": "foo",
         }

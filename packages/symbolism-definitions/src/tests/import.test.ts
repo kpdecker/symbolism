@@ -42,10 +42,8 @@ describe("imports", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 18,
-            "fileName": "source.ts",
             "kind": "VariableDeclaration",
-            "line": 2,
+            "location": "source.ts:2:18",
             "name": "stringValue = \\"foo\\"",
             "path": "stringValue",
           },
@@ -58,10 +56,8 @@ describe("imports", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 18,
-            "fileName": "source.ts",
             "kind": "VariableDeclaration",
-            "line": 2,
+            "location": "source.ts:2:18",
             "name": "stringValue = \\"foo\\"",
             "path": "stringValue",
           },
@@ -76,10 +72,8 @@ describe("imports", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 18,
-            "fileName": "source.ts",
             "kind": "VariableDeclaration",
-            "line": 2,
+            "location": "source.ts:2:18",
             "name": "stringValue = \\"foo\\"",
             "path": "stringValue",
           },
@@ -94,10 +88,8 @@ describe("imports", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 5,
-            "fileName": "source.ts",
             "kind": "FunctionDeclaration",
-            "line": 3,
+            "location": "source.ts:3:5",
             "name": "functionValue",
             "path": "functionValue",
           },
@@ -111,10 +103,8 @@ describe("imports", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 5,
-            "fileName": "source.ts",
             "kind": "FunctionDeclaration",
-            "line": 3,
+            "location": "source.ts:3:5",
             "name": "functionValue",
             "path": "functionValue",
           },
@@ -132,10 +122,8 @@ describe("imports", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 18,
-            "fileName": "source.ts",
             "kind": "VariableDeclaration",
-            "line": 2,
+            "location": "source.ts:2:18",
             "name": "stringValue = \\"foo\\"",
             "path": "stringValue",
           },
@@ -150,10 +138,8 @@ describe("imports", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 5,
-            "fileName": "source.ts",
             "kind": "FunctionDeclaration",
-            "line": 3,
+            "location": "source.ts:3:5",
             "name": "functionValue",
             "path": "functionValue",
           },

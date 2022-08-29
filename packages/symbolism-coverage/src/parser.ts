@@ -47,17 +47,20 @@ export function findCoverageLocations(config: Config) {
           referencingNode.getStart()
         );
 
+        const [fileName, line, column] = node.location.split(":");
+
         coverageRequired.push({
           kind: referencingNode.parent.kind,
           definitionPath: symbolPath,
           token: node.path,
-          fileName: node.fileName,
+          fileName,
           start: referencingNode.pos,
           length: referencingNode.end - referencingNode.pos,
 
           text: node.name,
 
-          ...lineAndColumn(lineAndChar),
+          line: parseInt(line, 10),
+          column: parseInt(column, 10),
         });
       });
     }

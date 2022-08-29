@@ -26,10 +26,8 @@ describe("infer binding elements", () => {
         Object {
           "symbol": Array [
             Object {
-              "column": 31,
-              "fileName": "test.ts",
               "kind": "PropertySignature",
-              "line": 2,
+              "location": "test.ts:2:31",
               "name": "foo: string",
               "path": "ExplicitType.foo",
             },
@@ -59,10 +57,8 @@ describe("infer binding elements", () => {
         Object {
           "symbol": Array [
             Object {
-              "column": 22,
-              "fileName": "test.ts",
               "kind": "BindingElement",
-              "line": 4,
+              "location": "test.ts:4:22",
               "name": "...y",
               "path": "y",
             },
@@ -92,10 +88,8 @@ describe("infer binding elements", () => {
         Object {
           "symbol": Array [
             Object {
-              "column": 31,
-              "fileName": "test.ts",
               "kind": "PropertySignature",
-              "line": 2,
+              "location": "test.ts:2:31",
               "name": "foo: string",
               "path": "ExplicitType.foo",
             },
@@ -127,10 +121,8 @@ describe("infer binding elements", () => {
         Object {
           "symbol": Array [
             Object {
-              "column": 13,
-              "fileName": "test.ts",
               "kind": "VariableDeclaration",
-              "line": 4,
+              "location": "test.ts:4:13",
               "name": "y",
               "path": "y",
             },
@@ -162,10 +154,8 @@ describe("infer binding elements", () => {
         Object {
           "symbol": Array [
             Object {
-              "column": 30,
-              "fileName": "test.ts",
               "kind": "TypeLiteral",
-              "line": 2,
+              "location": "test.ts:2:30",
               "name": "{ foo: string }",
               "path": "ExplicitType",
             },
@@ -195,10 +185,8 @@ describe("infer binding elements", () => {
         Object {
           "symbol": Array [
             Object {
-              "column": 30,
-              "fileName": "test.ts",
               "kind": "TypeLiteral",
-              "line": 2,
+              "location": "test.ts:2:30",
               "name": "{ foo: string }",
               "path": "ExplicitType",
             },
@@ -228,10 +216,8 @@ describe("infer binding elements", () => {
         Object {
           "symbol": Array [
             Object {
-              "column": 30,
-              "fileName": "test.ts",
               "kind": "TypeLiteral",
-              "line": 2,
+              "location": "test.ts:2:30",
               "name": "{ foo: string }",
               "path": "ExplicitType",
             },
@@ -263,10 +249,8 @@ describe("infer binding elements", () => {
         Object {
           "symbol": Array [
             Object {
-              "column": 13,
-              "fileName": "test.ts",
               "kind": "VariableDeclaration",
-              "line": 4,
+              "location": "test.ts:4:13",
               "name": "y",
               "path": "y",
             },

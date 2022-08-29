@@ -49,10 +49,8 @@ describe("infer tuple types", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 7,
-            "fileName": "test.tsx",
             "kind": "BindingElement",
-            "line": 12,
+            "location": "test.tsx:12:7",
             "name": "destructureA",
             "path": "destructureA",
           },
@@ -66,10 +64,8 @@ describe("infer tuple types", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 25,
-            "fileName": "test.tsx",
             "kind": "TypeLiteral",
-            "line": 4,
+            "location": "test.tsx:4:25",
             "name": "{ foo: string }",
             "path": "ExplicitType",
           },
@@ -82,10 +78,8 @@ describe("infer tuple types", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 25,
-            "fileName": "test.tsx",
             "kind": "TypeLiteral",
-            "line": 4,
+            "location": "test.tsx:4:25",
             "name": "{ foo: string }",
             "path": "ExplicitType",
           },
@@ -108,10 +102,8 @@ describe("infer tuple types", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 51,
-            "fileName": "test.tsx",
             "kind": "PropertySignature",
-            "line": 5,
+            "location": "test.tsx:5:51",
             "name": "bar: ExplicitType",
             "path": "Tuple.bar",
           },
@@ -139,10 +131,8 @@ describe("infer tuple types", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 27,
-            "fileName": "test.tsx",
             "kind": "BindingElement",
-            "line": 7,
+            "location": "test.tsx:7:27",
             "name": "paramA",
             "path": "destructure.paramA",
           },
@@ -156,10 +146,8 @@ describe("infer tuple types", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 25,
-            "fileName": "test.tsx",
             "kind": "TypeLiteral",
-            "line": 4,
+            "location": "test.tsx:4:25",
             "name": "{ foo: string }",
             "path": "ExplicitType",
           },
@@ -172,10 +160,8 @@ describe("infer tuple types", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 25,
-            "fileName": "test.tsx",
             "kind": "TypeLiteral",
-            "line": 4,
+            "location": "test.tsx:4:25",
             "name": "{ foo: string }",
             "path": "ExplicitType",
           },
@@ -197,10 +183,8 @@ describe("infer tuple types", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 51,
-            "fileName": "test.tsx",
             "kind": "PropertySignature",
-            "line": 5,
+            "location": "test.tsx:5:51",
             "name": "bar: ExplicitType",
             "path": "Tuple.bar",
           },
@@ -219,54 +203,42 @@ describe("infer tuple types", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 1,
-            "fileName": "typescript/lib/lib.es5.d.ts",
             "kind": "InterfaceDeclaration",
-            "line": 1275,
+            "location": "node_modules/typescript/lib/lib.es5.d.ts:1275:1",
             "name": "interface Array<T> {
       ",
             "path": "Array",
           },
           Object {
-            "column": 13,
-            "fileName": "typescript/lib/lib.es5.d.ts",
             "kind": "VariableDeclaration",
-            "line": 1470,
+            "location": "node_modules/typescript/lib/lib.es5.d.ts:1470:13",
             "name": "Array: ArrayConstructor",
             "path": "Array",
           },
           Object {
-            "column": 1,
-            "fileName": "typescript/lib/lib.es2015.core.d.ts",
             "kind": "InterfaceDeclaration",
-            "line": 21,
+            "location": "node_modules/typescript/lib/lib.es2015.core.d.ts:21:1",
             "name": "interface Array<T> {
       ",
             "path": "Array",
           },
           Object {
-            "column": 1,
-            "fileName": "typescript/lib/lib.es2015.iterable.d.ts",
             "kind": "InterfaceDeclaration",
-            "line": 58,
+            "location": "node_modules/typescript/lib/lib.es2015.iterable.d.ts:58:1",
             "name": "interface Array<T> {
       ",
             "path": "Array",
           },
           Object {
-            "column": 1,
-            "fileName": "typescript/lib/lib.es2015.symbol.wellknown.d.ts",
             "kind": "InterfaceDeclaration",
-            "line": 94,
+            "location": "node_modules/typescript/lib/lib.es2015.symbol.wellknown.d.ts:94:1",
             "name": "interface Array<T> {
       ",
             "path": "Array",
           },
           Object {
-            "column": 1,
-            "fileName": "typescript/lib/lib.es2016.array.include.d.ts",
             "kind": "InterfaceDeclaration",
-            "line": 21,
+            "location": "node_modules/typescript/lib/lib.es2016.array.include.d.ts:21:1",
             "name": "interface Array<T> {
       ",
             "path": "Array",
@@ -280,10 +252,8 @@ describe("infer tuple types", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 24,
-            "fileName": "@types/react/index.d.ts",
             "kind": "FunctionType",
-            "line": 859,
+            "location": "node_modules/@types/react/index.d.ts:859:24",
             "name": "(value: A) => void",
             "path": "React.Dispatch",
           },

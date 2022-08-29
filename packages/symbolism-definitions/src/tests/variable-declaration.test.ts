@@ -25,10 +25,8 @@ describe("infer variable declaration", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 15,
-            "fileName": "test.ts",
             "kind": "VariableDeclaration",
-            "line": 3,
+            "location": "test.ts:3:15",
             "name": "x: ExplicitType = { foo: undefined }",
             "path": "x",
           },
@@ -40,10 +38,8 @@ describe("infer variable declaration", () => {
     expect(dumpSymbol(varSymbol!, checker)?.declaration).toMatchInlineSnapshot(`
       Array [
         Object {
-          "column": 15,
-          "fileName": "test.ts",
           "kind": "VariableDeclaration",
-          "line": 3,
+          "location": "test.ts:3:15",
           "name": "x: ExplicitType = { foo: undefined }",
           "path": "x",
         },
@@ -69,10 +65,8 @@ describe("infer variable declaration", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 15,
-            "fileName": "test.ts",
             "kind": "VariableDeclaration",
-            "line": 2,
+            "location": "test.ts:2:15",
             "name": "x = { foo: \\"foo\\" }",
             "path": "x",
           },
@@ -97,10 +91,8 @@ describe("infer variable declaration", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 15,
-            "fileName": "test.ts",
             "kind": "VariableDeclaration",
-            "line": 2,
+            "location": "test.ts:2:15",
             "name": "y = { foo: \\"foo\\" }",
             "path": "y",
           },

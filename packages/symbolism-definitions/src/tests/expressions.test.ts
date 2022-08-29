@@ -34,10 +34,8 @@ describe("infer expressions", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 9,
-            "fileName": "test.ts",
             "kind": "FunctionDeclaration",
-            "line": 3,
+            "location": "test.ts:3:9",
             "name": "foo",
             "path": "foo",
           },
@@ -52,10 +50,8 @@ describe("infer expressions", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 13,
-            "fileName": "test.ts",
             "kind": "VariableDeclaration",
-            "line": 7,
+            "location": "test.ts:7:13",
             "name": "bar = (await foo())",
             "path": "bar",
           },
@@ -70,10 +66,8 @@ describe("infer expressions", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 21,
-            "fileName": "test.ts",
             "kind": "TypeLiteral",
-            "line": 2,
+            "location": "test.ts:2:21",
             "name": "{}",
             "path": "Test",
           },
@@ -95,10 +89,8 @@ describe("infer expressions", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 1,
-            "fileName": "typescript/lib/lib.dom.d.ts",
             "kind": "InterfaceDeclaration",
-            "line": 17154,
+            "location": "node_modules/typescript/lib/lib.dom.d.ts:17154:1",
             "name": "interface Console {",
             "path": "Console",
           },
@@ -113,10 +105,8 @@ describe("infer expressions", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 1,
-            "fileName": "typescript/lib/lib.dom.d.ts",
             "kind": "InterfaceDeclaration",
-            "line": 17154,
+            "location": "node_modules/typescript/lib/lib.dom.d.ts:17154:1",
             "name": "interface Console {",
             "path": "Console",
           },
@@ -149,10 +139,8 @@ describe("infer expressions", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 13,
-            "fileName": "typescript/lib/lib.dom.d.ts",
             "kind": "VariableDeclaration",
-            "line": 17177,
+            "location": "node_modules/typescript/lib/lib.dom.d.ts:17177:13",
             "name": "console: Console",
             "path": "console",
           },
@@ -166,10 +154,8 @@ describe("infer expressions", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 5,
-            "fileName": "typescript/lib/lib.dom.d.ts",
             "kind": "MethodSignature",
-            "line": 17167,
+            "location": "node_modules/typescript/lib/lib.dom.d.ts:17167:5",
             "name": "log(...data: any[]): void;",
             "path": "Console.log",
           },
@@ -201,10 +187,8 @@ describe("infer expressions", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 13,
-            "fileName": "typescript/lib/lib.dom.d.ts",
             "kind": "VariableDeclaration",
-            "line": 17177,
+            "location": "node_modules/typescript/lib/lib.dom.d.ts:17177:13",
             "name": "console: Console",
             "path": "console",
           },
@@ -219,19 +203,15 @@ describe("infer expressions", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 1,
-            "fileName": "typescript/lib/lib.es5.d.ts",
             "kind": "InterfaceDeclaration",
-            "line": 1027,
+            "location": "node_modules/typescript/lib/lib.es5.d.ts:1027:1",
             "name": "interface Error {
       ",
             "path": "Error",
           },
           Object {
-            "column": 13,
-            "fileName": "typescript/lib/lib.es5.d.ts",
             "kind": "VariableDeclaration",
-            "line": 1039,
+            "location": "node_modules/typescript/lib/lib.es5.d.ts:1039:13",
             "name": "Error: ErrorConstructor",
             "path": "Error",
           },
@@ -246,35 +226,27 @@ describe("infer expressions", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 1,
-            "fileName": "typescript/lib/lib.es5.d.ts",
             "kind": "InterfaceDeclaration",
-            "line": 1501,
+            "location": "node_modules/typescript/lib/lib.es5.d.ts:1501:1",
             "name": "interface Promise<T> {
       ",
             "path": "Promise",
           },
           Object {
-            "column": 1,
-            "fileName": "typescript/lib/lib.es2015.iterable.d.ts",
             "kind": "InterfaceDeclaration",
-            "line": 218,
+            "location": "node_modules/typescript/lib/lib.es2015.iterable.d.ts:218:1",
             "name": "interface Promise<T> { }",
             "path": "Promise",
           },
           Object {
-            "column": 13,
-            "fileName": "typescript/lib/lib.es2015.promise.d.ts",
             "kind": "VariableDeclaration",
-            "line": 78,
+            "location": "node_modules/typescript/lib/lib.es2015.promise.d.ts:78:13",
             "name": "Promise: PromiseConstructor",
             "path": "Promise",
           },
           Object {
-            "column": 1,
-            "fileName": "typescript/lib/lib.es2015.symbol.wellknown.d.ts",
             "kind": "InterfaceDeclaration",
-            "line": 173,
+            "location": "node_modules/typescript/lib/lib.es2015.symbol.wellknown.d.ts:173:1",
             "name": "interface Promise<T> {
       ",
             "path": "Promise",

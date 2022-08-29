@@ -35,10 +35,8 @@ describe("types", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 5,
-            "fileName": "test.tsx",
             "kind": "InterfaceDeclaration",
-            "line": 2,
+            "location": "test.tsx:2:5",
             "name": "interface Foo { foo: string }",
             "path": "Foo",
           },
@@ -53,10 +51,8 @@ describe("types", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 5,
-            "fileName": "test.tsx",
             "kind": "InterfaceDeclaration",
-            "line": 2,
+            "location": "test.tsx:2:5",
             "name": "interface Foo { foo: string }",
             "path": "Foo",
           },
@@ -71,10 +67,8 @@ describe("types", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 5,
-            "fileName": "test.tsx",
             "kind": "InterfaceDeclaration",
-            "line": 2,
+            "location": "test.tsx:2:5",
             "name": "interface Foo { foo: string }",
             "path": "Foo",
           },
@@ -92,10 +86,8 @@ describe("types", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 5,
-            "fileName": "test.tsx",
             "kind": "InterfaceDeclaration",
-            "line": 3,
+            "location": "test.tsx:3:5",
             "name": "interface Extend extends Foo { bat: string; }",
             "path": "Extend",
           },
@@ -110,10 +102,8 @@ describe("types", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 5,
-            "fileName": "test.tsx",
             "kind": "InterfaceDeclaration",
-            "line": 3,
+            "location": "test.tsx:3:5",
             "name": "interface Extend extends Foo { bat: string; }",
             "path": "Extend",
           },
@@ -131,10 +121,8 @@ describe("types", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 5,
-            "fileName": "test.tsx",
             "kind": "TypeAliasDeclaration",
-            "line": 5,
+            "location": "test.tsx:5:5",
             "name": "type IntersectionAlias = Foo & { bar: string };",
             "path": "IntersectionAlias",
           },
@@ -148,10 +136,8 @@ describe("types", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 5,
-            "fileName": "test.tsx",
             "kind": "TypeAliasDeclaration",
-            "line": 5,
+            "location": "test.tsx:5:5",
             "name": "type IntersectionAlias = Foo & { bar: string };",
             "path": "IntersectionAlias",
           },
@@ -168,10 +154,8 @@ describe("types", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 36,
-            "fileName": "test.tsx",
             "kind": "TypeLiteral",
-            "line": 5,
+            "location": "test.tsx:5:36",
             "name": "{ bar: string }",
             "path": "IntersectionAlias",
           },
@@ -190,10 +174,8 @@ describe("types", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 24,
-            "fileName": "test.tsx",
             "kind": "Parameter",
-            "line": 9,
+            "location": "test.tsx:9:24",
             "name": "extras?: {}",
             "path": "setExtras.extras",
           },
@@ -208,10 +190,8 @@ describe("types", () => {
       Object {
         "symbol": Array [
           Object {
-            "column": 24,
-            "fileName": "test.tsx",
             "kind": "Parameter",
-            "line": 9,
+            "location": "test.tsx:9:24",
             "name": "extras?: {}",
             "path": "setExtras.extras",
           },
