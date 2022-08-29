@@ -49,7 +49,9 @@ export function convertArrayLiteralValue(
     })
   );
 
-  const items = createUnionKind(elements);
+  const items: AnySchemaNode = elements.length
+    ? createUnionKind(elements)
+    : { kind: "primitive", name: "any" };
 
   return {
     kind: "array",

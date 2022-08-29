@@ -26,7 +26,7 @@ function testType(source: string, name = "Type") {
 describe("type schema converter", () => {
   describe("arrays", () => {
     it("should pull type from array literals", () => {
-      const { checker, context, sourceFile } = testType(`
+      const { checker, sourceFile } = testType(`
         const x = [1, 2, 3];
       `);
 
@@ -38,8 +38,21 @@ describe("type schema converter", () => {
         "
       `);
     });
+    it("should pull type from empty array literals", () => {
+      const { checker, sourceFile } = testType(`
+        const x = [];
+      `);
+
+      const xNodes = findIdentifiers(sourceFile, "x");
+
+      expect(printSchema(evaluateSchema(xNodes[0], checker)))
+        .toMatchInlineSnapshot(`
+        "any[];
+        "
+      `);
+    });
     it("should pull type from spread elements", () => {
-      const { checker, context, sourceFile } = testType(`
+      const { checker, sourceFile } = testType(`
         const x = [1, 2, 3];
         const y = [4, ...x];
       `);
@@ -54,7 +67,7 @@ describe("type schema converter", () => {
     });
 
     it("should pull type from const array literals", () => {
-      const { checker, context, sourceFile } = testType(`
+      const { checker, sourceFile } = testType(`
         const x = [1, 2, 3] as const;
       `);
 
@@ -70,7 +83,7 @@ describe("type schema converter", () => {
   describe("tuples", () => {
     // (Tuple = 1 << 3), // Synthesized generic tuple type
     it("should pull type from tuples", () => {
-      const { type, declaration, context } = testType(`
+      const { declaration, context } = testType(`
         type Type = [1, 2, 3];
       `);
 
@@ -81,7 +94,7 @@ describe("type schema converter", () => {
       `);
     });
     it("should handle tuples with rest and optional", () => {
-      const { type, declaration, context } = testType(`
+      const { declaration, context } = testType(`
         type Type = [1, 2, 3, ...string[], number?];
       `);
 
@@ -92,7 +105,7 @@ describe("type schema converter", () => {
       `);
     });
     it("should handle variadic tuples", () => {
-      const { type, declaration, context } = testType(`
+      const { declaration, context } = testType(`
         type GenericType<T> = [1, ...T];
         type Type = GenericType<[string, "bar"]>;
       `);
