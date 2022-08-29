@@ -7,6 +7,7 @@ import { getNodeSchema } from "./value-eval";
 interface SchemaNode {
   flags?: string[];
   extra?: any;
+  node?: ts.Node;
 }
 
 export interface PrimitiveSchema extends SchemaNode {
@@ -26,7 +27,6 @@ export interface PrimitiveSchema extends SchemaNode {
     | "unknown"
     | "any"
     | "never";
-  node: ts.Node;
 }
 
 export interface UnionSchema extends SchemaNode {
@@ -85,14 +85,12 @@ export interface BinaryExpressionSchema extends SchemaNode {
 export interface IndexSchema extends SchemaNode {
   kind: "index";
   type: AnySchemaNode;
-  node: ts.Node;
 }
 
 export interface IndexAccessSchema extends SchemaNode {
   kind: "index-access";
   object: AnySchemaNode;
   index: AnySchemaNode;
-  node: ts.Node;
 }
 
 export interface ReferenceSchema extends SchemaNode {
@@ -107,7 +105,6 @@ export interface ReferenceSchema extends SchemaNode {
 
 export interface ErrorSchema extends SchemaNode {
   kind: "error";
-  node?: ts.Node;
 }
 
 export type AnySchemaNode =

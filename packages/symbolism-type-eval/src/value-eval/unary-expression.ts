@@ -111,6 +111,6 @@ function evalUnaryOperator(
   return {
     kind: "primitive",
     name: "number",
-    node: ("node" in operandSchema && operandSchema.node) || contextNode,
+    node: operandSchema.node || contextNode,
   };
 }

@@ -54,5 +54,6 @@ export function convertArrayLiteralValue(
   return {
     kind: "array",
     items,
+    node,
   };
 }

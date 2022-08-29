@@ -15,6 +15,13 @@ export function resolveSymbolsInSchema(
     return schema;
   }
 
+  if (schema.node) {
+    const symbol = getLocalSymbol(schema.node, checker);
+    if (symbol && symbolSchemas.get(symbol)) {
+      return symbolSchemas.get(symbol)!;
+    }
+  }
+
   if (
     schema.kind === "primitive" ||
     schema.kind === "error" ||
@@ -22,11 +29,6 @@ export function resolveSymbolsInSchema(
     schema.kind === "index" ||
     schema.kind === "index-access"
   ) {
-    const symbol = getLocalSymbol(schema.node, checker);
-    if (symbol && symbolSchemas.get(symbol)) {
-      return symbolSchemas.get(symbol)!;
-    }
-
     return schema;
   }
 

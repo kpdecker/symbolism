@@ -253,13 +253,15 @@ function getTypeSchemaWorker(
       );
       invariant(arrayValueType, "Array type has no number index type");
 
+      const items = getTypeSchema({
+        context,
+        type: arrayValueType,
+        decrementDepth: false,
+      });
       return {
         kind: "array",
-        items: getTypeSchema({
-          context,
-          type: arrayValueType,
-          decrementDepth: false,
-        }),
+        items,
+        node: contextNode,
         flags: dumpFlags(type.flags, ts.TypeFlags).concat(
           dumpFlags(objectFlags, ts.ObjectFlags)
         ),
@@ -420,10 +422,11 @@ export function createReferenceFromType(
     })
     .filter(Boolean);
 
-  if (symbol?.name === "Array") {
+  if (symbol?.name === "Array" && parameters[0]?.kind === "primitive") {
     return {
       kind: "array",
       items: parameters[0],
+      node: parameters[0].node,
     };
   }
 

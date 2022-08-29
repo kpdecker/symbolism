@@ -83,6 +83,10 @@ export function nonConcreteInputs(
     return [];
   }
 
+  if (schema.node) {
+    return [schema.node];
+  }
+
   if (schema.kind === "literal") {
     return [];
   }
