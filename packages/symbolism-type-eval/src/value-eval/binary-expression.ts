@@ -9,6 +9,7 @@ import { booleanPrimitiveSchema } from "../well-known-schemas";
 import { getNodeSchema } from ".";
 import { normalizeTemplateLiteralSchema } from "./string-template";
 import { createUnionKind, expandUnions } from "./union";
+import { dumpSchema } from "@symbolism/ts-debug";
 
 export function convertBinaryExpression(
   node: ts.Node,
@@ -213,17 +214,42 @@ export function evaluateBinaryExpressionSchema(
     operatorKind === ts.SyntaxKind.PlusToken ||
     operatorKind === ts.SyntaxKind.PlusEqualsToken;
 
+  const isShortCircuit =
+    operatorKind === ts.SyntaxKind.AmpersandAmpersandToken ||
+    operatorKind === ts.SyntaxKind.BarBarToken;
+
   const expandedSchema = expandUnions({
     items: [leftSchema, rightSchema],
     merger(right, left) {
       right = context.resolveSchema(right);
       left = context.resolveSchema(left);
 
+      // Treat || with object-like schemas a intersections,
+      // merging the results to calculate all possible outcomes.
+      if (
+        operatorKind === ts.SyntaxKind.BarBarToken &&
+        left.kind === "object" &&
+        right.kind === "object"
+      ) {
+        // TODO: If this is strict mode, then this should shortcircuit.
+        return {
+          kind: "intersection",
+          items: [left, right],
+        };
+      }
+
       if (left.kind === "literal" && right.kind === "literal") {
         return {
           kind: "literal",
           value: operator(left.value, right.value),
         };
+      } else if (isShortCircuit && left.kind === "literal") {
+        // Handle `literal` || `any` and `literal` && `any`
+        if (left.value) {
+          return operatorKind === ts.SyntaxKind.BarBarToken ? left : right;
+        } else {
+          return operatorKind === ts.SyntaxKind.BarBarToken ? right : left;
+        }
       } else if (
         isAddition &&
         ((left.kind === "literal" && typeof left.value === "string") ||

@@ -133,7 +133,10 @@ function convertObjectLiteralValue(
         key: spreadSchema,
         value: spreadSchema,
       });
-    } else if (spreadSchema.kind === "union") {
+    } else if (
+      spreadSchema.kind === "union" ||
+      spreadSchema.kind === "intersection"
+    ) {
       // TODO: Consider expanding the union vs. inlining all props?
       spreadSchema.items.forEach((item) => {
         spreadProperties(item, node);

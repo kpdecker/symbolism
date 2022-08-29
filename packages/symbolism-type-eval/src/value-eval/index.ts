@@ -13,7 +13,7 @@ import { SchemaContext } from "../context";
 import { convertBinaryExpression } from "./binary-expression";
 import { objectOperators } from "./object";
 import { templateOperators } from "./string-template";
-import { arrayOperators, convertArrayLiteralValue } from "./array";
+import { arrayOperators } from "./array";
 import { isConcreteSchema } from "../classify";
 
 import { checkerEval, NodeEvalHandler, noType, variableLike } from "./handlers";

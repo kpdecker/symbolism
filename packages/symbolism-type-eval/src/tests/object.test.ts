@@ -7,13 +7,16 @@ import { createJsonSchema } from "../print/json";
 import { evaluateSchema } from "../schema";
 import { getTypeSchema } from "../type-eval";
 
-function testType(source: string, name = "Type") {
-  const program = mockProgram({
-    "test.ts": source,
-  });
+function testType(source: string, options?: ts.CompilerOptions) {
+  const program = mockProgram(
+    {
+      "test.ts": source,
+    },
+    options
+  );
   const checker = program.getTypeChecker();
   const sourceFile = program.getSourceFile("test.ts")!;
-  const node = findIdentifiers(sourceFile, name)[0];
+  const node = findIdentifiers(sourceFile, "Type")[0];
   return {
     type: checker.getTypeAtLocation(node),
     declaration: node,
@@ -270,12 +273,14 @@ describe("type schema converter", () => {
   });
 
   it("should handle any spreads in object literals", () => {
-    const { type, context, sourceFile } = testType(`
+    const { context, sourceFile } = testType(`
         type Source = {
           directUnion: 1 | 2 | 3 | 4;
         };
 
         declare const source: any;
+        declare const obj: { foo: string; bar: string };
+
         const literal = {
             [source.directUnion + "foo"]: 0,
             [source.directUnion + "bar"]: 0,
@@ -296,7 +301,9 @@ describe("type schema converter", () => {
             objectSpread: {
               deOther: true,
               ...(source ? {foo: "bar"} : { baz: "qux" })
-            }
+            },
+
+            ...(obj || { bat: true }),
         }
         type Type = typeof literal;
       `);
@@ -309,7 +316,10 @@ describe("type schema converter", () => {
       printSchema(evaluateSchema(assignNode.initializer!, context.checker))
     ).toMatchInlineSnapshot(`
       "{
+        bar: string;
+        bat: true;
         blat: \\"yes\\";
+        foo: string;
         nullSpread: { dat: true };
         objectSpread: {
           baz: \\"qux\\";
@@ -320,6 +330,36 @@ describe("type schema converter", () => {
         [k: \`\${any}foo\`]: 0;
         [k: \`\${any}bar\`]: 0;
         [k: any]: any;
+      };
+      "
+    `);
+  });
+  it("should handle any spreads in strict null object literals", () => {
+    const { context, sourceFile } = testType(
+      `
+        declare const obj: { foo: string; bar: string } | undefined;
+
+        const literal = {
+            ...(obj || { bat: true }),
+        }
+        type Type = typeof literal;
+      `,
+      {
+        strictNullChecks: true,
+      }
+    );
+
+    // Object literal becomes an anonymous type when referenced elsewhere
+    // Have to trace it to the source
+    const literalNode = findIdentifiers(sourceFile, "literal")[0];
+    const assignNode = literalNode.parent as ts.VariableDeclaration;
+    expect(
+      printSchema(evaluateSchema(assignNode.initializer!, context.checker))
+    ).toMatchInlineSnapshot(`
+      "{
+        bar: string;
+        bat: true;
+        foo: string;
       };
       "
     `);
