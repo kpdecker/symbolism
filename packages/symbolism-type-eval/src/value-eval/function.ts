@@ -176,6 +176,11 @@ function convertCallLikeNode(node: ts.Node, context: SchemaContext) {
           )
           .filter(Boolean)
       );
+    } else if (
+      functionSchema?.kind === "primitive" &&
+      functionSchema.name === "any"
+    ) {
+      returnType = functionSchema;
     }
     if (!returnType) {
       throw new SchemaError("Expected function schema", functionSchema);
