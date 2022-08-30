@@ -264,11 +264,13 @@ function convertElementAccessExpression(
 
   if (parentSchema.kind === "object") {
     if (argumentSchema.kind === "primitive") {
-      return createUnionKind(
-        Object.values(parentSchema.properties)
-          .concat(parentSchema.abstractIndexKeys.map(({ value }) => value))
-          .flat()
-      );
+      const allValues = Object.values(parentSchema.properties)
+        .concat(parentSchema.abstractIndexKeys.map(({ value }) => value))
+        .flat();
+      if (!allValues.length) {
+        return neverSchema;
+      }
+      return createUnionKind(allValues);
     } else if (argumentSchema.kind === "literal") {
       const argValue = argumentSchema.value + "";
       const parentType = checker.getTypeAtLocation(node.expression);
