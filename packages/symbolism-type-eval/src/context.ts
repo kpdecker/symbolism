@@ -5,7 +5,8 @@ import { SymbolTable } from "@symbolism/symbol-table";
 import invariant from "tiny-invariant";
 import { TypeEvalOptions } from "./value-eval";
 import { AnySchemaNode } from "./schema";
-import { baseDefs } from "./well-known-schemas";
+import { baseDefs, wellKnownReferences } from "./well-known-schemas";
+import { SchemaError } from "./classify";
 
 export class SchemaContext {
   typesHandled = new Set<ts.Type>();
@@ -34,7 +35,12 @@ export class SchemaContext {
   resolveSchema(schema: AnySchemaNode | undefined): AnySchemaNode | undefined {
     if (schema?.kind === "reference") {
       const definition = this.typeDefinitions.get(schema.typeId);
-      return definition ? this.resolveSchema(definition) : schema;
+      if (!definition && !wellKnownReferences.includes(schema.name)) {
+        throw new SchemaError("Definition not found ", schema);
+      }
+      return definition
+        ? this.resolveSchema(definition)
+        : { kind: "primitive", name: "unknown" };
     }
     return schema;
   }
