@@ -133,7 +133,7 @@ export function getTypeName(
   type: ts.Type,
   checker: ts.TypeChecker
 ): string | undefined {
-  if (isTupleTypeReference(type)) {
+  if (isTupleTypeReference(type) || type.flags & ts.TypeFlags.StringMapping) {
     return undefined;
   }
 

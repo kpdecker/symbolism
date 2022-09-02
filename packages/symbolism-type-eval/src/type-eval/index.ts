@@ -28,6 +28,7 @@ import {
 import { getNodeSchema, TypeEvalOptions } from "../value-eval";
 import { createUnionKind } from "../value-eval/union";
 import {
+  neverSchema,
   tooMuchRecursionSchema,
   wellKnownReferences,
 } from "../well-known-schemas";
@@ -113,7 +114,7 @@ export function getTypeSchema(
 
   logDebug(
     "getTypeSchema",
-    checker.typeToString(type),
+    dumpType(type, checker),
     dumpNode(contextNode, checker),
     { canEmitDef, typeId, typeName }
   );
@@ -388,6 +389,15 @@ function getTypeSchemaWorker(
         kind: "error",
         extra: "Conditional type not supported in schemas",
       };
+    } else if (type.flags & ts.TypeFlags.StringMapping) {
+      const childType = (type as ts.StringMappingType).type;
+      const childSchema = getTypeSchema({
+        context,
+        type: childType,
+        decrementDepth: false,
+      });
+
+      return mapString(childSchema, type as ts.StringMappingType, context);
     } else {
       /* istanbul ignore next Sanity */
       throw new Error(
@@ -402,6 +412,119 @@ function getTypeSchemaWorker(
       err
     );
   }
+}
+
+export function mapString(
+  schema: AnySchemaNode,
+  mappingType: ts.StringMappingType,
+  context: SchemaContext
+): AnySchemaNode {
+  if (!schema) {
+    return schema;
+  }
+
+  if (
+    schema.kind === "primitive" ||
+    schema.kind === "error" ||
+    // Type checker would have resolved this if it was concrete.
+    schema.kind === "index" ||
+    schema.kind === "index-access"
+  ) {
+    return schema;
+  }
+
+  const operator: "Uppercase" | "Lowercase" | "Capitalize" | "Uncapitalize" =
+    mappingType.symbol.name as any;
+
+  if (schema.kind === "literal") {
+    if (typeof schema.value === "string") {
+      const str = schema.value;
+      let newValue = schema.value;
+
+      switch (operator) {
+        case "Uppercase":
+          newValue = str.toUpperCase();
+          break;
+        case "Lowercase":
+          newValue = str.toLowerCase();
+          break;
+        case "Capitalize":
+          newValue = str.charAt(0).toUpperCase() + str.slice(1);
+          break;
+        case "Uncapitalize":
+          newValue = str.charAt(0).toLowerCase() + str.slice(1);
+          break;
+      }
+
+      return {
+        kind: "literal",
+        value: newValue,
+      };
+    } else {
+      return neverSchema;
+    }
+  }
+
+  if (schema.kind === "template-literal") {
+    const operatesOnWholeString =
+      operator === "Lowercase" || operator === "Uppercase";
+
+    return {
+      kind: "template-literal",
+      items: schema.items.map((item, i) =>
+        i < 1 || operatesOnWholeString
+          ? mapString(item, mappingType, context)
+          : item
+      ),
+    };
+  }
+
+  if (schema.kind === "reference") {
+    // WARN: This could OOM if a cyclical object is passed. This doesn't match constraints
+    // of the string mapping types so we're ignoring this case for now.
+    return mapString(context.resolveSchema(schema), mappingType, context);
+  }
+
+  if (schema.kind === "binary-expression" || schema.kind === "function") {
+    return {
+      kind: "error",
+      extra: schema.kind + " not supported in string mapping",
+    };
+  }
+
+  if (schema.kind === "union") {
+    return createUnionKind(
+      schema.items.map((item) => mapString(item, mappingType, context))
+    );
+  } else if (schema.kind === "intersection" || schema.kind === "tuple") {
+    return {
+      ...schema,
+      items: schema.items.map((item) => mapString(item, mappingType, context)),
+    };
+  }
+
+  if (schema.kind === "array") {
+    return {
+      ...schema,
+      items: mapString(schema.items, mappingType, context),
+    };
+  }
+
+  if (schema.kind === "object") {
+    return {
+      ...schema,
+      properties: Object.entries(schema.properties).reduce(
+        (acc, [key, value]) => {
+          acc[key] = mapString(value, mappingType, context);
+          return acc;
+        },
+        {} as Record<string, AnySchemaNode>
+      ),
+    };
+  }
+
+  const gottaCatchEmAll: never = schema;
+  throw new Error("Not implemented");
 }
 
 export function createReferenceFromType(
