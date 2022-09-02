@@ -8,7 +8,7 @@ import { SchemaContext } from "../context";
 import { createUnionKind, expandSchemaList, unionProperties } from "./union";
 import { dumpNode } from "@symbolism/ts-debug";
 import { getNodeSchema } from ".";
-import { nodeEvalHandler, variableLike } from "./handlers";
+import { checkerEval, nodeEvalHandler, variableLike } from "./handlers";
 import { getSymbolDeclaration, invariantNode } from "@symbolism/ts-utils";
 import { getLocalSymbol } from "./symbol";
 import { neverSchema, undefinedSchema } from "../well-known-schemas";
@@ -52,6 +52,16 @@ export const objectOperators = nodeEvalHandler({
 
   [ts.SyntaxKind.PropertyAccessExpression](node, context) {
     invariantNode(node, context.checker, ts.isPropertyAccessExpression);
+
+    const { checker } = context;
+
+    // If we are looking at an instantiated type, use that. It will have type parameters
+    // accounted for.
+    const type = checker.getTypeAtLocation(node);
+    if ((type as ts.ObjectType).objectFlags & ts.ObjectFlags.Instantiated) {
+      return checkerEval(node, context);
+    }
+
     return getNodeSchema({
       context,
       node: node.name,

@@ -155,8 +155,17 @@ function convertCallLikeNode(node: ts.Node, context: SchemaContext) {
 
   const returnType = signature?.getReturnType();
 
+  // If we are looking at an instantiated type, use that. It will have type parameters
+  // accounted for.
+  const returnTypeHasParameters =
+    signature?.typeParameters?.length || (signature as any).mapper;
+
   // Evaluate the function at node level
-  if (!ts.isNewExpression(node) && signature?.declaration) {
+  if (
+    !ts.isNewExpression(node) &&
+    signature?.declaration &&
+    !returnTypeHasParameters
+  ) {
     const functionSchema = context.resolveSchema(
       getNodeSchema({
         context,
