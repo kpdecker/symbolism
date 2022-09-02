@@ -143,7 +143,10 @@ function convertCall(
           return undefined!;
         }
 
-        if (!ts.isCallExpression(input)) {
+        if (
+          !ts.isCallExpression(input) &&
+          !ts.isArrayLiteralExpression(input)
+        ) {
           logWarn("Could not find symbol for input", dumpNode(input, checker));
         }
 
