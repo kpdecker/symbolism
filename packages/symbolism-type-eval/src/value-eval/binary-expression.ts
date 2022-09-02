@@ -231,7 +231,6 @@ export function evaluateBinaryExpressionSchema(
         left.kind === "object" &&
         right.kind === "object"
       ) {
-        // TODO: If this is strict mode, then this should shortcircuit.
         return {
           kind: "intersection",
           items: [left, right],
@@ -250,6 +249,8 @@ export function evaluateBinaryExpressionSchema(
         } else {
           return operatorKind === ts.SyntaxKind.BarBarToken ? right : left;
         }
+      } else if (operatorKind === ts.SyntaxKind.AmpersandAmpersandToken) {
+        return createUnionKind([left, right]);
       } else if (
         isAddition &&
         ((left.kind === "literal" && typeof left.value === "string") ||
