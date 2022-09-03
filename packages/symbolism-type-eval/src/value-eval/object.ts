@@ -13,7 +13,7 @@ import { getSymbolDeclaration, invariantNode } from "@symbolism/ts-utils";
 import { getLocalSymbol } from "./symbol";
 import { neverSchema, undefinedSchema } from "../well-known-schemas";
 
-export const objectOperators = nodeEvalHandler({
+export const objectOperators = nodeEvalHandler(() => ({
   [ts.SyntaxKind.ObjectLiteralExpression](node, context) {
     invariantNode(node, context.checker, ts.isObjectLiteralExpression);
     return convertObjectLiteralValue(node, context);
@@ -73,7 +73,7 @@ export const objectOperators = nodeEvalHandler({
     invariantNode(node, context.checker, ts.isElementAccessExpression);
     return convertElementAccessExpression(node, context);
   },
-});
+}));
 
 function convertObjectLiteralValue(
   node: ts.Node,

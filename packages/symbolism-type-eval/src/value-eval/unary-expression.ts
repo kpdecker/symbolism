@@ -7,7 +7,7 @@ import { AnySchemaNode } from "../schema";
 import { createUnionKind } from "./union";
 import invariant from "tiny-invariant";
 
-export const unaryExpressionOperators = nodeEvalHandler({
+export const unaryExpressionOperators = nodeEvalHandler(() => ({
   [ts.SyntaxKind.PrefixUnaryExpression](node, context): AnySchemaNode {
     invariantNode(node, context.checker, ts.isPrefixUnaryExpression);
 
@@ -26,7 +26,7 @@ export const unaryExpressionOperators = nodeEvalHandler({
       decrementDepth: true,
     })!;
   },
-});
+}));
 
 function evalUnaryOperator(
   operator: ts.PrefixUnaryOperator | ts.PostfixUnaryOperator,

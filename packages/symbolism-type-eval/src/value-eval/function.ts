@@ -10,7 +10,7 @@ import { AnySchemaNode, createReferenceSchema } from "../schema";
 import { SchemaError } from "../classify";
 import { printSchemaNode } from "../print/typescript";
 
-export const functionOperators = nodeEvalHandler({
+export const functionOperators = nodeEvalHandler(() => ({
   [ts.SyntaxKind.CallExpression]: convertCallLikeNode,
   [ts.SyntaxKind.NewExpression]: convertCallLikeNode,
   [ts.SyntaxKind.TaggedTemplateExpression]: convertCallLikeNode,
@@ -84,7 +84,7 @@ export const functionOperators = nodeEvalHandler({
 
     return context.resolveSchema(expressionSchema);
   },
-});
+}));
 
 function convertFunctionLikeNode(node: ts.Node, context: SchemaContext) {
   invariantNode(node, context.checker, ts.isFunctionLike);

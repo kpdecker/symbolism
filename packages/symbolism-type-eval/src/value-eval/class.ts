@@ -1,7 +1,7 @@
 import ts from "typescript";
 import { checkerEval, nodeEvalHandler, noType } from "./handlers";
 
-export const classOperators = nodeEvalHandler({
+export const classOperators = nodeEvalHandler(() => ({
   [ts.SyntaxKind.OverrideKeyword]: noType,
   [ts.SyntaxKind.SuperKeyword]: checkerEval,
   [ts.SyntaxKind.ThisKeyword]: checkerEval,
@@ -29,4 +29,4 @@ export const classOperators = nodeEvalHandler({
 
   // Type
   [ts.SyntaxKind.PropertySignature]: checkerEval,
-});
+}));

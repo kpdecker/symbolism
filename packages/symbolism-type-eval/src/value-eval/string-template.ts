@@ -9,7 +9,7 @@ import { getNodeSchema } from ".";
 import { checkerEval, nodeEvalHandler } from "./handlers";
 import { invariantNode } from "@symbolism/ts-utils";
 
-export const templateOperators = nodeEvalHandler({
+export const templateOperators = nodeEvalHandler(() => ({
   [ts.SyntaxKind.NoSubstitutionTemplateLiteral]: checkerEval,
   [ts.SyntaxKind.TemplateExpression](node, context) {
     invariantNode(node, context.checker, ts.isTemplateExpression);
@@ -22,7 +22,7 @@ export const templateOperators = nodeEvalHandler({
 
   [ts.SyntaxKind.TemplateLiteralType]: checkerEval,
   [ts.SyntaxKind.TemplateLiteralTypeSpan]: checkerEval,
-});
+}));
 
 export function convertTemplateLiteralValue(
   node: ts.TemplateExpression,

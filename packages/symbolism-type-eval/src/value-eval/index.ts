@@ -47,7 +47,7 @@ const nodePathHandlers: Record<ts.SyntaxKind, NodeEvalHandler> = {
   [ts.SyntaxKind.SourceFile]: noType,
 
   // Low level tokens
-  ...tokenOperators,
+  ...tokenOperators(),
 
   // Intrinsic Values
   [ts.SyntaxKind.AnyKeyword]: checkerEval,
@@ -377,14 +377,14 @@ const nodePathHandlers: Record<ts.SyntaxKind, NodeEvalHandler> = {
   [ts.SyntaxKind.MergeDeclarationMarker]: noType,
   [ts.SyntaxKind.EndOfDeclarationMarker]: noType,
 
-  ...unaryExpressionOperators,
-  ...templateOperators,
-  ...objectOperators,
-  ...arrayOperators,
-  ...functionOperators,
-  ...classOperators,
-  ...jsDocHandlers,
-  ...jsxPathHandlers,
+  ...unaryExpressionOperators(),
+  ...templateOperators(),
+  ...objectOperators(),
+  ...arrayOperators(),
+  ...functionOperators(),
+  ...classOperators(),
+  ...jsDocHandlers(),
+  ...jsxPathHandlers(),
 };
 
 export function getNodeSchema(

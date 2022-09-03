@@ -8,7 +8,7 @@ import { nodeEvalHandler } from "./handlers";
 import { invariantNode } from "@symbolism/ts-utils";
 import { dumpNode } from "@symbolism/ts-debug";
 
-export const arrayOperators = nodeEvalHandler({
+export const arrayOperators = nodeEvalHandler(() => ({
   [ts.SyntaxKind.ArrayLiteralExpression](node, context) {
     invariantNode(node, context.checker, ts.isArrayLiteralExpression);
     return convertArrayLiteralValue(node, context);
@@ -25,7 +25,7 @@ export const arrayOperators = nodeEvalHandler({
       decrementDepth: false,
     });
   },
-});
+}));
 
 export function convertArrayLiteralValue(
   node: ts.ArrayLiteralExpression,

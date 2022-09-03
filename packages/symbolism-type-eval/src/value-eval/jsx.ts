@@ -5,7 +5,7 @@ import { getNodeSchema } from ".";
 import { AnySchemaNode, ObjectSchema } from "../schema";
 import { SchemaError } from "../classify";
 
-export const jsxPathHandlers = nodeEvalHandler({
+export const jsxPathHandlers = nodeEvalHandler(() => ({
   [ts.SyntaxKind.JsxElement](node, context) {
     invariantNode(node, context.checker, ts.isJsxElement);
     return getNodeSchema({
@@ -116,4 +116,4 @@ export const jsxPathHandlers = nodeEvalHandler({
       decrementDepth: false,
     });
   },
-});
+}));

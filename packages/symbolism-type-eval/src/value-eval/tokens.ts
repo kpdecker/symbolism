@@ -3,7 +3,7 @@ import ts from "typescript";
 import { getTypeSchema } from "../type-eval";
 import { noType, nodeEvalHandler, checkerEval } from "./handlers";
 
-export const tokenOperators = nodeEvalHandler({
+export const tokenOperators = nodeEvalHandler(() => ({
   [ts.SyntaxKind.EndOfFileToken]: noType,
   [ts.SyntaxKind.SingleLineCommentTrivia]: noType,
   [ts.SyntaxKind.MultiLineCommentTrivia]: noType,
@@ -135,4 +135,4 @@ export const tokenOperators = nodeEvalHandler({
   [ts.SyntaxKind.FromKeyword]: noType,
   [ts.SyntaxKind.GlobalKeyword]: noType,
   [ts.SyntaxKind.OfKeyword]: noType,
-});
+}));

@@ -12,9 +12,9 @@ export type NodeEvalHandler = (
   context: SchemaContext
 ) => AnySchemaNode | undefined;
 
-export function nodeEvalHandler<T extends { [kind: number]: NodeEvalHandler }>(
-  cfg: T
-) {
+export function nodeEvalHandler<
+  T extends () => { [kind: number]: NodeEvalHandler }
+>(cfg: T) {
   return cfg;
 }
 

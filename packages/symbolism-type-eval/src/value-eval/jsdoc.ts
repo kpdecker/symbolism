@@ -1,7 +1,7 @@
 import ts from "typescript";
 import { noType, nodeEvalHandler } from "./handlers";
 
-export const jsDocHandlers = nodeEvalHandler({
+export const jsDocHandlers = nodeEvalHandler(() => ({
   [ts.SyntaxKind.JSDocTypeExpression]: noType,
   [ts.SyntaxKind.JSDocNameReference]: noType,
   [ts.SyntaxKind.JSDocMemberName]: noType,
@@ -41,4 +41,4 @@ export const jsDocHandlers = nodeEvalHandler({
   [ts.SyntaxKind.JSDocTypedefTag]: noType,
   [ts.SyntaxKind.JSDocSeeTag]: noType,
   [ts.SyntaxKind.JSDocPropertyTag]: noType,
-});
+}));
