@@ -89,7 +89,12 @@ const nodePathHandlers: Record<ts.SyntaxKind, NodeEvalHandler> = {
       }
     }
 
-    if (ts.isBindingElement(node.parent)) {
+    if (
+      ts.isBindingElement(node.parent) ||
+      ((ts.isPropertyAccessExpression(node.parent) ||
+        ts.isPropertyAssignment(node.parent)) &&
+        node.parent.name === node)
+    ) {
       return getNodeSchema({
         node: node.parent,
         context,

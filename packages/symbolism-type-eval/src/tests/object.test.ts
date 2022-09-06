@@ -237,38 +237,38 @@ describe("type schema converter", () => {
 
       expect(printSchema(evaluateSchema(literalNode!, context.checker)))
         .toMatchInlineSnapshot(`
-        "{
-          \\"1bar\\": 0;
-          \\"1foo\\": 0;
-          \\"2bar\\": 0;
-          \\"2foo\\": 0;
-          \\"3bar\\": 0;
-          \\"3foo\\": 0;
-          \\"4bar\\": 0;
-          \\"4foo\\": 0;
-          blat: \\"yes\\";
-        };
-        "
-      `);
+          "{
+            \\"1bar\\": 0;
+            \\"1foo\\": 0;
+            \\"2bar\\": 0;
+            \\"2foo\\": 0;
+            \\"3bar\\": 0;
+            \\"3foo\\": 0;
+            \\"4bar\\": 0;
+            \\"4foo\\": 0;
+            blat: \\"yes\\";
+          };
+          "
+        `);
 
       expect(
         printSchema({
           root: getTypeSchema({ type, context, decrementDepth: false }),
         })
       ).toMatchInlineSnapshot(`
-        "{
-          \\"1bar\\": 0;
-          \\"1foo\\": 0;
-          \\"2bar\\": 0;
-          \\"2foo\\": 0;
-          \\"3bar\\": 0;
-          \\"3foo\\": 0;
-          \\"4bar\\": 0;
-          \\"4foo\\": 0;
-          blat: \\"yes\\";
-        };
-        "
-      `);
+          "{
+            \\"1bar\\": 0;
+            \\"1foo\\": 0;
+            \\"2bar\\": 0;
+            \\"2foo\\": 0;
+            \\"3bar\\": 0;
+            \\"3foo\\": 0;
+            \\"4bar\\": 0;
+            \\"4foo\\": 0;
+            blat: \\"yes\\";
+          };
+          "
+        `);
     });
   });
 
@@ -631,5 +631,88 @@ describe("type schema converter", () => {
       "{ blat: string };
       "
     `);
+  });
+
+  describe("index signatures", () => {
+    it("should evaluate index keys", () => {
+      const { checker, sourceFile } = testType(`
+        declare const injectedConfig: Record<string, string>;
+
+        export const appConfig = {
+          food: injectedConfig.food,
+        } as const;
+
+        const food = appConfig.food;
+      `);
+
+      const appConfigNodes = findIdentifiers(sourceFile, "appConfig");
+      expect(printSchema(evaluateSchema(appConfigNodes[0], checker)))
+        .toMatchInlineSnapshot(`
+        "{ food: string };
+        "
+      `);
+
+      const foodNodes = findIdentifiers(sourceFile, "food");
+      expect(printSchema(evaluateSchema(foodNodes[0], checker)))
+        .toMatchInlineSnapshot(`
+        "string;
+        "
+      `);
+    });
+    it("should evaluate index keys on literals", () => {
+      const { checker, sourceFile } = testType(`
+        export const appConfig: Record<string, string> = {
+          food: "bar",
+        };
+
+        const food = appConfig.food;
+        const accessFood = appConfig['food'];
+        const bar = appConfig.bar;
+        const bat = appConfig['bat'];
+      `);
+
+      const appConfigNodes = findIdentifiers(sourceFile, "appConfig");
+      expect(printSchema(evaluateSchema(appConfigNodes[0], checker)))
+        .toMatchInlineSnapshot(`
+        "{
+          food: \\"bar\\";
+          [k: string]: string;
+        };
+        "
+      `);
+
+      const foodNodes = findIdentifiers(sourceFile, "food");
+      expect(printSchema(evaluateSchema(foodNodes[0], checker)))
+        .toMatchInlineSnapshot(`
+        "\\"bar\\";
+        "
+      `);
+      expect(printSchema(evaluateSchema(foodNodes[1], checker)))
+        .toMatchInlineSnapshot(`
+        "\\"bar\\";
+        "
+      `);
+
+      const accessFoodNodes = findIdentifiers(sourceFile, "accessFood");
+      expect(printSchema(evaluateSchema(accessFoodNodes[0], checker)))
+        .toMatchInlineSnapshot(`
+        "\\"bar\\";
+        "
+      `);
+
+      const barNodes = findIdentifiers(sourceFile, "bar");
+      expect(printSchema(evaluateSchema(barNodes[0], checker)))
+        .toMatchInlineSnapshot(`
+        "string;
+        "
+      `);
+
+      const batNodes = findIdentifiers(sourceFile, "bat");
+      expect(printSchema(evaluateSchema(batNodes[0], checker)))
+        .toMatchInlineSnapshot(`
+        "string;
+        "
+      `);
+    });
   });
 });

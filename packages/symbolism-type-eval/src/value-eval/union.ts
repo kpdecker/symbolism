@@ -1,5 +1,6 @@
 import invariant from "tiny-invariant";
 import { removeDuplicateSchemas } from "../classify";
+import { SchemaContext } from "../context";
 import { AnySchemaNode, UnionSchema } from "../schema";
 
 export function createUnionKind(items: AnySchemaNode[]): AnySchemaNode {
@@ -148,9 +149,10 @@ export function unionSchemas(
   };
 }
 
-export function unionProperties(schema: UnionSchema) {
+export function unionProperties(schema: UnionSchema, context: SchemaContext) {
   const properties = {} as { [key: string]: AnySchemaNode };
-  for (const item of schema.items) {
+  for (const storedItem of schema.items) {
+    const item = context.resolveSchema(storedItem);
     if (item.kind === "object") {
       for (const key of Object.keys(item.properties)) {
         const existingKey = properties[key];
