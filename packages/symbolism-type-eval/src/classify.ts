@@ -1,6 +1,6 @@
 import { dumpNode, dumpSchema, dumpSymbol } from "@symbolism/ts-debug";
 import { getSymbolDeclaration, isNamedDeclaration } from "@symbolism/ts-utils";
-import { NodeError, removeDuplicates } from "@symbolism/utils";
+import { logDebug, NodeError, removeDuplicates } from "@symbolism/utils";
 import invariant from "tiny-invariant";
 import ts from "typescript";
 import { SchemaContext } from "./context";
@@ -106,7 +106,14 @@ export function findParameterDependency(
       return findParameterDependency(symbolDeclaration, checker);
     }
 
-    throw new Error("Unexpected state");
+    // No symbol found. This could be due to the variable not being declared.
+    logDebug(
+      "No symbol found for",
+      dumpNode(node, checker),
+      "parent",
+      dumpNode(node.parent, checker)
+    );
+    return undefined;
   }
 
   if (ts.isVariableDeclaration(node)) {
