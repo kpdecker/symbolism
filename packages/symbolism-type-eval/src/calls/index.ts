@@ -131,28 +131,27 @@ function convertCall(
     };
   });
 
-  const baseNodeMap = new Map<ts.Node, AnySchemaNode>();
-
   // Find the inputs that are parameter calls
   const parameterInputs = new Set(
     argSchemas.flatMap((arg) => arg.parameterNodes)
   );
 
-  argSchemas.forEach((arg) => {
-    arg.parameterNodes.forEach((parameter) => {
-      baseNodeMap.set(
-        parameter,
-        getNodeSchema({
-          context,
-          node: parameter,
-          decrementDepth: false,
-        })!
-      );
-    });
+  // Set base types for parameters. These will be overwritten as/if they are
+  // resolved below.
+  const baseNodeMap = new Map<ts.Node, AnySchemaNode>();
+  parameterInputs.forEach((parameter) => {
+    baseNodeMap.set(
+      parameter,
+      getNodeSchema({
+        context,
+        node: parameter,
+        decrementDepth: false,
+      })!
+    );
   });
 
   // Everything is concrete. No need to expand.
-  if (argSchemas.every((arg) => !arg.parameterNodes.length)) {
+  if (!parameterInputs.size) {
     collectedCalls.push({
       callExpression,
       arguments: argSchemas.map((arg) =>
