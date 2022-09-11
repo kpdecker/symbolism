@@ -111,8 +111,9 @@ export function parseSymbolTable(program: ts.Program, config: Config) {
             if (!symbol) {
               logVerbose(
                 "No Symbol:",
-                dumpNode(node, checker),
-                dumpSymbol(checker.getSymbolAtLocation(node.parent), checker)
+                () => dumpNode(node, checker),
+                () =>
+                  dumpSymbol(checker.getSymbolAtLocation(node.parent), checker)
               );
               return;
             }
@@ -121,9 +122,9 @@ export function parseSymbolTable(program: ts.Program, config: Config) {
             if (isIntrinsicType(type)) {
               logVerbose(
                 "Intrinsic Symbol:",
-                dumpNode(node, checker),
-                dumpSymbol(symbol, checker),
-                checker.typeToString(type)
+                () => dumpNode(node, checker),
+                () => dumpSymbol(symbol, checker),
+                () => checker.typeToString(type)
               );
               pickSymbol("intrinsic", symbol);
             }
@@ -169,8 +170,8 @@ export function parseSymbolTable(program: ts.Program, config: Config) {
             if (!definitionSymbol) {
               logWarn(
                 `No definition symbol found`,
-                dumpNode(node, checker),
-                symbolDeclaration && dumpNode(symbolDeclaration, checker),
+                () => dumpNode(node, checker),
+                () => symbolDeclaration && dumpNode(symbolDeclaration, checker),
                 definitionSymbol
               );
               return;
@@ -182,8 +183,8 @@ export function parseSymbolTable(program: ts.Program, config: Config) {
               if (!(definitionSymbol.flags & ts.SymbolFlags.Transient)) {
                 logWarn(
                   "Definition symbol lacking declaration",
-                  dumpNode(node, checker),
-                  dumpSymbol(definitionSymbol, checker)
+                  () => dumpNode(node, checker),
+                  () => dumpSymbol(definitionSymbol!, checker)
                 );
               }
 
@@ -202,8 +203,8 @@ export function parseSymbolTable(program: ts.Program, config: Config) {
             logDebug(
               "Symbol:",
               handlerUsed,
-              dumpNode(node, checker),
-              dumpSymbol(symbol, checker)
+              () => dumpNode(node, checker),
+              () => dumpSymbol(symbol, checker)
             );
 
             // TODO: Allow for multiple definitions (i.e. root type and variable declaration)?

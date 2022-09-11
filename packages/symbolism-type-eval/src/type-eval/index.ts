@@ -119,8 +119,8 @@ export function getTypeSchema(
 
   logDebug(
     "getTypeSchema",
-    dumpType(type, checker),
-    dumpNode(contextNode, checker),
+    () => dumpType(type, checker),
+    () => dumpNode(contextNode, checker),
     { canEmitDef, typeId, typeName }
   );
 
@@ -274,9 +274,6 @@ function getTypeSchemaWorker(
         kind: "array",
         items,
         node: contextNode,
-        flags: dumpFlags(type.flags, ts.TypeFlags).concat(
-          dumpFlags(objectFlags, ts.ObjectFlags)
-        ),
       };
     } else if (type.flags & ts.TypeFlags.Object || type.isClassOrInterface()) {
       const objectFlags = (type as ts.ObjectType).objectFlags;

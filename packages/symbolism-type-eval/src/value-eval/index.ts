@@ -47,7 +47,7 @@ export type TypeEvalOptions = {
    */
   evalParameters?: boolean;
 
-  /** 
+  /**
    * If true, will not attempt to resolve the final type of parameter nodes,
    * instead mapping them to any type with the correct replacement node.
    */
@@ -425,7 +425,7 @@ export function getNodeSchema(
     return tooMuchRecursionSchema;
   }
 
-  logDebug("getNodeSchema", dumpNode(node, context.checker));
+  logDebug("getNodeSchema", () => dumpNode(node, context.checker));
   try {
     const handler = nodePathHandlers[node.kind];
     invariant(
@@ -448,9 +448,10 @@ export function getNodeSchema(
       );
     } else {
       logDebug(
-        `Unsupported expression: ${
-          ts.SyntaxKind[node.kind]
-        }\n\nNode: ${JSON.stringify(dumpNode(node, context.checker))}`
+        () =>
+          `Unsupported expression: ${
+            ts.SyntaxKind[node.kind]
+          }\n\nNode: ${JSON.stringify(dumpNode(node, context.checker))}`
       );
     }
   } catch (err) {

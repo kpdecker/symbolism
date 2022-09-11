@@ -1,10 +1,10 @@
-import { dumpNode, dumpSchema, dumpSymbol } from "@symbolism/ts-debug";
+import { dumpNode, dumpSchema } from "@symbolism/ts-debug";
 import { getSymbolDeclaration, isNamedDeclaration } from "@symbolism/ts-utils";
-import { logDebug, NodeError, removeDuplicates } from "@symbolism/utils";
+import { logDebug, removeDuplicates } from "@symbolism/utils";
 import invariant from "tiny-invariant";
 import ts, { findAncestor } from "typescript";
 import { SchemaContext } from "./context";
-import { AnySchemaNode, PrimitiveSchema, UnionSchema } from "./schema";
+import { AnySchemaNode, UnionSchema } from "./schema";
 import { getNodeSchema } from "./value-eval";
 import { getLocalSymbol } from "./value-eval/symbol";
 
@@ -109,9 +109,9 @@ export function findParameterDependency(
     // No symbol found. This could be due to the variable not being declared.
     logDebug(
       "No symbol found for",
-      dumpNode(node, checker),
+      () => dumpNode(node, checker),
       "parent",
-      dumpNode(node.parent, checker)
+      () => dumpNode(node.parent, checker)
     );
     return undefined;
   }

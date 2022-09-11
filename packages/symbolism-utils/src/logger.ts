@@ -11,6 +11,15 @@ export enum LogLevel {
 
 let loggerLevel = LogLevel.warn;
 
+function processArgs(message: unknown[]) {
+  return message.map((arg) => {
+    if (typeof arg === "function") {
+      return arg();
+    }
+    return arg;
+  });
+}
+
 export function setLogLevel(level: LogLevel) {
   const originalLevel = loggerLevel;
   loggerLevel = level;
@@ -19,31 +28,31 @@ export function setLogLevel(level: LogLevel) {
 
 export function logWarn(...message: unknown[]) {
   if (loggerLevel <= LogLevel.warn) {
-    console.warn(...message);
+    console.warn(...processArgs(message));
   }
 }
 
 export function logInfo(...message: unknown[]) {
   if (loggerLevel <= LogLevel.info) {
-    console.info(...message);
+    console.info(...processArgs(message));
   }
 }
 
 export function logInteractive(...message: unknown[]) {
   if (process.stdout.isTTY) {
-    logInfo(...message);
+    logInfo(...processArgs(message));
   }
 }
 
 export function logVerbose(...message: unknown[]) {
   if (loggerLevel <= LogLevel.verbose) {
-    console.info(...message);
+    console.info(...processArgs(message));
   }
 }
 
 export function logDebug(...message: unknown[]) {
   if (loggerLevel <= LogLevel.debug) {
-    console.debug(...message);
+    console.debug(...processArgs(message));
   }
 }
 

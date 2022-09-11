@@ -48,7 +48,7 @@ function dumpSchema(symbolPath: string, options: OptionValues) {
     node = node.parent;
   }
 
-  logVerbose(`Scanning node`, dumpNode(node, checker));
+  logVerbose(`Scanning node`, () => dumpNode(node, checker));
 
   const schema = evaluateSchema(node, checker);
 

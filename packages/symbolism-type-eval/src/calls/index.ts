@@ -57,7 +57,7 @@ function convertFunctionCallsForSymbol(
 
   logVerbose(
     "Converting call",
-    dumpSymbol(symbol, checker),
+    () => dumpSymbol(symbol, checker),
     "references",
     references?.length
   );

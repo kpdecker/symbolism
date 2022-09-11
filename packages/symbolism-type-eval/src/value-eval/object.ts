@@ -476,9 +476,10 @@ function evalPropertySchema(
     );
   } else {
     logDebug(
-      `Unable to resolve expression: ${
-        ts.SyntaxKind[nameNode.kind]
-      }\n\nNode: ${JSON.stringify(dumpNode(nameNode, context.checker))}`
+      () =>
+        `Unable to resolve expression: ${
+          ts.SyntaxKind[nameNode.kind]
+        }\n\nNode: ${JSON.stringify(dumpNode(nameNode, context.checker))}`
     );
   }
 }
