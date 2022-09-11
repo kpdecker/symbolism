@@ -10,7 +10,9 @@ import { SchemaError } from "./classify";
 
 export class SchemaContext {
   typesHandled = new Set<ts.Type>();
-  typeDefinitions = new Map<TypeId, AnySchemaNode>(baseDefs);
+  typeDefinitions = new Map<TypeId, AnySchemaNode | (() => AnySchemaNode)>(
+    baseDefs
+  );
 
   /**
    * Cache of computed internal schemas. These types are generally
@@ -43,9 +45,16 @@ export class SchemaContext {
       if (!definition && !wellKnownReferences.includes(schema.name)) {
         throw new SchemaError("Definition not found ", schema);
       }
-      return definition
-        ? this.resolveSchema(definition)
-        : { kind: "primitive", name: "unknown" };
+      if (definition) {
+        if (typeof definition === "function") {
+          const evaledDefinition = definition();
+          this.typeDefinitions.set(schema.typeId, evaledDefinition);
+          return evaledDefinition;
+        }
+        return definition;
+      }
+
+      return { kind: "primitive", name: "unknown" };
     }
     return schema;
   }

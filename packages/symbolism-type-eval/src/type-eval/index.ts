@@ -139,7 +139,9 @@ export function getTypeSchema(
         )}
 
 New: ${dumpSchema(ret)}
-Existing: ${dumpSchema(existingDef)}`,
+Existing: ${dumpSchema(
+          typeof existingDef === "function" ? existingDef() : existingDef
+        )})}`,
         contextNode,
         checker
       );
@@ -239,7 +241,7 @@ function getTypeSchemaWorker(
         getTypeSchema({
           context,
           type: elementType,
-          decrementDepth: false,
+          decrementDepth: true,
         })
       );
 
@@ -334,37 +336,36 @@ function getTypeSchemaWorker(
           };
         }
 
-        const functionSchema = createUnionKind(
-          callSignatures.map(convertSignature)
-        );
+        const buildFunctionSchema = () =>
+          createUnionKind(callSignatures.map(convertSignature));
 
         if (isNamedType(type, context.checker)) {
           const referenceNode = createReferenceFromType(
             type,
             context,
-            functionSchema
+            buildFunctionSchema
           );
           if (referenceNode) {
             return referenceNode;
           }
         }
 
-        return functionSchema;
+        return buildFunctionSchema();
       }
 
-      const objectSchema = convertObjectType(context, type);
+      const buildObjectSchema = () => convertObjectType(context, type);
       if (isNamedType(type, context.checker)) {
         const referenceNode = createReferenceFromType(
           type,
           context,
-          objectSchema
+          buildObjectSchema
         );
         if (referenceNode) {
           return referenceNode;
         }
       }
 
-      return objectSchema;
+      return buildObjectSchema();
     } else if (type.flags & ts.TypeFlags.Index) {
       const index = type as ts.IndexType;
       const node = findContextNode(index.type, context.contextNode);
@@ -541,7 +542,7 @@ export function mapString(
 export function createReferenceFromType(
   type: ts.Type,
   context: SchemaContext,
-  definitionSchema?: AnySchemaNode
+  definitionSchema?: () => AnySchemaNode
 ): AnySchemaNode | undefined {
   const typeId = getTypeId(type, context.checker, true);
   const friendlyTypeId = getTypeId(type, context.checker, false);

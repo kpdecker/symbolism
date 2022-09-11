@@ -13,12 +13,14 @@ export function printSchema(
     return undefined;
   }
   const defs = Array.from(schema.defs ? schema.defs.entries() : [])
-    .map(([typeName, node]) => {
+    .map(([typeName, schemaNode]) => {
+      const resolvedSchemaNode =
+        typeof schemaNode === "function" ? schemaNode() : schemaNode;
       return `type ${
         schema.friendlyNames?.[typeName] ?? typeName
       } = ${safeTypeFormat(
-        printSchemaNode(node, target),
-        node,
+        printSchemaNode(resolvedSchemaNode, target),
+        resolvedSchemaNode,
         target === "js"
       )}
 `;

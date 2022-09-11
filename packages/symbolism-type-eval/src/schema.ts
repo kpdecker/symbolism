@@ -1,4 +1,5 @@
 import { TypeId } from "@symbolism/ts-utils";
+import invariant from "tiny-invariant";
 import ts from "typescript";
 import { areSchemasEqual } from "./classify";
 import { SchemaContext } from "./context";
@@ -126,7 +127,7 @@ export type AnySchemaNode =
   | ErrorSchema;
 
 export type Schema = {
-  defs?: Map<string, AnySchemaNode>;
+  defs?: Map<string, AnySchemaNode | (() => AnySchemaNode)>;
   friendlyNames?: Record<string, string>;
   root: AnySchemaNode | undefined;
 };
@@ -139,11 +140,28 @@ export function evaluateSchema(node: ts.Node, checker: ts.TypeChecker): Schema {
     decrementDepth: false,
     evalParameters: true,
   });
+  resolveDeferredDefs();
+
   return filterDefs({
     defs: new Map(context.typeDefinitions),
     friendlyNames: {},
     root,
   });
+
+  function resolveDeferredDefs() {
+    let updated = true;
+    while (updated) {
+      updated = false;
+      Array.from(context.typeDefinitions.entries() || []).forEach(
+        ([name, def]) => {
+          if (typeof def === "function") {
+            context.typeDefinitions.set(name, def());
+            updated = true;
+          }
+        }
+      );
+    }
+  }
 }
 
 function filterDefs(schema: Schema) {
@@ -156,6 +174,7 @@ function filterDefs(schema: Schema) {
 
   for (const name of referencesToCount) {
     const def = defs?.get(name);
+    invariant(typeof def !== "function", "Def should be evaluated");
 
     const foundReferences = findReferences(def);
     for (const reference of foundReferences) {
@@ -167,13 +186,19 @@ function filterDefs(schema: Schema) {
   }
 
   Array.from(defs?.entries() || []).forEach(([name, def]) => {
+    invariant(typeof def !== "function", "Def should be evaluated");
+
     if (def.kind === "error") {
       defs?.delete(name);
     }
+
+    if (!referenceCount[name]) {
+      defs?.delete(name);
+      return;
+    }
+
     if (referenceCount[name] <= 1 && areSchemasEqual(def, root)) {
       // If we have a direct reference to the root, remove it
-      defs?.delete(name);
-    } else if (!referenceCount[name]) {
       defs?.delete(name);
     }
   });
@@ -181,7 +206,9 @@ function filterDefs(schema: Schema) {
   if (root?.kind === "reference") {
     if (referenceCount[root.typeId] === 1) {
       const { typeId } = root;
-      root = defs?.get(typeId) || root;
+      const def = defs?.get(typeId);
+      invariant(!def || typeof def !== "function", "Def should be evaluated");
+      root = def || root;
       defs?.delete(typeId);
     }
   }
@@ -322,7 +349,7 @@ function filterDefs(schema: Schema) {
           if (ret) {
             defs?.delete(schema.typeId);
 
-            return ret;
+            return typeof ret === "function" ? ret() : ret;
           }
         }
         return schema;

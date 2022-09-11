@@ -14,7 +14,9 @@ export function createJsonSchema(params: {
 
   const $defs: Record<string, JsonObject | null> = {};
   schema.defs?.forEach((node, typeName) => {
-    $defs[schema.friendlyNames?.[typeName] ?? typeName] = schemaToJson(node);
+    const resolvedDef = typeof node === "function" ? node() : node;
+    $defs[schema.friendlyNames?.[typeName] ?? typeName] =
+      schemaToJson(resolvedDef);
   });
 
   return {
