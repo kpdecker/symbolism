@@ -2,7 +2,7 @@ import { dumpNode, dumpSchema, dumpSymbol } from "@symbolism/ts-debug";
 import { getSymbolDeclaration, isNamedDeclaration } from "@symbolism/ts-utils";
 import { logDebug, NodeError, removeDuplicates } from "@symbolism/utils";
 import invariant from "tiny-invariant";
-import ts from "typescript";
+import ts, { findAncestor } from "typescript";
 import { SchemaContext } from "./context";
 import { AnySchemaNode, PrimitiveSchema, UnionSchema } from "./schema";
 import { getNodeSchema } from "./value-eval";
@@ -140,6 +140,21 @@ export function findParameterDependency(
   return undefined;
 }
 
+export function isParameterInScope(
+  /**
+   * Node whose scope we are checking.
+   * This can be any child of the function defining `parameter
+   */
+  node: ts.Node,
+  parameter: ts.ParameterDeclaration | undefined
+) {
+  if (!parameter) {
+    return false;
+  }
+
+  return !!findAncestor(node, (hay) => hay === parameter.parent);
+}
+
 export function bindParameterDependency(
   node: ts.Node,
   parameterBinding: { node: ts.ParameterDeclaration; schema: AnySchemaNode },
@@ -164,6 +179,7 @@ export function bindParameterDependency(
 }
 
 export function unboundInputs(
+  scopeContext: ts.Node,
   schema: AnySchemaNode | undefined,
   checker: ts.TypeChecker
 ): { node: ts.Node; unboundNode: ts.ParameterDeclaration | undefined }[] {
@@ -173,7 +189,7 @@ export function unboundInputs(
 
   if (schema.node) {
     const unboundNode = findParameterDependency(schema.node, checker);
-    if (unboundNode) {
+    if (isParameterInScope(scopeContext, unboundNode)) {
       // This node's value is derived from a parameter
       return [{ node: schema.node, unboundNode }];
     } else {
@@ -210,30 +226,32 @@ export function unboundInputs(
     schema.kind === "template-literal" ||
     schema.kind === "binary-expression"
   ) {
-    return schema.items.flatMap((item) => unboundInputs(item, checker));
+    return schema.items.flatMap((item) =>
+      unboundInputs(scopeContext, item, checker)
+    );
   }
 
   if (schema.kind === "array") {
-    return unboundInputs(schema.items, checker);
+    return unboundInputs(scopeContext, schema.items, checker);
   }
 
   if (schema.kind === "object") {
     const abstractKeysSymbols = schema.abstractIndexKeys.flatMap(
       (abstractKey) =>
-        unboundInputs(abstractKey.key, checker).concat(
-          unboundInputs(abstractKey.value, checker)
+        unboundInputs(scopeContext, abstractKey.key, checker).concat(
+          unboundInputs(scopeContext, abstractKey.value, checker)
         )
     );
 
     return Object.values(schema.properties)
-      .flatMap((item) => unboundInputs(item, checker))
+      .flatMap((item) => unboundInputs(scopeContext, item, checker))
       .concat(abstractKeysSymbols);
   }
 
   if (schema.kind === "function") {
-    return unboundInputs(schema.returnType, checker).concat(
+    return unboundInputs(scopeContext, schema.returnType, checker).concat(
       ...schema.parameters.flatMap(({ schema }) =>
-        unboundInputs(schema, checker)
+        unboundInputs(scopeContext, schema, checker)
       )
     );
   }

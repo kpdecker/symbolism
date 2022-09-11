@@ -2,7 +2,7 @@ import ts, { findAncestor } from "typescript";
 
 import { AnySchemaNode } from "../schema";
 import { CallContext } from "../context";
-import { dumpNode, dumpSymbol } from "@symbolism/ts-debug";
+import { dumpNode, dumpSchema, dumpSymbol } from "@symbolism/ts-debug";
 import { areSchemasEqual, unboundInputs } from "../classify";
 import { resolveParametersInSchema } from "../value-eval/symbol";
 import { logVerbose, NodeError, removeDuplicates } from "@symbolism/utils";
@@ -120,10 +120,10 @@ function convertCall(
       lateBindParameters: true,
     })!;
 
-    const inputs = unboundInputs(schema, checker);
-    const parameterNodes = inputs
-      .map((input) => input.unboundNode!)
-      .filter(Boolean);
+    const inputs = unboundInputs(callExpression, schema, checker);
+    const parameterNodes = Array.from(
+      new Set(inputs.map((input) => input.unboundNode!).filter(Boolean))
+    );
 
     return {
       schema,
@@ -202,6 +202,11 @@ function convertCall(
   Next Symbol: ${JSON.stringify(dumpSymbol(symbol, checker))}
   Current Symbol: ${JSON.stringify(dumpSymbol(currentSymbol, checker))}
 
+  History: ${context.history}
+
+  call: ${JSON.stringify(dumpNode(callExpression, checker))}
+  arguments: ${callExpression.arguments.length}
+
   Symbols Seen:
   - ${context.symbolsHandled
     .map((s) => JSON.stringify(dumpSymbol(s, checker)))
@@ -224,6 +229,8 @@ function convertCall(
           .join("\n    - ")}`
     )
     .join("\n  - ")}
+  Parameter Schemas:
+  - ${argSchemas.map((arg) => "" && dumpSchema(arg.schema)).join("\n  - ")}
 `,
         callExpression,
         context.checker
