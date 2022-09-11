@@ -133,7 +133,12 @@ export type Schema = {
 
 export function evaluateSchema(node: ts.Node, checker: ts.TypeChecker): Schema {
   const context = new SchemaContext(node, checker, {});
-  const root = getNodeSchema({ context, node, decrementDepth: false });
+  const root = getNodeSchema({
+    context,
+    node,
+    decrementDepth: false,
+    evalParameters: true,
+  });
   return filterDefs({
     defs: new Map(context.typeDefinitions),
     friendlyNames: {},

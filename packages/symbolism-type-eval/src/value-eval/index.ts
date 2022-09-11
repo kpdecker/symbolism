@@ -41,6 +41,13 @@ export type TypeEvalOptions = {
   allowMissing?: boolean;
 
   /**
+   * True to evaluate parameters. Otherwise parameters will be mapped to unknown schema.
+   * Most use cases for function schema don't require knowledge of the evaled parameter
+   * type and calculating this can be expensive, so this flag makes that opt in.
+   */
+  evalParameters?: boolean;
+
+  /** 
    * If true, will not attempt to resolve the final type of parameter nodes,
    * instead mapping them to any type with the correct replacement node.
    */

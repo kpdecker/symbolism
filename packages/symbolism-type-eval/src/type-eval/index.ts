@@ -24,6 +24,7 @@ import {
   createReferenceSchema,
   ErrorSchema,
   FunctionSchema,
+  PrimitiveSchema,
 } from "../schema";
 import { getNodeSchema, TypeEvalOptions } from "../value-eval";
 import { createUnionKind } from "../value-eval/union";
@@ -310,12 +311,18 @@ function getTypeSchemaWorker(
 
               return {
                 name: parameter.name,
-                schema: getNodeSchema({
-                  context,
-                  node: declaration,
-                  decrementDepth: true,
-                  allowMissing: false,
-                })!,
+                schema: context.options.evalParameters
+                  ? getNodeSchema({
+                      context,
+                      node: declaration,
+                      decrementDepth: true,
+                      allowMissing: false,
+                    })!
+                  : ({
+                      kind: "primitive",
+                      name: "unknown",
+                      node: declaration,
+                    } as PrimitiveSchema),
                 symbol: parameter,
               };
             }),
