@@ -383,6 +383,8 @@ describe("type schema converter", () => {
             }
         }
 
+        const tuple = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] as const;
+
         let union: {foo: "bar"} & { baz: "qux" };
         const unionLookup = union[source];
         const unionLookup2 = union["foo"];
@@ -401,6 +403,9 @@ describe("type schema converter", () => {
 
         const stringLookup = spreadName['length'];
         const stringAbstractLookup = spreadName[source];
+
+        const tupleLookup = tuple[0];
+        const tupleAbstractLookup = tuple[source];
 
         type Type = typeof literal;
       `);
@@ -540,6 +545,15 @@ describe("type schema converter", () => {
             ) => number)
           | ((url: string) => string)
           | number;
+        "
+      `);
+
+      expect(testVar("tupleLookup")).toMatchInlineSnapshot(`
+        "1;
+        "
+      `);
+      expect(testVar("tupleAbstractLookup")).toMatchInlineSnapshot(`
+        "1 | 10 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9;
         "
       `);
     });

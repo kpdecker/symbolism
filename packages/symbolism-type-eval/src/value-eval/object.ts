@@ -376,6 +376,17 @@ function evalPropertySchema(
     };
   } else if (parentSchema.kind === "array") {
     return parentSchema.items;
+  } else if (parentSchema.kind === "tuple") {
+    if (nameSchema.kind === "primitive") {
+      return createUnionKind(parentSchema.items);
+    } else if (nameSchema.kind === "literal") {
+      return parentSchema.items[nameSchema.value as any];
+    }
+
+    return {
+      kind: "literal",
+      value: undefined,
+    };
   } else if (parentSchema.kind === "primitive") {
     if (parentSchema.name === "any" || parentSchema.name === "never") {
       return remapSchemaNode(parentSchema, nameNode);
