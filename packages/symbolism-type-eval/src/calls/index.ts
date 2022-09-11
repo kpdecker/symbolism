@@ -257,7 +257,11 @@ function convertCall(
             const argument = context.resolveSchema(
               call.arguments[parameterIndex]
             );
-            if (argument) {
+            if (
+              argument &&
+              // Use types from the parameter if we're just getting any
+              !(argument.kind === "primitive" && argument.name === "any")
+            ) {
               parameterMap.set(node, argument);
             }
           }

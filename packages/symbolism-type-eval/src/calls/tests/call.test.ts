@@ -3,14 +3,10 @@ import { CallContext } from "../../context";
 import { parseSymbolTable } from "@symbolism/symbol-table";
 import { loadFunctionCalls } from "..";
 import { printCalls } from "../../print/calls";
+import ts from "typescript";
 
-function testCall(source: string) {
-  const program = mockProgram({
-    "test.tsx": source,
-  });
+function testProgram(program: ts.Program) {
   const checker = program.getTypeChecker();
-  const sourceFile = program.getSourceFile("test.tsx")!;
-
   const symbolTable = parseSymbolTable(program, {
     exclude() {
       return false;
@@ -21,16 +17,68 @@ function testCall(source: string) {
     tokens: [],
     tsConfigPath: "tsconfig.json",
   });
-
   return {
     program,
-    sourceFile,
     checker,
     symbolTable,
   };
 }
 
+function testCall(source: string) {
+  const program = mockProgram({
+    "test.tsx": source,
+  });
+  const sourceFile = program.getSourceFile("test.tsx")!;
+
+  return {
+    ...testProgram(program),
+    sourceFile,
+  };
+}
+
 describe("call arguments lookup", () => {
+  it("should handle local types with the same names", () => {
+    const program = mockProgram({
+      "test.tsx": `
+        import i18n from "i18next";
+
+        type Props = {
+          test: number;
+        };
+
+        function foo(props: Props) {
+          return i18n.t("bar", { foo: props.test });
+        }
+
+        foo(notAThing);
+      `,
+      "foo.tsx": `
+        import i18n from "i18next";
+
+      type Props = {
+          foo: string;
+        };
+        function foo(props: Props) {
+          return i18n.t("foo", { foo: props.foo });
+        }
+
+        foo(notAThing);
+      `,
+    });
+
+    const { checker, symbolTable } = testProgram(program);
+
+    const foo = symbolTable.lookup("TFunction", checker);
+    const calls = loadFunctionCalls(
+      foo[0],
+      new CallContext(foo[0], symbolTable, checker, {})
+    );
+    expect(printCalls(calls)).toMatchInlineSnapshot(`
+      "i18n.t(\\"bar\\", arg as { foo: number });
+      i18n.t(\\"foo\\", arg as { foo: string });
+      "
+    `);
+  });
   it("should load direct calls", () => {
     const { checker, symbolTable } = testCall(`
       declare function foo(a: number): number;
@@ -261,6 +309,73 @@ describe("call arguments lookup", () => {
       "obj.foo(arg as \`foo:\${number}\`);
       "
     `);
+  });
+
+  describe("destructuring", () => {
+    it("should handle destructuring in declaration", () => {
+      const { checker, symbolTable } = testCall(`
+        type Typey = {
+          email: string;
+        };
+
+        declare function foo(a: any): number;
+
+        function bar({ email }: Typey) {
+          return foo(email + "bat");
+        }
+
+        declare const param: string;
+
+        bar({ email: 'bar' });
+        bar({ email: 'baz' });
+        bar({ email: param });
+      `);
+
+      const foo = symbolTable.lookup("foo", checker);
+      const calls = loadFunctionCalls(
+        foo[0],
+        new CallContext(foo[0], symbolTable, checker, {})
+      );
+      expect(printCalls(calls)).toMatchInlineSnapshot(`
+        "foo(arg as \`\${string}bat\`);
+        foo(\`barbat\`);
+        foo(\`bazbat\`);
+        "
+      `);
+    });
+
+    it("should handle destructuring in block", () => {
+      const { checker, symbolTable } = testCall(`
+        type Typey = {
+          email: string;
+        };
+
+        declare function foo(a: any): number;
+
+        function bar(param: Typey) {
+          const { email } = param;
+          return foo(email + "bat");
+        }
+
+        declare const param: string;
+
+        bar({ email: 'bar' });
+        bar({ email: 'baz' });
+        bar({ email: param });
+      `);
+
+      const foo = symbolTable.lookup("foo", checker);
+      const calls = loadFunctionCalls(
+        foo[0],
+        new CallContext(foo[0], symbolTable, checker, {})
+      );
+      expect(printCalls(calls)).toMatchInlineSnapshot(`
+        "foo(arg as \`\${string}bat\`);
+        foo(\`barbat\`);
+        foo(\`bazbat\`);
+        "
+      `);
+    });
   });
 
   /**
