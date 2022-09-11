@@ -2,6 +2,7 @@ import { NodeError } from "@symbolism/utils";
 import invariant from "tiny-invariant";
 import ts from "typescript";
 import { getNodeSchema } from ".";
+import { findParameterDependency } from "../classify";
 import { SchemaContext } from "../context";
 import { AnySchemaNode } from "../schema";
 import { getTypeSchema } from "../type-eval";
@@ -71,6 +72,8 @@ export function variableLike(
       return schema.items[propertyName as any];
     } else if (schema?.kind === "object") {
       return schema.properties[propertyName] || neverSchema;
+    } else if (schema?.kind === "primitive" && schema.name === "any") {
+      return schema;
     } else {
       return neverSchema;
     }
@@ -82,7 +85,19 @@ export function variableLike(
       decrementDepth: false,
     });
   }
-  if (!context.options.limitToValues && "type" in node && node.type) {
+
+  if (context.options.lateBindParameters) {
+    const dependency = findParameterDependency(node, context.checker);
+    if (dependency) {
+      return {
+        kind: "primitive",
+        name: "unknown",
+        node,
+      };
+    }
+  }
+
+  if ("type" in node && node.type) {
     return getNodeSchema({ context, node: node.type, decrementDepth: false });
   }
 
@@ -91,4 +106,17 @@ export function variableLike(
     name: "unknown",
     node,
   };
+}
+
+export function remapSchemaNode(
+  schema: AnySchemaNode | undefined,
+  node: ts.Node
+): AnySchemaNode | undefined {
+  if (schema?.node) {
+    return {
+      ...schema,
+      node,
+    };
+  }
+  return schema;
 }

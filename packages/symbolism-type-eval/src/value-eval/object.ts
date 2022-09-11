@@ -8,7 +8,7 @@ import { SchemaContext } from "../context";
 import { createUnionKind, expandSchemaList, unionProperties } from "./union";
 import { dumpNode } from "@symbolism/ts-debug";
 import { getNodeSchema } from ".";
-import { checkerEval, nodeEvalHandler, variableLike } from "./handlers";
+import { nodeEvalHandler, remapSchemaNode, variableLike } from "./handlers";
 import { getSymbolDeclaration, invariantNode } from "@symbolism/ts-utils";
 import { getLocalSymbol } from "./symbol";
 import { neverSchema, undefinedSchema } from "../well-known-schemas";
@@ -55,10 +55,6 @@ export const objectOperators = nodeEvalHandler(() => ({
   [ts.SyntaxKind.PropertyAccessExpression](node, context) {
     invariantNode(node, context.checker, ts.isPropertyAccessExpression);
 
-    const { checker } = context;
-
-    // If we are looking at an instantiated type, use that. It will have type parameters
-    // accounted for.
     const parentSchema = getNodeSchema({
       context,
       node: node.expression,
@@ -382,11 +378,14 @@ function evalPropertySchema(
     return parentSchema.items;
   } else if (parentSchema.kind === "primitive") {
     if (parentSchema.name === "any" || parentSchema.name === "never") {
-      return parentSchema;
+      return remapSchemaNode(parentSchema, nameNode);
     }
 
-    // Resolve via TS
-    return nameSchema;
+    return getTypeSchema({
+      node: nameNode,
+      context,
+      decrementDepth: false,
+    });
   } else if (parentSchema.kind === "literal") {
     if (nameSchema.kind === "primitive") {
       const baseType = checker.getBaseTypeOfLiteralType(

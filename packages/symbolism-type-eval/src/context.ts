@@ -19,6 +19,11 @@ export class SchemaContext {
    */
   typeCache = new Map<ts.Type, AnySchemaNode>();
 
+  /**
+   * Known parameter bindings.
+   */
+  parameterBindings = new Map<ts.ParameterDeclaration, AnySchemaNode>();
+
   // Arbitrary limit to prevent infinite loops
   maxDepth = 50;
 
@@ -91,6 +96,7 @@ export class SchemaContext {
 
   protected cloneProps(newInstance: SchemaContext) {
     newInstance.typesHandled = new Set(this.typesHandled);
+    newInstance.parameterBindings = new Map(this.parameterBindings);
     newInstance.typeDefinitions = this.typeDefinitions;
     newInstance.typeCache = this.typeCache;
     newInstance.history = this.history;

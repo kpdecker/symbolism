@@ -2,17 +2,12 @@ import ts, { findAncestor } from "typescript";
 
 import { AnySchemaNode } from "../schema";
 import { CallContext } from "../context";
-import { dumpNode, dumpSchema, dumpSymbol } from "@symbolism/ts-debug";
-import { areSchemasEqual, nonConcreteInputs, SchemaError } from "../classify";
-import { getLocalSymbol, resolveSymbolsInSchema } from "../value-eval/symbol";
-import {
-  logVerbose,
-  logWarn,
-  NodeError,
-  removeDuplicates,
-} from "@symbolism/utils";
+import { dumpNode, dumpSymbol } from "@symbolism/ts-debug";
+import { areSchemasEqual, unboundInputs } from "../classify";
+import { resolveParametersInSchema } from "../value-eval/symbol";
+import { logVerbose, NodeError, removeDuplicates } from "@symbolism/utils";
 import { expandUnions } from "../value-eval/union";
-import { getSymbolDeclaration, isNamedDeclaration } from "@symbolism/ts-utils";
+import { isNamedDeclaration } from "@symbolism/ts-utils";
 import { getNodeSchema } from "../value-eval";
 import invariant from "tiny-invariant";
 import { defineSymbol } from "@symbolism/definitions";
@@ -20,7 +15,6 @@ import { defineSymbol } from "@symbolism/definitions";
 export type FunctionCallInfo = {
   callExpression: ts.CallExpression;
   arguments: AnySchemaNode[];
-  symbols: ts.Symbol[];
 };
 
 export function loadFunctionCalls(
@@ -116,7 +110,6 @@ function convertCall(
   const { checker } = context;
 
   const signature = checker.getResolvedSignature(callExpression)!;
-  const parameterSymbols = signature.getParameters();
 
   const argSchemas = callExpression.arguments.map((argument, i) => {
     const schema = getNodeSchema({
@@ -124,62 +117,34 @@ function convertCall(
       node: argument,
       decrementDepth: false,
       allowMissing: false,
-      limitToValues: true,
+      lateBindParameters: true,
     })!;
 
-    const inputs = nonConcreteInputs(schema);
-    const inputSymbols = inputs
-      .map((input) => {
-        const symbol = getLocalSymbol(input, checker);
-        if (symbol) {
-          return {
-            symbol,
-            declaration: getSymbolDeclaration(symbol),
-          };
-        }
-
-        const type = checker.getTypeAtLocation(input);
-        if (type.flags & ts.TypeFlags.Any) {
-          return undefined!;
-        }
-
-        if (
-          !ts.isCallExpression(input) &&
-          !ts.isArrayLiteralExpression(input)
-        ) {
-          logWarn("Could not find symbol for input", dumpNode(input, checker));
-        }
-
-        return undefined!;
-      })
+    const inputs = unboundInputs(schema, checker);
+    const parameterNodes = inputs
+      .map((input) => input.unboundNode!)
       .filter(Boolean);
 
     return {
       schema,
-      inputs,
-      inputSymbols,
+      parameterNodes,
     };
   });
 
-  const baseSymbolMap = new Map<ts.Symbol, AnySchemaNode>();
+  const baseNodeMap = new Map<ts.Node, AnySchemaNode>();
 
   // Find the inputs that are parameter calls
   const parameterInputs = new Set(
-    argSchemas.flatMap((arg) => {
-      const parameterNodes: ts.ParameterDeclaration[] = arg.inputSymbols
-        .map((node) => findAncestor(node?.declaration, ts.isParameter)!)
-        .filter(Boolean);
-      return parameterNodes;
-    })
+    argSchemas.flatMap((arg) => arg.parameterNodes)
   );
 
   argSchemas.forEach((arg) => {
-    arg.inputSymbols.forEach((inputSymbol) => {
-      baseSymbolMap.set(
-        inputSymbol.symbol,
+    arg.parameterNodes.forEach((parameter) => {
+      baseNodeMap.set(
+        parameter,
         getNodeSchema({
           context,
-          node: inputSymbol.declaration!,
+          node: parameter,
           decrementDepth: false,
         })!
       );
@@ -187,19 +152,22 @@ function convertCall(
   });
 
   // Everything is concrete. No need to expand.
-  if (argSchemas.every((arg) => !arg.inputs.length)) {
+  if (argSchemas.every((arg) => !arg.parameterNodes.length)) {
     collectedCalls.push({
       callExpression,
       arguments: argSchemas.map((arg) =>
-        resolveSymbolsInSchema(arg.schema, baseSymbolMap, context)
+        resolveParametersInSchema(arg.schema, baseNodeMap, context)
       ),
-      symbols: parameterSymbols,
     });
     return;
   }
 
   const functionDeclarations = Array.from(
-    new Set(Array.from(parameterInputs.values()).map((node) => node.parent))
+    new Set(
+      Array.from(parameterInputs.values()).map(
+        (node) => node.parent as ts.FunctionDeclaration
+      )
+    )
   ).sort((a, b) => a.pos - b.pos);
 
   // We have parameters that need to be resolved via upstream calls.
@@ -248,14 +216,12 @@ function convertCall(
     .map((s) => JSON.stringify(dumpNode(s, checker)))
     .join("\n  - ")}
 
-  Arg Schemas:
+  Parameter Nodes:
   - ${argSchemas
     .map(
       (arg) =>
-        `\n    - ${arg.inputSymbols
-          .map((inputSymbol) =>
-            JSON.stringify(dumpSymbol(inputSymbol?.symbol, checker))
-          )
+        `\n    - ${arg.parameterNodes
+          .map((parameter) => JSON.stringify(dumpNode(parameter, checker)))
           .join("\n    - ")}`
     )
     .join("\n  - ")}
@@ -283,23 +249,22 @@ function convertCall(
     } else {
       upstreamCall.forEach((call) => {
         // Inject the arguments into the call
-        const symbolMap = new Map<ts.Symbol, AnySchemaNode>(baseSymbolMap);
+        const parameterMap = new Map<ts.Node, AnySchemaNode>(baseNodeMap);
         parameterInputs.forEach((node) => {
           if (node.parent === firstDeclaration) {
-            const symbol = checker.getSymbolAtLocation(node.name)!;
             const parameterIndex = node.parent.parameters.indexOf(node);
 
             const argument = context.resolveSchema(
               call.arguments[parameterIndex]
             );
             if (argument) {
-              symbolMap.set(symbol, argument);
+              parameterMap.set(node, argument);
             }
           }
         });
         partiallyResolvedArgSchemas.push(
           argSchemas.map((arg) =>
-            resolveSymbolsInSchema(arg.schema, symbolMap, context)
+            resolveParametersInSchema(arg.schema, parameterMap, context)
           )
         );
       });
@@ -308,7 +273,7 @@ function convertCall(
     // No calls, so everything is resolved.
     partiallyResolvedArgSchemas.push(
       argSchemas.map((arg) =>
-        resolveSymbolsInSchema(arg.schema, baseSymbolMap, context)
+        resolveParametersInSchema(arg.schema, baseNodeMap, context)
       )
     );
   }
@@ -339,7 +304,6 @@ function convertCall(
       collectedCalls.push({
         callExpression,
         arguments: args,
-        symbols: parameterSymbols,
       });
     });
   });

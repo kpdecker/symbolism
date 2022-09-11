@@ -1,8 +1,12 @@
-import { dumpSchema } from "@symbolism/ts-debug";
-import { removeDuplicates } from "@symbolism/utils";
+import { dumpNode, dumpSchema, dumpSymbol } from "@symbolism/ts-debug";
+import { getSymbolDeclaration, isNamedDeclaration } from "@symbolism/ts-utils";
+import { NodeError, removeDuplicates } from "@symbolism/utils";
 import invariant from "tiny-invariant";
 import ts from "typescript";
+import { SchemaContext } from "./context";
 import { AnySchemaNode, PrimitiveSchema, UnionSchema } from "./schema";
+import { getNodeSchema } from "./value-eval";
+import { getLocalSymbol } from "./value-eval/symbol";
 
 export class SchemaError extends Error {
   constructor(
@@ -76,15 +80,98 @@ export function isConcreteSchema(type: AnySchemaNode | undefined): boolean {
   throw new Error("Not implemented");
 }
 
-export function nonConcreteInputs(
-  schema: AnySchemaNode | undefined
-): ts.Node[] {
+export function findParameterDependency(
+  node: ts.Node,
+  checker: ts.TypeChecker
+): ts.ParameterDeclaration | undefined {
+  if (ts.isParameter(node)) {
+    return node;
+  }
+
+  if (ts.isIdentifier(node)) {
+    if (isNamedDeclaration(node.parent) && node.parent.name === node) {
+      return findParameterDependency(node.parent, checker);
+    }
+
+    if (
+      ts.isPropertyAccessExpression(node.parent) &&
+      node.parent.name === node
+    ) {
+      return findParameterDependency(node.parent, checker);
+    }
+
+    const symbol = getLocalSymbol(node, checker);
+    const symbolDeclaration = getSymbolDeclaration(symbol);
+    if (symbolDeclaration && symbolDeclaration !== node) {
+      return findParameterDependency(symbolDeclaration, checker);
+    }
+
+    throw new Error("Unexpected state");
+  }
+
+  if (ts.isVariableDeclaration(node)) {
+    if (node.initializer) {
+      return findParameterDependency(node.initializer, checker);
+    }
+    return undefined;
+  }
+
+  if (
+    ts.isPropertyAccessExpression(node) ||
+    ts.isElementAccessExpression(node)
+  ) {
+    return findParameterDependency(node.expression, checker);
+  }
+
+  if (ts.isBindingElement(node)) {
+    return findParameterDependency(node.parent, checker);
+  }
+  if (ts.isObjectBindingPattern(node) || ts.isArrayBindingPattern(node)) {
+    return findParameterDependency(node.parent, checker);
+  }
+
+  return undefined;
+}
+
+export function bindParameterDependency(
+  node: ts.Node,
+  parameterBinding: { node: ts.ParameterDeclaration; schema: AnySchemaNode },
+  context: SchemaContext
+): AnySchemaNode | undefined {
+  const newContext = context.cloneNode({
+    node,
+    decrementDepth: false,
+  });
+  newContext.parameterBindings.set(
+    parameterBinding.node,
+    parameterBinding.schema
+  );
+
+  return getNodeSchema({
+    node,
+    decrementDepth: false,
+    lateBindParameters: true,
+
+    context: newContext,
+  });
+}
+
+export function unboundInputs(
+  schema: AnySchemaNode | undefined,
+  checker: ts.TypeChecker
+): { node: ts.Node; unboundNode: ts.ParameterDeclaration | undefined }[] {
   if (!schema) {
     return [];
   }
 
   if (schema.node) {
-    return [schema.node];
+    const unboundNode = findParameterDependency(schema.node, checker);
+    if (unboundNode) {
+      // This node's value is derived from a parameter
+      return [{ node: schema.node, unboundNode }];
+    } else {
+      return [];
+    }
   }
 
   if (schema.kind === "literal") {
@@ -98,7 +185,15 @@ export function nonConcreteInputs(
     schema.kind === "index" ||
     schema.kind === "index-access"
   ) {
-    return [schema.node!].filter(Boolean);
+    if (schema.node) {
+      return [
+        {
+          node: schema.node,
+          unboundNode: findParameterDependency(schema.node, checker),
+        },
+      ];
+    }
+    return [];
   }
 
   if (
@@ -108,29 +203,31 @@ export function nonConcreteInputs(
     schema.kind === "template-literal" ||
     schema.kind === "binary-expression"
   ) {
-    return schema.items.flatMap(nonConcreteInputs);
+    return schema.items.flatMap((item) => unboundInputs(item, checker));
   }
 
   if (schema.kind === "array") {
-    return nonConcreteInputs(schema.items);
+    return unboundInputs(schema.items, checker);
   }
 
   if (schema.kind === "object") {
     const abstractKeysSymbols = schema.abstractIndexKeys.flatMap(
       (abstractKey) =>
-        nonConcreteInputs(abstractKey.key).concat(
-          nonConcreteInputs(abstractKey.value)
+        unboundInputs(abstractKey.key, checker).concat(
+          unboundInputs(abstractKey.value, checker)
         )
     );
 
     return Object.values(schema.properties)
-      .flatMap(nonConcreteInputs)
+      .flatMap((item) => unboundInputs(item, checker))
       .concat(abstractKeysSymbols);
   }
 
   if (schema.kind === "function") {
-    return nonConcreteInputs(schema.returnType).concat(
-      ...schema.parameters.flatMap(({ schema }) => nonConcreteInputs(schema))
+    return unboundInputs(schema.returnType, checker).concat(
+      ...schema.parameters.flatMap(({ schema }) =>
+        unboundInputs(schema, checker)
+      )
     );
   }
 

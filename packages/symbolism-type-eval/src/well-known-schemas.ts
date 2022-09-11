@@ -15,7 +15,6 @@ export const undefinedSchema: LiteralSchema = {
 export const neverSchema: Readonly<PrimitiveSchema> = {
   kind: "primitive",
   name: "never",
-  node: undefined,
 };
 
 export const booleanPrimitiveSchema: Readonly<UnionSchema> = {
@@ -29,7 +28,6 @@ export const booleanPrimitiveSchema: Readonly<UnionSchema> = {
 export const numberPrimitiveSchema: Readonly<PrimitiveSchema> = {
   kind: "primitive",
   name: "number",
-  node: undefined,
 };
 
 export const tooMuchRecursionSchema: Readonly<ReferenceSchema> = {

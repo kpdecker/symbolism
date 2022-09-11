@@ -74,6 +74,10 @@ export function getTypeSchema(
     type = params.context.checker.getTypeAtLocation(node);
   }
 
+  if (ts.isParameter(node) && params.context.parameterBindings.has(node)) {
+    return params.context.parameterBindings.get(node)!;
+  }
+
   const context = params.context.clone({
     ...params,
     type,

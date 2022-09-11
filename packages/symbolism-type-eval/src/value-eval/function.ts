@@ -21,7 +21,7 @@ export const functionOperators = nodeEvalHandler(() => ({
   [ts.SyntaxKind.FunctionDeclaration]: convertFunctionLikeNode,
   [ts.SyntaxKind.Parameter](node, context) {
     invariantNode(node, context.checker, ts.isParameter);
-    if (context.options.limitToValues) {
+    if (context.options.lateBindParameters) {
       // Don't evaluate the type to allow for parameter replacement
       return {
         kind: "primitive",

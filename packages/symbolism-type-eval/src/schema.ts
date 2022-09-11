@@ -8,6 +8,7 @@ interface SchemaNode {
   flags?: string[];
   extra?: any;
   node?: ts.Node;
+  unboundSymbol?: ts.Symbol;
 }
 
 export interface PrimitiveSchema extends SchemaNode {

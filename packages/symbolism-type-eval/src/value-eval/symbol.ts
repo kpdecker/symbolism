@@ -1,12 +1,13 @@
 import { isNamedDeclaration } from "@symbolism/ts-utils";
-import ts, { NamedDeclaration } from "typescript";
+import ts from "typescript";
+import { bindParameterDependency, findParameterDependency } from "../classify";
 import { SchemaContext } from "../context";
 import { AnySchemaNode } from "../schema";
 import { evaluateBinaryExpressionSchema } from "./binary-expression";
 
-export function resolveSymbolsInSchema(
+export function resolveParametersInSchema(
   schema: AnySchemaNode,
-  symbolSchemas: Map<ts.Symbol, AnySchemaNode>,
+  parameterSchemas: Map<ts.Node, AnySchemaNode>,
   context: SchemaContext
 ): AnySchemaNode {
   const { checker } = context;
@@ -16,9 +17,22 @@ export function resolveSymbolsInSchema(
   }
 
   if (schema.node) {
-    const symbol = getLocalSymbol(schema.node, checker);
-    if (symbol && symbolSchemas.get(symbol)) {
-      return symbolSchemas.get(symbol)!;
+    const parameter = findParameterDependency(schema.node, context.checker);
+    if (parameter && parameterSchemas.get(parameter)) {
+      const ret = bindParameterDependency(
+        schema.node,
+        {
+          node: parameter,
+          schema: parameterSchemas.get(parameter)!,
+        },
+        context
+      );
+      if (ret) {
+        return ret;
+      }
+
+      // Fall through:
+      // No parameter updates applied, i.e. may reference a different closure scope
     }
   }
 
@@ -34,7 +48,7 @@ export function resolveSymbolsInSchema(
 
   if (schema.kind === "binary-expression") {
     const resolved = schema.items.map((item) =>
-      resolveSymbolsInSchema(item, symbolSchemas, context)
+      resolveParametersInSchema(item, parameterSchemas, context)
     );
 
     return evaluateBinaryExpressionSchema(
@@ -55,7 +69,7 @@ export function resolveSymbolsInSchema(
     return {
       ...schema,
       items: schema.items.map((item) =>
-        resolveSymbolsInSchema(item, symbolSchemas, context)
+        resolveParametersInSchema(item, parameterSchemas, context)
       ),
     };
   }
@@ -63,7 +77,7 @@ export function resolveSymbolsInSchema(
   if (schema.kind === "array") {
     return {
       ...schema,
-      items: resolveSymbolsInSchema(schema.items, symbolSchemas, context),
+      items: resolveParametersInSchema(schema.items, parameterSchemas, context),
     };
   }
 
@@ -72,7 +86,11 @@ export function resolveSymbolsInSchema(
       ...schema,
       properties: Object.entries(schema.properties).reduce(
         (acc, [key, value]) => {
-          acc[key] = resolveSymbolsInSchema(value, symbolSchemas, context);
+          acc[key] = resolveParametersInSchema(
+            value,
+            parameterSchemas,
+            context
+          );
           return acc;
         },
         {} as Record<string, AnySchemaNode>
@@ -86,15 +104,15 @@ export function resolveSymbolsInSchema(
       parameters: schema.parameters.map((parameter) => ({
         ...parameter,
         name: parameter.name,
-        schema: resolveSymbolsInSchema(
+        schema: resolveParametersInSchema(
           parameter.schema,
-          symbolSchemas,
+          parameterSchemas,
           context
         ),
       })),
-      returnType: resolveSymbolsInSchema(
+      returnType: resolveParametersInSchema(
         schema.returnType,
-        symbolSchemas,
+        parameterSchemas,
         context
       ),
     };

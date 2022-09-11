@@ -16,13 +16,18 @@ import { templateOperators } from "./string-template";
 import { arrayOperators } from "./array";
 import { isConcreteSchema } from "../classify";
 
-import { checkerEval, NodeEvalHandler, noType, variableLike } from "./handlers";
+import {
+  checkerEval,
+  NodeEvalHandler,
+  noType,
+  remapSchemaNode,
+  variableLike,
+} from "./handlers";
 import { classOperators } from "./class";
 import { functionOperators } from "./function";
 import { jsDocHandlers } from "./jsdoc";
 import { jsxPathHandlers } from "./jsx";
 import { tokenOperators } from "./tokens";
-import { getLocalSymbol } from "./symbol";
 import { getTypeSchema } from "../type-eval";
 import {
   booleanPrimitiveSchema,
@@ -34,13 +39,12 @@ import { unaryExpressionOperators } from "./unary-expression";
 
 export type TypeEvalOptions = {
   allowMissing?: boolean;
+
   /**
-   * Partially evaluates the schema, not tracing the entire tree
-   * for type definitions.
-   *
-   * This is useful for finding
+   * If true, will not attempt to resolve the final type of parameter nodes,
+   * instead mapping them to any type with the correct replacement node.
    */
-  limitToValues?: boolean;
+  lateBindParameters?: boolean;
 };
 
 const nodePathHandlers: Record<ts.SyntaxKind, NodeEvalHandler> = {
@@ -77,16 +81,12 @@ const nodePathHandlers: Record<ts.SyntaxKind, NodeEvalHandler> = {
     invariantNode(node, context.checker, ts.isIdentifier);
     const { checker } = context;
 
-    if (context.options.limitToValues) {
-      const localSymbol = getLocalSymbol(node, context.checker);
-      const localDeclaration = getSymbolDeclaration(localSymbol);
-      if (localDeclaration) {
-        return getNodeSchema({
-          node: localDeclaration,
-          context,
-          decrementDepth: false,
-        });
-      }
+    if (ts.isParameter(node.parent)) {
+      return getNodeSchema({
+        node: node.parent,
+        context,
+        decrementDepth: false,
+      });
     }
 
     if (
@@ -95,15 +95,18 @@ const nodePathHandlers: Record<ts.SyntaxKind, NodeEvalHandler> = {
         ts.isPropertyAssignment(node.parent)) &&
         node.parent.name === node)
     ) {
-      return getNodeSchema({
-        node: node.parent,
-        context,
-        decrementDepth: false,
-      });
+      return remapSchemaNode(
+        getNodeSchema({
+          node: node.parent,
+          context,
+          decrementDepth: false,
+        }),
+        node
+      );
     }
 
     const identifierDefinition = defineSymbol(node, checker, {
-      chooseLocal: false,
+      chooseLocal: !!context.options.lateBindParameters,
     });
 
     if (isIntrinsicType(identifierDefinition?.type)) {
@@ -121,41 +124,46 @@ const nodePathHandlers: Record<ts.SyntaxKind, NodeEvalHandler> = {
       }
     }
 
-    if (!context.options.limitToValues) {
-      const identifierDeclaration = getSymbolDeclaration(
-        identifierDefinition?.symbol
+    const identifierDeclaration = getSymbolDeclaration(
+      identifierDefinition?.symbol
+    );
+
+    if (identifierDeclaration) {
+      const type = context.checker.getTypeAtLocation(node);
+      const declarationType = context.checker.getTypeAtLocation(
+        identifierDeclaration
       );
 
-      if (identifierDeclaration) {
-        const type = context.checker.getTypeAtLocation(node);
-        const declarationType = context.checker.getTypeAtLocation(
-          identifierDeclaration
-        );
-
-        // Use the checker definition when we have type parameters involved.
-        // TODO: Figure out what happens if this reference has a nested type param
-        if (declarationType.isTypeParameter()) {
-          return getTypeSchema({
-            context,
-            type,
-            node,
-            decrementDepth: false,
-          });
-        }
-
-        return getNodeSchema({
+      // Use the checker definition when we have type parameters involved.p
+      // TODO: Figure out what happens if this reference has a nested type param
+      if (declarationType.isTypeParameter()) {
+        return getTypeSchema({
           context,
-          node: identifierDeclaration,
+          type,
+          node,
           decrementDepth: false,
         });
       }
+
+      return remapSchemaNode(
+        getNodeSchema({
+          context,
+          node: identifierDeclaration,
+          decrementDepth: false,
+        }),
+        node
+      );
     }
 
-    return {
-      kind: "primitive",
-      name: "any",
-      node,
-    };
+    // We have a type, but no declaration. This is probably an index signature.
+    const checkerType =
+      identifierDefinition?.type || checker.getTypeAtLocation(node);
+    return getTypeSchema({
+      type: checkerType,
+      node: node,
+      decrementDepth: false,
+      context,
+    });
   },
   [ts.SyntaxKind.QualifiedName]: checkerEval,
 
@@ -401,6 +409,10 @@ export function getNodeSchema(
 ): AnySchemaNode | undefined {
   const context = options.context.cloneNode(options);
   const { node } = options;
+
+  if (ts.isParameter(node) && context.parameterBindings.has(node)) {
+    return context.parameterBindings.get(node);
+  }
 
   if (context.maxDepth <= 0) {
     return tooMuchRecursionSchema;

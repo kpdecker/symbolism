@@ -3,7 +3,6 @@ import { CallContext } from "../../context";
 import { parseSymbolTable } from "@symbolism/symbol-table";
 import { loadFunctionCalls } from "..";
 import { printCalls } from "../../print/calls";
-import { findIdentifiers } from "@symbolism/ts-utils";
 
 function testCall(source: string) {
   const program = mockProgram({
@@ -294,6 +293,7 @@ describe("call arguments lookup", () => {
     `);
 
     const foo = symbolTable.lookup("foo", checker);
+
     const calls = loadFunctionCalls(
       foo[0],
       new CallContext(foo[0], symbolTable, checker, {})
@@ -336,6 +336,106 @@ describe("call arguments lookup", () => {
     );
     expect(printCalls(calls)).toMatchInlineSnapshot(`
       "foo(\\"foo\\");
+      "
+    `);
+  });
+
+  describe("index signatures", () => {
+    it("should evaluate index keys", () => {
+      const { checker, symbolTable } = testCall(`
+        declare const injectedConfig: Record<string, string>;
+
+        export const appConfig = {
+          food: injectedConfig.food,
+        } as const;
+
+        declare function foo(value): void;
+
+        foo(appConfig.bar);
+        foo(appConfig.food);
+      `);
+
+      const foo = symbolTable.lookup("foo", checker);
+      const calls = loadFunctionCalls(
+        foo[0],
+        new CallContext(foo[0], symbolTable, checker, {})
+      );
+      expect(printCalls(calls)).toMatchInlineSnapshot(`
+        "foo(arg as string);
+        foo(undefined);
+        "
+      `);
+    });
+    it("should evaluate index keys on literals", () => {
+      const { checker, symbolTable } = testCall(`
+        export const appConfig: Record<string, string> = {
+          food: "bar",
+        };
+
+        declare function foo(value): void;
+
+        foo(appConfig.bar);
+        foo(appConfig);
+        foo(appConfig.food);
+      `);
+
+      const foo = symbolTable.lookup("foo", checker);
+      const calls = loadFunctionCalls(
+        foo[0],
+        new CallContext(foo[0], symbolTable, checker, {})
+      );
+      expect(printCalls(calls)).toMatchInlineSnapshot(`
+        "foo(
+          arg as {
+            food: \\"bar\\";
+            [k: string]: string;
+          }
+        );
+        foo(arg as string);
+        foo(\\"bar\\");
+        "
+      `);
+    });
+  });
+
+  it("should evaluate derived values", () => {
+    const { checker, symbolTable } = testCall(`
+        declare function foo(value, note): void;
+
+        declare const fullyBound: string;
+
+        function bar({ boundParam, deepBoundParam }) {
+          const { value: destructured } = deepBoundParam;
+          foo(boundParam + 'bat', 'paramDestructure');
+          foo(deepBoundParam.value, 'deepPropAccess');
+          foo(deepBoundParam['value'], 'deepElementAccess');
+          foo(destructured, 'destructured');
+          foo(fullyBound, 'externalBound');
+          foo(fullyBound.length, 'externalBoundProp');
+          foo(fullyBound['length'], 'externalBoundPropElement');
+        }
+
+        bar({
+          boundParam: 'bound!',
+          deepBoundParam: {
+            value: 'deep!'
+          }
+        })
+      `);
+
+    const foo = symbolTable.lookup("foo", checker);
+    const calls = loadFunctionCalls(
+      foo[0],
+      new CallContext(foo[0], symbolTable, checker, {})
+    );
+    expect(printCalls(calls)).toMatchInlineSnapshot(`
+      "foo(arg as number, \\"externalBoundProp\\");
+      foo(arg as number, \\"externalBoundPropElement\\");
+      foo(arg as string, \\"externalBound\\");
+      foo(\`bound!bat\`, \\"paramDestructure\\");
+      foo(\\"deep!\\", \\"deepElementAccess\\");
+      foo(\\"deep!\\", \\"deepPropAccess\\");
+      foo(\\"deep!\\", \\"destructured\\");
       "
     `);
   });

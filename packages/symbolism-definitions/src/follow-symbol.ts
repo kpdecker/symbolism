@@ -10,7 +10,7 @@ export function followSymbol(
   options: DefinitionOptions
 ) {
   const { symbol } = definition || {};
-  if (!symbol || !definition) {
+  if (!symbol || !definition || options.chooseLocal) {
     return definition;
   }
 
