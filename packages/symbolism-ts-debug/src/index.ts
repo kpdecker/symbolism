@@ -190,8 +190,14 @@ export function dumpSchema(
     schema,
     (key, value) => {
       if (key === "node") {
-        return (value as ts.Node)?.getText();
+        return (
+          ts.SyntaxKind[(value as ts.Node)?.kind] +
+          ": " +
+          (value as ts.Node)?.getText()
+        );
       } else if (key === "symbol") {
+        return (value as ts.Symbol)?.getName();
+      } else if (key === "unboundSymbol") {
         return (value as ts.Symbol)?.getName();
       }
       return value;
