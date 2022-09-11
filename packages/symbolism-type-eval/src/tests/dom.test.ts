@@ -43,7 +43,7 @@ describe("type schema converter", () => {
                 ) => undefined)
               | ((
                   type: string,
-                  listener: EventListenerOrEventListenerObject,
+                  listener: EventListener | EventListenerObject,
                   options: AddEventListenerOptions | false | true
                 ) => undefined);
             dispatchEvent: (event: Event) => false | true;
@@ -81,7 +81,7 @@ describe("type schema converter", () => {
             cancelBubble: false | true;
             cancelable: false | true;
             composed: false | true;
-            composedPath: () => EventTarget[];
+            composedPath: () => Array<EventTarget>;
             currentTarget: EventTarget;
             defaultPrevented: false | true;
             eventPhase: number;
@@ -112,7 +112,7 @@ describe("type schema converter", () => {
           type EventTarget = {
             addEventListener: (
               type: string,
-              callback: EventListener | EventListenerObject,
+              callback: EventListenerOrEventListenerObject,
               options: AddEventListenerOptions | false | true
             ) => undefined;
             dispatchEvent: (event: Event) => false | true;

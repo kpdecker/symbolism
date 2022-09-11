@@ -249,7 +249,10 @@ export function evaluateBinaryExpressionSchema(
         } else {
           return operatorKind === ts.SyntaxKind.BarBarToken ? right : left;
         }
-      } else if (operatorKind === ts.SyntaxKind.AmpersandAmpersandToken) {
+      } else if (
+        operatorKind === ts.SyntaxKind.AmpersandAmpersandToken ||
+        operatorKind === ts.SyntaxKind.BarBarToken
+      ) {
         return createUnionKind([left, right]);
       } else if (
         isAddition &&
