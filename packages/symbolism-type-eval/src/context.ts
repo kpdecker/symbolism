@@ -73,7 +73,9 @@ export class SchemaContext {
       ...rest,
     });
     this.cloneProps(ret);
-    ret.history += ` -> ${this.checker.typeToString(type)}`;
+    ret.history += ` -> ${ts.SyntaxKind[node.kind]} ${this.checker.typeToString(
+      type
+    )}`;
 
     if (decrementDepth) {
       ret.maxDepth--;
@@ -94,7 +96,7 @@ export class SchemaContext {
       ...rest,
     });
     this.cloneProps(ret);
-    ret.history += ` -> node ${node.getText()}`;
+    ret.history += ` -> node ${ts.SyntaxKind[node.kind]} ${node.getText()}`;
 
     if (decrementDepth) {
       ret.maxDepth--;
@@ -143,6 +145,7 @@ export class CallContext extends SchemaContext {
     this.cloneProps(ret);
 
     ret.symbolsHandled.push(symbol);
+    ret.history += ` -> symbol ${symbol.name}`;
 
     return [symbol, ret] as const;
   }
