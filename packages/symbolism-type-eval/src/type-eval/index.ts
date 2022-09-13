@@ -37,7 +37,7 @@ import { convertLiteralOrPrimitive } from "./literal";
 import { convertObjectType } from "./object";
 import { convertTemplateLiteralType } from "./template-literal";
 
-const buildingSchema: ErrorSchema = {
+export const buildingSchema: ErrorSchema = {
   kind: "error",
   extra: "building",
 };

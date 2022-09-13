@@ -7,6 +7,7 @@ import { TypeEvalOptions } from "./value-eval";
 import { AnySchemaNode } from "./schema";
 import { baseDefs, wellKnownReferences } from "./well-known-schemas";
 import { SchemaError } from "./classify";
+import { buildingSchema } from "./type-eval";
 
 export class SchemaContext {
   typesHandled = new Set<ts.Type>();
@@ -42,11 +43,24 @@ export class SchemaContext {
   resolveSchema(schema: AnySchemaNode | undefined): AnySchemaNode | undefined {
     if (schema?.kind === "reference") {
       const definition = this.typeDefinitions.get(schema.typeId);
-      if (!definition && !wellKnownReferences.includes(schema.name)) {
+      if (definition === buildingSchema) {
+        throw new SchemaError(
+          `Circular reference to ${schema.typeId} while building schema ` +
+            this.history,
+          schema
+        );
+      }
+
+      if (
+        !definition &&
+        !wellKnownReferences.includes(schema.name) &&
+        schema.name !== "tooMuchRecursion"
+      ) {
         throw new SchemaError("Definition not found ", schema);
       }
       if (definition) {
         if (typeof definition === "function") {
+          this.typeDefinitions.set(schema.typeId, buildingSchema);
           const evaledDefinition = definition();
           this.typeDefinitions.set(schema.typeId, evaledDefinition);
           return evaledDefinition;
@@ -73,9 +87,9 @@ export class SchemaContext {
       ...rest,
     });
     this.cloneProps(ret);
-    ret.history += ` -> ${ts.SyntaxKind[node.kind]} ${this.checker.typeToString(
-      type
-    )}`;
+    ret.history += `\n    -> ${
+      ts.SyntaxKind[node.kind]
+    } ${this.checker.typeToString(type)}`;
 
     if (decrementDepth) {
       ret.maxDepth--;
@@ -96,7 +110,9 @@ export class SchemaContext {
       ...rest,
     });
     this.cloneProps(ret);
-    ret.history += ` -> node ${ts.SyntaxKind[node.kind]} ${node.getText()}`;
+    ret.history += `\n    -> node ${
+      ts.SyntaxKind[node.kind]
+    } ${node.getText()}`;
 
     if (decrementDepth) {
       ret.maxDepth--;
@@ -145,7 +161,7 @@ export class CallContext extends SchemaContext {
     this.cloneProps(ret);
 
     ret.symbolsHandled.push(symbol);
-    ret.history += ` -> symbol ${symbol.name}`;
+    ret.history += `\n    -> symbol ${symbol.name}`;
 
     return [symbol, ret] as const;
   }
