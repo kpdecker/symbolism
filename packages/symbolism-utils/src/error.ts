@@ -1,11 +1,19 @@
 import { dumpNode } from "@symbolism/ts-debug";
 import ts from "typescript";
 
+declare global {
+  interface Error {
+    cause?: Error;
+    isNodeError?: boolean;
+  }
+}
+
 const $prepareStackTrace = Error.prepareStackTrace;
 Error.prepareStackTrace = (error, stack) => {
-  let result = $prepareStackTrace!(error, stack);
-  if ("cause" in error && (error as any).cause) {
-    result += "\n\nCaused by: " + (error as any).cause.stack;
+  let result = $prepareStackTrace?.(error, stack);
+
+  if (error.cause) {
+    result += "\n\nCaused by: " + error.cause.stack;
   }
   return result;
 };
@@ -32,12 +40,12 @@ export class NodeError extends Error {
     super(`${message}\n\nNode: ${dump}`);
     Error.captureStackTrace(this, this.constructor);
 
-    if ((cause as any)?.isNodeError) {
+    if (cause?.isNodeError) {
       return cause as NodeError;
     }
 
     if (cause) {
-      (this as any).cause = cause;
+      this.cause = cause;
       try {
         // Reading here ensures that line numbers are correctly source mapped
         cause.stack;
@@ -46,9 +54,4 @@ export class NodeError extends Error {
       }
     }
   }
-}
-
-// https://stackoverflow.com/a/52231746/238459
-function isRunningInJest() {
-  return process.env.JEST_WORKER_ID !== undefined;
 }
