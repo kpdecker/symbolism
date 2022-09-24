@@ -309,6 +309,7 @@ function getTypeSchemaWorker(
 
       const callSignatures = type.getCallSignatures();
       if (callSignatures.length > 0) {
+        // eslint-disable-next-line no-inner-declarations
         function convertSignature(signature: ts.Signature): FunctionSchema {
           const returnType = signature.getReturnType();
           return {
@@ -426,6 +427,7 @@ function getTypeSchemaWorker(
         `Unsupported type ${JSON.stringify(dumpType(type, checker))}`
       );
     }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (err: any) {
     throw new NodeError(
       `Error converting type ${checker.typeToString(type)} ${context.history}`,
@@ -455,8 +457,11 @@ export function mapString(
     return schema;
   }
 
-  const operator: "Uppercase" | "Lowercase" | "Capitalize" | "Uncapitalize" =
-    mappingType.symbol.name as any;
+  const operator = mappingType.symbol.name as
+    | "Uppercase"
+    | "Lowercase"
+    | "Capitalize"
+    | "Uncapitalize";
 
   if (schema.kind === "literal") {
     if (typeof schema.value === "string") {

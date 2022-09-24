@@ -388,7 +388,8 @@ function evalPropertySchema(
     if (nameSchema.kind === "primitive") {
       return createUnionKind(parentSchema.items);
     } else if (nameSchema.kind === "literal") {
-      return parentSchema.items[nameSchema.value as any];
+      // @ts-expect-error Using implicit casting
+      return parentSchema.items[nameSchema.value];
     }
 
     return {
@@ -435,7 +436,8 @@ function evalPropertySchema(
       // We have concrete literals on both sides, evaluate the result in js space
       const argValue = nameSchema.value + "";
       if (parentSchema.value != null) {
-        const value = (parentSchema.value as any)[argValue];
+        // @ts-expect-error Boxing lookups
+        const value = parentSchema.value[argValue];
         if (
           value === null ||
           typeof value === "string" ||

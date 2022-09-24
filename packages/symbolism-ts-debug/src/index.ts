@@ -167,6 +167,8 @@ export function dumpType(
 
   function recurseDump(type: ts.Type | undefined) {
     if (recurse) {
+      // any to break circular return type inference
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       return (dumpType as any)(type, checker, false);
     }
   }

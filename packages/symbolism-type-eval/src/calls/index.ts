@@ -86,13 +86,13 @@ function convertFunctionCallsForSymbol(
   calls.forEach((callExpression) => {
     try {
       convertCall(symbol, callExpression, context, collectedCalls);
-    } catch (e: any) {
+    } catch (e: unknown) {
       throw new NodeError(
         "Error converting call " +
           JSON.stringify(dumpSymbol(symbol, context.checker)),
         callExpression,
         context.checker,
-        e
+        e as Error
       );
     }
   });

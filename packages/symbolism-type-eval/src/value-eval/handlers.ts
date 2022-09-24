@@ -28,7 +28,8 @@ export const noType: NodeEvalHandler = () => undefined;
 export const expressionEval: NodeEvalHandler = (node, context) => {
   if ("expression" in node) {
     return getNodeSchema({
-      node: (node as any).expression,
+      // @ts-expect-error Check above
+      node: node.expression,
       context,
       decrementDepth: false,
     });
@@ -69,7 +70,8 @@ export function variableLike(
     if (schema?.kind === "array") {
       return schema.items;
     } else if (schema?.kind === "tuple") {
-      return schema.items[propertyName as any];
+      // @ts-expect-error Using implicit casting
+      return schema.items[propertyName];
     } else if (schema?.kind === "object") {
       return schema.properties[propertyName] || neverSchema;
     } else if (schema?.kind === "primitive" && schema.name === "any") {

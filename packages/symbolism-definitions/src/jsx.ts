@@ -51,7 +51,7 @@ export const jsxSymbolHandlers = nodeOperators({
 
     const propertyDefinition = getPropertySymbol(
       node,
-      assertExists(properties.getType()),
+      assertExists(properties.type),
       checker,
       name,
       {

@@ -404,7 +404,7 @@ function defineBindingElement(
       : (node.propertyName || node.name).getText();
 
     // This supports tuple types. Unclear on others
-    const bindingPatternType = bindingPatternDefinition?.getType();
+    const bindingPatternType = bindingPatternDefinition?.type;
     if (bindingPatternType && isTypeReference(bindingPatternType)) {
       const typeArguments = checker.getTypeArguments(bindingPatternType);
       const typeArgument = typeArguments[+propertyName] || typeArguments[0];

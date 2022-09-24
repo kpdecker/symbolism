@@ -1,8 +1,7 @@
-import { dumpSchema } from "@symbolism/ts-debug";
 import { format } from "prettier";
 import { FunctionCallInfo } from "../calls";
-import { canPrintInJs, isConcreteSchema, SchemaError } from "../classify";
-import { printSchema, printSchemaNode } from "./typescript";
+import { canPrintInJs, SchemaError } from "../classify";
+import { printSchemaNode } from "./typescript";
 
 export function printCalls(calls: FunctionCallInfo[]) {
   const unformattedText = calls
@@ -10,6 +9,7 @@ export function printCalls(calls: FunctionCallInfo[]) {
       const unformattedText = printCall(call);
       try {
         return format(unformattedText, { parser: "typescript" });
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (err: any) {
         throw new SchemaError(
           err.message + "\n\nUnformatted: " + unformattedText,

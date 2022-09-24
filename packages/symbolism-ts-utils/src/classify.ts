@@ -57,6 +57,7 @@ export function isAssignmentExpression(
     case ts.SyntaxKind.BarEqualsToken:
     case ts.SyntaxKind.CaretEqualsToken:
     //
+    // eslint-disable-next-line no-fallthrough
     case ts.SyntaxKind.LessThanLessThanEqualsToken:
     case ts.SyntaxKind.GreaterThanGreaterThanGreaterThanEqualsToken:
     case ts.SyntaxKind.GreaterThanGreaterThanEqualsToken:

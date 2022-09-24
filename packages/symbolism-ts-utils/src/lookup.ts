@@ -31,6 +31,7 @@ export function getNodeAtPosition(
       return child;
     }
   };
+  // eslint-disable-next-line no-constant-condition
   while (true) {
     const child = ts.forEachChild(current, getContainingChild);
     if (!child) {
@@ -48,6 +49,7 @@ export function getSymbolForModuleLike(
 ) {
   const checker = program.getTypeChecker();
   const symbol: ts.Symbol =
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     checker.getSymbolAtLocation(node) ?? (node as any).symbol;
 
   if (symbol) {

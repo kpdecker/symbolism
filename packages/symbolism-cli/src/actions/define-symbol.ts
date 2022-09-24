@@ -1,4 +1,4 @@
-import { Command, OptionValues } from "commander";
+import { Command } from "commander";
 import { resolve } from "path";
 import invariant from "tiny-invariant";
 import { getCliConfig, initTypescript } from "@symbolism/utils";
@@ -10,12 +10,7 @@ export function initDefineSymbol(program: Command) {
   program.command("defineSymbol <file> <line> <column>").action(dumpSymbol);
 }
 
-function dumpSymbol(
-  file: string,
-  line: string,
-  column: string,
-  opts: OptionValues
-) {
+function dumpSymbol(file: string, line: string, column: string) {
   const config = getCliConfig();
   const services = initTypescript(config, file);
   const program = services.getProgram();

@@ -8,7 +8,7 @@ import { getNodeSchema } from "./value-eval";
 
 interface SchemaNode {
   flags?: string[];
-  extra?: any;
+  extra?: unknown;
   node?: ts.Node;
   unboundSymbol?: ts.Symbol;
 }
@@ -169,7 +169,8 @@ function filterDefs(schema: Schema) {
   const referenceCount: Record<string, number> = {};
   const friendlyNames: Record<string, string> = {};
 
-  let { defs, root } = schema;
+  const { defs } = schema;
+  let { root } = schema;
 
   const referencesToCount = new Set(findReferences(schema.root));
 
@@ -221,7 +222,7 @@ function filterDefs(schema: Schema) {
         needleDef !== hayDef && friendlyNames[hayId] === friendlyNames[needleId]
     );
     if (nameConflicts.length) {
-      nameConflicts.forEach(([hayId, hay]) => {
+      nameConflicts.forEach(([hayId]) => {
         friendlyNames[hayId] = hayId;
       });
     }

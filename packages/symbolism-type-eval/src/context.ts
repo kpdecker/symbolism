@@ -80,7 +80,7 @@ export class SchemaContext {
       decrementDepth: boolean;
     } & TypeEvalOptions
   ) {
-    let { node, type, decrementDepth, ...rest } = params;
+    const { node, type, decrementDepth, ...rest } = params;
 
     const ret = new SchemaContext(node, this.checker, {
       ...this.options,
