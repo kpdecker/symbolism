@@ -4,6 +4,7 @@ import { getNodePath, pathMatchesTokenFilter } from "@symbolism/paths";
 import { resolve } from "path";
 import ts from "typescript";
 import { SymbolTable } from "./index";
+import invariant from "tiny-invariant";
 
 export function filterSymbolsToFile(symbols: SymbolTable, fileName: string) {
   if (!fileName) {
@@ -55,9 +56,10 @@ function symbolMatchesFile(symbol: ts.Symbol, fileName: string | undefined) {
     return true;
   }
 
-  let symbolFileName = resolve(
-    getSymbolDeclaration(symbol)!.getSourceFile().fileName
-  );
+  const declaration = getSymbolDeclaration(symbol);
+  invariant(declaration, "Unable to find declaration for symbol");
+
+  let symbolFileName = resolve(declaration.getSourceFile().fileName);
 
   if (symbolFileName.includes("node_modules")) {
     symbolFileName = symbolFileName.replace(/.*\/node_modules\//g, "");

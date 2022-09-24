@@ -16,3 +16,14 @@ export function removeDuplicates<T>(
       ) < 0
   );
 }
+
+export function bitwiseFlagSet(
+  flags: number | undefined,
+  flag: number
+): boolean {
+  if (flags === undefined) {
+    return false;
+  }
+
+  return (flags & flag) === flag;
+}

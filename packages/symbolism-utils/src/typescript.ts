@@ -39,6 +39,7 @@ export function initTypescript(config: Config, filePath?: string) {
 
       try {
         return ts.ScriptSnapshot.fromString(readFileSync(fileName).toString());
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (e: any) {
         throw new Error("Failed to read file " + fileName + ": " + e.message);
       }
@@ -64,4 +65,10 @@ export function assertUnreachable(
   message = "Unreachable code executed"
 ): never {
   throw new Error(message);
+}
+
+export function assertExists<T>(value: T | undefined | null): T {
+  invariant(value != null, "Expected value to be exist");
+
+  return value;
 }

@@ -2,6 +2,7 @@ import ts from "typescript";
 import invariant from "tiny-invariant";
 
 import {
+  bitwiseFlagSet,
   Config,
   logDebug,
   logVerbose,
@@ -21,7 +22,7 @@ export class SymbolTable extends Map<ts.Symbol, Set<ts.Node>> {
     return Array.from(this.keys()).filter((key) => {
       if (
         pathMatchesTokenFilter(
-          getNodePath(getSymbolDeclaration(key)!, checker),
+          getNodePath(getSymbolDeclaration(key), checker),
           pathFilter
         )
       ) {
@@ -134,7 +135,7 @@ export function parseSymbolTable(program: ts.Program, config: Config) {
             // If the type checker resolved a direct type, use that, if it's
             // not transient.
             const typeSymbol = type?.getSymbol();
-            if (!(typeSymbol?.flags! & ts.SymbolFlags.Transient)) {
+            if (!bitwiseFlagSet(typeSymbol?.flags, ts.SymbolFlags.Transient)) {
               pickSymbol("type-symbol", typeSymbol);
             }
 
@@ -184,7 +185,7 @@ export function parseSymbolTable(program: ts.Program, config: Config) {
                 logWarn(
                   "Definition symbol lacking declaration",
                   () => dumpNode(node, checker),
-                  () => dumpSymbol(definitionSymbol!, checker)
+                  () => dumpSymbol(definitionSymbol, checker)
                 );
               }
 
@@ -235,7 +236,7 @@ export function extractSymbolSummary(
   const allPaths: string[] = [];
 
   symbols.forEach((symbolMap, symbol) => {
-    const declarationPath = getNodePath(getSymbolDeclaration(symbol)!, checker);
+    const declarationPath = getNodePath(getSymbolDeclaration(symbol), checker);
     if (declarationPath) {
       if (!declarationPaths.includes(declarationPath)) {
         declarationPaths.push(declarationPath);
@@ -259,7 +260,7 @@ export function extractSymbolSummary(
     return {
       path,
       size: pathSymbols.reduce(
-        (prev, symbol) => prev + (symbols.get(symbol!)?.size || 0),
+        (prev, symbol) => prev + (symbols.get(symbol)?.size || 0),
         0
       ),
     };
@@ -283,7 +284,7 @@ export function dumpSymbolTable(symbols: SymbolTable, checker: ts.TypeChecker) {
 
       const dumpedNode = dumpNode(node, checker);
       invariant(dumpedNode, "Node is undefined");
-      ret.get(source)!.push(dumpedNode);
+      ret.get(source)?.push(dumpedNode);
     });
   });
 

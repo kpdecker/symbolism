@@ -64,7 +64,7 @@ function convertFunctionCallsForSymbol(
 
   const calls = (references ?? [])
     .map((reference) => {
-      const call = findAncestor(reference, ts.isCallExpression)!;
+      const call = findAncestor(reference, ts.isCallExpression);
       if (call) {
         if (call.expression === reference) {
           return call;
@@ -76,6 +76,7 @@ function convertFunctionCallsForSymbol(
         }
       }
 
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       return undefined!;
     })
     .filter(Boolean);
@@ -109,19 +110,19 @@ function convertCall(
 ) {
   const { checker } = context;
 
-  const signature = checker.getResolvedSignature(callExpression)!;
-
-  const argSchemas = callExpression.arguments.map((argument, i) => {
+  const argSchemas = callExpression.arguments.map((argument) => {
     const schema = getNodeSchema({
       context,
       node: argument,
       decrementDepth: false,
       allowMissing: false,
       lateBindParameters: true,
-    })!;
+    });
+    invariant(schema, "Argument must have a schema");
 
     const inputs = unboundInputs(callExpression, schema, checker);
     const parameterNodes = Array.from(
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       new Set(inputs.map((input) => input.unboundNode!).filter(Boolean))
     );
 
@@ -140,14 +141,14 @@ function convertCall(
   // resolved below.
   const baseNodeMap = new Map<ts.Node, AnySchemaNode>();
   parameterInputs.forEach((parameter) => {
-    baseNodeMap.set(
-      parameter,
-      getNodeSchema({
-        context,
-        node: parameter,
-        decrementDepth: false,
-      })!
-    );
+    const parameterSchema = getNodeSchema({
+      context,
+      node: parameter,
+      decrementDepth: false,
+    });
+    invariant(parameterSchema, "Parameter must have a schema");
+
+    baseNodeMap.set(parameter, parameterSchema);
   });
 
   // Everything is concrete. No need to expand.
@@ -243,10 +244,10 @@ function convertCall(
     upstreamCalls.set(declaration, upstreamCall);
   });
 
-  let partiallyResolvedArgSchemas: AnySchemaNode[][] = [];
+  const partiallyResolvedArgSchemas: AnySchemaNode[][] = [];
 
   // Outer call should always be bound
-  const firstDeclaration = functionDeclarations.shift()!;
+  const firstDeclaration = functionDeclarations.shift();
   if (firstDeclaration) {
     const upstreamCall = upstreamCalls.get(firstDeclaration);
     if (!upstreamCall?.length) {

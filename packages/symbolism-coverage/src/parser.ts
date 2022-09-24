@@ -2,12 +2,9 @@ import * as ts from "typescript";
 import { parseSymbolTable } from "@symbolism/symbol-table";
 import { getNodePath, pathMatchesTokenFilter } from "@symbolism/paths";
 import { Config, initTypescript } from "@symbolism/utils";
-import {
-  getSymbolDeclaration,
-  lineAndColumn,
-  LineAndColumn,
-} from "@symbolism/ts-utils";
+import { getSymbolDeclaration, LineAndColumn } from "@symbolism/ts-utils";
 import { dumpNode } from "@symbolism/ts-debug";
+import invariant from "tiny-invariant";
 
 export type TokenSourceLocation = {
   kind: ts.SyntaxKind;
@@ -36,16 +33,13 @@ export function findCoverageLocations(config: Config) {
   const coverageRequired: TokenSourceLocation[] = [];
 
   allReferences.forEach((referencingNodes, symbol) => {
-    const symbolPath = getNodePath(getSymbolDeclaration(symbol)!, checker);
+    const symbolPath = getNodePath(getSymbolDeclaration(symbol), checker);
     if (
       config.tokens.some(({ name }) => pathMatchesTokenFilter(symbolPath, name))
     ) {
       referencingNodes.forEach((referencingNode) => {
-        const sourceFile = referencingNode.getSourceFile();
-        const node = dumpNode(referencingNode, checker)!;
-        const lineAndChar = sourceFile?.getLineAndCharacterOfPosition(
-          referencingNode.getStart()
-        );
+        const node = dumpNode(referencingNode, checker);
+        invariant(node, "Failed to dump node");
 
         const [fileName, line, column] = node.location.split(":");
 

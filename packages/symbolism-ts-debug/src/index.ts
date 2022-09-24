@@ -6,6 +6,7 @@ import { isIntrinsicType, isTypeReference } from "@symbolism/ts-utils";
 import invariant from "tiny-invariant";
 import ts, { ObjectType } from "typescript";
 import { relative } from "path";
+import { bitwiseFlagSet } from "@symbolism/utils";
 
 export function dumpFlags(
   flags: number | undefined,
@@ -17,14 +18,17 @@ export function dumpFlags(
     if (
       // Flag is set
       number &&
-      (flags! & number) === number &&
+      bitwiseFlagSet(flags, number) &&
       // And it's not a combined flag
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       !(~flags! & number)
     ) {
       // Iterate to pick the first vs. last for duplicates
       ret.push(
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         Object.keys(allFlags).find(
-          (key) => (allFlags[key as any] as unknown as number) === number
+          (key) =>
+            (allFlags[key as unknown as number] as unknown as number) === number
         )!
       );
     }
@@ -47,15 +51,16 @@ export function dumpDefinition(
 }
 
 export function dumpSymbol(
-  symbol: ts.Symbol | undefined,
+  symbol: ts.Symbol | undefined | null,
   checker: ts.TypeChecker
 ) {
   if (!symbol) {
-    return symbol;
+    return undefined;
   }
 
   const declarations = symbol?.declarations || [];
   const declarationDump: NonNullable<ReturnType<typeof dumpNode>>[] =
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     declarations.map((node) => dumpNode(node, checker)!).filter(Boolean);
 
   if (symbol && !declarations.length) {

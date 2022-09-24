@@ -1,4 +1,4 @@
-import { getCliConfig, initTypescript } from "@symbolism/utils";
+import { assertExists, getCliConfig, initTypescript } from "@symbolism/utils";
 import { Command } from "commander";
 import { relative } from "path";
 
@@ -9,8 +9,7 @@ export function initDumpFiles(program: Command) {
 export function dumpFiles() {
   const config = getCliConfig();
   const services = initTypescript(config);
-  services
-    .getProgram()!
+  assertExists(services.getProgram())
     .getSourceFiles()
     .map((sourceFile) => sourceFile.fileName)
     .filter((fileName) => !config.exclude(fileName))

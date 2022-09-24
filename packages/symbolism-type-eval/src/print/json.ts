@@ -1,4 +1,4 @@
-import { assertUnreachable } from "@symbolism/utils";
+import { assertExists, assertUnreachable } from "@symbolism/utils";
 import { JsonObject } from "type-fest";
 import ts from "typescript";
 import { isNumericSchema } from "../classify";
@@ -117,7 +117,7 @@ export function schemaToJson(
       if (literals.length === schema.items.length) {
         return {
           type: "string",
-          enum: literals.map((item) => item?.const!),
+          enum: literals.map((item) => assertExists(item?.const)),
         };
       }
       return {

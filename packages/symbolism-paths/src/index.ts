@@ -14,7 +14,7 @@ import { jsxPathHandlers } from "./jsx";
 import { tokenOperators } from "./tokens";
 import { NodeError } from "@symbolism/utils";
 import { invariantNode, isNamedDeclaration } from "@symbolism/ts-utils";
-import { dumpNode } from "@symbolism/ts-debug";
+import invariant from "tiny-invariant";
 
 const handlePropertyAccess: PathHandler = ({
   node,
@@ -252,15 +252,18 @@ const nodePathHandlers: Record<ts.SyntaxKind, PathHandler> = {
 };
 
 export function getNodePath(
-  node: ts.Node,
+  node: ts.Node | undefined,
   checker: ts.TypeChecker,
-  filter: (node: ts.Node) => boolean = (node) => !!node,
-  child?: ts.Node
+  filter: (node: ts.Node) => boolean = (node) => !!node
 ): string {
+  if (!node) {
+    return "<missingNode>";
+  }
   function getPath(child: ts.Node) {
     return getNodePath(child, checker, filter).replace(/^\./, "");
   }
   function getParentPath() {
+    invariant(node);
     return getPath(node.parent);
   }
 

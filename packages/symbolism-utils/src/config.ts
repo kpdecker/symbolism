@@ -104,7 +104,7 @@ export function parseConfig(configFilePath: string): Config {
     tsConfigPath: resolve(baseDir, initialConfig.tsConfigPath),
     coverageJsonPath: resolve(baseDir, initialConfig.coverageJsonPath),
 
-    entryPoints: initialConfig.entryPoints!.flatMap((pattern) =>
+    entryPoints: initialConfig.entryPoints?.flatMap((pattern) =>
       glob
         .sync(pattern, {
           cwd: baseDir,

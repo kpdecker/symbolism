@@ -6,7 +6,7 @@ import { getNodeSchema } from ".";
 import { createUnionKind } from "./union";
 import { nodeEvalHandler } from "./handlers";
 import { invariantNode } from "@symbolism/ts-utils";
-import { dumpNode } from "@symbolism/ts-debug";
+import invariant from "tiny-invariant";
 
 export const arrayOperators = nodeEvalHandler(() => ({
   [ts.SyntaxKind.ArrayLiteralExpression](node, context) {
@@ -38,7 +38,8 @@ export function convertArrayLiteralValue(
         node: element,
         decrementDepth: true,
         allowMissing: false,
-      })!;
+      });
+      invariant(elementSchema);
 
       const dereferencedSchema = context.resolveSchema(elementSchema);
       if (ts.isSpreadElement(element) && dereferencedSchema.kind === "array") {

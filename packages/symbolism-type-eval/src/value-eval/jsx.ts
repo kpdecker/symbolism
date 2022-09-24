@@ -4,6 +4,7 @@ import { checkerEval, nodeEvalHandler, noType } from "./handlers";
 import { getNodeSchema } from ".";
 import { AnySchemaNode, ObjectSchema } from "../schema";
 import { SchemaError } from "../classify";
+import { assertExists } from "@symbolism/utils";
 
 export const jsxPathHandlers = nodeEvalHandler(() => ({
   [ts.SyntaxKind.JsxElement](node, context) {
@@ -83,11 +84,13 @@ export const jsxPathHandlers = nodeEvalHandler(() => ({
       } else {
         invariantNode(property, context.checker, ts.isJsxAttribute);
         properties[property.name.text] = property.initializer
-          ? getNodeSchema({
-              context,
-              node: property.initializer,
-              decrementDepth: false,
-            })!
+          ? assertExists(
+              getNodeSchema({
+                context,
+                node: property.initializer,
+                decrementDepth: false,
+              })
+            )
           : { kind: "literal", value: true };
       }
     });

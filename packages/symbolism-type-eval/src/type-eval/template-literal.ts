@@ -35,6 +35,8 @@ export function convertTemplateLiteralType(
 
         const itemType = templateType.types[i];
         return [
+          // Boolean filter will strip undefined case
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
           textSchema!,
           itemType &&
             getTypeSchema({

@@ -9,6 +9,7 @@ import { createUnionKind } from "./union";
 import { AnySchemaNode, createReferenceSchema } from "../schema";
 import { SchemaError } from "../classify";
 import { printSchemaNode } from "../print/typescript";
+import { assertExists } from "@symbolism/utils";
 
 export const functionOperators = nodeEvalHandler(() => ({
   [ts.SyntaxKind.CallExpression]: convertCallLikeNode,
@@ -123,12 +124,14 @@ function convertFunctionLikeNode(node: ts.Node, context: SchemaContext) {
   } else {
     let returnType: AnySchemaNode = createUnionKind(
       returnNodes.map((returnNode) => {
-        return getNodeSchema({
-          context,
-          node: returnNode,
-          decrementDepth: true,
-          allowMissing: false,
-        })!;
+        return assertExists(
+          getNodeSchema({
+            context,
+            node: returnNode,
+            decrementDepth: true,
+            allowMissing: false,
+          })
+        );
       })
     );
 
@@ -181,6 +184,7 @@ function convertCallLikeNode(node: ts.Node, context: SchemaContext) {
       returnType = createUnionKind(
         functionSchema.items
           .map((type) =>
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             type.kind === "function" ? type.returnType : undefined!
           )
           .filter(Boolean)

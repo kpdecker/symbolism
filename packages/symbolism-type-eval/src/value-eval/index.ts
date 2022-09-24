@@ -6,7 +6,7 @@ import {
   invariantNode,
   isIntrinsicType,
 } from "@symbolism/ts-utils";
-import { logDebug, NodeError } from "@symbolism/utils";
+import { assertExists, logDebug, NodeError } from "@symbolism/utils";
 import { dumpNode } from "@symbolism/ts-debug";
 import { AnySchemaNode } from "../schema";
 import { SchemaContext } from "../context";
@@ -115,15 +115,15 @@ const nodePathHandlers: Record<ts.SyntaxKind, NodeEvalHandler> = {
     const identifierDefinition = defineSymbol(node, checker, {
       chooseLocal: !!context.options.lateBindParameters,
     });
+    const identifierType = identifierDefinition?.type;
 
-    if (isIntrinsicType(identifierDefinition?.type)) {
-      const { type } = identifierDefinition!;
-      if (type?.flags! & ts.TypeFlags.Undefined) {
+    if (isIntrinsicType(identifierType)) {
+      if (assertExists(identifierType?.flags) & ts.TypeFlags.Undefined) {
         return {
           kind: "literal",
           value: undefined,
         };
-      } else if (type?.flags! & ts.TypeFlags.Null) {
+      } else if (assertExists(identifierType?.flags) & ts.TypeFlags.Null) {
         return {
           kind: "literal",
           value: null,
@@ -199,18 +199,22 @@ const nodePathHandlers: Record<ts.SyntaxKind, NodeEvalHandler> = {
         decrementDepth: false,
       })
     );
-    const trueSchema = getNodeSchema({
-      context,
-      node: node.whenTrue,
-      decrementDepth: false,
-      allowMissing: false,
-    })!;
-    const falseSchema = getNodeSchema({
-      context,
-      node: node.whenFalse,
-      decrementDepth: false,
-      allowMissing: false,
-    })!;
+    const trueSchema = assertExists(
+      getNodeSchema({
+        context,
+        node: node.whenTrue,
+        decrementDepth: false,
+        allowMissing: false,
+      })
+    );
+    const falseSchema = assertExists(
+      getNodeSchema({
+        context,
+        node: node.whenFalse,
+        decrementDepth: false,
+        allowMissing: false,
+      })
+    );
 
     if (isConcreteSchema(conditionSchema)) {
       if (conditionSchema?.kind === "literal") {

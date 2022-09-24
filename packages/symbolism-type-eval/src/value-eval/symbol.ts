@@ -1,5 +1,5 @@
 import { isNamedDeclaration } from "@symbolism/ts-utils";
-import { assertUnreachable } from "@symbolism/utils";
+import { assertExists, assertUnreachable } from "@symbolism/utils";
 import ts from "typescript";
 import { bindParameterDependency, findParameterDependency } from "../classify";
 import { SchemaContext } from "../context";
@@ -22,7 +22,7 @@ export function resolveParametersInSchema(
         schema.node,
         {
           node: parameter,
-          schema: parameterSchemas.get(parameter)!,
+          schema: assertExists(parameterSchemas.get(parameter)),
         },
         context
       );

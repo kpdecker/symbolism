@@ -1,4 +1,4 @@
-import { logDebug, NodeError } from "@symbolism/utils";
+import { assertExists, logDebug, NodeError } from "@symbolism/utils";
 import invariant from "tiny-invariant";
 import ts from "typescript";
 import { isConcreteSchema, SchemaError } from "../classify";
@@ -117,7 +117,7 @@ function convertObjectLiteralValue(
         node: property.expression,
         decrementDepth: true,
         allowMissing: false,
-      })!;
+      });
       spreadProperties(spreadSchema, property);
     } else if (
       ts.isPropertyAssignment(property) ||
@@ -125,22 +125,26 @@ function convertObjectLiteralValue(
       ts.isGetAccessorDeclaration(property) ||
       ts.isSetAccessorDeclaration(property)
     ) {
-      let schema = getNodeSchema({
-        context,
-        node: property,
-        decrementDepth: true,
-        allowMissing: false,
-      })!;
+      const schema = assertExists(
+        getNodeSchema({
+          context,
+          node: property,
+          decrementDepth: true,
+          allowMissing: false,
+        })
+      );
 
       setProperties(property.name, schema);
     } else if (ts.isShorthandPropertyAssignment(property)) {
       const propertyName = property.name.text;
-      const schema = getNodeSchema({
-        context,
-        node: property,
-        decrementDepth: true,
-        allowMissing: false,
-      })!;
+      const schema = assertExists(
+        getNodeSchema({
+          context,
+          node: property,
+          decrementDepth: true,
+          allowMissing: false,
+        })
+      );
 
       properties[propertyName] = schema;
     } else {
@@ -192,10 +196,20 @@ function convertObjectLiteralValue(
       }
     }
   }
-  function spreadProperties(spreadSchema: AnySchemaNode, node: ts.Node) {
+  function spreadProperties(
+    spreadSchema: AnySchemaNode | undefined,
+    node: ts.Node
+  ) {
     spreadSchema = context.resolveSchema(spreadSchema);
 
-    if (spreadSchema.kind === "object") {
+    if (
+      !spreadSchema ||
+      (spreadSchema.kind === "primitive" && spreadSchema.name !== "any") ||
+      spreadSchema.kind === "literal" ||
+      spreadSchema.kind === "template-literal"
+    ) {
+      /* NOP */
+    } else if (spreadSchema.kind === "object") {
       Object.assign(properties, spreadSchema.properties);
       abstractIndexKeys.push(...spreadSchema.abstractIndexKeys);
     } else if (
@@ -214,12 +228,6 @@ function convertObjectLiteralValue(
       spreadSchema.items.forEach((item) => {
         spreadProperties(item, node);
       });
-    } else if (
-      spreadSchema.kind === "primitive" ||
-      spreadSchema.kind === "literal" ||
-      spreadSchema.kind === "template-literal"
-    ) {
-      /* NOP */
     } else {
       throw new NodeError(
         `Spread not impl ${spreadSchema.kind} ${printSchema({
@@ -279,7 +287,7 @@ function evaluatePropertyName(
     });
   }
 
-  return propertyName! as AnySchemaNode;
+  return assertExists(propertyName);
 }
 
 function evalPropertySchema(

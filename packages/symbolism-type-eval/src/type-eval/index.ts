@@ -16,6 +16,7 @@ import {
   isTupleTypeReference,
 } from "@symbolism/ts-utils";
 import {
+  assertExists,
   assertUnreachable,
   logDebug,
   NodeError,
@@ -73,14 +74,15 @@ export function getTypeSchema(
   let { type, node } = params;
 
   if (!node) {
-    node = findContextNode(type!, params.context.contextNode);
+    invariant(type);
+    node = findContextNode(type, params.context.contextNode);
   }
   if (!type) {
     type = params.context.checker.getTypeAtLocation(node);
   }
 
   if (ts.isParameter(node) && params.context.parameterBindings.has(node)) {
-    return params.context.parameterBindings.get(node)!;
+    return assertExists(params.context.parameterBindings.get(node));
   }
 
   const context = params.context.clone({
@@ -106,6 +108,7 @@ export function getTypeSchema(
   const existingDef = typeId && context.typeDefinitions.get(typeId);
 
   // Use type reference if we've processed this already.
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   if (wellKnownReferences.includes(typeName!) || (canEmitDef && existingDef)) {
     const refSchema = createReferenceFromType(type, context);
     if (refSchema) {
@@ -114,7 +117,7 @@ export function getTypeSchema(
   }
 
   if (!canEmitDef && context.typeCache.has(type)) {
-    return context.typeCache.get(type)!;
+    return assertExists(context.typeCache.get(type));
   }
 
   if (!isIntrinsicType(type)) {
@@ -256,12 +259,14 @@ function getTypeSchemaWorker(
       };
     } else if ((checker as any).isArrayType(type)) {
       if (ts.isArrayLiteralExpression(contextNode)) {
-        return getNodeSchema({
-          context,
-          node: contextNode,
-          decrementDepth: false,
-          allowMissing: false,
-        })!;
+        return assertExists(
+          getNodeSchema({
+            context,
+            node: contextNode,
+            decrementDepth: false,
+            allowMissing: false,
+          })
+        );
       }
       const arrayValueType = checker.getIndexTypeOfType(
         type,
@@ -315,12 +320,14 @@ function getTypeSchemaWorker(
               return {
                 name: parameter.name,
                 schema: context.options.evalParameters
-                  ? getNodeSchema({
-                      context,
-                      node: declaration,
-                      decrementDepth: true,
-                      allowMissing: false,
-                    })!
+                  ? assertExists(
+                      getNodeSchema({
+                        context,
+                        node: declaration,
+                        decrementDepth: true,
+                        allowMissing: false,
+                      })
+                    )
                   : ({
                       kind: "primitive",
                       name: "unknown",
@@ -558,6 +565,7 @@ export function createReferenceFromType(
       if (!isThisTypeParameter(type)) {
         return getTypeSchema({ context, type, decrementDepth: true });
       }
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       return undefined!;
     })
     .filter(Boolean);
