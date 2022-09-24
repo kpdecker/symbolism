@@ -1,4 +1,8 @@
-import { getSymbolDeclaration, invariantNode } from "@symbolism/ts-utils";
+import {
+  getSymbolDeclaration,
+  invariantNode,
+  tryGetThisTypeAt,
+} from "@symbolism/ts-utils";
 import ts, { findAncestor } from "typescript";
 import { defineSymbol } from "./index";
 import {
@@ -16,7 +20,7 @@ export const classOperators = nodeOperators({
   [ts.SyntaxKind.ThisKeyword](node, checker, options) {
     // Internal API: Couldn't find any other way to resolve proper type
     // consistently.
-    const thisType = (checker as any).tryGetThisTypeAt(node) as ts.Type;
+    const thisType = tryGetThisTypeAt(checker, node);
     if (thisType) {
       return {
         symbol: thisType.symbol,

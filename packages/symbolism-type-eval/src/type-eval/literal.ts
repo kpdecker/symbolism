@@ -1,3 +1,4 @@
+import { getIntrinsicName } from "@symbolism/ts-utils";
 import invariant from "tiny-invariant";
 import ts from "typescript";
 import { SchemaContext } from "../context";
@@ -33,7 +34,7 @@ export function convertLiteralOrPrimitive(
   } else if (type.flags & ts.TypeFlags.BooleanLiteral) {
     return {
       kind: "literal",
-      value: (type as any).intrinsicName === "true",
+      value: getIntrinsicName(type) === "true",
     };
   } else if (type.flags & ts.TypeFlags.Number) {
     return {

@@ -8,7 +8,7 @@ import {
   getPropertySymbol,
   nodeOperators,
 } from "./utils";
-import { invariantNode } from "@symbolism/ts-utils";
+import { invariantNode, getBindingElement } from "@symbolism/ts-utils";
 import { dumpNode } from "@symbolism/ts-debug";
 
 export const jsxSymbolHandlers = nodeOperators({
@@ -62,13 +62,8 @@ export const jsxSymbolHandlers = nodeOperators({
     // If the property has an attached property definition, then
     // use that as the symbol is from an implicit property and
     // doesn't have a declaration from the getProperty call.
-    if (
-      propertyDefinition &&
-      (propertyDefinition.symbol as any).bindingElement
-    ) {
-      const bindingElement: ts.BindingElement = (
-        propertyDefinition.symbol as any
-      ).bindingElement;
+    const bindingElement = getBindingElement(propertyDefinition?.symbol);
+    if (bindingElement) {
       return directTypeAndSymbol(
         bindingElement.propertyName || bindingElement.name,
         checker

@@ -1,9 +1,10 @@
 import { NodeError } from "@symbolism/utils";
-import ts from "typescript";
+import ts, { InternalSymbolName } from "typescript";
 import type { Opaque } from "type-fest";
 
 import { getSymbolDeclaration } from "./lookup";
 import { relative } from "path";
+import { getIntrinsicName, isThisType } from "./internal-apis";
 
 export function invariantNode<T extends ts.Node>(
   node: ts.Node,
@@ -20,12 +21,14 @@ export function invariantNode<T extends ts.Node>(
 }
 
 export function isExpression(node: ts.Node): node is ts.Expression {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return (ts as any).isExpression(node) || ts.isJsxAttributes(node);
 }
 export function isNamedDeclaration(node: ts.Node): node is ts.NamedDeclaration {
   return isDeclaration(node) && "name" in node;
 }
 export function isDeclaration(node: ts.Node): node is ts.Declaration {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return (ts as any).isDeclaration(node);
 }
 export function isInheritingDeclaration(
@@ -102,7 +105,7 @@ export function isArraySymbol(symbol: ts.Symbol): boolean {
 }
 
 export function isErrorType(type: ts.Type | undefined): boolean {
-  return (type as any)?.intrinsicName === "error";
+  return getIntrinsicName(type) === "error";
 }
 
 const intrinsicTypes =
@@ -122,17 +125,14 @@ const intrinsicTypes =
   ts.TypeFlags.NonPrimitive;
 
 export function isIntrinsicType(type: ts.Type | undefined): boolean {
-  return (type?.flags! & intrinsicTypes) !== 0;
+  return !!type?.flags && (type.flags & intrinsicTypes) !== 0;
 }
 
 export type TypeId = Opaque<string, "TypeId">;
-export function isNamedType(type: ts.Type, checker: ts.TypeChecker): boolean {
-  return !!getTypeName(type, checker);
+export function isNamedType(type: ts.Type): boolean {
+  return !!getTypeName(type);
 }
-export function getTypeName(
-  type: ts.Type,
-  checker: ts.TypeChecker
-): string | undefined {
+export function getTypeName(type: ts.Type): string | undefined {
   if (isTupleTypeReference(type) || type.flags & ts.TypeFlags.StringMapping) {
     return undefined;
   }
@@ -164,7 +164,9 @@ export function getTypeName(
     name = type.symbol.name;
   }
 
-  if (Object.values(ts.InternalSymbolName).includes(name as any)) {
+  if (
+    Object.values(ts.InternalSymbolName).includes(name as InternalSymbolName)
+  ) {
     return undefined;
   }
 
@@ -194,7 +196,7 @@ export function getTypeId(
 export function isThisTypeParameter(
   type: ts.Type | undefined
 ): type is ts.TypeParameter {
-  return type?.isTypeParameter() && (type as any).isThisType;
+  return !!type?.isTypeParameter() && isThisType(type);
 }
 
 export function isTypeReference(

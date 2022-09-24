@@ -2,7 +2,11 @@ import type { defineSymbol } from "@symbolism/definitions";
 import type { AnySchemaNode } from "@symbolism/type-eval";
 
 import { getNodePath } from "@symbolism/paths";
-import { isIntrinsicType, isTypeReference } from "@symbolism/ts-utils";
+import {
+  isIntrinsicType,
+  isTypeReference,
+  getSymbolId,
+} from "@symbolism/ts-utils";
 import invariant from "tiny-invariant";
 import ts, { ObjectType } from "typescript";
 import { relative } from "path";
@@ -91,7 +95,7 @@ export function dumpSymbol(
   );
 
   return {
-    id: (symbol as any)?.id,
+    id: getSymbolId(symbol),
     flags: dumpFlags(symbol?.getFlags(), ts.SymbolFlags),
     declaration: declarationDump,
   };

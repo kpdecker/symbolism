@@ -6,10 +6,12 @@ import {
   dumpType,
 } from "@symbolism/ts-debug";
 import {
+  getResolvedTypeArguments,
   getSymbolDeclaration,
   getTypeId,
   getTypeName,
   invariantNode,
+  isArrayType,
   isIntrinsicType,
   isNamedType,
   isThisTypeParameter,
@@ -101,10 +103,10 @@ export function getTypeSchema(
     type = type.getConstraint() || type;
   }
 
-  const canEmitDef = isNamedType(type, checker);
+  const canEmitDef = isNamedType(type);
 
   const typeId = getTypeId(type, checker, true);
-  const typeName = getTypeName(type, checker);
+  const typeName = getTypeName(type);
   const existingDef = typeId && context.typeDefinitions.get(typeId);
 
   // Use type reference if we've processed this already.
@@ -257,7 +259,7 @@ function getTypeSchemaWorker(
         items,
         elementFlags: tupleType.elementFlags,
       };
-    } else if ((checker as any).isArrayType(type)) {
+    } else if (isArrayType(type, checker)) {
       if (ts.isArrayLiteralExpression(contextNode)) {
         return assertExists(
           getNodeSchema({
@@ -347,7 +349,7 @@ function getTypeSchemaWorker(
         const buildFunctionSchema = () =>
           createUnionKind(callSignatures.map(convertSignature));
 
-        if (isNamedType(type, context.checker)) {
+        if (isNamedType(type)) {
           const referenceNode = createReferenceFromType(
             type,
             context,
@@ -362,7 +364,7 @@ function getTypeSchemaWorker(
       }
 
       const buildObjectSchema = () => convertObjectType(context, type);
-      if (isNamedType(type, context.checker)) {
+      if (isNamedType(type)) {
         const referenceNode = createReferenceFromType(
           type,
           context,
@@ -553,13 +555,13 @@ export function createReferenceFromType(
 ): AnySchemaNode | undefined {
   const typeId = getTypeId(type, context.checker, true);
   const friendlyTypeId = getTypeId(type, context.checker, false);
-  const typeName = getTypeName(type, context.checker);
+  const typeName = getTypeName(type);
 
   const aliasSymbol = type.aliasSymbol;
   const symbol = type.symbol?.name ? type.symbol : aliasSymbol;
 
   const typeArguments: readonly ts.Type[] =
-    type.aliasTypeArguments || (type as any).resolvedTypeArguments || [];
+    type.aliasTypeArguments || getResolvedTypeArguments(type) || [];
   const parameters = typeArguments
     .map((type) => {
       if (!isThisTypeParameter(type)) {

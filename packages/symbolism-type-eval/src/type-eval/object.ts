@@ -1,4 +1,4 @@
-import { getSymbolDeclaration } from "@symbolism/ts-utils";
+import { getSymbolDeclaration, getSymbolParent } from "@symbolism/ts-utils";
 import ts from "typescript";
 import { getTypeSchema } from ".";
 import { SchemaContext } from "../context";
@@ -91,7 +91,7 @@ function convertSymbol(
 
   let finalSymbol = symbol;
   if (symbol.flags & ts.SymbolFlags.Prototype) {
-    finalSymbol = (symbol as any).parent;
+    finalSymbol = getSymbolParent(symbol) || symbol;
   }
 
   finalSymbol.members?.forEach((member, name) => {

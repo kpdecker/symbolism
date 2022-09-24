@@ -1,4 +1,8 @@
-import { getSymbolDeclaration, invariantNode } from "@symbolism/ts-utils";
+import {
+  getSymbolDeclaration,
+  invariantNode,
+  resolveExternalModuleName,
+} from "@symbolism/ts-utils";
 import { logWarn } from "@symbolism/utils";
 import invariant from "tiny-invariant";
 import ts, { findAncestor } from "typescript";
@@ -13,14 +17,15 @@ export const importOperators = nodeOperators({
   [ts.SyntaxKind.NamespaceImport]: directTypeAndSymbol,
   [ts.SyntaxKind.NamedImports]: directTypeAndSymbol,
   [ts.SyntaxKind.ImportSpecifier](node, checker) {
-    const importDeclaration = findAncestor(node, ts.isImportDeclaration);
-
     invariantNode(node, checker, ts.isImportSpecifier);
+
+    const importDeclaration = findAncestor(node, ts.isImportDeclaration);
     invariant(importDeclaration);
 
-    const externalModule: ts.Symbol = (
-      checker as any
-    ).resolveExternalModuleName(importDeclaration.moduleSpecifier);
+    const externalModule = resolveExternalModuleName(
+      checker,
+      importDeclaration.moduleSpecifier
+    );
     if (!externalModule) {
       logWarn(
         "Failed to resolve externalModule",

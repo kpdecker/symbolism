@@ -1,5 +1,10 @@
 import ts, { findAncestor } from "typescript";
-import { findNodesInTree, invariantNode, TypeId } from "@symbolism/ts-utils";
+import {
+  findNodesInTree,
+  getSignatureMapper,
+  invariantNode,
+  TypeId,
+} from "@symbolism/ts-utils";
 import { checkerEval, nodeEvalHandler, noType } from "./handlers";
 import { getNodeSchema } from ".";
 import { undefinedSchema } from "../well-known-schemas";
@@ -161,7 +166,7 @@ function convertCallLikeNode(node: ts.Node, context: SchemaContext) {
   // If we are looking at an instantiated type, use that. It will have type parameters
   // accounted for.
   const returnTypeHasParameters =
-    signature?.typeParameters?.length || (signature as any).mapper;
+    signature?.typeParameters?.length || getSignatureMapper(signature);
 
   // Evaluate the function at node level
   if (
