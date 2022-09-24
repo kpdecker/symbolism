@@ -1,3 +1,4 @@
+import { assertExists } from "@symbolism/utils";
 import path from "path";
 import ts from "typescript";
 
@@ -29,7 +30,7 @@ export function mockProgram(
 
       return ts.createSourceFile(
         fileName,
-        host.readFile(fileName)!,
+        assertExists(host.readFile(fileName)),
         ts.ScriptTarget.ES2022
       );
     },

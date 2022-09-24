@@ -47,9 +47,10 @@ export function dumpDefinition(
   if (!inferred) {
     return inferred;
   }
-  const symbol = dumpSymbol(inferred!.symbol, checker);
+  const symbol = dumpSymbol(inferred.symbol, checker);
+  const type = inferred.type;
   return {
-    type: checker.typeToString(inferred?.type!),
+    type: type && checker.typeToString(type),
     symbol: symbol?.declaration,
   };
 }
@@ -139,13 +140,11 @@ export function dumpNode(
       ts.isVariableDeclaration(node)
     ) as ts.VariableDeclaration;
     if (declaration) {
+      const symbol = checker.getSymbolAtLocation(node.parent.parent.parent);
       name =
         declaration.name.getText() +
         " " +
-        (checker.getSymbolAtLocation(node.parent.parent.parent) &&
-          checker.getFullyQualifiedName(
-            checker.getSymbolAtLocation(node.parent.parent.parent)!
-          ));
+        (symbol && checker.getFullyQualifiedName(symbol));
     }
   }
   ret.name = name;

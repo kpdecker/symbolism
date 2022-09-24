@@ -1,5 +1,5 @@
 import ts from "typescript";
-import { NodeError, logDebug } from "@symbolism/utils";
+import { NodeError, logDebug, assertExists } from "@symbolism/utils";
 import { classOperators } from "./class";
 import { functionOperators } from "./function";
 import { importOperators } from "./import";
@@ -13,6 +13,7 @@ import {
   directTypeAndSymbol,
   getArrayType,
   DefinitionOptions,
+  DefinitionSymbol,
 } from "./utils";
 import { followSymbol } from "./follow-symbol";
 import {
@@ -22,7 +23,8 @@ import {
   isNamedDeclaration,
   isTypeReference,
 } from "@symbolism/ts-utils";
-import { dumpNode } from "@symbolism/ts-debug";
+
+export type { DefinitionSymbol } from "./utils";
 
 function nopHandler() {
   return null;
@@ -234,10 +236,14 @@ const nodeHandlers: Record<ts.SyntaxKind, DefinitionOperation> = {
 };
 
 export function defineSymbol(
-  node: ts.Node,
+  node: ts.Node | undefined,
   checker: ts.TypeChecker,
   options: { chooseLocal?: boolean } = {}
 ) {
+  if (!node) {
+    return undefined;
+  }
+
   logDebug(
     "defineSymbol",
     ts.SyntaxKind[node.kind],
@@ -312,17 +318,18 @@ function defineProperties(
   node: ts.Node,
   checker: ts.TypeChecker,
   options: DefinitionOptions
-) {
+): DefinitionSymbol | null | undefined {
   if (ts.isPropertyAssignment(node) || ts.isShorthandPropertyAssignment(node)) {
-    const objectType = defineSymbol(node.parent, checker, options);
-    if (!objectType || !objectType.type) {
+    const objectDefinition = defineSymbol(node.parent, checker, options);
+    const objectType = objectDefinition?.type;
+    if (!objectType) {
       return;
     }
     const propertyName = node.name.getText();
 
     const propertyDefinition = getPropertySymbol(
       node,
-      objectType.type,
+      objectType,
       checker,
       propertyName,
       {
@@ -386,16 +393,20 @@ function defineBindingElement(
     }
 
     const bindingPattern = node.parent;
-    const bindingPatternType = defineSymbol(bindingPattern, checker, options);
+    const bindingPatternDefinition = defineSymbol(
+      bindingPattern,
+      checker,
+      options
+    );
 
     const propertyName = ts.isArrayBindingPattern(bindingPattern)
       ? bindingPattern.elements.indexOf(node) + ""
       : (node.propertyName || node.name).getText();
 
     // This supports tuple types. Unclear on others
-    if (bindingPatternType?.type && isTypeReference(bindingPatternType.type)) {
-      const typeRefType = bindingPatternType.type;
-      const typeArguments = checker.getTypeArguments(typeRefType);
+    const bindingPatternType = bindingPatternDefinition?.getType();
+    if (bindingPatternType && isTypeReference(bindingPatternType)) {
+      const typeArguments = checker.getTypeArguments(bindingPatternType);
       const typeArgument = typeArguments[+propertyName] || typeArguments[0];
       if (typeArgument && !(typeArgument.getFlags() & ts.TypeFlags.Any)) {
         return {
@@ -408,7 +419,7 @@ function defineBindingElement(
 
     const propertyDefinition = getPropertySymbol(
       node,
-      bindingPatternType?.type!,
+      assertExists(bindingPatternType),
       checker,
       propertyName,
       {

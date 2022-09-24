@@ -1,6 +1,6 @@
 import invariant from "tiny-invariant";
 import ts, { JsxOpeningLikeElement } from "typescript";
-import { logDebug } from "@symbolism/utils";
+import { assertExists, logDebug } from "@symbolism/utils";
 import { defineSymbol } from "./index";
 import {
   contextualTypeAndSymbol,
@@ -51,7 +51,7 @@ export const jsxSymbolHandlers = nodeOperators({
 
     const propertyDefinition = getPropertySymbol(
       node,
-      properties.type!,
+      assertExists(properties.getType()),
       checker,
       name,
       {

@@ -81,7 +81,7 @@ export function getPropertySymbol(
     stringIndex,
     numberIndex,
   }: { stringIndex?: boolean; numberIndex?: boolean } = {}
-) {
+): DefinitionSymbol | undefined {
   const symbol =
     type.getProperty(name) ||
     (stringIndex && type.getStringIndexType()?.symbol) ||
