@@ -27,7 +27,7 @@ function testType(source: string, name = "Type") {
 describe("type schema converter", () => {
   describe("functions", () => {
     it("should evaluate return", () => {
-      const { type, context, sourceFile } = testType(`
+      const { context, sourceFile } = testType(`
         const foo = function() {
           return 'foo';
         };
@@ -92,7 +92,7 @@ describe("type schema converter", () => {
       `);
     });
     it("should evaluate yield in generators", () => {
-      const { type, context, sourceFile } = testType(`
+      const { context, sourceFile } = testType(`
         function foo() {
           throw 'bar';
         }
@@ -106,7 +106,7 @@ describe("type schema converter", () => {
       `);
     });
     it("should evaluate yield in generators", () => {
-      const { type, context, sourceFile } = testType(`
+      const { context, sourceFile } = testType(`
         function* foo() {
           yield 'foo';
           yield 'bar';
@@ -209,7 +209,7 @@ describe("type schema converter", () => {
       `);
     });
     it("should infer return from iterators", () => {
-      const { type, context, sourceFile } = testType(`
+      const { context, sourceFile } = testType(`
         function* generator() {
           yield "foo";
           yield "bar";
@@ -267,7 +267,7 @@ describe("type schema converter", () => {
       `);
     });
     it("should evaluate await", () => {
-      const { type, context, sourceFile } = testType(`
+      const { context, sourceFile } = testType(`
         const foo = async function() {
           return 'foo';
         };

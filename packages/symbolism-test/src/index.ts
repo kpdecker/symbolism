@@ -19,7 +19,7 @@ export function mockProgram(
     readFile(fileName) {
       return sourceFiles[fileName] || ts.sys.readFile(fileName);
     },
-    writeFile(fileName, text) {
+    writeFile() {
       throw new Error("NOT IMPLEMENTED");
     },
     getSourceFile(fileName) {
@@ -45,8 +45,7 @@ export function mockProgram(
       containingFile,
       reusedNames,
       redirectedReference,
-      options,
-      containingSourceFile?
+      options
     ) {
       return moduleNames.map(
         (moduleName): ts.ResolvedModuleFull | undefined => {

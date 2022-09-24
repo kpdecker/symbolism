@@ -2,7 +2,6 @@ import { mockProgram } from "@symbolism/test";
 import { findIdentifiers } from "@symbolism/ts-utils";
 import { printSchema } from "../print/typescript";
 import { SchemaContext } from "../context";
-import { getNodeSchema } from "../value-eval";
 import { evaluateSchema } from "../schema";
 
 function testType(source: string, name = "Type") {
@@ -120,7 +119,7 @@ describe("type schema converter", () => {
 
   describe("binding", () => {
     it("should resolve variable binding", () => {
-      const { type, declaration, context, sourceFile } = testType(`
+      const { declaration, context, sourceFile } = testType(`
         type GenericType<T> = [1, ...T];
         type Type = GenericType<[string, "bar"]>;
 

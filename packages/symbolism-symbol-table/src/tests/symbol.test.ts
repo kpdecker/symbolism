@@ -13,7 +13,7 @@ describe("symbol table", () => {
 
     expect(symbolTable.size).toBeGreaterThan(100);
 
-    const artifact = Array.from(symbolTable).find(([symbol, references]) => {
+    const artifact = Array.from(symbolTable).find(([symbol]) => {
       return symbol.getName() === "parseSymbolTable";
     });
 

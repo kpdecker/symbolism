@@ -2,9 +2,7 @@ import { mockProgram } from "@symbolism/test";
 import { findIdentifiers } from "@symbolism/ts-utils";
 import { printSchema } from "../print/typescript";
 import { SchemaContext } from "../context";
-import { getNodeSchema } from "../value-eval";
 import { evaluateSchema } from "../schema";
-import { LogLevel, setLogLevel } from "@symbolism/utils";
 import ts from "typescript";
 
 function testType(source: string, options?: ts.CompilerOptions) {
@@ -31,7 +29,7 @@ function testType(source: string, options?: ts.CompilerOptions) {
 // TODO: Use type references when a type is named
 describe("type schema converter", () => {
   it("should convert direct types to a schema", () => {
-    const { type, declaration, context } = testType(`
+    const { declaration, context } = testType(`
       enum Enum {
         a = "a",
         b = "b",
@@ -104,7 +102,7 @@ describe("type schema converter", () => {
     `);
   });
   it("should merge intersections", () => {
-    const { type, declaration, context } = testType(`
+    const { declaration, context } = testType(`
       type Generic<T> = {foo: T} | {bar: T};
       type GenericIntersection<T> = {foo: T} & {bar: T};
       type Type = {
@@ -159,7 +157,7 @@ describe("type schema converter", () => {
   });
 
   it("should merge union", () => {
-    const { type, declaration, context } = testType(`
+    const { declaration, context } = testType(`
       type Generic<T> = {foo: T} | {bar: T};
       type GenericIntersection<T> = {foo: T} & {bar: T};
       type Type = {
@@ -217,7 +215,7 @@ describe("type schema converter", () => {
 
   describe("objects", () => {
     it("should handle interfaces and classes", () => {
-      const { type, declaration, context } = testType(`
+      const { declaration, context } = testType(`
         interface CSSProps  {
           color?: string
           interfaceFunction: (foo: "bar") => string;
@@ -247,7 +245,7 @@ describe("type schema converter", () => {
       `);
     });
     it("should handle index signatures", () => {
-      const { type, declaration, context } = testType(`
+      const { declaration, context } = testType(`
         type Source = {
           directUnion: 1 | 2 | 3;
           wideningUnion: 1 | number;
@@ -269,7 +267,7 @@ describe("type schema converter", () => {
     });
     it("should handle mapped types", () => {
       // ts.ObjectFlags.Mapped;
-      const { type, declaration, context } = testType(`
+      const { declaration, context } = testType(`
         type Source = {
           directUnion: 1 | 2 | 3;
           wideningUnion: 1 | number;
@@ -296,7 +294,7 @@ describe("type schema converter", () => {
 
     it("should handle reverse mapped types", () => {
       // https://github.com/microsoft/TypeScript/blob/5d65c4dc26334ec7518d2472a9b3b69dac9ff2b5/tests/cases/compiler/reverseMappedTypeAssignableToIndex.ts#L1
-      const { type, declaration, context } = testType(`
+      const { declaration, context } = testType(`
         // Simple mapped type and inferrence
         type Mapped<T> = { [K in keyof T]: { name: T[K] } };
         type InferFromMapped<T> = T extends Mapped<infer R> ? R : never;
@@ -318,7 +316,7 @@ describe("type schema converter", () => {
       `);
     });
     it("should handle well known objects", () => {
-      const { type, declaration, context } = testType(`
+      const { declaration, context } = testType(`
         type Type = {
           date: Date;
         };
@@ -332,7 +330,7 @@ describe("type schema converter", () => {
     });
 
     it("should handle circular types", () => {
-      const { type, declaration, context } = testType(`
+      const { declaration, context } = testType(`
         type Type = {
           foo: Type;
           date: Date;
@@ -355,7 +353,7 @@ describe("type schema converter", () => {
   describe("generics", () => {
     it("should handle resolved generics", () => {
       // setLogLevel(LogLevel.debug);
-      const { type, declaration, context } = testType(`
+      const { declaration, context } = testType(`
           interface CSSProps  {
             color?: string;
             backgroundColor?: string;
@@ -378,7 +376,7 @@ describe("type schema converter", () => {
       `);
     });
     it("should handle implicitly resolved generics", () => {
-      const { type, declaration, context } = testType(`
+      const { declaration, context } = testType(`
           interface CSSProps  {
             color?: string;
             backgroundColor?: string;
@@ -402,7 +400,7 @@ describe("type schema converter", () => {
       `);
     });
     it("should handle unresolved generics", () => {
-      const { type, declaration, context } = testType(`
+      const { declaration, context } = testType(`
           interface NestedSelector<T>  {
             prop: T;
           }
@@ -420,7 +418,7 @@ describe("type schema converter", () => {
 
   describe("template literal types", () => {
     it("should handle template literal types", () => {
-      const { type, declaration, context } = testType(`
+      const { declaration, context } = testType(`
         type Bar = string;
         type Type = \`foo \${Bar}\`;
       `);
@@ -432,7 +430,7 @@ describe("type schema converter", () => {
       `);
     });
     it("should flatten concrete templates", () => {
-      const { type, declaration, context } = testType(`
+      const { declaration, context } = testType(`
         type Bar = "foo" | "bar";
         type Type = \`foo \${Bar}\`;
       `);
@@ -444,7 +442,7 @@ describe("type schema converter", () => {
       `);
     });
     it("should load types from runtime code", () => {
-      const { type, declaration, context } = testType(`
+      const { declaration, context } = testType(`
         declare const bar: "foo" | "bar";
         const foo = \`foo \${bar}\`
         const type = \`\${foo}d\`
@@ -458,7 +456,7 @@ describe("type schema converter", () => {
       `);
     });
     it("should load types from runtime object literal", () => {
-      const { type, declaration, context } = testType(`
+      const { declaration, context } = testType(`
         declare const bar: "foo" | "bar";
         const foo = \`foo \${bar}\`
         const type = {
@@ -476,7 +474,7 @@ describe("type schema converter", () => {
   });
 
   it("should handle index access type", () => {
-    const { type, declaration, context } = testType(`
+    const { declaration, context } = testType(`
         type Pairs<T> = {
           [TKey in keyof T]: {
             key: TKey;

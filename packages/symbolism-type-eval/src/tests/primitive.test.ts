@@ -24,7 +24,7 @@ function testType(source: string, name = "Type") {
 }
 
 function testTypeNode(typeSource: string) {
-  const { type, declaration, context } = testType(`
+  const { declaration, context } = testType(`
         type Type = ${typeSource};
       `);
 
@@ -38,7 +38,7 @@ function testTypeNode(typeSource: string) {
 describe("type schema converter", () => {
   describe("primitive", () => {
     it("should convert direct types to a schema", () => {
-      const { type, declaration, context } = testType(`
+      const { declaration, context } = testType(`
       enum Enum {
         a = "a",
         b = "b",
@@ -123,7 +123,7 @@ describe("type schema converter", () => {
     });
 
     it("should handle index access type", () => {
-      const { type, declaration, context } = testType(`
+      const { declaration, context } = testType(`
         type Pairs<T> = {
           [TKey in keyof T]: {
             key: TKey;

@@ -3,7 +3,6 @@ import { findIdentifiers } from "@symbolism/ts-utils";
 import { printSchema } from "../print/typescript";
 import { evaluateSchema } from "../schema";
 import { SchemaContext } from "../context";
-import { LogLevel, setLogLevel } from "@symbolism/utils";
 
 function testType(source: string, name = "Type") {
   const program = mockProgram({
@@ -208,7 +207,6 @@ describe("type schema converter", () => {
 
         function testNode(name: string) {
           const nodes = findIdentifiers(sourceFile, name);
-          const type = checker.getTypeAtLocation(nodes[0]);
           return printSchema(evaluateSchema(nodes[0], checker));
         }
       });

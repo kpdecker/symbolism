@@ -1,17 +1,10 @@
 import { mockProgram } from "@symbolism/test";
-import {
-  findIdentifiers,
-  findNodesInTree,
-  invariantNode,
-} from "@symbolism/ts-utils";
+import { findIdentifiers, findNodesInTree } from "@symbolism/ts-utils";
 import { printSchema } from "../print/typescript";
 import { SchemaContext } from "../context";
-import { getNodeSchema } from "../value-eval";
 import { evaluateSchema } from "../schema";
-import { LogLevel, setLogLevel } from "@symbolism/utils";
 import ts from "typescript";
 import invariant from "tiny-invariant";
-import { dumpNode } from "@symbolism/ts-debug";
 
 function testType(source: string, name = "Type") {
   const program = mockProgram({
@@ -362,7 +355,7 @@ describe("type schema converter", () => {
       `);
     });
     it("should evaluate jsx text", () => {
-      let jsxNodes = findNodesInTree(sourceFile, ts.isJsxText);
+      const jsxNodes = findNodesInTree(sourceFile, ts.isJsxText);
       let jsxSchema = evaluateSchema(jsxNodes[0], context.checker);
       expect(printSchema(jsxSchema)).toMatchInlineSnapshot(`
         "\\"\\\\n        food\\\\n        \\";
@@ -375,7 +368,7 @@ describe("type schema converter", () => {
       `);
     });
     it.skip("should evaluate jsx expressions", () => {
-      let jsxNodes = findNodesInTree(sourceFile, ts.isJsxExpression);
+      const jsxNodes = findNodesInTree(sourceFile, ts.isJsxExpression);
       let jsxSchema = evaluateSchema(jsxNodes[0], context.checker);
       expect(printSchema(jsxSchema)).toMatchInlineSnapshot(`
         "any;
@@ -654,7 +647,7 @@ describe("type schema converter", () => {
     });
 
     it("should evaluate jsx attributes", () => {
-      let jsxNodes = findNodesInTree(sourceFile, ts.isJsxAttributes);
+      const jsxNodes = findNodesInTree(sourceFile, ts.isJsxAttributes);
       let jsxSchema = evaluateSchema(jsxNodes[0], context.checker);
       expect(printSchema(jsxSchema)).toMatchInlineSnapshot(`
         "{};

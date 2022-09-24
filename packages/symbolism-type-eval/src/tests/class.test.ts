@@ -3,7 +3,6 @@ import { findIdentifiers, findNodesInTree } from "@symbolism/ts-utils";
 import { printSchema } from "../print/typescript";
 import { SchemaContext } from "../context";
 import ts from "typescript";
-import { getNodeSchema } from "../value-eval";
 import { evaluateSchema } from "../schema";
 
 function testType(source: string, name = "Type") {
@@ -27,7 +26,7 @@ function testType(source: string, name = "Type") {
 describe("type schema converter", () => {
   describe("classes", () => {
     it("should convert class schemas", () => {
-      const { type, context, sourceFile } = testType(`
+      const { context, sourceFile } = testType(`
         interface Foo { foo: string }
         class DeclaredClass implements Foo {
           foo: string;
@@ -175,7 +174,7 @@ describe("type schema converter", () => {
       `);
     });
     it("should convert enums", () => {
-      const { type, context, sourceFile } = testType(`
+      const { context, sourceFile } = testType(`
         enum Foo {
           a = 1,
           c = 3,

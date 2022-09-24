@@ -67,7 +67,6 @@ describe("type schema converter", () => {
 
         function testNode(name: string) {
           const nodes = findIdentifiers(sourceFile, name);
-          const type = checker.getTypeAtLocation(nodes[0]);
           return printSchema(evaluateSchema(nodes[0], checker));
         }
       });
@@ -307,7 +306,6 @@ describe("type schema converter", () => {
 
         function testNode(name: string) {
           const nodes = findIdentifiers(sourceFile, name);
-          const type = checker.getTypeAtLocation(nodes[0]);
           return printSchema(evaluateSchema(nodes[0], checker));
         }
       });
@@ -401,7 +399,6 @@ describe("type schema converter", () => {
 
       function testNode(name: string) {
         const nodes = findIdentifiers(sourceFile, name);
-        const type = checker.getTypeAtLocation(nodes[0]);
         return printSchema(evaluateSchema(nodes[0], checker));
       }
     });

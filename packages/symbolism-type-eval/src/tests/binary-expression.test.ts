@@ -25,7 +25,7 @@ function testType(source: string, name = "Type") {
 describe("type schema converter", () => {
   describe("binary expressions", () => {
     it("should narrow string binary operations", () => {
-      const { type, declaration, checker, sourceFile } = testType(`
+      const { checker, sourceFile } = testType(`
         type Source = {
           directUnion: 1 | 2 | 3;
         };
@@ -168,7 +168,6 @@ describe("type schema converter", () => {
 
       function testNode(name: string) {
         const nodes = findIdentifiers(sourceFile, name);
-        const type = checker.getTypeAtLocation(nodes[0]);
         return printSchema(evaluateSchema(nodes[0], checker));
       }
     });

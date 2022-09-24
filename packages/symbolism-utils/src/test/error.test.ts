@@ -2,8 +2,6 @@ import { mockProgram } from "@symbolism/test";
 import { findIdentifiers } from "@symbolism/ts-utils";
 import { NodeError } from "../error";
 
-const checker = {} as any;
-
 describe("NodeError", () => {
   it("should reuse NodeErrors", () => {
     const program = mockProgram({

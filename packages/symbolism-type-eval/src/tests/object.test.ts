@@ -367,7 +367,7 @@ describe("type schema converter", () => {
 
   describe("object access", () => {
     it("should handle object access", () => {
-      const { type, context, sourceFile } = testType(`
+      const { context, sourceFile } = testType(`
         type Source = {
           directUnion: 1 | 2 | 3 | 4;
         };
