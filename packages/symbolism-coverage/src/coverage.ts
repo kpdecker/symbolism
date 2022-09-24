@@ -16,18 +16,36 @@ type ExecutedCoverage = Record<
   }
 >;
 
+type FileCoverageData = {
+  path: string;
+  statementMap: Record<string, { start: LineAndColumn; end: LineAndColumn }>;
+  s: Record<string, number>;
+  branchMap: Record<
+    string,
+    {
+      line: number;
+      type: string;
+      locations: { start: LineAndColumn; end: LineAndColumn }[];
+    }
+  >;
+  b: Record<string, number[]>;
+  fnMap: Record<string, { name: string; line: number }>;
+};
+
 export function parseExecutedCoverage(jsonPath: string) {
-  const rawCoverageJson = JSON.parse(readFileSync(jsonPath, "utf8"));
+  const rawCoverageJson: Record<string, FileCoverageData> = JSON.parse(
+    readFileSync(jsonPath, "utf8")
+  );
   const coverageJson: ExecutedCoverage = {};
 
-  Object.entries<any>(rawCoverageJson).forEach(
+  Object.entries(rawCoverageJson).forEach(
     ([
       filePath,
       { statementMap, s: statementCoverage, branchMap, b: branchCoverage },
     ]) => {
-      const branchDeclarations = Object.values<any>(branchMap)
+      const branchDeclarations = Object.values(branchMap)
         .flatMap(({ locations }, id) => {
-          return locations.map((location: any, locationIndex: number) => ({
+          return locations.map((location, locationIndex: number) => ({
             ...parseCoverageLocation(location),
             count: branchCoverage[id][locationIndex] || 0,
           }));
@@ -35,7 +53,7 @@ export function parseExecutedCoverage(jsonPath: string) {
         .sort(reverseLocationPriority);
 
       coverageJson[filePath] = {
-        statements: Object.entries<any>(statementMap)
+        statements: Object.entries(statementMap)
           .map(([id, { start, end }]) => ({
             ...parseCoverageLocation({ start, end }),
             count: statementCoverage[id] || 0,
