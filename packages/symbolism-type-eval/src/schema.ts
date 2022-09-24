@@ -1,4 +1,5 @@
 import { TypeId } from "@symbolism/ts-utils";
+import { assertUnreachable } from "@symbolism/utils";
 import invariant from "tiny-invariant";
 import ts from "typescript";
 import { areSchemasEqual } from "./classify";
@@ -283,8 +284,8 @@ function filterDefs(schema: Schema) {
         return [schema.typeId];
 
       default:
-        const gottaCatchEmAll: never = schema;
-        throw new Error(`Unsupported schema kind ${(schema as any).kind}`);
+        // @ts-expect-error Logging unexpected data case
+        assertUnreachable(schema, `Unsupported schema kind ${schema.kind}`);
     }
   }
 
@@ -355,8 +356,8 @@ function filterDefs(schema: Schema) {
         return schema;
 
       default:
-        const gottaCatchEmAll: never = schema;
-        throw new Error(`Unsupported schema kind ${(schema as any).kind}`);
+        // @ts-expect-error Logging unexpected data case
+        assertUnreachable(schema, `Unsupported schema kind ${schema.kind}`);
     }
   }
 }

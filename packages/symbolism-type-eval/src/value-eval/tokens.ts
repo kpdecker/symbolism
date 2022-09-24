@@ -1,6 +1,4 @@
-import { getSymbolDeclaration } from "@symbolism/ts-utils";
 import ts from "typescript";
-import { getTypeSchema } from "../type-eval";
 import { noType, nodeEvalHandler, checkerEval } from "./handlers";
 
 export const tokenOperators = nodeEvalHandler(() => ({

@@ -1,4 +1,5 @@
 import { isNamedDeclaration } from "@symbolism/ts-utils";
+import { assertUnreachable } from "@symbolism/utils";
 import ts from "typescript";
 import { bindParameterDependency, findParameterDependency } from "../classify";
 import { SchemaContext } from "../context";
@@ -10,8 +11,6 @@ export function resolveParametersInSchema(
   parameterSchemas: Map<ts.Node, AnySchemaNode>,
   context: SchemaContext
 ): AnySchemaNode {
-  const { checker } = context;
-
   if (!schema || schema.kind === "literal") {
     return schema;
   }
@@ -122,8 +121,7 @@ export function resolveParametersInSchema(
     return schema;
   }
 
-  const gottaCatchEmAll: never = schema;
-  throw new Error("Not implemented");
+  assertUnreachable(schema);
 }
 
 export function getLocalSymbol(

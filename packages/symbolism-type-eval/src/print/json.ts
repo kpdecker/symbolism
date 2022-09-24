@@ -1,3 +1,4 @@
+import { assertUnreachable } from "@symbolism/utils";
 import { JsonObject } from "type-fest";
 import ts from "typescript";
 import { isNumericSchema } from "../classify";
@@ -110,7 +111,7 @@ export function schemaToJson(
         type: "error",
         message: JSON.stringify("error! " + schema.extra),
       };
-    case "union":
+    case "union": {
       const anyOf = schema.items.map(schemaToJson);
       const literals = anyOf.filter((item) => item?.const);
       if (literals.length === schema.items.length) {
@@ -122,6 +123,7 @@ export function schemaToJson(
       return {
         anyOf,
       };
+    }
     case "intersection":
       return {
         oneOf: schema.items.map(schemaToJson),
@@ -137,7 +139,7 @@ export function schemaToJson(
       };
 
     default:
-      const gottaCatchEmAll: never = schema;
-      throw new Error(`Unsupported schema kind ${(schema as any).kind}`);
+      // @ts-expect-error - Exhaustive switch
+      assertUnreachable(schema, `Unsupported schema kind ${schema.kind}`);
   }
 }

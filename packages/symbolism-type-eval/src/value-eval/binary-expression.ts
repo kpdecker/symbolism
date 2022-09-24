@@ -9,7 +9,7 @@ import { booleanPrimitiveSchema } from "../well-known-schemas";
 import { getNodeSchema } from ".";
 import { normalizeTemplateLiteralSchema } from "./string-template";
 import { createUnionKind, expandUnions } from "./union";
-import { dumpSchema } from "@symbolism/ts-debug";
+import { assertUnreachable } from "@symbolism/utils";
 
 export function convertBinaryExpression(
   node: ts.Node,
@@ -20,12 +20,12 @@ export function convertBinaryExpression(
   }
 
   const leftSchema = context.resolveSchema(
-    getNodeSchema({ context, node: node.left, decrementDepth: true })!
+    getNodeSchema({ context, node: node.left, decrementDepth: true })
   );
   invariant(leftSchema, "Expected left schema");
 
   const rightSchema = context.resolveSchema(
-    getNodeSchema({ context, node: node.right, decrementDepth: true })!
+    getNodeSchema({ context, node: node.right, decrementDepth: true })
   );
   invariant(rightSchema, "Expected right schema");
 
@@ -96,12 +96,14 @@ export function convertBinaryExpression(
       });
 
     default:
-      const defaultAssertion: never = operator;
-      /* istanbul ignore next */
-      throw new Error(`Unhandled operator: ${ts.SyntaxKind[operator]}`);
+      assertUnreachable(
+        operator,
+        `Unhandled operator: ${ts.SyntaxKind[operator]}`
+      );
   }
 
   function convertArithmeticOperation() {
+    invariant(leftSchema && rightSchema, "Expected left and right schemas");
     return evaluateBinaryExpressionSchema(
       leftSchema,
       rightSchema,
@@ -117,11 +119,13 @@ export function evaluateBinaryExpressionSchema(
   operatorKind: ts.BinaryOperator,
   context: SchemaContext
 ): AnySchemaNode {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let operator: (a: any, b: any) => any;
   switch (operatorKind) {
     case ts.SyntaxKind.PlusToken:
     case ts.SyntaxKind.PlusEqualsToken:
       operator = (a, b) => a + b;
+
       break;
 
     case ts.SyntaxKind.MinusToken:

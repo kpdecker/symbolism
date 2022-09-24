@@ -15,7 +15,11 @@ import {
   isThisTypeParameter,
   isTupleTypeReference,
 } from "@symbolism/ts-utils";
-import { logDebug, NodeError } from "@symbolism/utils";
+import {
+  assertUnreachable,
+  logDebug,
+  NodeError,
+} from "@symbolism/utils";
 import invariant from "tiny-invariant";
 import ts from "typescript";
 import { SchemaContext } from "../context";
@@ -532,8 +536,7 @@ export function mapString(
     };
   }
 
-  const gottaCatchEmAll: never = schema;
-  throw new Error("Not implemented");
+  assertUnreachable(schema);
 }
 
 export function createReferenceFromType(

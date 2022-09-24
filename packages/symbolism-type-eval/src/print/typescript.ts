@@ -1,4 +1,5 @@
 import { dumpSchema } from "@symbolism/ts-debug";
+import { assertUnreachable } from "@symbolism/utils";
 import { format } from "prettier";
 import ts from "typescript";
 import { canPrintInJs } from "../classify";
@@ -115,7 +116,7 @@ export function printSchemaNode(
           );
         })
         .join(", ")}]`;
-    case "object":
+    case "object": {
       const keys = Object.keys(schema.properties);
       if (keys.length === 1 && schema.abstractIndexKeys.length === 0) {
         return `({ ${JSON.stringify(keys[0])}: ${printSchemaNode(
@@ -152,11 +153,13 @@ export function printSchemaNode(
           .join("\n") +
         "})"
       );
-    case "function":
+    }
+    case "function": {
       const typeString = `((${schema.parameters
         .map(({ name, schema }) => `${name}: ${printSchemaNode(schema, "ts")}`)
         .join(", ")}) => ${printSchemaNode(schema.returnType, "ts")})`;
       return wrapTsType(typeString);
+    }
     case "binary-expression":
       return `\`${templateVar(
         schema.items[0],
@@ -180,7 +183,7 @@ export function printSchemaNode(
       // console.log(schema, new Error().stack);
       return JSON.stringify("error! " + schema.extra);
     case "union":
-    case "intersection":
+    case "intersection": {
       const separator = schema.kind === "union" ? " | " : " & ";
       return wrapTsType(
         `(${schema.items
@@ -188,6 +191,7 @@ export function printSchemaNode(
           .sort()
           .join(separator)})`
       );
+    }
     case "template-literal":
       return wrapTsType(
         `\`${schema.items
@@ -206,8 +210,8 @@ export function printSchemaNode(
       return schema.name;
 
     default:
-      const gottaCatchEmAll: never = schema;
-      throw new Error(`Unsupported schema kind ${(schema as any).kind}`);
+      // @ts-expect-error - exhaustive check
+      assertUnreachable(schema, `Unsupported schema kind ${schema.kind}`);
   }
 }
 

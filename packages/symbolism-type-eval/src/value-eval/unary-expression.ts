@@ -6,6 +6,7 @@ import { booleanPrimitiveSchema } from "../well-known-schemas";
 import { AnySchemaNode } from "../schema";
 import { createUnionKind } from "./union";
 import invariant from "tiny-invariant";
+import { assertUnreachable } from "@symbolism/utils";
 
 export const unaryExpressionOperators = nodeEvalHandler(() => ({
   [ts.SyntaxKind.PrefixUnaryExpression](node, context): AnySchemaNode {
@@ -20,11 +21,13 @@ export const unaryExpressionOperators = nodeEvalHandler(() => ({
   [ts.SyntaxKind.PostfixUnaryExpression](node, context): AnySchemaNode {
     invariantNode(node, context.checker, ts.isPostfixUnaryExpression);
 
-    return getNodeSchema({
+    const schema = getNodeSchema({
       context,
       node: node.operand,
       decrementDepth: true,
-    })!;
+    });
+    invariant(schema, "Expected operand to have a schema");
+    return schema;
   },
 }));
 
@@ -34,6 +37,7 @@ function evalUnaryOperator(
   contextNode: ts.Node
 ): AnySchemaNode {
   if (operandSchema.kind === "literal") {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const value: any = operandSchema.value;
     switch (operator) {
       case ts.SyntaxKind.PlusToken:
@@ -67,7 +71,7 @@ function evalUnaryOperator(
           value: 1 - parseInt(value, 10),
         };
       default:
-        const gottaCatchEmAll: never = operator;
+        assertUnreachable(operator);
     }
   } else if (operandSchema?.kind === "union") {
     return createUnionKind(

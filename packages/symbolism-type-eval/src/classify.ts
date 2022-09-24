@@ -1,6 +1,10 @@
 import { dumpNode, dumpSchema } from "@symbolism/ts-debug";
 import { getSymbolDeclaration, isNamedDeclaration } from "@symbolism/ts-utils";
-import { logDebug, removeDuplicates } from "@symbolism/utils";
+import {
+  assertUnreachable,
+  logDebug,
+  removeDuplicates,
+} from "@symbolism/utils";
 import invariant from "tiny-invariant";
 import ts, { findAncestor } from "typescript";
 import { SchemaContext } from "./context";
@@ -13,7 +17,7 @@ export class SchemaError extends Error {
     message: string,
     schema: AnySchemaNode | AnySchemaNode[] | undefined
   ) {
-    let kind = Array.isArray(schema) ? "array" : schema?.kind;
+    const kind = Array.isArray(schema) ? "array" : schema?.kind;
     super(`${message} ${kind}
 
 GOT: ${dumpSchema(schema)}
@@ -76,8 +80,8 @@ export function isConcreteSchema(type: AnySchemaNode | undefined): boolean {
     return true;
   }
 
-  const gottaCatchEmAll: never = type;
-  throw new Error("Not implemented");
+  // @ts-expect-error Exhaustive switch
+  assertUnreachable(type, `Unsupported schema kind ${type.kind}`);
 }
 
 export function findParameterDependency(
@@ -260,8 +264,8 @@ export function unboundInputs(
     return [];
   }
 
-  const gottaCatchEmAll: never = schema;
-  throw new Error("Not implemented");
+  // @ts-expect-error Exhaustive switch
+  assertUnreachable(type, `Unsupported schema kind ${type.kind}`);
 }
 
 /**
@@ -318,8 +322,8 @@ export function canPrintInJs(type: AnySchemaNode | undefined): boolean {
     return false;
   }
 
-  const gottaCatchEmAll: never = type;
-  throw new Error("Not implemented");
+  // @ts-expect-error Exhaustive switch
+  assertUnreachable(type, `Unsupported schema kind ${type.kind}`);
 }
 
 export function isLiteralUnion(type: AnySchemaNode): type is UnionSchema {
@@ -400,7 +404,7 @@ export function areSchemasEqual(
     return (
       b.kind === "literal" &&
       (a.value === b.value ||
-        (Number.isNaN(a.value as any) && Number.isNaN(b.value as any)))
+        (Number.isNaN(a.value as unknown) && Number.isNaN(b.value as unknown)))
     );
   }
 
@@ -465,6 +469,6 @@ export function areSchemasEqual(
     );
   }
 
-  const gottaCatchEmAll: never = a;
-  throw new Error("Not implemented");
+  // @ts-expect-error Exhaustive switch
+  assertUnreachable(a, `Unsupported schema kind ${a.kind}`);
 }
