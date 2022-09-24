@@ -67,9 +67,11 @@ export function isAssignmentExpression(
     case ts.SyntaxKind.EqualsToken:
       return true;
 
-    default:
+    default: {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const defaultAssertion: never = operator;
       return false;
+    }
   }
 }
 
