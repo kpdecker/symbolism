@@ -6,12 +6,16 @@ import { defineSymbol } from "../index";
 const program = mockProgram({
   "source.ts": `
     export const stringValue = "foo";
-    export function functionValue() {
+    export function functionValue(): string {
     }
+
+    export default functionValue();
   `,
   "test.tsx": `
     import { stringValue, functionValue } from "source";
     import * as Source from "source";
+
+    import def from "source";
 
     stringValue;
     functionValue;
@@ -94,7 +98,7 @@ describe("imports", () => {
             "path": "functionValue",
           },
         ],
-        "type": "() => void",
+        "type": "() => string",
       }
     `);
     expect(
@@ -109,7 +113,7 @@ describe("imports", () => {
             "path": "functionValue",
           },
         ],
-        "type": "() => void",
+        "type": "() => string",
       }
     `);
   });
@@ -144,7 +148,26 @@ describe("imports", () => {
             "path": "functionValue",
           },
         ],
-        "type": "() => void",
+        "type": "() => string",
+      }
+    `);
+  });
+
+  it("should resolve named imports", () => {
+    const defNodes = lookupNamedToken("def");
+
+    expect(dumpDefinition(defineSymbol(defNodes[0], checker), checker))
+      .toMatchInlineSnapshot(`
+      Object {
+        "symbol": Array [
+          Object {
+            "kind": "ExportAssignment",
+            "location": "source.ts:6:5",
+            "name": "export default functionValue();",
+            "path": "",
+          },
+        ],
+        "type": "string",
       }
     `);
   });

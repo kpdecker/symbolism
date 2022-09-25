@@ -6,14 +6,36 @@ import {
 import { logWarn } from "@symbolism/utils";
 import invariant from "tiny-invariant";
 import ts, { findAncestor } from "typescript";
+import { defineSymbol } from ".";
 import { deferred, directTypeAndSymbol, nodeOperators } from "./utils";
 
 export const importOperators = nodeOperators({
   [ts.SyntaxKind.ImportType]: directTypeAndSymbol,
   [ts.SyntaxKind.NamespaceExportDeclaration]: directTypeAndSymbol,
   [ts.SyntaxKind.ImportEqualsDeclaration]: directTypeAndSymbol,
-  [ts.SyntaxKind.ImportDeclaration]: directTypeAndSymbol,
-  [ts.SyntaxKind.ImportClause]: directTypeAndSymbol,
+  [ts.SyntaxKind.ImportDeclaration](node, checker) {
+    invariantNode(node, checker, ts.isImportDeclaration);
+    const { moduleSpecifier } = node;
+
+    const moduleSymbol = resolveExternalModuleName(checker, moduleSpecifier);
+    if (!moduleSymbol) {
+      return directTypeAndSymbol(node, checker);
+    }
+
+    const moduleDeclaration = getSymbolDeclaration(moduleSymbol);
+    invariant(moduleDeclaration);
+
+    return {
+      symbol: moduleSymbol,
+      declaration: moduleDeclaration,
+      getType: () =>
+        checker.getTypeOfSymbolAtLocation(moduleSymbol, moduleDeclaration),
+    };
+  },
+  [ts.SyntaxKind.ImportClause](node, checker) {
+    invariantNode(node, checker, ts.isImportClause);
+    return defineSymbol(node.parent, checker);
+  },
   [ts.SyntaxKind.NamespaceImport]: directTypeAndSymbol,
   [ts.SyntaxKind.NamedImports]: directTypeAndSymbol,
   [ts.SyntaxKind.ImportSpecifier](node, checker) {

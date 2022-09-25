@@ -55,7 +55,7 @@ const handlePropertyAccess: PathHandler = ({
     }
   }
 
-  return getParentPath() + "." + resolvePropertyAccessDownward(node);
+  return resolvePropertyAccessDownward(node);
 };
 
 const nodePathHandlers: Record<ts.SyntaxKind, PathHandler> = {
@@ -208,7 +208,10 @@ const nodePathHandlers: Record<ts.SyntaxKind, PathHandler> = {
   [ts.SyntaxKind.NamespaceExportDeclaration]: nameWithParent,
   [ts.SyntaxKind.ImportEqualsDeclaration]: nameWithParent,
   [ts.SyntaxKind.ImportDeclaration]: skipNode,
-  [ts.SyntaxKind.ImportClause]: skipNode,
+  [ts.SyntaxKind.ImportClause]: ({ node, checker }) => {
+    invariantNode(node, checker, ts.isImportClause);
+    return node.name?.getText() ?? "";
+  },
   [ts.SyntaxKind.NamespaceImport]: nameWithParent,
   [ts.SyntaxKind.NamedImports]: skipNode,
   [ts.SyntaxKind.ImportSpecifier]: nameWithParent,

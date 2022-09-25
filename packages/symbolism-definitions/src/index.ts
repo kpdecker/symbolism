@@ -294,6 +294,33 @@ function defineIdentifier(
       }
     }
 
+    // Default imports
+    if (ts.isImportClause(node.parent) && node.parent.name === node) {
+      const parentDefinition = defineSymbol(node.parent, checker, options);
+      if (parentDefinition) {
+        const defaultSymbol = parentDefinition
+          .getType()
+          ?.getProperty("default");
+        const defaultDeclaration = getSymbolDeclaration(defaultSymbol);
+        if (defaultDeclaration) {
+          return followSymbol(
+            {
+              symbol: defaultSymbol,
+              declaration: defaultDeclaration,
+              getType: () =>
+                checker.getTypeOfSymbolAtLocation(
+                  // @ts-expect-error TS is dumb
+                  defaultSymbol,
+                  defaultDeclaration
+                ),
+            },
+            checker,
+            options
+          );
+        }
+      }
+    }
+
     // Identifier pass through
     if (
       (isNamedDeclaration(node.parent) && node.parent.name === node) ||
