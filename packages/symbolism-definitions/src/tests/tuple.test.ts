@@ -40,7 +40,14 @@ describe("infer tuple types", () => {
     expect(dumpDefinition(defineSymbol(destructureANodes[0], checker), checker))
       .toMatchInlineSnapshot(`
       Object {
-        "symbol": undefined,
+        "symbol": Array [
+          Object {
+            "kind": "BindingElement",
+            "location": "test.tsx:12:7",
+            "name": "destructureA",
+            "path": "destructureA",
+          },
+        ],
         "type": "string",
       }
     `);
@@ -91,7 +98,14 @@ describe("infer tuple types", () => {
     expect(dumpDefinition(defineSymbol(destructureCNodes[0], checker), checker))
       .toMatchInlineSnapshot(`
       Object {
-        "symbol": undefined,
+        "symbol": Array [
+          Object {
+            "kind": "BindingElement",
+            "location": "test.tsx:14:7",
+            "name": "destructureC",
+            "path": "destructureC",
+          },
+        ],
         "type": "string",
       }
     `);
@@ -122,7 +136,14 @@ describe("infer tuple types", () => {
     expect(dumpDefinition(defineSymbol(paramANodes[0], checker), checker))
       .toMatchInlineSnapshot(`
       Object {
-        "symbol": undefined,
+        "symbol": Array [
+          Object {
+            "kind": "BindingElement",
+            "location": "test.tsx:7:27",
+            "name": "paramA",
+            "path": "destructure.paramA",
+          },
+        ],
         "type": "string",
       }
     `);
@@ -173,7 +194,14 @@ describe("infer tuple types", () => {
     expect(dumpDefinition(defineSymbol(paramCNodes[0], checker), checker))
       .toMatchInlineSnapshot(`
       Object {
-        "symbol": undefined,
+        "symbol": Array [
+          Object {
+            "kind": "BindingElement",
+            "location": "test.tsx:7:43",
+            "name": "paramC",
+            "path": "destructure.paramC",
+          },
+        ],
         "type": "string",
       }
     `);

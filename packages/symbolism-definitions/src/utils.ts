@@ -12,7 +12,7 @@ import {
 export type DefinitionSymbol = {
   symbol: ts.Symbol | undefined;
   declaration: ts.Declaration | undefined;
-  type: ts.Type | undefined;
+  getType: () => ts.Type | undefined;
 };
 export type DefinitionOptions = { chooseLocal?: boolean };
 export type DefinitionOperation = (
@@ -27,6 +27,19 @@ export function nodeOperators<
   return cfg;
 }
 
+export function deferred<T>(cb: () => T) {
+  let cacheValue: T | undefined = undefined;
+  let valueSet = false;
+
+  return () => {
+    if (!valueSet) {
+      cacheValue = cb();
+      valueSet = true;
+    }
+    return cacheValue;
+  };
+}
+
 // Infers definition from where the symbol is defined vs. explicit types.
 // I.e. for jsx attributes, it resolves the props for the parent element.
 export function contextualTypeAndSymbol(
@@ -39,7 +52,7 @@ export function contextualTypeAndSymbol(
     return getArrayType({
       symbol: contextType.symbol,
       declaration: getSymbolDeclaration(contextType.symbol),
-      type: contextType,
+      getType: () => contextType,
     });
   }
   return directTypeAndSymbol(node, checker);
@@ -49,26 +62,34 @@ export function directTypeAndSymbol(
   node: ts.Node,
   checker: ts.TypeChecker
 ): DefinitionSymbol {
-  const symbol = checker.getSymbolAtLocation(node);
-  let type: ts.Type;
+  let symbol = checker.getSymbolAtLocation(node);
 
-  if (symbol && !ts.isGetAccessor(node)) {
-    type = checker.getTypeOfSymbolAtLocation(symbol, node);
-  } else {
-    type = checker.getTypeAtLocation(node);
-  }
+  const getType = deferred(() => {
+    let type: ts.Type;
 
-  if (isErrorType(type)) {
-    // If we errored while attempting to resolve the type from the node
-    // (have seen this happen with symbols pointing to InterfaceDeclarations),
-    // we can try to resolve the type from the symbol.
-    type = checker.getTypeAtLocation(node);
+    if (symbol && !ts.isGetAccessor(node)) {
+      type = checker.getTypeOfSymbolAtLocation(symbol, node);
+    } else {
+      type = checker.getTypeAtLocation(node);
+    }
+
+    if (isErrorType(type)) {
+      // If we errored while attempting to resolve the type from the node
+      // (have seen this happen with symbols pointing to InterfaceDeclarations),
+      // we can try to resolve the type from the symbol.
+      type = checker.getTypeAtLocation(node);
+    }
+    return type;
+  });
+
+  if (!symbol) {
+    symbol = getType()?.symbol;
   }
 
   return {
-    symbol: symbol || type.symbol,
-    declaration: getSymbolDeclaration(symbol || type.symbol),
-    type,
+    symbol: symbol,
+    declaration: getSymbolDeclaration(symbol),
+    getType,
   };
 }
 
@@ -93,35 +114,36 @@ export function getPropertySymbol(
     return undefined;
   }
 
-  let propertyType: ts.Type | undefined = undefined;
-  if (symbol) {
-    const declaration = symbol.declarations?.[0];
-    if (ts.isBindingElement(node) && declaration) {
-      propertyType = checker.getTypeAtLocation(declaration);
-    } else {
-      propertyType = checker.getTypeOfSymbolAtLocation(symbol, node);
+  const getType = deferred(() => {
+    if (symbol) {
+      const declaration = symbol.declarations?.[0];
+      if (ts.isBindingElement(node) && declaration) {
+        return checker.getTypeAtLocation(declaration);
+      } else {
+        return checker.getTypeOfSymbolAtLocation(symbol, node);
+      }
     }
-  }
+  });
 
   // Two distinct objects here lets us track both the property in code and
   // the ultimate type that it resolves to.
   return {
     symbol,
     declaration: getSymbolDeclaration(symbol),
-    type: propertyType,
+    getType,
   };
 }
 
-export function getArrayType(inferred: DefinitionSymbol) {
-  const { type, symbol } = inferred;
+export function getArrayType(inferred: DefinitionSymbol): DefinitionSymbol {
+  const { getType, symbol } = inferred;
 
   // If our parent is an array, we need to get the element type
-  const numberIndexType = type?.getNumberIndexType();
+  const numberIndexType = getType?.()?.getNumberIndexType();
   if (symbol && isArraySymbol(symbol) && numberIndexType) {
     return {
       symbol: numberIndexType?.symbol || symbol,
       declaration: getSymbolDeclaration(numberIndexType?.symbol || symbol),
-      type: numberIndexType,
+      getType: () => numberIndexType,
     };
   }
 

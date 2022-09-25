@@ -6,7 +6,7 @@ import {
 import { logWarn } from "@symbolism/utils";
 import invariant from "tiny-invariant";
 import ts, { findAncestor } from "typescript";
-import { directTypeAndSymbol, nodeOperators } from "./utils";
+import { deferred, directTypeAndSymbol, nodeOperators } from "./utils";
 
 export const importOperators = nodeOperators({
   [ts.SyntaxKind.ImportType]: directTypeAndSymbol,
@@ -39,9 +39,9 @@ export const importOperators = nodeOperators({
     const memberDeclaration = getSymbolDeclaration(member);
     if (memberDeclaration) {
       return {
-        type: checker.getTypeAtLocation(memberDeclaration),
         symbol: member,
         declaration: memberDeclaration,
+        getType: deferred(() => checker.getTypeAtLocation(memberDeclaration)),
       };
     } else {
       logWarn(`Could not find member ${name} in ${externalModule.name}`);

@@ -48,7 +48,7 @@ export function dumpDefinition(
     return inferred;
   }
   const symbol = dumpSymbol(inferred.symbol, checker);
-  const type = inferred.type;
+  const type = inferred.getType();
   return {
     type: type && checker.typeToString(type),
     symbol: symbol?.declaration,

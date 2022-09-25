@@ -25,7 +25,7 @@ export const classOperators = nodeOperators({
       return {
         symbol: thisType.symbol,
         declaration: getSymbolDeclaration(thisType.symbol),
-        type: thisType,
+        getType: () => thisType,
       };
     }
 

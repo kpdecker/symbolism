@@ -115,7 +115,7 @@ const nodePathHandlers: Record<ts.SyntaxKind, NodeEvalHandler> = {
     const identifierDefinition = defineSymbol(node, checker, {
       chooseLocal: !!context.options.lateBindParameters,
     });
-    const identifierType = identifierDefinition?.type;
+    const identifierType = identifierDefinition?.getType();
 
     if (isIntrinsicType(identifierType)) {
       if (assertExists(identifierType?.flags) & ts.TypeFlags.Undefined) {
@@ -164,7 +164,7 @@ const nodePathHandlers: Record<ts.SyntaxKind, NodeEvalHandler> = {
 
     // We have a type, but no declaration. This is probably an index signature.
     const checkerType =
-      identifierDefinition?.type || checker.getTypeAtLocation(node);
+      identifierDefinition?.getType() || checker.getTypeAtLocation(node);
     return getTypeSchema({
       type: checkerType,
       node: node,
@@ -333,10 +333,10 @@ const nodePathHandlers: Record<ts.SyntaxKind, NodeEvalHandler> = {
 
     // If we have an alias symbol, resolve the type from that as it has type
     // parameters evaluated.
-    if (typeDefinition?.type?.aliasSymbol) {
+    if (typeDefinition?.getType()?.aliasSymbol) {
       return getTypeSchema({
         context,
-        type: typeDefinition.type,
+        type: assertExists(typeDefinition.getType()),
         node: typeDeclaration,
         decrementDepth: false,
       });

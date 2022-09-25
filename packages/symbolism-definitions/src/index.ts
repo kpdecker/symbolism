@@ -154,7 +154,7 @@ const nodeHandlers: Record<ts.SyntaxKind, DefinitionOperation> = {
   [ts.SyntaxKind.EnumMember](node, checker, options) {
     invariantNode(node, checker, ts.isEnumMember);
     const parentDefinition = defineSymbol(node.parent, checker, options);
-    const type = parentDefinition?.type;
+    const type = parentDefinition?.getType();
     if (!type) {
       return directTypeAndSymbol(node.name, checker);
     }
@@ -276,7 +276,7 @@ function defineIdentifier(
         ts.isNewExpression(node.parent))
     ) {
       const contextSymbol = contextualTypeAndSymbol(node, checker);
-      const contextType = contextSymbol?.type;
+      const contextType = contextSymbol?.getType();
       if (
         contextType &&
         !(contextType?.getFlags() & ts.TypeFlags.Any) &&
@@ -300,7 +300,9 @@ function defineIdentifier(
       (isAssignmentExpression(node.parent) && node.parent.left === node)
     ) {
       const parentDefinition = defineSymbol(node.parent, checker, options);
-      if (parentDefinition) {
+
+      // Declarations can be missing when imp
+      if (parentDefinition && parentDefinition.declaration) {
         return parentDefinition;
       }
     }
@@ -321,7 +323,7 @@ function defineProperties(
 ): DefinitionSymbol | null | undefined {
   if (ts.isPropertyAssignment(node) || ts.isShorthandPropertyAssignment(node)) {
     const objectDefinition = defineSymbol(node.parent, checker, options);
-    const objectType = objectDefinition?.type;
+    const objectType = objectDefinition?.getType();
     if (!objectType) {
       return;
     }
@@ -347,7 +349,8 @@ function defineProperties(
           {
             symbol: shorthandSymbol,
             declaration: getSymbolDeclaration(shorthandSymbol),
-            type: checker.getTypeOfSymbolAtLocation(shorthandSymbol, node),
+            getType: () =>
+              checker.getTypeOfSymbolAtLocation(shorthandSymbol, node),
           },
           checker,
           options
@@ -404,15 +407,15 @@ function defineBindingElement(
       : (node.propertyName || node.name).getText();
 
     // This supports tuple types. Unclear on others
-    const bindingPatternType = bindingPatternDefinition?.type;
+    const bindingPatternType = bindingPatternDefinition?.getType();
     if (bindingPatternType && isTypeReference(bindingPatternType)) {
       const typeArguments = checker.getTypeArguments(bindingPatternType);
       const typeArgument = typeArguments[+propertyName] || typeArguments[0];
       if (typeArgument && !(typeArgument.getFlags() & ts.TypeFlags.Any)) {
         return {
-          type: typeArgument,
           symbol: typeArgument.symbol,
           declaration: getSymbolDeclaration(typeArgument.symbol),
+          getType: () => typeArgument,
         };
       }
     }
@@ -462,9 +465,9 @@ function defineTaggedTemplate(node: ts.Node, checker: ts.TypeChecker) {
       const returnType = signature.getReturnType();
       if (returnType) {
         return {
-          type: returnType,
           symbol: returnType.symbol,
           declaration: getSymbolDeclaration(returnType.symbol),
+          getType: () => returnType,
         };
       }
     }

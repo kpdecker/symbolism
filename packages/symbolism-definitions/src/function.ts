@@ -50,9 +50,9 @@ function defineCallReturn(node: ts.Node, checker: ts.TypeChecker) {
       const returnType = signature.getReturnType();
       if (returnType) {
         return {
-          type: returnType,
           symbol: returnType.symbol,
           declaration: getSymbolDeclaration(returnType.symbol),
+          getType: () => returnType,
         };
       }
     }

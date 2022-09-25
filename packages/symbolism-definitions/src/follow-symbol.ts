@@ -8,7 +8,7 @@ export function followSymbol(
   definition: DefinitionSymbol | undefined | null,
   checker: ts.TypeChecker,
   options: DefinitionOptions
-) {
+): DefinitionSymbol | undefined | null {
   const { symbol } = definition || {};
   if (!symbol || !definition || options.chooseLocal) {
     return definition;
@@ -24,7 +24,7 @@ export function followSymbol(
     return {
       symbol: symbolTarget,
       declaration: targetDeclaration,
-      type: definition.type,
+      getType: definition.getType,
     };
   }
 
@@ -35,12 +35,12 @@ export function followSymbol(
     if (
       // Check that we have a fully resolved definition
       followedDefinition?.symbol &&
-      followedDefinition.type
+      followedDefinition.getType()
     ) {
       return {
         symbol: followedDefinition.symbol,
         declaration: getSymbolDeclaration(followedDefinition.symbol),
-        type: definition.type,
+        getType: definition.getType,
       };
     }
   }
