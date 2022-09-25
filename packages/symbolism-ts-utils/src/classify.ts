@@ -12,6 +12,8 @@ export function invariantNode<T extends ts.Node>(
   matcher?: (node: ts.Node) => node is T
 ): asserts node is T {
   if (!matcher || !matcher(node)) {
+    // eslint-disable-next-line no-debugger
+    debugger;
     throw new NodeError(
       `Unexpected node type: ${ts.SyntaxKind[node.kind]}`,
       node,
