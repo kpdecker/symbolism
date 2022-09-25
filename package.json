@@ -12,6 +12,7 @@
     "clean": "rm -rf packages/*/dist",
     "build": "./scripts/build.sh",
     "watch": "./scripts/build.sh watch",
+    "yalc:push": "for x in packages/*; do pushd -q $x; yalc push; popd -q; done",
     "changeset": "changeset",
     "version-packages": "yarn test & yarn lint && changeset version",
     "release": "yarn build && changeset publish"
