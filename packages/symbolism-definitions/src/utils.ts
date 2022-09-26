@@ -31,7 +31,7 @@ export function deferred<T>(cb: () => T) {
   let cacheValue: T | undefined = undefined;
   let valueSet = false;
 
-  return () => {
+  return function deferredWorker() {
     if (!valueSet) {
       cacheValue = cb();
       valueSet = true;

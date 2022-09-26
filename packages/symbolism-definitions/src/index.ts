@@ -14,6 +14,7 @@ import {
   getArrayType,
   DefinitionOptions,
   DefinitionSymbol,
+  deferred,
 } from "./utils";
 import { followSymbol } from "./follow-symbol";
 import {
@@ -307,12 +308,13 @@ function defineIdentifier(
             {
               symbol: defaultSymbol,
               declaration: defaultDeclaration,
-              getType: () =>
+              getType: deferred(() =>
                 checker.getTypeOfSymbolAtLocation(
                   // @ts-expect-error TS is dumb
                   defaultSymbol,
                   defaultDeclaration
-                ),
+                )
+              ),
             },
             checker,
             options
@@ -376,8 +378,9 @@ function defineProperties(
           {
             symbol: shorthandSymbol,
             declaration: getSymbolDeclaration(shorthandSymbol),
-            getType: () =>
-              checker.getTypeOfSymbolAtLocation(shorthandSymbol, node),
+            getType: deferred(() =>
+              checker.getTypeOfSymbolAtLocation(shorthandSymbol, node)
+            ),
           },
           checker,
           options

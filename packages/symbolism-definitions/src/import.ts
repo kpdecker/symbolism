@@ -28,8 +28,9 @@ export const importOperators = nodeOperators({
     return {
       symbol: moduleSymbol,
       declaration: moduleDeclaration,
-      getType: () =>
-        checker.getTypeOfSymbolAtLocation(moduleSymbol, moduleDeclaration),
+      getType: deferred(() =>
+        checker.getTypeOfSymbolAtLocation(moduleSymbol, moduleDeclaration)
+      ),
     };
   },
   [ts.SyntaxKind.ImportClause](node, checker) {
