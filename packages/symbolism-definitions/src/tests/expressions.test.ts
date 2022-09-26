@@ -1,5 +1,6 @@
 import { dumpDefinition } from "@symbolism/ts-debug";
 import { findIdentifiers, findNodeInTree } from "@symbolism/ts-utils";
+import { assertExists } from "@symbolism/utils";
 import ts from "typescript";
 import { mockProgram, testExpression, testStatement } from "../../test/utils";
 import { defineSymbol } from "../index";
@@ -123,6 +124,30 @@ describe("infer expressions", () => {
         "type": "boolean",
       }
     `);
+  });
+
+  it("should handle named IIFE", () => {
+    const program = mockProgram({
+      "test.ts": "(function foo() {})();",
+    });
+    const checker = program.getTypeChecker();
+    const sourceFile = assertExists(program.getSourceFile("test.ts"));
+    const fooNodes = findIdentifiers(sourceFile, "foo");
+
+    expect(dumpDefinition(defineSymbol(fooNodes[0], checker), checker))
+      .toMatchInlineSnapshot(`
+        Object {
+          "symbol": Array [
+            Object {
+              "kind": "FunctionExpression",
+              "location": "test.ts:1:2",
+              "name": "function foo() {}",
+              "path": "",
+            },
+          ],
+          "type": "() => void",
+        }
+      `);
   });
 
   it("should handle postfix expression", () => {

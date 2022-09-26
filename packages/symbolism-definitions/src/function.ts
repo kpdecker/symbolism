@@ -12,6 +12,10 @@ export const functionOperators = nodeOperators({
   [ts.SyntaxKind.NewExpression]: defineCallReturn,
 
   [ts.SyntaxKind.FunctionExpression](node, checker, options) {
+    invariantNode(node, checker, ts.isFunctionExpression);
+    if (node.name) {
+      return directTypeAndSymbol(node.name, checker);
+    }
     return defineSymbol(node.parent, checker, options);
   },
   [ts.SyntaxKind.FunctionDeclaration]: directTypeAndSymbol,
