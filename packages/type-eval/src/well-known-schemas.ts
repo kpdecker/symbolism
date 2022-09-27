@@ -53,6 +53,11 @@ export const wellKnownReferences = [
   "Promise",
   "WeakMap",
   "WeakSet",
+
+  // Disable window and document for now. Inspection of these types has significant
+  // overhead and it's assumed that schema documentation needs will be minimal for these.
+  "Window",
+  "Document",
 ];
 
 export const baseDefs: [TypeId, AnySchemaNode][] = [
