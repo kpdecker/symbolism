@@ -7,26 +7,10 @@ npm install -g @symbolism/cli
 symbolism --help
 ```
 
-## Code use test coverage
+## Function Call Coverage Report
 
-Ensure that critical code in your project has test coverage based on what is is rather than where it is. Test all of your analytics calls, critical API usage, etc. without resorting to requiring 100% coverage.
+Assert that the use of a function is tested in addition to the function itself. See [coverage](./docs/coverage.md).
 
-```console
-symbolism coverage
-```
-
-Output for [`defineSymbol`](https://github.com/kpdecker/symbolism/blob/cdaca7281de99bd64ab66ee96cbde632695a1263/packages/symbolism-definitions/src/index.ts#L239).
-
-```shell
-defineSymbol: 85.19% covered (23/27)
-  Missing:
-    defineSymbol: ./packages/symbolism-definitions/src/class.ts:33:14
-    defineSymbol: ./packages/symbolism-definitions/src/index.ts:166:12
-    defineSymbol: ./packages/symbolism-definitions/src/jsx.ts:17:12
-    defineSymbol: ./packages/symbolism-definitions/src/jsx.ts:23:12
-```
-
-See config section below for setup details.
 
 ## Static schema extraction
 
@@ -38,7 +22,7 @@ symbolism dumpSchema ./packages/symbolism-test/src/dump-symbol.ts Schema
 ```
 
 Output:
-```shell
+```ts
 {
   bar: "bar" | "bat";
   merged: number;
@@ -47,20 +31,27 @@ Output:
 
 For a machine JSON Schema readable format, use the `--json` flag.
 
-## Config
 
-WIP
+## Symbol lookup
 
-```json
-{
-  "tokens": [
-    "function-call",
-    "function-call-with-args",
-    { "name": "myOtherFunction", "min": 0.9 }
-  ],
-  "min": 1
-}
+Lookup the definition of a symbol in your project. This command is useful when setting up the configuration for our coverage and eslint tools.
+
+```console
+defineSymbol ./packages/symbolism-test/src/dump-symbol.ts 9 20
 ```
 
-- `tokens`: A list of tokens to assert coverage for. Objects may be used to override the default config for those tokens. Any top-level config value may be set here.
-- `min`: \[0-1\] The minimum percentage of token references required for the assertion to pass.
+Output:
+
+```js
+{
+  type: 'string',
+  symbol: [
+    {
+      kind: 'PropertySignature',
+      name: 'search: string;',
+      path: 'Location.search',
+      location: 'node_modules/typescript/lib/lib.dom.d.ts:9069:5'
+    }
+  ]
+}
+```

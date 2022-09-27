@@ -5,3 +5,5 @@ declare const value: "bat" | typeof foo;
 export interface Schema {
   [foo]: typeof value;
 }
+
+window.location.search;
