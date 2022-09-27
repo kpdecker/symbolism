@@ -46,7 +46,7 @@ location.search;
 Array of disallowed symbols. These can be specified as a string, `symbolPath`, or an object. If an object is specified, it must have a `symbolPath` property, and may have a `fileName` property.
 
 
-`symbolPath` This path of the symbol that is disallowed. This is the value that is reported by the [defineSymbol](../../../symbolism-cli/README.md#definesymbol) CLI command.
+`symbolPath` This path of the symbol that is disallowed. This is the value that is reported by the [defineSymbol](../../../cli/README.md#definesymbol) CLI command.
 
 Since symbol paths are not unique, the `fileName` property is required to disambiguate symbols that share a path. This path is relative to the root of the project for local source and to node_modules for imported modules.
 

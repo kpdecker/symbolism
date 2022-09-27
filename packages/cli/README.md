@@ -14,7 +14,7 @@ symbolism --help
 Document all of the inputs to a function. Evaluates the function call hierarchy and resolves all of the static arguments.
 
 ```console 
-symbolism callInputs ./packages/symbolism-test/src/dump-symbol.ts Schema
+symbolism callInputs ./packages/test/src/dump-symbol.ts Schema
 ```
 
 ### Code use test coverage
@@ -25,15 +25,15 @@ Ensure that critical code in your project has test coverage based on what is is 
 symbolism coverage
 ```
 
-Output for [`defineSymbol`](https://github.com/kpdecker/symbolism/blob/cdaca7281de99bd64ab66ee96cbde632695a1263/packages/symbolism-definitions/src/index.ts#L239).
+Output for [`defineSymbol`](https://github.com/kpdecker/symbolism/blob/cdaca7281de99bd64ab66ee96cbde632695a1263/packages/definitions/src/index.ts#L239).
 
 ```shell
 defineSymbol: 85.19% covered (23/27)
   Missing:
-    defineSymbol: ./packages/symbolism-definitions/src/class.ts:33:14
-    defineSymbol: ./packages/symbolism-definitions/src/index.ts:166:12
-    defineSymbol: ./packages/symbolism-definitions/src/jsx.ts:17:12
-    defineSymbol: ./packages/symbolism-definitions/src/jsx.ts:23:12
+    defineSymbol: ./packages/definitions/src/class.ts:33:14
+    defineSymbol: ./packages/definitions/src/index.ts:166:12
+    defineSymbol: ./packages/definitions/src/jsx.ts:17:12
+    defineSymbol: ./packages/definitions/src/jsx.ts:23:12
 ```
 
 See config section below for setup details.
@@ -44,7 +44,7 @@ Document the schema of your typescript data types. Calculates the final schema f
 
 
 ```console
-symbolism dumpSchema ./packages/symbolism-test/src/dump-symbol.ts Schema
+symbolism dumpSchema ./packages/test/src/dump-symbol.ts Schema
 ```
 
 Output:

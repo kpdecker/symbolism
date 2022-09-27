@@ -7,15 +7,15 @@ Ensure that critical code in your project has test coverage based on what is is 
 symbolism coverage
 ```
 
-Output for [`defineSymbol`](https://github.com/kpdecker/symbolism/blob/cdaca7281de99bd64ab66ee96cbde632695a1263/packages/symbolism-definitions/src/index.ts#L239).
+Output for [`defineSymbol`](https://github.com/kpdecker/symbolism/blob/cdaca7281de99bd64ab66ee96cbde632695a1263/packages/definitions/src/index.ts#L239).
 
 ```shell
 defineSymbol: 85.19% covered (23/27)
   Missing:
-    defineSymbol: ./packages/symbolism-definitions/src/class.ts:33:14
-    defineSymbol: ./packages/symbolism-definitions/src/index.ts:166:12
-    defineSymbol: ./packages/symbolism-definitions/src/jsx.ts:17:12
-    defineSymbol: ./packages/symbolism-definitions/src/jsx.ts:23:12
+    defineSymbol: ./packages/definitions/src/class.ts:33:14
+    defineSymbol: ./packages/definitions/src/index.ts:166:12
+    defineSymbol: ./packages/definitions/src/jsx.ts:17:12
+    defineSymbol: ./packages/definitions/src/jsx.ts:23:12
 ```
 
 Showing that my tests do not cover those 4 calls to `defineSymbol`.

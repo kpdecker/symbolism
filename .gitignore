@@ -1,6 +1,6 @@
 node_modules
 build
-coverage
+/coverage
 dist
 .vscode
 symbolism.log

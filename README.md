@@ -18,7 +18,7 @@ Document the schema of your typescript data types. Calculates the final schema f
 
 
 ```console
-symbolism dumpSchema ./packages/symbolism-test/src/dump-symbol.ts Schema
+symbolism dumpSchema ./packages/test/src/dump-symbol.ts Schema
 ```
 
 Output:
@@ -37,7 +37,7 @@ For a machine JSON Schema readable format, use the `--json` flag.
 Lookup the definition of a symbol in your project. This command is useful when setting up the configuration for our coverage and eslint tools.
 
 ```console
-defineSymbol ./packages/symbolism-test/src/dump-symbol.ts 9 20
+defineSymbol ./packages/test/src/dump-symbol.ts 9 20
 ```
 
 Output:

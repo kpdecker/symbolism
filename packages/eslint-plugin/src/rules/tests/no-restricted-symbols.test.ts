@@ -138,7 +138,7 @@ ruleTester.run("no-restricted-symbols", noRestrictedSymbols, {
         {
           symbolPath: "Location.search",
           fileName:
-            "packages/symbolism-eslint-plugin/src/rules/tests/no-restricted-symbols.test.ts",
+            "packages/eslint-plugin/src/rules/tests/no-restricted-symbols.test.ts",
         },
       ],
       filename: __filename,

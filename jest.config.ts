@@ -13,12 +13,7 @@ export default {
   coverageReporters: process.env.CI ? ["text"] : ["text-summary", "lcov"],
 
   // An array of regexp pattern strings used to skip coverage collection
-  coveragePathIgnorePatterns: [
-    "/node_modules/",
-    "/test/",
-    "/dist/",
-    "symbolism-test",
-  ],
+  coveragePathIgnorePatterns: ["/node_modules/", "/test/", "/dist/"],
 
   // A list of reporter names that Jest uses when writing coverage reports
   // coverageReporters: [
@@ -69,15 +64,7 @@ export default {
   // Map our internal packages in typescript space to ensure we are most recent versions. Using
   // the node_modules-based lookup can result in old versions of the code being tested.
   moduleNameMapper: {
-    "^@symbolism/coverage": "<rootDir>/packages/symbolism-coverage/src",
-    "^@symbolism/definitions": "<rootDir>/packages/symbolism-definitions/src",
-    "^@symbolism/paths": "<rootDir>/packages/symbolism-paths/src",
-    "^@symbolism/symbol-table": "<rootDir>/packages/symbolism-symbol-table/src",
-    "^@symbolism/test": "<rootDir>/packages/symbolism-test/src",
-    "^@symbolism/ts-utils": "<rootDir>/packages/symbolism-ts-utils/src",
-    "^@symbolism/ts-debug": "<rootDir>/packages/symbolism-ts-debug/src",
-    "^@symbolism/type-eval": "<rootDir>/packages/symbolism-type-eval/src",
-    "^@symbolism/utils": "<rootDir>/packages/symbolism-utils/src",
+    "^@symbolism/(.*)": "<rootDir>/packages/$1/src",
   },
 
   // An array of regexp pattern strings, matched against all module paths before considered 'visible' to the module loader
