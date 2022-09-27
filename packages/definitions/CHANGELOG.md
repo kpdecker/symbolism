@@ -1,5 +1,18 @@
 # @symbolism/definitions
 
+## 0.3.0
+
+### Minor Changes
+
+- de3f874: Add eslint rules
+
+### Patch Changes
+
+- Updated dependencies [de3f874]
+  - @symbolism/ts-debug@0.3.0
+  - @symbolism/ts-utils@0.3.0
+  - @symbolism/utils@0.3.0
+
 ## 0.2.0
 
 ### Minor Changes

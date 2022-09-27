@@ -1,6 +1,6 @@
 {
   "name": "@symbolism/test",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Symbolism utilities",
   "main": "dist/index.js",
   "author": "Kevin Decker <kpdecker@gmail.com>",

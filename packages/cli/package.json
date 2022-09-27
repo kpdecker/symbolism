@@ -1,6 +1,6 @@
 {
   "name": "@symbolism/cli",
-  "version": "0.2.1",
+  "version": "0.3.0",
   "description": "Coverage assertions for specific code tokens.",
   "main": "dist/index.js",
   "bin": {
@@ -20,14 +20,14 @@
     "url": "git+https://github.com/kpdecker/symbolism.git"
   },
   "dependencies": {
-    "@symbolism/coverage": "^0.2.0",
-    "@symbolism/definitions": "^0.2.0",
-    "@symbolism/paths": "^0.2.0",
-    "@symbolism/symbol-table": "^0.2.0",
-    "@symbolism/ts-debug": "^0.2.0",
-    "@symbolism/ts-utils": "^0.2.0",
-    "@symbolism/type-eval": "^0.2.0",
-    "@symbolism/utils": "^0.2.0",
+    "@symbolism/coverage": "^0.3.0",
+    "@symbolism/definitions": "^0.3.0",
+    "@symbolism/paths": "^0.3.0",
+    "@symbolism/symbol-table": "^0.3.0",
+    "@symbolism/ts-debug": "^0.3.0",
+    "@symbolism/ts-utils": "^0.3.0",
+    "@symbolism/type-eval": "^0.3.0",
+    "@symbolism/utils": "^0.3.0",
     "chalk": "4",
     "commander": "^9.4.0",
     "prettier": "^2.7.1",

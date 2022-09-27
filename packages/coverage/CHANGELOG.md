@@ -1,5 +1,20 @@
 # @symbolism/coverage
 
+## 0.3.0
+
+### Minor Changes
+
+- de3f874: Add eslint rules
+
+### Patch Changes
+
+- Updated dependencies [de3f874]
+  - @symbolism/paths@0.3.0
+  - @symbolism/symbol-table@0.3.0
+  - @symbolism/ts-debug@0.3.0
+  - @symbolism/ts-utils@0.3.0
+  - @symbolism/utils@0.3.0
+
 ## 0.2.0
 
 ### Minor Changes
