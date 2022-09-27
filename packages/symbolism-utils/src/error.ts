@@ -10,7 +10,10 @@ declare global {
 
 const $prepareStackTrace = Error.prepareStackTrace;
 Error.prepareStackTrace = (error, stack) => {
-  let result = $prepareStackTrace?.(error, stack);
+  let result =
+    $prepareStackTrace?.(error, stack) ||
+    `${error.name}: ${error.message}
+  at ${stack.join("\n  at ")}`;
 
   if (error.cause) {
     result += "\n\nCaused by: " + error.cause.stack;
