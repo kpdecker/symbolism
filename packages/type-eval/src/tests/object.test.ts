@@ -40,6 +40,10 @@ describe("type schema converter", () => {
         const zeeRealString = 'real!';
 
         declare const zeeObject: Record<string, number> & {
+          /**
+           * this is a comment
+           * @deprecated dont use this anymore
+           */
           extra: string;
           [key: \`foo\${string}\`]: string;
         };
@@ -64,6 +68,7 @@ describe("type schema converter", () => {
           ...source,
           ...zeeObject,
         }
+
         type Type = typeof literal;
       `);
       expect(printSchema(evaluateSchema(declaration, context.checker)))
@@ -116,17 +121,23 @@ describe("type schema converter", () => {
           "$schema": "https://json-schema.org/draft/2020-12/schema",
           "patternProperties": Object {
             "/^.*$/": Object {
+              "documentationComment": Array [],
+              "jsDocTags": Array [],
               "type": "number",
             },
             "/^.*fooreal!$/": Object {
               "const": "literal!",
             },
             "/^foo.*$/": Object {
+              "documentationComment": Array [],
+              "jsDocTags": Array [],
               "type": "string",
             },
           },
           "properties": Object {
             "bothor": Object {
+              "documentationComment": Array [],
+              "jsDocTags": Array [],
               "type": "string",
             },
             "directUnion": Object {
@@ -138,6 +149,23 @@ describe("type schema converter", () => {
               "type": "string",
             },
             "extra": Object {
+              "documentationComment": Array [
+                Object {
+                  "kind": "text",
+                  "text": "this is a comment",
+                },
+              ],
+              "jsDocTags": Array [
+                Object {
+                  "name": "deprecated",
+                  "text": Array [
+                    Object {
+                      "kind": "text",
+                      "text": "dont use this anymore",
+                    },
+                  ],
+                },
+              ],
               "type": "string",
             },
             "gettor": Object {
@@ -167,6 +195,8 @@ describe("type schema converter", () => {
               "$ref": "#/$defs/Source",
             },
             "string": Object {
+              "documentationComment": Array [],
+              "jsDocTags": Array [],
               "type": "string",
             },
           },

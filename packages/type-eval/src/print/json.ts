@@ -38,7 +38,11 @@ export function schemaToJson(
 
   switch (schema.kind) {
     case "primitive":
-      return { type: schema.name };
+      return {
+        type: schema.name,
+        documentationComment: schema.node?.symbol?.getDocumentationComment?.() ?? [],
+        jsDocTags: schema.node?.symbol?.getJsDocTags?.() ?? [],
+      };
     case "literal":
       if (typeof schema.value === "bigint") {
         return { const: `"${schema.value}"` };

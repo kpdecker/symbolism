@@ -59,7 +59,9 @@ describe("dumpSchema", () => {
             ]
           },
           \\"merged\\": {
-            \\"type\\": \\"number\\"
+            \\"type\\": \\"number\\",
+            \\"documentationComment\\": [],
+            \\"jsDocTags\\": []
           }
         }
       }"
