@@ -1,5 +1,5 @@
 {
-  "name": "@symbolism/test",
+  "name": "@noom-symbolism/test",
   "version": "0.3.0",
   "description": "Symbolism utilities",
   "main": "dist/index.js",

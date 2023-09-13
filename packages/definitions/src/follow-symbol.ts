@@ -2,7 +2,7 @@ import ts from "typescript";
 import invariant from "tiny-invariant";
 import { DefinitionOptions, DefinitionSymbol } from "./utils";
 import { defineSymbol } from "./index";
-import { getSymbolDeclaration, getSymbolTarget } from "@symbolism/ts-utils";
+import { getSymbolDeclaration, getSymbolTarget } from "@noom-symbolism/ts-utils";
 
 export function followSymbol(
   definition: DefinitionSymbol | undefined | null,

@@ -3,10 +3,10 @@ import { ParserServices } from "@typescript-eslint/typescript-estree";
 import { ESLintUtils } from "@typescript-eslint/utils";
 import invariant from "tiny-invariant";
 
-import { defineSymbol } from "@symbolism/definitions";
-import { getNodePath, pathMatchesTokenFilter } from "@symbolism/paths";
+import { defineSymbol } from "@noom-symbolism/definitions";
+import { getNodePath, pathMatchesTokenFilter } from "@noom-symbolism/paths";
 import { relative } from "path";
-import { isNamedDeclaration } from "@symbolism/ts-utils";
+import { isNamedDeclaration } from "@noom-symbolism/ts-utils";
 
 //------------------------------------------------------------------------------
 // Rule Definition

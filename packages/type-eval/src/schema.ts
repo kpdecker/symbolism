@@ -1,5 +1,5 @@
-import { TypeId } from "@symbolism/ts-utils";
-import { assertUnreachable } from "@symbolism/utils";
+import { TypeId } from "@noom-symbolism/ts-utils";
+import { assertUnreachable } from "@noom-symbolism/utils";
 import invariant from "tiny-invariant";
 import ts from "typescript";
 import { areSchemasEqual } from "./classify";

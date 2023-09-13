@@ -9,7 +9,7 @@ import { booleanPrimitiveSchema } from "../well-known-schemas";
 import { getNodeSchema } from ".";
 import { normalizeTemplateLiteralSchema } from "./string-template";
 import { createUnionKind, expandUnions } from "./union";
-import { assertUnreachable } from "@symbolism/utils";
+import { assertUnreachable } from "@noom-symbolism/utils";
 
 export function convertBinaryExpression(
   node: ts.Node,

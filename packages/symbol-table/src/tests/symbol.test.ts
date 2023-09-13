@@ -1,5 +1,5 @@
-import { getNodePath } from "@symbolism/paths";
-import { initTypescript, parseConfig } from "@symbolism/utils";
+import { getNodePath } from "@noom-symbolism/paths";
+import { initTypescript, parseConfig } from "@noom-symbolism/utils";
 import { dumpSymbolTable, parseSymbolTable } from "../index";
 
 describe("symbol table", () => {

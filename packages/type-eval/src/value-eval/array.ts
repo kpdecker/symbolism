@@ -5,7 +5,7 @@ import { AnySchemaNode } from "../schema";
 import { getNodeSchema } from ".";
 import { createUnionKind } from "./union";
 import { nodeEvalHandler } from "./handlers";
-import { invariantNode } from "@symbolism/ts-utils";
+import { invariantNode } from "@noom-symbolism/ts-utils";
 import invariant from "tiny-invariant";
 
 export const arrayOperators = nodeEvalHandler(() => ({

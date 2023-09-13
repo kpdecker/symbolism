@@ -1,12 +1,12 @@
 import ts from "typescript";
-import { invariantNode } from "@symbolism/ts-utils";
+import { invariantNode } from "@noom-symbolism/ts-utils";
 import { nodeEvalHandler } from "./handlers";
 import { getNodeSchema } from ".";
 import { booleanPrimitiveSchema } from "../well-known-schemas";
 import { AnySchemaNode } from "../schema";
 import { createUnionKind } from "./union";
 import invariant from "tiny-invariant";
-import { assertUnreachable } from "@symbolism/utils";
+import { assertUnreachable } from "@noom-symbolism/utils";
 
 export const unaryExpressionOperators = nodeEvalHandler(() => ({
   [ts.SyntaxKind.PrefixUnaryExpression](node, context): AnySchemaNode {

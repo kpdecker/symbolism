@@ -1,4 +1,4 @@
-import { getSymbolDeclaration, getSymbolParent } from "@symbolism/ts-utils";
+import { getSymbolDeclaration, getSymbolParent } from "@noom-symbolism/ts-utils";
 import ts from "typescript";
 import { getTypeSchema } from ".";
 import { SchemaContext } from "../context";

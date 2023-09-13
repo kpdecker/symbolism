@@ -2,7 +2,7 @@ import {
   getSymbolDeclaration,
   invariantNode,
   isNamedDeclaration,
-} from "@symbolism/ts-utils";
+} from "@noom-symbolism/ts-utils";
 import ts, { findAncestor } from "typescript";
 import { defineSymbol } from "./index";
 import { directTypeAndSymbol, nodeOperators } from "./utils";

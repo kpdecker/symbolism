@@ -1,4 +1,4 @@
-import { assertExists, getCliConfig, initTypescript } from "@symbolism/utils";
+import { assertExists, getCliConfig, initTypescript } from "@noom-symbolism/utils";
 import { Command } from "commander";
 import { relative } from "path";
 

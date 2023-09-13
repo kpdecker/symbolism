@@ -23,7 +23,7 @@ Add `@symbolism` to the plugins section of your `.eslintrc` configuration file:
 ```json
 {
     "plugins": [
-        "@symbolism"
+        "@noom-symbolism"
     ]
 }
 ```
@@ -34,7 +34,7 @@ Then configure the rules you want to use under the rules section.
 ```json
 {
     "rules": {
-        "@symbolism/no-restricted-symbols": [
+        "@noom-symbolism/no-restricted-symbols": [
             "error",
             {
                 "symbolPath": "Location.search",

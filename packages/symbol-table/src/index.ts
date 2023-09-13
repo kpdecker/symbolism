@@ -8,11 +8,11 @@ import {
   logVerbose,
   logWarn,
   NodeError,
-} from "@symbolism/utils";
-import { defineSymbol } from "@symbolism/definitions";
-import { getNodePath, pathMatchesTokenFilter } from "@symbolism/paths";
-import { getSymbolDeclaration, isIntrinsicType } from "@symbolism/ts-utils";
-import { dumpNode, dumpSymbol } from "@symbolism/ts-debug";
+} from "@noom-symbolism/utils";
+import { defineSymbol } from "@noom-symbolism/definitions";
+import { getNodePath, pathMatchesTokenFilter } from "@noom-symbolism/paths";
+import { getSymbolDeclaration, isIntrinsicType } from "@noom-symbolism/ts-utils";
+import { dumpNode, dumpSymbol } from "@noom-symbolism/ts-debug";
 import { relative } from "path";
 
 export * from "./symbol-filters";

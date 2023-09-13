@@ -1,5 +1,5 @@
-import { mockProgram } from "@symbolism/test";
-import { findIdentifiers } from "@symbolism/ts-utils";
+import { mockProgram } from "@noom-symbolism/test";
+import { findIdentifiers } from "@noom-symbolism/ts-utils";
 import { printSchema } from "../print/typescript";
 import { SchemaContext } from "../context";
 import { evaluateSchema } from "../schema";

@@ -1,4 +1,4 @@
-import { LineAndColumn } from "@symbolism/ts-utils";
+import { LineAndColumn } from "@noom-symbolism/ts-utils";
 import { readFileSync } from "fs";
 import { CoverageRequiredListing } from "./parser";
 

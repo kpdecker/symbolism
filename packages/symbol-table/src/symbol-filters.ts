@@ -1,5 +1,5 @@
-import { getSymbolDeclaration } from "@symbolism/ts-utils";
-import { getNodePath, pathMatchesTokenFilter } from "@symbolism/paths";
+import { getSymbolDeclaration } from "@noom-symbolism/ts-utils";
+import { getNodePath, pathMatchesTokenFilter } from "@noom-symbolism/paths";
 
 import { resolve } from "path";
 import ts from "typescript";

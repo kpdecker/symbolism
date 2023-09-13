@@ -1,13 +1,13 @@
 import ts from "typescript";
 
-import { defineSymbol } from "@symbolism/definitions";
+import { defineSymbol } from "@noom-symbolism/definitions";
 import {
   getSymbolDeclaration,
   invariantNode,
   isIntrinsicType,
-} from "@symbolism/ts-utils";
-import { assertExists, logDebug, NodeError } from "@symbolism/utils";
-import { dumpNode } from "@symbolism/ts-debug";
+} from "@noom-symbolism/ts-utils";
+import { assertExists, logDebug, NodeError } from "@noom-symbolism/utils";
+import { dumpNode } from "@noom-symbolism/ts-debug";
 import { AnySchemaNode } from "../schema";
 import { SchemaContext } from "../context";
 import { convertBinaryExpression } from "./binary-expression";

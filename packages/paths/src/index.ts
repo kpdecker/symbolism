@@ -12,8 +12,8 @@ import { functionOperators } from "./function";
 import { jsDocHandlers } from "./jsdoc";
 import { jsxPathHandlers } from "./jsx";
 import { tokenOperators } from "./tokens";
-import { NodeError } from "@symbolism/utils";
-import { invariantNode, isNamedDeclaration } from "@symbolism/ts-utils";
+import { NodeError } from "@noom-symbolism/utils";
+import { invariantNode, isNamedDeclaration } from "@noom-symbolism/ts-utils";
 import invariant from "tiny-invariant";
 
 const handlePropertyAccess: PathHandler = ({

@@ -1,4 +1,4 @@
-import { TypeId } from "@symbolism/ts-utils";
+import { TypeId } from "@noom-symbolism/ts-utils";
 import {
   AnySchemaNode,
   LiteralSchema,

@@ -1,5 +1,5 @@
 import ts from "typescript";
-import { logDebug } from "@symbolism/utils";
+import { logDebug } from "@noom-symbolism/utils";
 import {
   getSymbolDeclaration,
   invariantNode,
@@ -7,7 +7,7 @@ import {
   isErrorType,
   isExpression,
   isInheritingDeclaration,
-} from "@symbolism/ts-utils";
+} from "@noom-symbolism/ts-utils";
 
 export type DefinitionSymbol = {
   symbol: ts.Symbol | undefined;

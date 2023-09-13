@@ -1,10 +1,10 @@
-import { dumpNode, dumpSchema } from "@symbolism/ts-debug";
-import { getSymbolDeclaration, isNamedDeclaration } from "@symbolism/ts-utils";
+import { dumpNode, dumpSchema } from "@noom-symbolism/ts-debug";
+import { getSymbolDeclaration, isNamedDeclaration } from "@noom-symbolism/ts-utils";
 import {
   assertUnreachable,
   logDebug,
   removeDuplicates,
-} from "@symbolism/utils";
+} from "@noom-symbolism/utils";
 import invariant from "tiny-invariant";
 import ts, { findAncestor } from "typescript";
 import { SchemaContext } from "./context";

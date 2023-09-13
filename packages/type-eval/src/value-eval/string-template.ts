@@ -1,4 +1,4 @@
-import { defineSymbol } from "@symbolism/definitions";
+import { defineSymbol } from "@noom-symbolism/definitions";
 import invariant from "tiny-invariant";
 import ts from "typescript";
 import { isLiteralUnion } from "../classify";
@@ -7,7 +7,7 @@ import { SchemaContext } from "../context";
 import { createUnionKind, expandSchemaList } from "./union";
 import { getNodeSchema } from ".";
 import { checkerEval, nodeEvalHandler } from "./handlers";
-import { invariantNode } from "@symbolism/ts-utils";
+import { invariantNode } from "@noom-symbolism/ts-utils";
 
 export const templateOperators = nodeEvalHandler(() => ({
   [ts.SyntaxKind.NoSubstitutionTemplateLiteral]: checkerEval,

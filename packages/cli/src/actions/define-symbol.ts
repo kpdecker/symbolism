@@ -1,10 +1,10 @@
 import { Command } from "commander";
 import { resolve } from "path";
 import invariant from "tiny-invariant";
-import { getCliConfig, initTypescript } from "@symbolism/utils";
-import { getNodeAtPosition } from "@symbolism/ts-utils";
-import { defineSymbol } from "@symbolism/definitions";
-import { dumpDefinition } from "@symbolism/ts-debug";
+import { getCliConfig, initTypescript } from "@noom-symbolism/utils";
+import { getNodeAtPosition } from "@noom-symbolism/ts-utils";
+import { defineSymbol } from "@noom-symbolism/definitions";
+import { dumpDefinition } from "@noom-symbolism/ts-debug";
 
 export function initDefineSymbol(program: Command) {
   program.command("defineSymbol <file> <line> <column>").action(dumpSymbol);

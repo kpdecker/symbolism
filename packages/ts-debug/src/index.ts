@@ -1,16 +1,16 @@
-import type { defineSymbol } from "@symbolism/definitions";
-import type { AnySchemaNode } from "@symbolism/type-eval";
+import type { defineSymbol } from "@noom-symbolism/definitions";
+import type { AnySchemaNode } from "@noom-symbolism/type-eval";
 
-import { getNodePath } from "@symbolism/paths";
+import { getNodePath } from "@noom-symbolism/paths";
 import {
   isIntrinsicType,
   isTypeReference,
   getSymbolId,
-} from "@symbolism/ts-utils";
+} from "@noom-symbolism/ts-utils";
 import invariant from "tiny-invariant";
 import ts, { ObjectType } from "typescript";
 import { relative } from "path";
-import { bitwiseFlagSet } from "@symbolism/utils";
+import { bitwiseFlagSet } from "@noom-symbolism/utils";
 
 export function dumpFlags(
   flags: number | undefined,

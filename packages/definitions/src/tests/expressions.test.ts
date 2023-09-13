@@ -1,6 +1,6 @@
-import { dumpDefinition } from "@symbolism/ts-debug";
-import { findIdentifiers, findNodeInTree } from "@symbolism/ts-utils";
-import { assertExists } from "@symbolism/utils";
+import { dumpDefinition } from "@noom-symbolism/ts-debug";
+import { findIdentifiers, findNodeInTree } from "@noom-symbolism/ts-utils";
+import { assertExists } from "@noom-symbolism/utils";
 import ts from "typescript";
 import { mockProgram, testExpression, testStatement } from "../../test/utils";
 import { defineSymbol } from "../index";

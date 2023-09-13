@@ -1,4 +1,4 @@
-import { dumpDefinition } from "@symbolism/ts-debug";
+import { dumpDefinition } from "@noom-symbolism/ts-debug";
 import ts from "typescript";
 import { mockProgram } from "../../test/utils";
 import { defineSymbol } from "../index";

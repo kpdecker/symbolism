@@ -1,10 +1,10 @@
 import ts from "typescript";
-import { invariantNode } from "@symbolism/ts-utils";
+import { invariantNode } from "@noom-symbolism/ts-utils";
 import { checkerEval, nodeEvalHandler, noType } from "./handlers";
 import { getNodeSchema } from ".";
 import { AnySchemaNode, ObjectSchema } from "../schema";
 import { SchemaError } from "../classify";
-import { assertExists } from "@symbolism/utils";
+import { assertExists } from "@noom-symbolism/utils";
 
 export const jsxPathHandlers = nodeEvalHandler(() => ({
   [ts.SyntaxKind.JsxElement](node, context) {

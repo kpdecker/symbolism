@@ -4,10 +4,10 @@ import {
   createJsonSchema,
   evaluateSchema,
   printSchema,
-} from "@symbolism/type-eval";
-import { getCliConfig, initTypescript, logVerbose } from "@symbolism/utils";
+} from "@noom-symbolism/type-eval";
+import { getCliConfig, initTypescript, logVerbose } from "@noom-symbolism/utils";
 import { nodeFromCLI } from "../arg-parser";
-import { dumpNode } from "@symbolism/ts-debug";
+import { dumpNode } from "@noom-symbolism/ts-debug";
 
 export function initDumpSchema(program: Command) {
   program

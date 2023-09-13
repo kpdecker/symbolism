@@ -1,4 +1,4 @@
-import { loadCliConfig } from "@symbolism/utils";
+import { loadCliConfig } from "@noom-symbolism/utils";
 import { Command } from "commander";
 import { initDumpSchema } from "../dump-schema";
 

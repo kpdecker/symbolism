@@ -1,7 +1,7 @@
 import ts from "typescript";
-import { getSymbolDeclaration, TypeId } from "@symbolism/ts-utils";
+import { getSymbolDeclaration, TypeId } from "@noom-symbolism/ts-utils";
 import { FunctionCallInfo } from "./calls";
-import { SymbolTable } from "@symbolism/symbol-table";
+import { SymbolTable } from "@noom-symbolism/symbol-table";
 import invariant from "tiny-invariant";
 import { TypeEvalOptions } from "./value-eval";
 import { AnySchemaNode } from "./schema";

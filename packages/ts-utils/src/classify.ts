@@ -1,4 +1,4 @@
-import { NodeError } from "@symbolism/utils";
+import { NodeError } from "@noom-symbolism/utils";
 import ts, { InternalSymbolName } from "typescript";
 import type { Opaque } from "type-fest";
 
