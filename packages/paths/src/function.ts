@@ -1,5 +1,5 @@
 import ts from "typescript";
-import { invariantNode, isNamedDeclaration } from "@noom-symbolism/ts-utils";
+import { invariantNode, isNamedDeclaration } from "@noom/symbolism-ts-utils";
 import {
   nameWithParent,
   pathHandler,

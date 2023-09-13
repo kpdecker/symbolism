@@ -1,4 +1,4 @@
-import { getIntrinsicName } from "@noom-symbolism/ts-utils";
+import { getIntrinsicName } from "@noom/symbolism-ts-utils";
 import invariant from "tiny-invariant";
 import ts from "typescript";
 import { SchemaContext } from "../context";

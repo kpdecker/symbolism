@@ -3,10 +3,10 @@ import { ParserServices } from "@typescript-eslint/typescript-estree";
 import { ESLintUtils } from "@typescript-eslint/utils";
 import invariant from "tiny-invariant";
 
-import { defineSymbol } from "@noom-symbolism/definitions";
-import { invariantNode } from "@noom-symbolism/ts-utils";
-import { dumpDefinition } from "@noom-symbolism/ts-debug";
-import { logDebug } from "@noom-symbolism/utils";
+import { defineSymbol } from "@noom/symbolism-definitions";
+import { invariantNode } from "@noom/symbolism-ts-utils";
+import { dumpDefinition } from "@noom/symbolism-ts-debug";
+import { logDebug } from "@noom/symbolism-utils";
 
 const createRule = ESLintUtils.RuleCreator((name) => name);
 const rule = createRule({

@@ -1,9 +1,9 @@
 import * as ts from "typescript";
-import { parseSymbolTable } from "@noom-symbolism/symbol-table";
-import { getNodePath, pathMatchesTokenFilter } from "@noom-symbolism/paths";
-import { Config, initTypescript } from "@noom-symbolism/utils";
-import { getSymbolDeclaration, LineAndColumn } from "@noom-symbolism/ts-utils";
-import { dumpNode } from "@noom-symbolism/ts-debug";
+import { parseSymbolTable } from "@noom/symbolism-symbol-table";
+import { getNodePath, pathMatchesTokenFilter } from "@noom/symbolism-paths";
+import { Config, initTypescript } from "@noom/symbolism-utils";
+import { getSymbolDeclaration, LineAndColumn } from "@noom/symbolism-ts-utils";
+import { dumpNode } from "@noom/symbolism-ts-debug";
 import invariant from "tiny-invariant";
 
 export type TokenSourceLocation = {

@@ -1,5 +1,5 @@
 import ts from "typescript";
-import { invariantNode } from "@noom-symbolism/ts-utils";
+import { invariantNode } from "@noom/symbolism-ts-utils";
 import {
   literalText,
   nameWithParent,

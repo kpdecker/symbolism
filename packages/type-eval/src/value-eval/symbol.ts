@@ -1,5 +1,5 @@
-import { isNamedDeclaration } from "@noom-symbolism/ts-utils";
-import { assertExists, assertUnreachable } from "@noom-symbolism/utils";
+import { isNamedDeclaration } from "@noom/symbolism-ts-utils";
+import { assertExists, assertUnreachable } from "@noom/symbolism-utils";
 import ts from "typescript";
 import { bindParameterDependency, findParameterDependency } from "../classify";
 import { SchemaContext } from "../context";

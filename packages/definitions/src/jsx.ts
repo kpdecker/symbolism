@@ -1,6 +1,6 @@
 import invariant from "tiny-invariant";
 import ts, { JsxOpeningLikeElement } from "typescript";
-import { assertExists, logDebug } from "@noom-symbolism/utils";
+import { assertExists, logDebug } from "@noom/symbolism-utils";
 import { defineSymbol } from "./index";
 import {
   contextualTypeAndSymbol,
@@ -8,8 +8,8 @@ import {
   getPropertySymbol,
   nodeOperators,
 } from "./utils";
-import { invariantNode, getBindingElement } from "@noom-symbolism/ts-utils";
-import { dumpNode } from "@noom-symbolism/ts-debug";
+import { invariantNode, getBindingElement } from "@noom/symbolism-ts-utils";
+import { dumpNode } from "@noom/symbolism-ts-debug";
 
 export const jsxSymbolHandlers = nodeOperators({
   [ts.SyntaxKind.JsxElement](node, checker, options) {

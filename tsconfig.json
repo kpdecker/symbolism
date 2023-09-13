@@ -29,15 +29,15 @@
     "moduleResolution": "node" /* Specify how TypeScript looks up a file from a given module specifier. */,
     "baseUrl": "./" /* Specify the base directory to resolve non-relative module names. */,
     "paths": {
-      "@noom-symbolism/coverage": ["./packages/coverage/src/index.ts"],
-      "@noom-symbolism/definitions": ["./packages/definitions/src/index.ts"],
-      "@noom-symbolism/paths": ["./packages/paths/src/index.ts"],
-      "@noom-symbolism/symbol-table": ["./packages/symbol-table/src/index.ts"],
-      "@noom-symbolism/test": ["./packages/test/src/index.ts"],
-      "@noom-symbolism/ts-debug": ["./packages/ts-debug/src/index.ts"],
-      "@noom-symbolism/ts-utils": ["./packages/ts-utils/src/index.ts"],
-      "@noom-symbolism/type-eval": ["./packages/type-eval/src/index.ts"],
-      "@noom-symbolism/utils": ["./packages/utils/src/index.ts"]
+      "@noom/symbolism-coverage": ["./packages/coverage/src/index.ts"],
+      "@noom/symbolism-definitions": ["./packages/definitions/src/index.ts"],
+      "@noom/symbolism-paths": ["./packages/paths/src/index.ts"],
+      "@noom/symbolism-symbol-table": ["./packages/symbol-table/src/index.ts"],
+      "@noom/symbolism-test": ["./packages/test/src/index.ts"],
+      "@noom/symbolism-ts-debug": ["./packages/ts-debug/src/index.ts"],
+      "@noom/symbolism-ts-utils": ["./packages/ts-utils/src/index.ts"],
+      "@noom/symbolism-type-eval": ["./packages/type-eval/src/index.ts"],
+      "@noom/symbolism-utils": ["./packages/utils/src/index.ts"]
     },
 
     // "rootDirs": [],                                   /* Allow multiple folders to be treated as one when resolving modules. */

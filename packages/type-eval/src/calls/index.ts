@@ -2,15 +2,15 @@ import ts, { findAncestor } from "typescript";
 
 import { AnySchemaNode } from "../schema";
 import { CallContext } from "../context";
-import { dumpNode, dumpSchema, dumpSymbol } from "@noom-symbolism/ts-debug";
+import { dumpNode, dumpSchema, dumpSymbol } from "@noom/symbolism-ts-debug";
 import { areSchemasEqual, unboundInputs } from "../classify";
 import { resolveParametersInSchema } from "../value-eval/symbol";
-import { logVerbose, NodeError, removeDuplicates } from "@noom-symbolism/utils";
+import { logVerbose, NodeError, removeDuplicates } from "@noom/symbolism-utils";
 import { expandUnions } from "../value-eval/union";
-import { isNamedDeclaration } from "@noom-symbolism/ts-utils";
+import { isNamedDeclaration } from "@noom/symbolism-ts-utils";
 import { getNodeSchema } from "../value-eval";
 import invariant from "tiny-invariant";
-import { defineSymbol } from "@noom-symbolism/definitions";
+import { defineSymbol } from "@noom/symbolism-definitions";
 
 export type FunctionCallInfo = {
   callExpression: ts.CallExpression;

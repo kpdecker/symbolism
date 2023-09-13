@@ -34,7 +34,7 @@ Then configure the rules you want to use under the rules section.
 ```json
 {
     "rules": {
-        "@noom-symbolism/no-restricted-symbols": [
+        "@noom/symbolism-no-restricted-symbols": [
             "error",
             {
                 "symbolPath": "Location.search",

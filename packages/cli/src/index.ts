@@ -3,7 +3,7 @@ import { initCoverage } from "./actions/coverage";
 import { initDumpFiles } from "./actions/dump-files";
 import { initDumpSymbols } from "./actions/dump-symbols";
 
-import { loadCliConfig, LogLevel, setLogLevel } from "@noom-symbolism/utils";
+import { loadCliConfig, LogLevel, setLogLevel } from "@noom/symbolism-utils";
 import { initCallInputs } from "./actions/call-inputs";
 import { initDumpSchema } from "./actions/dump-schema";
 import { initDefineSymbol } from "./actions/define-symbol";

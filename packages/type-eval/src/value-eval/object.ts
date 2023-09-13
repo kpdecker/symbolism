@@ -1,4 +1,4 @@
-import { assertExists, logDebug, NodeError } from "@noom-symbolism/utils";
+import { assertExists, logDebug, NodeError } from "@noom/symbolism-utils";
 import invariant from "tiny-invariant";
 import ts from "typescript";
 import { isConcreteSchema, SchemaError } from "../classify";
@@ -6,10 +6,10 @@ import { printSchema } from "../print/typescript";
 import { AnySchemaNode, ObjectSchema } from "../schema";
 import { SchemaContext } from "../context";
 import { createUnionKind, expandSchemaList, unionProperties } from "./union";
-import { dumpNode } from "@noom-symbolism/ts-debug";
+import { dumpNode } from "@noom/symbolism-ts-debug";
 import { getNodeSchema } from ".";
 import { nodeEvalHandler, remapSchemaNode, variableLike } from "./handlers";
-import { getSymbolDeclaration, invariantNode } from "@noom-symbolism/ts-utils";
+import { getSymbolDeclaration, invariantNode } from "@noom/symbolism-ts-utils";
 import { getLocalSymbol } from "./symbol";
 import { neverSchema, undefinedSchema } from "../well-known-schemas";
 import { schemaToRegEx } from "../string";

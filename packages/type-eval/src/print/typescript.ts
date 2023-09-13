@@ -1,5 +1,5 @@
-import { dumpSchema } from "@noom-symbolism/ts-debug";
-import { assertUnreachable } from "@noom-symbolism/utils";
+import { dumpSchema } from "@noom/symbolism-ts-debug";
+import { assertUnreachable } from "@noom/symbolism-utils";
 import { format } from "prettier";
 import ts from "typescript";
 import { canPrintInJs } from "../classify";

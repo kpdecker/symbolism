@@ -1,5 +1,5 @@
 {
-  "name": "@noom-symbolism/utils",
+  "name": "@noom/symbolism-utils",
   "version": "0.3.0",
   "description": "Symbolism utilities",
   "main": "dist/index.js",
@@ -7,16 +7,19 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/kpdecker/symbolism.git"
+    "url": "git+https://github.com/noom/symbolism.git"
   },
   "dependencies": {
     "commander": "^9.3.0",
     "glob": "^8.0.3",
     "minimatch": "^5.1.0",
     "tiny-invariant": "^1.2.0",
-    "@noom-symbolism/ts-debug": "^0.3.0"
+    "@noom/symbolism-ts-debug": "^0.3.0"
   },
   "peerDependencies": {
     "typescript": "^4.7.4"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com/"
   }
 }

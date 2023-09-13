@@ -4,9 +4,9 @@ import {
   extractSymbolSummary,
   filterSymbolsToFile,
   parseSymbolTable,
-} from "@noom-symbolism/symbol-table";
-import { getCliConfig, initTypescript } from "@noom-symbolism/utils";
-import { pathMatchesTokenFilter } from "@noom-symbolism/paths";
+} from "@noom/symbolism-symbol-table";
+import { getCliConfig, initTypescript } from "@noom/symbolism-utils";
+import { pathMatchesTokenFilter } from "@noom/symbolism-paths";
 
 export function initDumpSymbols(program: Command) {
   program

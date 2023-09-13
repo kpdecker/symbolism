@@ -1,4 +1,4 @@
-import { assertExists, assertUnreachable } from "@noom-symbolism/utils";
+import { assertExists, assertUnreachable } from "@noom/symbolism-utils";
 import { JsonObject } from "type-fest";
 import ts from "typescript";
 import { isNumericSchema } from "../classify";

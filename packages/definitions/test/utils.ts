@@ -1,11 +1,11 @@
 import ts from "typescript";
-import { findNodeInTree } from "@noom-symbolism/ts-utils";
+import { findNodeInTree } from "@noom/symbolism-ts-utils";
 import { defineSymbol } from "../src/index";
-import { dumpDefinition } from "@noom-symbolism/ts-debug";
-import { mockProgram } from "@noom-symbolism/test";
-import { assertExists } from "@noom-symbolism/utils";
+import { dumpDefinition } from "@noom/symbolism-ts-debug";
+import { mockProgram } from "@noom/symbolism-test";
+import { assertExists } from "@noom/symbolism-utils";
 
-export { mockProgram } from "@noom-symbolism/test";
+export { mockProgram } from "@noom/symbolism-test";
 
 export function testStatement(source: string) {
   const program = mockProgram({

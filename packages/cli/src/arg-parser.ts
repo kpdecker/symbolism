@@ -1,6 +1,6 @@
-import { findSymbol, parseSymbolTable } from "@noom-symbolism/symbol-table";
-import { getNodeAtPosition, getSymbolDeclaration } from "@noom-symbolism/ts-utils";
-import { getCliConfig } from "@noom-symbolism/utils";
+import { findSymbol, parseSymbolTable } from "@noom/symbolism-symbol-table";
+import { getNodeAtPosition, getSymbolDeclaration } from "@noom/symbolism-ts-utils";
+import { getCliConfig } from "@noom/symbolism-utils";
 import { OptionValues } from "commander";
 import { resolve } from "path";
 import ts from "typescript";

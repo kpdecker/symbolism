@@ -1,4 +1,4 @@
-import { dumpNode } from "@noom-symbolism/ts-debug";
+import { dumpNode } from "@noom/symbolism-ts-debug";
 import ts from "typescript";
 
 declare global {

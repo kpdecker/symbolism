@@ -4,7 +4,7 @@ import {
   getSignatureMapper,
   invariantNode,
   TypeId,
-} from "@noom-symbolism/ts-utils";
+} from "@noom/symbolism-ts-utils";
 import { checkerEval, nodeEvalHandler, noType } from "./handlers";
 import { getNodeSchema } from ".";
 import { undefinedSchema } from "../well-known-schemas";
@@ -14,7 +14,7 @@ import { createUnionKind } from "./union";
 import { AnySchemaNode, createReferenceSchema } from "../schema";
 import { SchemaError } from "../classify";
 import { printSchemaNode } from "../print/typescript";
-import { assertExists } from "@noom-symbolism/utils";
+import { assertExists } from "@noom/symbolism-utils";
 
 export const functionOperators = nodeEvalHandler(() => ({
   [ts.SyntaxKind.CallExpression]: convertCallLikeNode,

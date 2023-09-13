@@ -2,8 +2,8 @@ import {
   getSymbolDeclaration,
   invariantNode,
   resolveExternalModuleName,
-} from "@noom-symbolism/ts-utils";
-import { logWarn } from "@noom-symbolism/utils";
+} from "@noom/symbolism-ts-utils";
+import { logWarn } from "@noom/symbolism-utils";
 import invariant from "tiny-invariant";
 import ts, { findAncestor } from "typescript";
 import { defineSymbol } from ".";

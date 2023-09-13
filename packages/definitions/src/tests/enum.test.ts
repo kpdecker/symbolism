@@ -1,5 +1,5 @@
-import { dumpDefinition } from "@noom-symbolism/ts-debug";
-import { findIdentifiers } from "@noom-symbolism/ts-utils";
+import { dumpDefinition } from "@noom/symbolism-ts-debug";
+import { findIdentifiers } from "@noom/symbolism-ts-utils";
 import ts, { findAncestor } from "typescript";
 import { mockProgram } from "../../test/utils";
 import { defineSymbol } from "../index";

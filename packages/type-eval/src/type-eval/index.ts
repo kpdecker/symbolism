@@ -4,7 +4,7 @@ import {
   dumpSchema,
   dumpSymbol,
   dumpType,
-} from "@noom-symbolism/ts-debug";
+} from "@noom/symbolism-ts-debug";
 import {
   getResolvedTypeArguments,
   getSymbolDeclaration,
@@ -16,13 +16,13 @@ import {
   isNamedType,
   isThisTypeParameter,
   isTupleTypeReference,
-} from "@noom-symbolism/ts-utils";
+} from "@noom/symbolism-ts-utils";
 import {
   assertExists,
   assertUnreachable,
   logDebug,
   NodeError,
-} from "@noom-symbolism/utils";
+} from "@noom/symbolism-utils";
 import invariant from "tiny-invariant";
 import ts from "typescript";
 import { SchemaContext } from "../context";

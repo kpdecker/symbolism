@@ -1,5 +1,5 @@
 import ts from "typescript";
-import { NodeError, logDebug, assertExists } from "@noom-symbolism/utils";
+import { NodeError, logDebug, assertExists } from "@noom/symbolism-utils";
 import { classOperators } from "./class";
 import { functionOperators } from "./function";
 import { importOperators } from "./import";
@@ -23,7 +23,7 @@ import {
   isAssignmentExpression,
   isNamedDeclaration,
   isTypeReference,
-} from "@noom-symbolism/ts-utils";
+} from "@noom/symbolism-ts-utils";
 
 export type { DefinitionSymbol } from "./utils";
 

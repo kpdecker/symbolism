@@ -1,7 +1,7 @@
 {
   "private": true,
-  "name": "symbolism",
-  "version": "0.0.0",
+  "name": "@noom/symbolism",
+  "version": "0.0.1",
   "description": "Coverage assertions for specific code tokens.",
   "scripts": {
     "format": "prettier -w src",
@@ -46,5 +46,12 @@
     "packages": [
       "packages/*"
     ]
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/noom/symbolism.git"
   }
 }

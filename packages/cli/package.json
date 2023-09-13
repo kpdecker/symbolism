@@ -1,5 +1,5 @@
 {
-  "name": "@noom-symbolism/cli",
+  "name": "@noom/symbolism-cli",
   "version": "0.3.0",
   "description": "Coverage assertions for specific code tokens.",
   "main": "dist/index.js",
@@ -17,17 +17,17 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/kpdecker/symbolism.git"
+    "url": "git+https://github.com/noom/symbolism.git"
   },
   "dependencies": {
-    "@noom-symbolism/coverage": "^0.3.0",
-    "@noom-symbolism/definitions": "^0.3.0",
-    "@noom-symbolism/paths": "^0.3.0",
-    "@noom-symbolism/symbol-table": "^0.3.0",
-    "@noom-symbolism/ts-debug": "^0.3.0",
-    "@noom-symbolism/ts-utils": "^0.3.0",
-    "@noom-symbolism/type-eval": "^0.3.0",
-    "@noom-symbolism/utils": "^0.3.0",
+    "@noom/symbolism-coverage": "^0.3.0",
+    "@noom/symbolism-definitions": "^0.3.0",
+    "@noom/symbolism-paths": "^0.3.0",
+    "@noom/symbolism-symbol-table": "^0.3.0",
+    "@noom/symbolism-ts-debug": "^0.3.0",
+    "@noom/symbolism-ts-utils": "^0.3.0",
+    "@noom/symbolism-type-eval": "^0.3.0",
+    "@noom/symbolism-utils": "^0.3.0",
     "chalk": "4",
     "commander": "^9.4.0",
     "prettier": "^2.7.1",
@@ -36,5 +36,8 @@
   },
   "peerDependencies": {
     "typescript": "^4.7.4"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com/"
   }
 }

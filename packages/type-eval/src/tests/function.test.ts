@@ -1,10 +1,10 @@
-import { mockProgram } from "@noom-symbolism/test";
-import { findIdentifiers, findNodesInTree } from "@noom-symbolism/ts-utils";
+import { mockProgram } from "@noom/symbolism-test";
+import { findIdentifiers, findNodesInTree } from "@noom/symbolism-ts-utils";
 import { printSchema } from "../print/typescript";
 import { SchemaContext } from "../context";
 import ts from "typescript";
 import { evaluateSchema } from "../schema";
-import { dumpNode } from "@noom-symbolism/ts-debug";
+import { dumpNode } from "@noom/symbolism-ts-debug";
 
 function testType(source: string, name = "Type") {
   const program = mockProgram({

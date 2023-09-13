@@ -1,5 +1,5 @@
 {
-  "name": "@noom-symbolism/type-eval",
+  "name": "@noom/symbolism-type-eval",
   "version": "0.3.0",
   "description": "Symbolism utilities",
   "main": "dist/index.js",
@@ -7,17 +7,20 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/kpdecker/symbolism.git"
+    "url": "git+https://github.com/noom/symbolism.git"
   },
   "dependencies": {
-    "@noom-symbolism/definitions": "0.3.0",
-    "@noom-symbolism/ts-debug": "0.3.0",
-    "@noom-symbolism/ts-utils": "0.3.0",
-    "@noom-symbolism/utils": "0.3.0",
+    "@noom/symbolism-definitions": "0.3.0",
+    "@noom/symbolism-ts-debug": "0.3.0",
+    "@noom/symbolism-ts-utils": "0.3.0",
+    "@noom/symbolism-utils": "0.3.0",
     "prettier": "^2.7.1",
     "tiny-invariant": "^1.2.0"
   },
   "peerDependencies": {
     "typescript": "^4.7.4"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com/"
   }
 }

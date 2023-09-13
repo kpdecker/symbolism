@@ -1,15 +1,15 @@
 import { Command, OptionValues } from "commander";
-import { getCliConfig, initTypescript } from "@noom-symbolism/utils";
-import { findSymbol, parseSymbolTable } from "@noom-symbolism/symbol-table";
+import { getCliConfig, initTypescript } from "@noom/symbolism-utils";
+import { findSymbol, parseSymbolTable } from "@noom/symbolism-symbol-table";
 import {
   CallContext,
   loadFunctionCall,
   loadFunctionCalls,
   printCalls,
-} from "@noom-symbolism/type-eval";
+} from "@noom/symbolism-type-eval";
 import { nodeFromCLI } from "../arg-parser";
 import ts, { findAncestor } from "typescript";
-import { defineSymbol } from "@noom-symbolism/definitions";
+import { defineSymbol } from "@noom/symbolism-definitions";
 import invariant from "tiny-invariant";
 
 export function initCallInputs(program: Command) {

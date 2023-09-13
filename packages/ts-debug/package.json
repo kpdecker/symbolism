@@ -1,21 +1,24 @@
 {
-  "name": "@noom-symbolism/ts-debug",
+  "name": "@noom/symbolism-ts-debug",
   "version": "0.3.0",
   "description": "Symbolism typescript utilities",
   "author": "Kevin Decker <kpdecker@gmail.com>",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/kpdecker/symbolism.git"
+    "url": "git+https://github.com/noom/symbolism.git"
   },
   "main": "dist/index.js",
   "dependencies": {
-    "@noom-symbolism/utils": "^0.3.0",
-    "@noom-symbolism/ts-utils": "^0.3.0",
-    "@noom-symbolism/paths": "^0.3.0",
+    "@noom/symbolism-utils": "^0.3.0",
+    "@noom/symbolism-ts-utils": "^0.3.0",
+    "@noom/symbolism-paths": "^0.3.0",
     "tiny-invariant": "^1.2.0"
   },
   "peerDependencies": {
     "typescript": "^4.7.4"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com/"
   }
 }

@@ -1,4 +1,4 @@
-import { NodeError } from "@noom-symbolism/utils";
+import { NodeError } from "@noom/symbolism-utils";
 import invariant from "tiny-invariant";
 import ts from "typescript";
 import { getNodeSchema } from ".";

@@ -1,4 +1,4 @@
-import { assertExists } from "@noom-symbolism/utils";
+import { assertExists } from "@noom/symbolism-utils";
 import path from "path";
 import ts from "typescript";
 

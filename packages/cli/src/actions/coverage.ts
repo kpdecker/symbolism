@@ -1,11 +1,11 @@
 import { Command } from "commander";
-import { getCliConfig } from "@noom-symbolism/utils";
+import { getCliConfig } from "@noom/symbolism-utils";
 import {
   evaluateCoverage,
   findCoverageLocations,
   parseExecutedCoverage,
   printResults,
-} from "@noom-symbolism/coverage";
+} from "@noom/symbolism-coverage";
 
 export function initCoverage(program: Command) {
   program.command("coverage").action(assertCoverage);

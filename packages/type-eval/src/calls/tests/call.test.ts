@@ -1,6 +1,6 @@
-import { mockProgram } from "@noom-symbolism/test";
+import { mockProgram } from "@noom/symbolism-test";
 import { CallContext } from "../../context";
-import { parseSymbolTable } from "@noom-symbolism/symbol-table";
+import { parseSymbolTable } from "@noom/symbolism-symbol-table";
 import { loadFunctionCalls } from "..";
 import { printCalls } from "../../print/calls";
 import ts from "typescript";
